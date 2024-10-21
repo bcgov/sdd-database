@@ -9,7 +9,9 @@ type Props = {
 
 export const generateMetadata = ({ params }: Props): Metadata => {
   return {
-    title: `Employee ${params.employeeId}`,
+    title: {
+      absolute: `Employee ${params.employeeId}`,
+    },
   };
 };
 
