@@ -1,12 +1,19 @@
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export default function Employees({
-  params,
-}: {
+type Props = {
   params: {
     employeeId: string;
   };
-}) {
+};
+
+export const generateMetadata = ({ params }: Props): Metadata => {
+  return {
+    title: `Employee ${params.employeeId}`,
+  };
+};
+
+export default function Employees({ params }: Props) {
   if (parseInt(params.employeeId) > 3) {
     notFound();
   }
