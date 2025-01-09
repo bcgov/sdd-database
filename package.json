@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@bcgov/design-system-react-components": "^0.4.0",
-    "next": "15.1.3",
+    "next": "15.1.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -20,7 +20,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.1.3",
+    "eslint-config-next": "15.1.4",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
