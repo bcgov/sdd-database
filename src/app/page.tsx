@@ -1,8 +1,30 @@
 "use client";
 
-import {Button, ButtonGroup, Dialog, DialogTrigger, Form, Modal, TextField} from "@bcgov/design-system-react-components"
+import {
+    Button,
+    ButtonGroup,
+    Dialog,
+    DialogTrigger,
+    Footer,
+    Form,
+    Header,
+    Modal,
+    TextField
+} from "@bcgov/design-system-react-components"
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 
 export default function Home() {
+
+    const search = (event: React.FormEvent<HTMLFormElement>) => {
+
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        const searchPhrase = formData.get("search") as string;
+
+        console.log("Search pressed with text = ", searchPhrase);
+    }
 
     const createNewEmployee = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -18,6 +40,12 @@ export default function Home() {
 
     return (
         <div>
+            <Header title="Employee Information"></Header>
+            <Form onSubmit={search}>
+                <TextField type="search" name="search" iconLeft=<SearchOutlinedIcon/>/>
+                <Button type="submit">Search</Button>
+            </Form>
+
             <DialogTrigger>
                 <Button variant="secondary">Add New Employee</Button>
                 <Modal>
@@ -33,6 +61,7 @@ export default function Home() {
                     </Dialog>
                 </Modal>
             </DialogTrigger>
+            <Footer hideAcknowledgement hideLogoAndLinks></Footer>
         </div>
     );
 }
