@@ -1,0 +1,20 @@
+# Version control
+.git
+.gitignore
+
+# Exclude IDE/editor directories and files
+.idea
+.vscode
+
+# Exclude Node.js dependencies (they will be installed in the container)
+node_modules
+
+# Exclude build output directories
+.next
+
+# Exclude docker-related files
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
