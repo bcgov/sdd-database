@@ -12,9 +12,13 @@ node_modules
 # Exclude build output directories
 .next
 
-# Exclude docker-related files
+# Exclude docker and kubernetes-related files
 Dockerfile
 .dockerignore
+.kube
 
 # Documentation
 README.md
+
+# Other files
+Workflow.drawio
