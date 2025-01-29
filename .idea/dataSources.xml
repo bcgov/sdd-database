@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="crunchy-postgres@localhost" uuid="e80965ee-02d8-4c4c-91e8-f8b72c82178c">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/crunchy-postgres</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.host.port" value="5432" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="true" />
+        <property name="com.intellij.clouds.kubernetes.db.resource" value="crunchy-postgres-pgbouncer" />
+        <property name="com.intellij.clouds.kubernetes.db.context" value="a6d989-dev/api-silver-devops-gov-bc-ca:6443/darshan.pandhi@gov.bc.ca" />
+        <property name="com.intellij.clouds.kubernetes.db.resource.type" value="Service" />
+        <property name="com.intellij.clouds.kubernetes.db.namespace" value="a6d989-dev" />
+        <property name="com.intellij.clouds.kubernetes.db.container.port" value="5432" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

@@ -15,9 +15,11 @@ RUN npm run build
 
 # Stage 2: Production
 FROM node:22.13.1
+
 WORKDIR /app
 
 COPY package*.json ./
+
 RUN npm install --production
 
 COPY --from=builder /app/.next ./.next
