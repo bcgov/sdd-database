@@ -8,7 +8,7 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/crunchy-postgres</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" value="5432" />
-        <property name="com.intellij.clouds.kubernetes.db.enabled" value="true" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
         <property name="com.intellij.clouds.kubernetes.db.resource" value="crunchy-postgres-pgbouncer" />
         <property name="com.intellij.clouds.kubernetes.db.context" value="a6d989-dev/api-silver-devops-gov-bc-ca:6443/darshan.pandhi@gov.bc.ca" />
         <property name="com.intellij.clouds.kubernetes.db.resource.type" value="Service" />

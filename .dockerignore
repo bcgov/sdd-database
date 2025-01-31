@@ -12,6 +12,12 @@ node_modules
 # Exclude build output directories
 .next
 
+# environment files
+.env*
+
+# database
+prisma
+
 # Exclude docker and kubernetes-related files
 Dockerfile
 .dockerignore
@@ -21,4 +27,5 @@ Dockerfile
 README.md
 
 # Other files
-Workflow.drawio
+*.drawio
+*.drawio.bkp
