@@ -10,6 +10,7 @@
 
 - PostgreSQL
 - Crunchy Postgres Operator
+- Prisma
 
 ### Deployment
 

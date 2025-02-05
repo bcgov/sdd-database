@@ -23,6 +23,7 @@
 /build
 
 # misc
+temporary
 .DS_Store
 *.pem
 *.drawio.bkp

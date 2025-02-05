@@ -26,6 +26,7 @@ Dockerfile
 # Documentation
 README.md
 
-# Other files
+# Other directories and files
+temporary
 *.drawio
 *.drawio.bkp
