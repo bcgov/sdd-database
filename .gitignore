@@ -23,10 +23,9 @@
 /build
 
 # misc
-temporary
+Diagrams
 .DS_Store
 *.pem
-*.drawio.bkp
 
 # debug
 npm-debug.log*

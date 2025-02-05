@@ -27,6 +27,5 @@ Dockerfile
 README.md
 
 # Other directories and files
-temporary
-*.drawio
-*.drawio.bkp
+Diagrams
+patch-app-user.yaml
