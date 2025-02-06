@@ -23,7 +23,6 @@
 /build
 
 # misc
-Diagrams
 .DS_Store
 *.pem
 
