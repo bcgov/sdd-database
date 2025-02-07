@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:22.13.1 AS builder
+FROM node:23.7.0 AS builder
 
 WORKDIR /app
 
@@ -13,8 +13,11 @@ COPY . .
 # Build the Next.js app (generates .next folder)
 RUN npm run build
 
+# Generate the Prisma Client during the build step
+RUN npx prisma generate
+
 # Stage 2: Production
-FROM node:22.13.1
+FROM node:23.7.0
 
 WORKDIR /app
 
@@ -22,8 +25,12 @@ COPY package*.json ./
 
 RUN npm install --production
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.ts ./next.config.ts
+# Copy Prisma Client from builder
+COPY --from=builder /app/node_modules/.prisma /app/node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma /app/node_modules/@prisma
+
+COPY --from=builder /app/.next /app/.next
+COPY --from=builder /app/next.config.ts /app/next.config.ts
 
 EXPOSE 3000
 
