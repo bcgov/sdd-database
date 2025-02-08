@@ -3,7 +3,7 @@ import {PrismaClient} from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function createEmployee(first_name: string, employee_id: string) {
-    return prisma.employee.create({
+    await prisma.employee.create({
         data: {first_name, employee_id},
     })
 }

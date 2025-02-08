@@ -8,6 +8,7 @@ import {
     Footer,
     Form,
     Header,
+    InlineAlert,
     Modal,
     TextField
 } from "@bcgov/design-system-react-components"
@@ -15,9 +16,15 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import {addNewEmployee, searchEmployees} from "@/actions/employees";
 import {useState} from "react";
 
-type Employee = {
+interface Employee {
     employee_id: string;
     first_name: string;
+}
+
+interface Alert {
+    variant: "success" | "danger";
+    title?: string;
+    description?: string;
 }
 
 export default function Home() {
@@ -25,12 +32,35 @@ export default function Home() {
     const [hasSearched, setHasSearched] = useState(false);
     const [searchResults, setSearchResults] = useState<Employee[]>([]);
 
+    const [alert, setAlert] = useState<Alert | undefined>();
+
     const handleAddNewEmployee = async (formData: FormData) => {
 
         const firstName = formData.get("firstName") as string;
         const employeeId = formData.get("employeeId") as string;
 
-        await addNewEmployee(firstName, employeeId);
+        const result = await addNewEmployee(firstName, employeeId);
+
+        if (result.success) {
+
+            setAlert({
+                variant: "success",
+                title: "Success",
+                description: `New employee '${firstName}' added!`
+            })
+
+            // Auto-hide the success alert message after 4.5 seconds
+            setTimeout(() => {
+                setAlert(undefined);
+            }, 4500)
+        } else {
+
+            setAlert({
+                variant: "danger",
+                title: `Error: Could not add new employee '${firstName}'`,
+                description: result.error ?? "An unexpected error occurred."
+            })
+        }
     }
 
     const handleSearch = async (formData: FormData) => {
@@ -38,7 +68,6 @@ export default function Home() {
         const searchPhrase = formData.get("search") as string;
 
         const searchResults = await searchEmployees(searchPhrase);
-        console.log(searchResults);
         setSearchResults(searchResults);
         setHasSearched(true);
     }
@@ -77,6 +106,13 @@ export default function Home() {
                     </Dialog>
                 </Modal>
             </DialogTrigger>
+
+            {alert && <InlineAlert title={alert.title}
+                                   description={alert.description}
+                                   isCloseable
+                                   onClose={() => setAlert(undefined)}
+                                   variant={alert.variant}></InlineAlert>}
+
             <Footer hideAcknowledgement hideLogoAndLinks></Footer>
         </div>
     );
