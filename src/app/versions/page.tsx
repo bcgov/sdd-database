@@ -9,7 +9,7 @@ export default function Updates() {
             version: "v0.0.4",
             notes: [
                 "Added this secret updates page to capture progress across versions",
-                "Added visual feedback for user to indicate successful new employee creation"
+                "Added visual feedback for user to indicate successful/unsuccessful new employee creation",
             ]
         },
         {
