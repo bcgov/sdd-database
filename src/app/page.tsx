@@ -8,6 +8,7 @@ import {
     Footer,
     Form,
     Header,
+    Heading,
     InlineAlert,
     Modal,
     TextField
@@ -29,6 +30,7 @@ export default function Home() {
     const [hasSearched, setHasSearched] = useState(false);
     const [searchResults, setSearchResults] = useState<Employee[]>([]);
 
+    const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
     const [alert, setAlert] = useState<Alert | undefined>();
 
     const handleAddNewEmployee = async (formData: FormData) => {
@@ -42,6 +44,8 @@ export default function Home() {
         }
 
         const result = await addNewEmployee(newEmployee);
+
+        setIsAddNewEmployeeModalOpen(false);
 
         if (result.success) {
 
@@ -91,18 +95,23 @@ export default function Home() {
                 ))
             )}
 
-            <DialogTrigger>
+            <DialogTrigger isOpen={isAddNewEmployeeModalOpen} onOpenChange={setIsAddNewEmployeeModalOpen}>
                 <Button variant="secondary">Add New Employee</Button>
                 <Modal>
                     <Dialog>
-                        Add New Employee
-                        <Form action={handleAddNewEmployee}>
-                            <TextField label="First Name" name="firstName" isRequired/>
-                            <TextField label="Employee ID" name="employeeId" isRequired/>
-                            <ButtonGroup>
-                                <Button type="submit">Create</Button>
-                            </ButtonGroup>
-                        </Form>
+                        <div style={{padding: "1rem"}}>
+                            <Heading level={5}>Add New Employee</Heading>
+                            <Form action={handleAddNewEmployee}
+                                  style={{display: "flex", flexDirection: "column", gap: '0.5rem',}}>
+                                <TextField label="First Name" name="firstName" isRequired/>
+                                <TextField label="Employee ID" name="employeeId" isRequired/>
+                                <ButtonGroup>
+                                    <Button type="submit">Create</Button>
+                                    <Button variant="secondary"
+                                            onPress={() => setIsAddNewEmployeeModalOpen(false)}>Cancel</Button>
+                                </ButtonGroup>
+                            </Form>
+                        </div>
                     </Dialog>
                 </Modal>
             </DialogTrigger>
