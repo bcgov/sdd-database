@@ -1,10 +1,14 @@
 import {PrismaClient} from "@prisma/client";
+import {Employee} from "@/types/Employee";
 
 const prisma = new PrismaClient();
 
-export async function createEmployee(first_name: string, employee_id: string) {
+export async function createEmployee(employee: Employee) {
     await prisma.employee.create({
-        data: {first_name, employee_id},
+        data: {
+            employee_id: employee.employee_id,
+            first_name: employee.first_name
+        },
     })
 }
 

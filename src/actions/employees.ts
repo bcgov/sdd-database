@@ -1,6 +1,7 @@
 "use server";
 
 import {Prisma} from "@prisma/client"
+import {Employee} from "@/types/Employee";
 import {createEmployee, getEmployeesByFilter} from "@/prisma-db";
 
 interface AddNewEmployeeResult {
@@ -8,20 +9,20 @@ interface AddNewEmployeeResult {
     error?: string;
 }
 
-export async function addNewEmployee(firstName: string, employeeId: string): Promise<AddNewEmployeeResult> {
+export async function addNewEmployee(employee: Employee): Promise<AddNewEmployeeResult> {
     try {
-        await createEmployee(firstName, employeeId);
+        await createEmployee(employee);
 
         return {success: true};
 
     } catch (error) {
-        
+
         // Handle unique constraint violation (P2002)
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
 
             return {
                 success: false,
-                error: `Employee ID ${employeeId} is already in use for some other employee`
+                error: `Employee ID ${employee.employee_id} is already in use for some other employee`
             };
         }
         // For other errors/error codes
@@ -33,5 +34,5 @@ export async function addNewEmployee(firstName: string, employeeId: string): Pro
 }
 
 export async function searchEmployees(query: string) {
-    return await getEmployeesByFilter(query);
+    return getEmployeesByFilter(query);
 }

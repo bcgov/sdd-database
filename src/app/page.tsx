@@ -15,11 +15,8 @@ import {
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import {addNewEmployee, searchEmployees} from "@/actions/employees";
 import {useState} from "react";
-
-interface Employee {
-    employee_id: string;
-    first_name: string;
-}
+import {SearchResult} from "@/components/SearchResult";
+import {Employee} from "@/types/Employee";
 
 interface Alert {
     variant: "success" | "danger";
@@ -36,17 +33,22 @@ export default function Home() {
 
     const handleAddNewEmployee = async (formData: FormData) => {
 
-        const firstName = formData.get("firstName") as string;
-        const employeeId = formData.get("employeeId") as string;
+        const first_name = formData.get("firstName") as string;
+        const employee_id = formData.get("employeeId") as string;
 
-        const result = await addNewEmployee(firstName, employeeId);
+        const newEmployee: Employee = {
+            first_name,
+            employee_id,
+        }
+
+        const result = await addNewEmployee(newEmployee);
 
         if (result.success) {
 
             setAlert({
                 variant: "success",
                 title: "Success",
-                description: `New employee '${firstName}' added!`
+                description: `New employee '${first_name}' added!`
             })
 
             // Auto-hide the success alert message after 4.5 seconds
@@ -57,7 +59,7 @@ export default function Home() {
 
             setAlert({
                 variant: "danger",
-                title: `Error: Could not add new employee '${firstName}'`,
+                title: `Error: Could not add new employee '${first_name}'`,
                 description: result.error ?? "An unexpected error occurred."
             })
         }
@@ -75,20 +77,18 @@ export default function Home() {
     return (
         <div>
             <Header title="Employee Information"></Header>
+
             <Form action={handleSearch}>
                 <TextField type="search" name="search" iconLeft=<SearchOutlinedIcon/>/>
                 <Button type="submit">Search</Button>
             </Form>
+
             {hasSearched && searchResults.length === 0 ? (
                 <p> No Employees found</p>
             ) : (
-                <ul>
-                    {searchResults.map(employee => (
-                        <li key={employee.employee_id}>
-                            <strong>{employee.first_name}</strong> (Employee ID: {employee.employee_id})
-                        </li>
-                    ))}
-                </ul>
+                searchResults.map(employee => (
+                    <SearchResult key={employee.employee_id} employee={employee}/>
+                ))
             )}
 
             <DialogTrigger>
