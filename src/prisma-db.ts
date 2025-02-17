@@ -3,7 +3,7 @@ import {Employee} from "@/types/Employee";
 
 const prisma = new PrismaClient();
 
-export async function createEmployee(employee: Employee) {
+export async function addNewEmployee(employee: Employee) {
     await prisma.employee.create({
         data: {
             employee_id: employee.employee_id,
@@ -20,5 +20,12 @@ export async function getEmployeesByFilter(query: string) {
                 {employee_id: {contains: query}},
             ]
         }
+    })
+}
+
+export async function updateEmployee(employee: Employee) {
+    return prisma.employee.update({
+        where: {employee_id: employee.employee_id},
+        data: {first_name: employee.first_name},
     })
 }

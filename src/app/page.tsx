@@ -14,7 +14,7 @@ import {
     TextField
 } from "@bcgov/design-system-react-components"
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
-import {addNewEmployee, searchEmployees} from "@/actions/employees";
+import {addNewEmployeeAction, searchEmployeesAction, updateEmployeeAction} from "@/actions/employees";
 import {useState} from "react";
 import {SearchResult} from "@/components/SearchResult";
 import {Employee} from "@/types/Employee";
@@ -27,11 +27,31 @@ interface Alert {
 
 export default function Home() {
 
-    const [hasSearched, setHasSearched] = useState(false);
+    const [searchPhrase, setSearchPhrase] = useState("");
     const [searchResults, setSearchResults] = useState<Employee[]>([]);
+    const [selectedEmployeeSearchResult, setSelectedEmployeeSearchResult] = useState<Employee>();
 
+    const [isSelectedSearchResultEditModalOpen, setIsSelectedSearchResultEditModalOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
-    const [alert, setAlert] = useState<Alert | undefined>();
+
+    const [alert, setAlert] = useState<Alert>();
+
+
+    const handleSearch = async (formData: FormData) => {
+        const query = formData.get("search") as string;
+        setSearchPhrase(query);
+        await runSearch(query);
+    }
+
+    const runSearch = async (query: string) => {
+        const searchResults = await searchEmployeesAction(query);   // create local variable to avoid setState timing issue
+        setSearchResults(searchResults);
+    }
+
+    const openSearchResultEditModal = (employee: Employee) => {
+        setSelectedEmployeeSearchResult(employee);
+        setIsSelectedSearchResultEditModalOpen(true);
+    }
 
     const handleAddNewEmployee = async (formData: FormData) => {
 
@@ -43,7 +63,7 @@ export default function Home() {
             employee_id,
         }
 
-        const result = await addNewEmployee(newEmployee);
+        const result = await addNewEmployeeAction(newEmployee);
 
         setIsAddNewEmployeeModalOpen(false);
 
@@ -69,13 +89,31 @@ export default function Home() {
         }
     }
 
-    const handleSearch = async (formData: FormData) => {
+    const handleEditEmployee = async (formData: FormData) => {
 
-        const searchPhrase = formData.get("search") as string;
+        const first_name = formData.get("firstName") as string;
 
-        const searchResults = await searchEmployees(searchPhrase);
-        setSearchResults(searchResults);
-        setHasSearched(true);
+        const updatedEmployee: Employee = {
+            first_name,
+            employee_id: selectedEmployeeSearchResult!.employee_id  // using non-null assertion to let typescript
+            // compiler know that this will never be undefined
+        }
+
+        await updateEmployeeAction(updatedEmployee);
+        await runSearch(searchPhrase);
+
+        setIsSelectedSearchResultEditModalOpen(false);
+
+        setAlert({
+            variant: "success",
+            title: "Success",
+            description: "Employee details updated!"
+        })
+
+        // Auto-hide the success alert message after 4.5 seconds
+        setTimeout(() => {
+            setAlert(undefined);
+        }, 4500)
     }
 
     return (
@@ -87,13 +125,56 @@ export default function Home() {
                 <Button type="submit">Search</Button>
             </Form>
 
-            {hasSearched && searchResults.length === 0 ? (
-                <p> No Employees found</p>
-            ) : (
-                searchResults.map(employee => (
-                    <SearchResult key={employee.employee_id} employee={employee}/>
-                ))
-            )}
+            <DialogTrigger isOpen={isSelectedSearchResultEditModalOpen}
+                           onOpenChange={setIsSelectedSearchResultEditModalOpen}>
+
+                {searchPhrase && searchResults.length === 0 ? (
+                    <p> No Employees found</p>
+                ) : (
+                    searchResults.map(employee => (
+                        <SearchResult key={employee.employee_id}
+                                      employee={employee}
+                                      searchResultClickHandler={openSearchResultEditModal}/>
+                    ))
+                )}
+
+                <Modal>
+                    <Dialog>
+                        <div style={{padding: "1rem"}}>
+                            <Heading level={5}>Edit Employee</Heading>
+                            <Form action={handleEditEmployee}
+                                  style={{display: "flex", flexDirection: "column", gap: '0.5rem',}}>
+                                <TextField label="First Name"
+                                           name="firstName"
+                                           isRequired
+                                           defaultValue={selectedEmployeeSearchResult?.first_name}/>
+                                <TextField label="Employee ID"
+                                           name="employeeId"
+                                           isRequired isDisabled
+                                           defaultValue={selectedEmployeeSearchResult?.employee_id}/>
+
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                }}>
+                                    <ButtonGroup>
+                                        <Button type="submit">Update</Button>
+                                        <Button variant="secondary"
+                                                onPress={() => setIsSelectedSearchResultEditModalOpen(false)}>Cancel</Button>
+                                    </ButtonGroup>
+
+                                    <ButtonGroup alignment="end">
+                                        <Button variant="secondary" danger
+                                                onPress={() => setIsSelectedSearchResultEditModalOpen(false)}>Delete</Button>
+                                    </ButtonGroup>
+                                </div>
+
+                            </Form>
+                        </div>
+                    </Dialog>
+                </Modal>
+
+            </DialogTrigger>
 
             <DialogTrigger isOpen={isAddNewEmployeeModalOpen} onOpenChange={setIsAddNewEmployeeModalOpen}>
                 <Button variant="secondary">Add New Employee</Button>

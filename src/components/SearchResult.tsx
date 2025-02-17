@@ -3,13 +3,14 @@ import {Employee} from "@/types/Employee";
 
 interface SearchResultProps {
     employee: Employee;
+    searchResultClickHandler: (employee: Employee) => void;
 }
 
-export function SearchResult({employee}: SearchResultProps) {
+export function SearchResult({employee, searchResultClickHandler}: SearchResultProps) {
     return (
         <Box>
             <Card elevation={3} sx={{margin: "15px", cursor: "pointer"}}>
-                <CardActionArea>
+                <CardActionArea onClick={() => searchResultClickHandler(employee)}>
                     <CardContent>
                         <Typography variant="h6">{employee.first_name} ({employee.employee_id})</Typography>
                     </CardContent>

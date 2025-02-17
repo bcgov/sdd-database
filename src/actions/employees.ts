@@ -2,16 +2,16 @@
 
 import {Prisma} from "@prisma/client"
 import {Employee} from "@/types/Employee";
-import {createEmployee, getEmployeesByFilter} from "@/prisma-db";
+import {addNewEmployee, getEmployeesByFilter, updateEmployee} from "@/prisma-db";
 
 interface AddNewEmployeeResult {
     success: boolean;
     error?: string;
 }
 
-export async function addNewEmployee(employee: Employee): Promise<AddNewEmployeeResult> {
+export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEmployeeResult> {
     try {
-        await createEmployee(employee);
+        await addNewEmployee(employee);
 
         return {success: true};
 
@@ -33,6 +33,10 @@ export async function addNewEmployee(employee: Employee): Promise<AddNewEmployee
     }
 }
 
-export async function searchEmployees(query: string) {
+export async function updateEmployeeAction(updatedEmployee: Employee) {
+    await updateEmployee(updatedEmployee);
+}
+
+export async function searchEmployeesAction(query: string) {
     return getEmployeesByFilter(query);
 }
