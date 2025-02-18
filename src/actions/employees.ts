@@ -2,7 +2,7 @@
 
 import {Prisma} from "@prisma/client"
 import {Employee} from "@/types/Employee";
-import {addNewEmployee, getEmployeesByFilter, updateEmployee} from "@/prisma-db";
+import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
 
 interface AddNewEmployeeResult {
     success: boolean;
@@ -39,4 +39,8 @@ export async function updateEmployeeAction(updatedEmployee: Employee) {
 
 export async function searchEmployeesAction(query: string) {
     return getEmployeesByFilter(query);
+}
+
+export async function deleteEmployeeAction(employee_id: string) {
+    await deleteEmployee(employee_id);
 }

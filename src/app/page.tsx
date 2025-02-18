@@ -1,8 +1,10 @@
 "use client";
 
 import {
+    AlertDialog,
     Button,
     ButtonGroup,
+    Callout,
     Dialog,
     DialogTrigger,
     Footer,
@@ -14,7 +16,12 @@ import {
     TextField
 } from "@bcgov/design-system-react-components"
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
-import {addNewEmployeeAction, searchEmployeesAction, updateEmployeeAction} from "@/actions/employees";
+import {
+    addNewEmployeeAction,
+    searchEmployeesAction,
+    updateEmployeeAction,
+    deleteEmployeeAction
+} from "@/actions/employees";
 import {useState} from "react";
 import {SearchResult} from "@/components/SearchResult";
 import {Employee} from "@/types/Employee";
@@ -32,6 +39,7 @@ export default function Home() {
     const [selectedEmployeeSearchResult, setSelectedEmployeeSearchResult] = useState<Employee>();
 
     const [isSelectedSearchResultEditModalOpen, setIsSelectedSearchResultEditModalOpen] = useState(false);
+    const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
 
     const [alert, setAlert] = useState<Alert>();
@@ -80,7 +88,6 @@ export default function Home() {
                 setAlert(undefined);
             }, 4500)
         } else {
-
             setAlert({
                 variant: "danger",
                 title: `Error: Could not add new employee '${first_name}'`,
@@ -100,8 +107,8 @@ export default function Home() {
         }
 
         await updateEmployeeAction(updatedEmployee);
-        await runSearch(searchPhrase);
 
+        await runSearch(searchPhrase);
         setIsSelectedSearchResultEditModalOpen(false);
 
         setAlert({
@@ -114,6 +121,26 @@ export default function Home() {
         setTimeout(() => {
             setAlert(undefined);
         }, 4500)
+    }
+
+    const handleDelete = async () => {
+
+        if (selectedEmployeeSearchResult) {
+            await deleteEmployeeAction(selectedEmployeeSearchResult.employee_id);
+            await runSearch(searchPhrase);
+            setIsDeleteAlertDialogOpen(false);
+            setIsSelectedSearchResultEditModalOpen(false);
+
+            setAlert({
+                variant: "success",
+                title: "Success",
+                description: `Employee '${selectedEmployeeSearchResult.first_name}' deleted!`
+            })
+
+            setTimeout(() => {
+                setAlert(undefined);
+            }, 4500)
+        }
     }
 
     return (
@@ -141,7 +168,17 @@ export default function Home() {
                 <Modal>
                     <Dialog>
                         <div style={{padding: "1rem"}}>
-                            <Heading level={5}>Edit Employee</Heading>
+                            <Heading level={4}>Edit Employee</Heading>
+
+                            <div style={{
+                                marginTop: "1rem",
+                                marginBottom: "1rem",
+                                whiteSpace: "pre-wrap"
+                            }}>
+                                <Callout title="Steps"
+                                         description="Edit employee information as you want and then click  'Update' to save your changes in the database. Subsequently, you should see a Success Alert message on the Home Screen."/>
+                            </div>
+
                             <Form action={handleEditEmployee}
                                   style={{display: "flex", flexDirection: "column", gap: '0.5rem',}}>
                                 <TextField label="First Name"
@@ -164,16 +201,33 @@ export default function Home() {
                                     </ButtonGroup>
 
                                     <ButtonGroup alignment="end">
-                                        <Button variant="secondary" danger
-                                                onPress={() => setIsSelectedSearchResultEditModalOpen(false)}>Delete</Button>
+                                        <Button variant="secondary"
+                                                danger
+                                                onPress={() => setIsDeleteAlertDialogOpen(true)}>Delete</Button>
                                     </ButtonGroup>
-                                </div>
 
+                                </div>
                             </Form>
                         </div>
                     </Dialog>
                 </Modal>
+            </DialogTrigger>
 
+            <DialogTrigger isOpen={isDeleteAlertDialogOpen}
+                           onOpenChange={setIsDeleteAlertDialogOpen}>
+                <Modal>
+                    <AlertDialog role="alertdialog" variant="destructive"
+                                 title={`Are you sure you want to delete this employee '${selectedEmployeeSearchResult?.first_name}'?`}
+                                 buttons={[
+                                     <Button key="alert-dialog-button-1"
+                                             danger onPress={() => handleDelete()}>Delete</Button>,
+                                     <Button key="alert-dialog-button-2"
+                                             variant="secondary"
+                                             onPress={() => setIsDeleteAlertDialogOpen(false)
+                                             }>Cancel</Button>
+                                 ]}
+                    />
+                </Modal>
             </DialogTrigger>
 
             <DialogTrigger isOpen={isAddNewEmployeeModalOpen} onOpenChange={setIsAddNewEmployeeModalOpen}>
@@ -181,7 +235,7 @@ export default function Home() {
                 <Modal>
                     <Dialog>
                         <div style={{padding: "1rem"}}>
-                            <Heading level={5}>Add New Employee</Heading>
+                            <Heading level={4}>Add New Employee</Heading>
                             <Form action={handleAddNewEmployee}
                                   style={{display: "flex", flexDirection: "column", gap: '0.5rem',}}>
                                 <TextField label="First Name" name="firstName" isRequired/>

@@ -29,3 +29,9 @@ export async function updateEmployee(employee: Employee) {
         data: {first_name: employee.first_name},
     })
 }
+
+export async function deleteEmployee(employee_id: string) {
+    return prisma.employee.delete({
+        where: {employee_id},
+    })
+}
