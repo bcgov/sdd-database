@@ -1,0 +1,14 @@
+spec:
+  users:
+    - name: crunchy-postgres
+      databases:
+        - crunchy-postgres
+      options: CREATEROLE
+    - name: postgres
+      databases:
+        - crunchy-postgres
+    - name: app-user
+      password:
+        type: AlphaNumeric
+      databases:
+        - crunchy-postgres

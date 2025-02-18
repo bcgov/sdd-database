@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: crunchy-postgres-ha-sjc6-pgdata # PVC name
+  namespace: a6d989-dev
+spec:
+  resources:
+    requests:
+      storage: 2Gi

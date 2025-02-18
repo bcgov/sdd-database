@@ -25,7 +25,9 @@ Dockerfile
 
 # Documentation
 README.md
+Terminal Commands.md
 
 # Other directories and files
 Diagrams
-patch-app-user.yaml
+OpenShift Config
+Temporary
