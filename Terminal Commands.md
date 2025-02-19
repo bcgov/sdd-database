@@ -28,25 +28,26 @@ oc port-forward pod/crunchy-postgres-pgbouncer-dfb6d8c4c-2pnxj 5432:5432 -n a6d9
 2. Trigger a new build in OpenShift by running:
 
 ```shell
-   oc start-build employee-information-database -n a6d989-tools
+   oc start-build employee-information-database -n <tools_namespace>
 ```
 
 3. Monitor the build logs
 
 ```shell
-oc logs -f bc/employee-information-database -n a6d989-tools
+oc logs -f bc/employee-information-database -n <tools_namespace>
 ```
 
 4. Add our custom tag to the newly created image in tools
 
 ```shell
-oc tag a6d989-tools/employee-information-database:latest a6d989-tools/employee-information-database:v0.0.5-tools -n a6d989-tools
+oc tag <tools_namespace>/employee-information-database:latest <tools_namespace>/employee-information-database:v0.0.5-tools -n <tools_namespace>
 ```
 
 5. Import this image in the dev namespace and update the tag
 
 ```shell
-oc tag a6d989-tools/employee-information-database:v0.0.5-tools a6d989-dev/employee-information-database:v0.0.5-dev -n a6d989-dev
+oc tag <tools_namespace>/employee-information-database:v0.0.5-tools <dev_namespace>/employee-information-database:v0.0.
+5-dev -n <dev_namespace>
 ```
 
 6. _Need to check if I need this step_
@@ -55,25 +56,25 @@ Update the deployment to use this new versioned image
 
 ```shell
 oc set image deployment/employee-information-database employee-information-database=image-registry.
-openshift-image-registry.svc:5000/a6d989-dev/employee-information-database:v0.0.5-dev -n a6d989-dev
+openshift-image-registry.svc:5000/<dev_namespace>/employee-information-database:v0.0.5-dev -n <dev_namespace>
 ```
 
 7. Trigger a new deployment
 
 ```shell
-oc rollout restart deployment/employee-information-database -n a6d989-dev
+oc rollout restart deployment/employee-information-database -n <dev_namespace>
 ```
 
 8. Monitor the deployment logs
 
 ```shell
- oc logs -f deployment/employee-information-database -n a6d989-dev
+ oc logs -f deployment/employee-information-database -n <dev_namespace>
 ```
 
 9. Verify the deployment update
 
 ```shell
-oc rollout status deployment/employee-information-database -n a6d989-dev
+oc rollout status deployment/employee-information-database -n <dev_namespace>
 ```
 
 ### Updating spec for OpenShift Resources
