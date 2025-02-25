@@ -9,11 +9,11 @@ export default function Updates() {
             version: "v0.0.4",
             notes: [
                 "Added this secret updates page to capture progress across versions",
-                "Touched up styling for the Add New Employee modal",
+                "Added more employee fields + Touched up styling for the Add New Employee modal",
                 "Added visual feedback for user to indicate successful/unsuccessful new employee creation",
                 "Touched up styling for Search Results - made them clickable",
                 "Add edit functionality",
-                "Add delete functionality",
+                "Add delete functionality + delete confirmation dialog",
             ]
         },
         {

@@ -1,7 +1,7 @@
 "use server";
 
 import {Prisma} from "@prisma/client"
-import {Employee} from "@/types/Employee";
+import {Employee} from "@prisma/client";
 import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
 
 interface AddNewEmployeeResult {
@@ -25,6 +25,9 @@ export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEm
                 error: `Employee ID ${employee.employee_id} is already in use for some other employee`
             };
         }
+
+        console.error(error);
+
         // For other errors/error codes
         return {
             success: false,

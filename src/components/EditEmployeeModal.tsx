@@ -1,7 +1,7 @@
 import {Button, ButtonGroup, Callout} from "@bcgov/design-system-react-components";
 import {EmployeeForm} from "@/components/EmployeeForm";
 import {EmployeeModal} from "@/components/EmployeeModal";
-import {Employee} from "@/types/Employee"
+import {Employee} from "@prisma/client";
 
 interface EditEmployeeModalProps {
     isOpen: boolean;

@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-import {Employee} from "@/types/Employee";
+import {Employee} from "@prisma/client";
 
 import {
     addNewEmployeeAction,
@@ -8,6 +8,7 @@ import {
     searchEmployeesAction,
     updateEmployeeAction
 } from "@/actions/employees";
+import {getEmployeeFullName} from "@/utils";
 
 interface Alert {
     variant: "success" | "danger";
@@ -42,12 +43,23 @@ export function useEmployeeActions() {
         setIsSelectedSearchResultEditModalOpen(true);
     }
 
+    const parseEmployeeFormData = (formData: FormData) => {
+
+        return {
+            first_name: formData.get("firstName") as string,
+            // converting empty middle name to null for clarity in database
+            middle_name: formData.get("middleName") as string || null,
+            last_name: formData.get("lastName") as string,
+            employee_id: formData.get("employeeId") as string,
+            notes: formData.get("notes") as string || null,
+        }
+    }
+
     const handleEditEmployee = async (formData: FormData) => {
         if (selectedEmployeeSearchResult) {
-            const first_name = formData.get("firstName") as string;
 
             const updatedEmployee: Employee = {
-                first_name,
+                ...parseEmployeeFormData(formData),
                 employee_id: selectedEmployeeSearchResult.employee_id
             }
 
@@ -59,7 +71,7 @@ export function useEmployeeActions() {
             setAlert({
                 variant: "success",
                 title: "Success",
-                description: "Employee details updated!"
+                description: `Employee details updated for '${getEmployeeFullName(selectedEmployeeSearchResult)}'!`
             })
 
             // Auto-hide the success alert message after 4.5 seconds
@@ -80,7 +92,7 @@ export function useEmployeeActions() {
             setAlert({
                 variant: "success",
                 title: "Success",
-                description: `Employee '${selectedEmployeeSearchResult.first_name}' deleted!`
+                description: `Employee '${getEmployeeFullName(selectedEmployeeSearchResult)}' deleted!`
             })
 
             setTimeout(() => {
@@ -91,13 +103,7 @@ export function useEmployeeActions() {
 
     const handleAddNewEmployee = async (formData: FormData) => {
 
-        const first_name = formData.get("firstName") as string;
-        const employee_id = formData.get("employeeId") as string;
-
-        const newEmployee: Employee = {
-            first_name,
-            employee_id,
-        }
+        const newEmployee: Employee = parseEmployeeFormData(formData);
 
         const result = await addNewEmployeeAction(newEmployee);
 
@@ -108,7 +114,7 @@ export function useEmployeeActions() {
             setAlert({
                 variant: "success",
                 title: "Success",
-                description: `New employee '${first_name}' added!`
+                description: `New employee '${getEmployeeFullName(newEmployee)}' added!`
             })
 
             // Auto-hide the success alert message after 4.5 seconds
@@ -118,7 +124,7 @@ export function useEmployeeActions() {
         } else {
             setAlert({
                 variant: "danger",
-                title: `Error: Could not add new employee '${first_name}'`,
+                title: `Error: Could not add new employee '${getEmployeeFullName(newEmployee)}'`,
                 description: result.error ?? "An unexpected error occurred."
             })
         }

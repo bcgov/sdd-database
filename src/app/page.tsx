@@ -20,6 +20,7 @@ import {
 } from "@bcgov/design-system-react-components"
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
+import {getEmployeeFullName} from "@/utils";
 
 export default function Home() {
 
@@ -71,7 +72,7 @@ export default function Home() {
                            onOpenChange={setIsDeleteAlertDialogOpen}>
                 <Modal>
                     <AlertDialog role="alertdialog" variant="destructive"
-                                 title={`Are you sure you want to delete this employee '${selectedEmployeeSearchResult?.first_name}'?`}
+                                 title={`Are you sure you want to delete this employee '${getEmployeeFullName(selectedEmployeeSearchResult)}'?`}
                                  buttons={[
                                      <Button key="alert-dialog-button-1"
                                              danger onPress={() => handleDelete()}>Delete</Button>,
