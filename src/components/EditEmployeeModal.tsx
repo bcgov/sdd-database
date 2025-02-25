@@ -21,7 +21,7 @@ export function EditEmployeeModal({isOpen, onOpenChange, onSubmit, employee, onD
                 marginBottom: "1rem",
             }}>
                 <Callout title="Info"
-                         description="Edit employee information as you want and then click  'Update' to save your changes in the database. Subsequently, you should see a Success Alert message on the Home Screen."/>
+                         description="Edit employee information as you want and then click  'Save'. You should see a Success Alert message on the Home Screen."/>
             </div>
             <div style={{
                 // backgroundColor: "lightyellow",
@@ -33,7 +33,7 @@ export function EditEmployeeModal({isOpen, onOpenChange, onSubmit, employee, onD
                 <EmployeeForm onSubmit={onSubmit}
                               employee={employee}
                               onCancel={() => onOpenChange(false)}
-                              submitButtonLabel="Update"/>
+                              submitButtonLabel="Save"/>
                 {/*<div style={{backgroundColor: "orange"}}>*/}
                 <ButtonGroup alignment="end">
                     <Button variant="secondary"
