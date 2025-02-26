@@ -21,6 +21,8 @@ import {
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
 import {getEmployeeFullName} from "@/utils";
+// import {ModalDialog} from "@/components/ModalDialog";
+// import {GenericForm} from "@/components/GenericForm";
 
 export default function Home() {
 
@@ -38,6 +40,7 @@ export default function Home() {
         setAlert,
         handleSearch,
         openSearchResultEditModal,
+        // handleEdit,
         handleEditEmployee,
         handleDelete,
         handleAddNewEmployee
@@ -51,6 +54,14 @@ export default function Home() {
                 <TextField type="search" name="search" iconLeft=<SearchOutlinedIcon/>/>
                 <Button type="submit">Search</Button>
             </Form>
+
+            {/*{searchPhrase && searchResults.length === 0 ? (*/}
+            {/*    <p> No results found</p>*/}
+            {/*) : (*/}
+            {/*    searchResults.map(item => (*/}
+            {/*        <SearchResult item={item} searchResultClickHandler={openSearchResultEditModal}/>*/}
+            {/*    ))*/}
+            {/*)}*/}
 
             {searchPhrase && searchResults.length === 0 ? (
                 <p> No Employees found</p>
@@ -68,6 +79,12 @@ export default function Home() {
                                employee={selectedEmployeeSearchResult}
                                onDelete={() => setIsDeleteAlertDialogOpen(true)}/>
 
+            {/*<EditModal isOpen={isSelectedSearchResultEditModalOpen}*/}
+            {/*                   onOpenChange={setIsSelectedSearchResultEditModalOpen}*/}
+            {/*                   onSubmit={handleEdit}*/}
+            {/*                   entity={selectedSearchResult}*/}
+            {/*                   onDelete={() => setIsDeleteAlertDialogOpen(true)}/>*/}
+
             <DialogTrigger isOpen={isDeleteAlertDialogOpen}
                            onOpenChange={setIsDeleteAlertDialogOpen}>
                 <Modal>
@@ -84,6 +101,16 @@ export default function Home() {
                     />
                 </Modal>
             </DialogTrigger>
+
+            {/*<ModalDialog isOpen={isAddNewEntityModalOpen}*/}
+            {/*               onOpenChange={setIsAddNewEntityModalOpen}*/}
+            {/*               triggerButtonText="Add New Employee"*/}
+            {/*               modalTitle="Add New Employee">*/}
+            {/*    <GenericForm onSubmit={handleAddNewEmployee}*/}
+            {/*                  onCancel={() => setIsAddNewEmployeeModalOpen(false)}*/}
+            {/*                  submitButtonLabel="Create"/>*/}
+            {/*</ModalDialog>*/}
+
 
             <EmployeeModal isOpen={isAddNewEmployeeModalOpen}
                            onOpenChange={setIsAddNewEmployeeModalOpen}

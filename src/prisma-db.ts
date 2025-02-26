@@ -28,6 +28,19 @@ export async function getEmployeesByFilter(query: string) {
     })
 }
 
+export async function getOfficesByFilter(query: string) {
+    return prisma.office.findMany({
+        where: {
+            OR: [
+                {office_number: {contains: query, mode: 'insensitive'}},
+                {office_name: {contains: query, mode: 'insensitive'}},
+                {postal_code: {contains: query, mode: 'insensitive'}},
+                {notes: {contains: query, mode: 'insensitive'}},
+            ]
+        }
+    })
+}
+
 export async function updateEmployee(employee: Employee) {
     return prisma.employee.update({
         where: {employee_id: employee.employee_id},

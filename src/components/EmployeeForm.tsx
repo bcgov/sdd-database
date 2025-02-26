@@ -13,9 +13,9 @@ export function EmployeeForm({onSubmit, employee, onCancel, submitButtonLabel}: 
     return (
         <Form action={onSubmit}
               style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: '0.5rem',
+                  // display: "flex",
+                  // flexDirection: "column",
+                  // gap: '0.5rem',
               }}>
             <TextField label="First Name"
                        name="firstName"

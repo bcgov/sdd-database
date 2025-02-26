@@ -1,6 +1,7 @@
 import {useState} from "react";
 
 import {Employee} from "@prisma/client";
+// import {Employee, Office} from "@prisma/client";
 
 import {
     addNewEmployeeAction,
@@ -44,7 +45,6 @@ export function useEmployeeActions() {
     }
 
     const parseEmployeeFormData = (formData: FormData) => {
-
         return {
             first_name: formData.get("firstName") as string,
             // converting empty middle name to null for clarity in database

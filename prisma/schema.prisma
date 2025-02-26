@@ -20,3 +20,10 @@ model Employee {
   last_name   String
   notes       String?
 }
+
+model Office {
+  office_number String  @id
+  office_name   String  @unique
+  postal_code   String  @unique
+  notes         String?
+}

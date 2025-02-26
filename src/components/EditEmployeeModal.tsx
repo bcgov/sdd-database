@@ -25,10 +25,10 @@ export function EditEmployeeModal({isOpen, onOpenChange, onSubmit, employee, onD
             </div>
             <div style={{
                 // backgroundColor: "lightyellow",
-                display: "flex",
-                // flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-end"
+                // display: "flex",
+                // // flexDirection: "row",
+                // justifyContent: "space-between",
+                // alignItems: "flex-end"
             }}>
                 <EmployeeForm onSubmit={onSubmit}
                               employee={employee}
