@@ -48,6 +48,13 @@ export async function updateEmployee(employee: Employee) {
     })
 }
 
+export async function updateOffice(office_number: string, notes: string | null) {
+    return prisma.office.update({
+        where: {office_number},
+        data: {notes}
+    })
+}
+
 export async function deleteEmployee(employee_id: string) {
     return prisma.employee.delete({
         where: {employee_id},

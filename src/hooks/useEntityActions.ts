@@ -1,14 +1,17 @@
 import {useState} from "react";
 
 import {Employee} from "@prisma/client";
-// import {Employee, Office} from "@prisma/client";
+
+import {Entity} from "@/types/Entity";
 
 import {
     addNewEmployeeAction,
     deleteEmployeeAction,
-    searchEmployeesAction,
     updateEmployeeAction
 } from "@/actions/employees";
+import {updateOfficeAction} from "@/actions/offices";
+import {searchAction} from "@/actions/search"
+
 import {getEmployeeFullName} from "@/utils";
 
 interface Alert {
@@ -17,10 +20,10 @@ interface Alert {
     description?: string;
 }
 
-export function useEmployeeActions() {
+export function useEntityActions() {
     const [searchPhrase, setSearchPhrase] = useState("");
-    const [searchResults, setSearchResults] = useState<Employee[]>([]);
-    const [selectedEmployeeSearchResult, setSelectedEmployeeSearchResult] = useState<Employee>();
+    const [searchResults, setSearchResults] = useState<Entity[]>([]);
+    const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
     const [isSelectedSearchResultEditModalOpen, setIsSelectedSearchResultEditModalOpen] = useState(false);
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
@@ -35,12 +38,12 @@ export function useEmployeeActions() {
     }
 
     const runSearch = async (query: string) => {
-        const results = await searchEmployeesAction(query);   // create local variable to avoid setState timing issue
+        const results = await searchAction(query);   // create local variable to avoid setState timing issue
         setSearchResults(results);
     }
 
-    const openSearchResultEditModal = (employee: Employee) => {
-        setSelectedEmployeeSearchResult(employee);
+    const openSearchResultEditModal = (item: Entity) => {
+        setSelectedSearchResult(item);
         setIsSelectedSearchResultEditModalOpen(true);
     }
 
@@ -55,49 +58,72 @@ export function useEmployeeActions() {
         }
     }
 
+    const addSuccessAlert = (description: string, timeInMs: number = 4500) => {
+
+        setAlert({
+            variant: "success",
+            title: "Success",
+            description: description
+        })
+
+        // Auto-hide the success alert message after 4.5 seconds
+        setTimeout(() => {
+            setAlert(undefined);
+        }, timeInMs)
+    }
+
+    const handleEditOffice = async (formData: FormData) => {
+
+        if (selectedSearchResult?.type === "office") {
+            const notes = formData.get("notes") as string || null;
+
+            await updateOfficeAction(selectedSearchResult.office_number, notes);
+        }
+    }
+
     const handleEditEmployee = async (formData: FormData) => {
-        if (selectedEmployeeSearchResult) {
+
+        if (selectedSearchResult?.type === "employee") {
 
             const updatedEmployee: Employee = {
                 ...parseEmployeeFormData(formData),
-                employee_id: selectedEmployeeSearchResult.employee_id
+                employee_id: selectedSearchResult.employee_id
             }
 
             await updateEmployeeAction(updatedEmployee);
 
-            await runSearch(searchPhrase);
-            setIsSelectedSearchResultEditModalOpen(false);
-
-            setAlert({
-                variant: "success",
-                title: "Success",
-                description: `Employee details updated for '${getEmployeeFullName(selectedEmployeeSearchResult)}'!`
-            })
-
-            // Auto-hide the success alert message after 4.5 seconds
-            setTimeout(() => {
-                setAlert(undefined);
-            }, 4500)
+            await runSearch(searchPhrase);  // This is because employees can be deleted
         }
+    }
+
+    const handleEdit = async (formData: FormData) => {
+
+        let successAlertDescription = ""
+
+        if (selectedSearchResult?.type === "employee") {
+            handleEditEmployee(formData);
+            successAlertDescription = "Employee details updated!"
+
+        } else if (selectedSearchResult?.type === "office") {
+            handleEditOffice(formData);
+            successAlertDescription = "Office details updated!"
+        }
+
+        setIsSelectedSearchResultEditModalOpen(false);
+
+        addSuccessAlert(successAlertDescription);
     }
 
     const handleDelete = async () => {
 
-        if (selectedEmployeeSearchResult) {
-            await deleteEmployeeAction(selectedEmployeeSearchResult.employee_id);
+        if (selectedSearchResult?.type === "employee") {
+            await deleteEmployeeAction(selectedSearchResult.employee_id);
             await runSearch(searchPhrase);
+
             setIsDeleteAlertDialogOpen(false);
             setIsSelectedSearchResultEditModalOpen(false);
 
-            setAlert({
-                variant: "success",
-                title: "Success",
-                description: `Employee '${getEmployeeFullName(selectedEmployeeSearchResult)}' deleted!`
-            })
-
-            setTimeout(() => {
-                setAlert(undefined);
-            }, 4500)
+            addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
         }
     }
 
@@ -110,17 +136,7 @@ export function useEmployeeActions() {
         setIsAddNewEmployeeModalOpen(false);
 
         if (result.success) {
-
-            setAlert({
-                variant: "success",
-                title: "Success",
-                description: `New employee '${getEmployeeFullName(newEmployee)}' added!`
-            })
-
-            // Auto-hide the success alert message after 4.5 seconds
-            setTimeout(() => {
-                setAlert(undefined);
-            }, 4500)
+            addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
         } else {
             setAlert({
                 variant: "danger",
@@ -133,7 +149,7 @@ export function useEmployeeActions() {
     return {
         searchPhrase,
         searchResults,
-        selectedEmployeeSearchResult,
+        selectedSearchResult,
         isSelectedSearchResultEditModalOpen,
         setIsSelectedSearchResultEditModalOpen,
         isDeleteAlertDialogOpen,
@@ -144,7 +160,7 @@ export function useEmployeeActions() {
         setAlert,
         handleSearch,
         openSearchResultEditModal,
-        handleEditEmployee,
+        handleEdit,
         handleDelete,
         handleAddNewEmployee
     }

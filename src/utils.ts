@@ -1,5 +1,4 @@
 import {Employee} from "@prisma/client";
-// import {Employee, Office} from "@prisma/client";
 
 export const getEmployeeFullName = (employee: Employee | undefined) => {
 
@@ -11,7 +10,3 @@ export const getEmployeeFullName = (employee: Employee | undefined) => {
 
     return fullName;
 }
-
-// export function isEmployee(item: Employee | Office) {
-//
-// }

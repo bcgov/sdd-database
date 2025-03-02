@@ -6,14 +6,21 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.5",
+            notes: [
+                "Added Offices"
+            ]
+        },
+        {
             version: "v0.0.4",
             notes: [
                 "Added this secret updates page to capture progress across versions",
                 "Added more employee fields + Touched up styling for the Add New Employee modal",
-                "Added visual feedback for user to indicate successful/unsuccessful new employee creation",
+                "Added visual feedback for user to indicate successful/unsuccessful actions like adding new" +
+                " employees, deleting, saving edits",
                 "Touched up styling for Search Results - made them clickable",
-                "Add edit functionality",
-                "Add delete functionality + delete confirmation dialog",
+                "Added edit functionality",
+                "Added delete functionality + delete confirmation dialog",
             ]
         },
         {

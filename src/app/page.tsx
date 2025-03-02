@@ -1,125 +1,80 @@
 "use client";
 
-import {SearchResult} from "@/components/SearchResult";
-import {EmployeeForm} from "@/components/EmployeeForm";
-import {EmployeeModal} from "@/components/EmployeeModal";
-import {EditEmployeeModal} from "@/components/EditEmployeeModal";
 
-import {useEmployeeActions} from "@/hooks/useEmployeeActions";
+import {Search} from "@/components/Search";
+import {EditModal} from "@/components/EditModal";
+import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
+import {ModalDialog} from "@/components/ModalDialog";
+import {EmployeeForm} from "@/components/EmployeeForm";
+
+import {useEntityActions} from "@/hooks/useEntityActions";
 
 import {
-    AlertDialog,
-    Button,
-    DialogTrigger,
     Footer,
-    Form,
     Header,
     InlineAlert,
-    Modal,
-    TextField
 } from "@bcgov/design-system-react-components"
 
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined"
-import {getEmployeeFullName} from "@/utils";
-// import {ModalDialog} from "@/components/ModalDialog";
-// import {GenericForm} from "@/components/GenericForm";
 
 export default function Home() {
 
     const {
         searchPhrase,
         searchResults,
-        selectedEmployeeSearchResult,
+        selectedSearchResult,
         isSelectedSearchResultEditModalOpen,
         setIsSelectedSearchResultEditModalOpen,
-        isDeleteAlertDialogOpen,
-        setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
         setIsAddNewEmployeeModalOpen,
-        alert,
-        setAlert,
+        isDeleteAlertDialogOpen,
+        setIsDeleteAlertDialogOpen,
         handleSearch,
         openSearchResultEditModal,
-        // handleEdit,
-        handleEditEmployee,
+        handleEdit,
+        handleAddNewEmployee,
         handleDelete,
-        handleAddNewEmployee
-    } = useEmployeeActions()
+        alert,
+        setAlert
+    } = useEntityActions()
 
     return (
-        <div>
+        <>
             <Header title="Employee Information"></Header>
 
-            <Form action={handleSearch}>
-                <TextField type="search" name="search" iconLeft=<SearchOutlinedIcon/>/>
-                <Button type="submit">Search</Button>
-            </Form>
+            <Search
+                searchPhrase={searchPhrase}
+                searchResults={searchResults}
+                searchResultClickHandler={openSearchResultEditModal}
+                handleSearch={handleSearch}
+            />
 
-            {/*{searchPhrase && searchResults.length === 0 ? (*/}
-            {/*    <p> No results found</p>*/}
-            {/*) : (*/}
-            {/*    searchResults.map(item => (*/}
-            {/*        <SearchResult item={item} searchResultClickHandler={openSearchResultEditModal}/>*/}
-            {/*    ))*/}
-            {/*)}*/}
-
-            {searchPhrase && searchResults.length === 0 ? (
-                <p> No Employees found</p>
-            ) : (
-                searchResults.map(employee => (
-                    <SearchResult key={employee.employee_id}
-                                  employee={employee}
-                                  searchResultClickHandler={openSearchResultEditModal}/>
-                ))
-            )}
-
-            <EditEmployeeModal isOpen={isSelectedSearchResultEditModalOpen}
-                               onOpenChange={setIsSelectedSearchResultEditModalOpen}
-                               onSubmit={handleEditEmployee}
-                               employee={selectedEmployeeSearchResult}
-                               onDelete={() => setIsDeleteAlertDialogOpen(true)}/>
-
-            {/*<EditModal isOpen={isSelectedSearchResultEditModalOpen}*/}
-            {/*                   onOpenChange={setIsSelectedSearchResultEditModalOpen}*/}
-            {/*                   onSubmit={handleEdit}*/}
-            {/*                   entity={selectedSearchResult}*/}
-            {/*                   onDelete={() => setIsDeleteAlertDialogOpen(true)}/>*/}
-
-            <DialogTrigger isOpen={isDeleteAlertDialogOpen}
-                           onOpenChange={setIsDeleteAlertDialogOpen}>
-                <Modal>
-                    <AlertDialog role="alertdialog" variant="destructive"
-                                 title={`Are you sure you want to delete this employee '${getEmployeeFullName(selectedEmployeeSearchResult)}'?`}
-                                 buttons={[
-                                     <Button key="alert-dialog-button-1"
-                                             danger onPress={() => handleDelete()}>Delete</Button>,
-                                     <Button key="alert-dialog-button-2"
-                                             variant="secondary"
-                                             onPress={() => setIsDeleteAlertDialogOpen(false)
-                                             }>Cancel</Button>
-                                 ]}
+            {selectedSearchResult &&
+                <>
+                    <EditModal
+                        item={selectedSearchResult}
+                        isOpen={isSelectedSearchResultEditModalOpen}
+                        setIsOpen={setIsSelectedSearchResultEditModalOpen}
+                        onSubmit={handleEdit}
+                        onDelete={() => setIsDeleteAlertDialogOpen(true)}
                     />
-                </Modal>
-            </DialogTrigger>
 
-            {/*<ModalDialog isOpen={isAddNewEntityModalOpen}*/}
-            {/*               onOpenChange={setIsAddNewEntityModalOpen}*/}
-            {/*               triggerButtonText="Add New Employee"*/}
-            {/*               modalTitle="Add New Employee">*/}
-            {/*    <GenericForm onSubmit={handleAddNewEmployee}*/}
-            {/*                  onCancel={() => setIsAddNewEmployeeModalOpen(false)}*/}
-            {/*                  submitButtonLabel="Create"/>*/}
-            {/*</ModalDialog>*/}
+                    {selectedSearchResult.type === "employee" &&
+                        <DeleteAlertDialog
+                            employee={selectedSearchResult}
+                            isOpen={isDeleteAlertDialogOpen}
+                            setIsOpen={setIsDeleteAlertDialogOpen}
+                            onDelete={handleDelete}/>
+                    }
+                </>
+            }
 
-
-            <EmployeeModal isOpen={isAddNewEmployeeModalOpen}
-                           onOpenChange={setIsAddNewEmployeeModalOpen}
-                           triggerButtonText="Add New Employee"
-                           modalTitle="Add New Employee">
+            <ModalDialog isOpen={isAddNewEmployeeModalOpen}
+                         setIsOpen={setIsAddNewEmployeeModalOpen}
+                         triggerButtonText="Add New Employee"
+                         modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
-                              onCancel={() => setIsAddNewEmployeeModalOpen(false)}
-                              submitButtonLabel="Create"/>
-            </EmployeeModal>
+                              onCancel={() => setIsAddNewEmployeeModalOpen(false)}/>
+            </ModalDialog>
 
             {alert && <InlineAlert title={alert.title}
                                    description={alert.description}
@@ -128,6 +83,6 @@ export default function Home() {
                                    variant={alert.variant}></InlineAlert>}
 
             <Footer hideAcknowledgement hideLogoAndLinks></Footer>
-        </div>
+        </>
     );
 }

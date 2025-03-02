@@ -50,9 +50,7 @@ oc tag <tools_namespace>/employee-information-database:v0.0.5-tools <dev_namespa
 5-dev -n <dev_namespace>
 ```
 
-6. _Need to check if I need this step_
-
-Update the deployment to use this new versioned image
+6. Update the deployment to use this new versioned image
 
 ```shell
 oc set image deployment/employee-information-database employee-information-database=image-registry.
