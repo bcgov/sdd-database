@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.5",
             notes: [
-                "Added Offices"
+                "Added Offices",
+                "Added filtering capability for search results",
             ]
         },
         {

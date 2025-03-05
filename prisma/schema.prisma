@@ -14,16 +14,19 @@ datasource db {
 }
 
 model Employee {
-  employee_id String  @id
-  first_name  String
-  middle_name String?
-  last_name   String
-  notes       String?
+  employee_id     String  @id
+  first_name      String
+  middle_name     String?
+  last_name       String
+  office_number   String
+  assigned_office Office  @relation(fields: [office_number], references: [office_number])
+  notes           String?
 }
 
 model Office {
-  office_number String  @id
-  office_name   String  @unique
-  postal_code   String  @unique
+  office_number String     @id
+  office_name   String     @unique
+  postal_code   String     @unique
   notes         String?
+  Employee      Employee[]
 }

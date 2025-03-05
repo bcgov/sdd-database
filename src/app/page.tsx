@@ -1,11 +1,11 @@
 "use client";
 
 
-import {Search} from "@/components/Search";
+import {Search} from "@/components/Search/Search";
 import {EditModal} from "@/components/EditModal";
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
-import {EmployeeForm} from "@/components/EmployeeForm";
+import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 
 import {useEntityActions} from "@/hooks/useEntityActions";
 
@@ -19,22 +19,24 @@ import {
 export default function Home() {
 
     const {
-        searchPhrase,
         searchResults,
         selectedSearchResult,
+        selectedFilterTags,
+        setSelectedFilterTags,
+        alert,
+        setAlert,
         isSelectedSearchResultEditModalOpen,
         setIsSelectedSearchResultEditModalOpen,
-        isAddNewEmployeeModalOpen,
-        setIsAddNewEmployeeModalOpen,
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
-        handleSearch,
+        isAddNewEmployeeModalOpen,
+        setIsAddNewEmployeeModalOpen,
         openSearchResultEditModal,
+        userHasSearchedOnce,
+        handleSearch,
         handleEdit,
-        handleAddNewEmployee,
         handleDelete,
-        alert,
-        setAlert
+        handleAddNewEmployee,
     } = useEntityActions()
 
     return (
@@ -42,8 +44,10 @@ export default function Home() {
             <Header title="Employee Information"></Header>
 
             <Search
-                searchPhrase={searchPhrase}
                 searchResults={searchResults}
+                selectedFilterTags={selectedFilterTags}
+                setSelectedFilterTags={setSelectedFilterTags}
+                userHasSearchedOnce={userHasSearchedOnce}
                 searchResultClickHandler={openSearchResultEditModal}
                 handleSearch={handleSearch}
             />

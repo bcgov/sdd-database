@@ -9,6 +9,7 @@ export async function addNewEmployee(employee: Employee) {
             first_name: employee.first_name,
             middle_name: employee.middle_name,
             last_name: employee.last_name,
+            office_number: employee.office_number,
             notes: employee.notes
         },
     })

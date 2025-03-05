@@ -1,4 +1,12 @@
-import {Button, ButtonGroup, Form, TextArea, TextField} from "@bcgov/design-system-react-components";
+import {
+    Accordion,
+    AccordionGroup,
+    Button,
+    ButtonGroup,
+    Form,
+    TextArea,
+    TextField
+} from "@bcgov/design-system-react-components";
 import {Employee} from "@prisma/client";
 
 
@@ -19,6 +27,15 @@ export function EmployeeForm({onSubmit, employee, onCancel, onDelete}: EmployeeF
                   // gap: '0.5rem',
               }}>
 
+            <AccordionGroup>
+
+                <Accordion label="Employee Details">
+                </Accordion>
+
+                <Accordion label="Office Details"></Accordion>
+
+            </AccordionGroup>
+
             <TextField label="First Name"
                        name="firstName"
                        isRequired
@@ -32,6 +49,8 @@ export function EmployeeForm({onSubmit, employee, onCancel, onDelete}: EmployeeF
                        name="employeeId"
                        isRequired isReadOnly={!!employee} // lock in edit mode
                        defaultValue={employee?.employee_id}/>
+
+            <TextField label="Office Number" name="officeNumber" isRequired />
 
             <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
 

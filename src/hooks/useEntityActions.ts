@@ -1,4 +1,5 @@
 import {useState} from "react";
+import type {Selection} from "@react-types/shared"
 
 import {Employee} from "@prisma/client";
 
@@ -21,7 +22,8 @@ interface Alert {
 }
 
 export function useEntityActions() {
-    const [searchPhrase, setSearchPhrase] = useState("");
+    const [searchPhrase, setSearchPhrase] = useState<string>();
+    const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
@@ -31,6 +33,8 @@ export function useEntityActions() {
 
     const [alert, setAlert] = useState<Alert>();
 
+    const userHasSearchedOnce = () => searchPhrase !== undefined;
+
     const handleSearch = async (formData: FormData) => {
         const query = formData.get("search") as string;
         setSearchPhrase(query);
@@ -38,8 +42,8 @@ export function useEntityActions() {
     }
 
     const runSearch = async (query: string) => {
-        const results = await searchAction(query);   // create local variable to avoid setState timing issue
-        setSearchResults(results);
+            const results = await searchAction(query);   // create local variable to avoid setState timing issue
+            setSearchResults(results);
     }
 
     const openSearchResultEditModal = (item: Entity) => {
@@ -54,6 +58,7 @@ export function useEntityActions() {
             middle_name: formData.get("middleName") as string || null,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
+            office_number: formData.get("officeNumber") as string,
             notes: formData.get("notes") as string || null,
         }
     }
@@ -92,7 +97,9 @@ export function useEntityActions() {
 
             await updateEmployeeAction(updatedEmployee);
 
-            await runSearch(searchPhrase);  // This is because employees can be deleted
+            if(searchPhrase !== undefined) {
+                await runSearch(searchPhrase);  // This is because employees can be deleted
+            }
         }
     }
 
@@ -118,7 +125,10 @@ export function useEntityActions() {
 
         if (selectedSearchResult?.type === "employee") {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
-            await runSearch(searchPhrase);
+
+            if(searchPhrase !== undefined) {
+                await runSearch(searchPhrase);  // This is because employees can be deleted
+            }
 
             setIsDeleteAlertDialogOpen(false);
             setIsSelectedSearchResultEditModalOpen(false);
@@ -147,19 +157,21 @@ export function useEntityActions() {
     }
 
     return {
-        searchPhrase,
         searchResults,
         selectedSearchResult,
+        selectedFilterTags,
+        setSelectedFilterTags,
+        alert,
+        setAlert,
         isSelectedSearchResultEditModalOpen,
         setIsSelectedSearchResultEditModalOpen,
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
         setIsAddNewEmployeeModalOpen,
-        alert,
-        setAlert,
-        handleSearch,
         openSearchResultEditModal,
+        userHasSearchedOnce,
+        handleSearch,
         handleEdit,
         handleDelete,
         handleAddNewEmployee

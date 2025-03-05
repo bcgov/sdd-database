@@ -1,7 +1,7 @@
 import {Callout} from "@bcgov/design-system-react-components";
 
-import {EmployeeForm} from "@/components/EmployeeForm";
-import {OfficeForm} from "@/components/OfficeForm";
+import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
+import {OfficeForm} from "@/components/Entity_Forms/OfficeForm";
 import {ModalDialog} from "@/components/ModalDialog";
 
 import {Entity} from "@/types/Entity";
