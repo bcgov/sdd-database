@@ -23,15 +23,8 @@ export function EditModal({
                           }: EditModalProps) {
 
     const getModalTitle = () => {
-        let title = "";
 
-        if (item?.type === "employee") {
-            title = "Edit Employee"
-        } else if (item?.type === "office") {
-            title = "Edit Office";
-        }
-
-        return title
+        return `Edit ${item?.type === "employee" ? "Employee" : "Office"}`;
     }
 
     const getModalBody = () => {
@@ -41,7 +34,7 @@ export function EditModal({
 
             bodyComponent = <EmployeeForm onSubmit={onSubmit}
                                           employee={item}
-                                          onCancel={() => setIsOpen(false)}
+                                          onClose={() => setIsOpen(false)}
                                           onDelete={onDelete}
             />
 
@@ -49,7 +42,7 @@ export function EditModal({
 
             bodyComponent = <OfficeForm onSubmit={onSubmit}
                                         office={item}
-                                        onCancel={() => setIsOpen(false)}/>
+                                        onClose={() => setIsOpen(false)}/>
         }
 
         return bodyComponent;

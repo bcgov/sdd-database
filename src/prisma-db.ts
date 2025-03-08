@@ -16,6 +16,9 @@ export async function addNewEmployee(employee: Employee) {
 }
 
 export async function getEmployeesByFilter(query: string) {
+    if(!query)
+        return prisma.employee.findMany()
+
     return prisma.employee.findMany({
         where: {
             OR: [
@@ -30,6 +33,9 @@ export async function getEmployeesByFilter(query: string) {
 }
 
 export async function getOfficesByFilter(query: string) {
+    if(!query)
+        return prisma.office.findMany()
+
     return prisma.office.findMany({
         where: {
             OR: [

@@ -50,7 +50,7 @@ export function Search({
         return key
     }
 
-    const searchResultsList = () => {
+    const displaySearchResults = () => {
         return (
             <>
                 {
@@ -65,30 +65,42 @@ export function Search({
         )
     }
 
+    const displayFiltersAndSearchResults = () => {
+        return (
+            <>
+                {/* Search Filters */}
+                <FilterTags setSelectedFilterTags={setSelectedFilterTags}></FilterTags>
+
+                {/* Search Results */}
+                {
+                    filteredSearchResults.length === 0 ?
+                    <p style = {{padding: "1rem"}}>No filtered search results found</p> :
+                    displaySearchResults()
+                }
+            </>
+        )
+    }
+
+    const displaySearchBody = () => {
+
+        if (searchResults.length === 0) {
+
+            return userHasSearchedOnce() ? <p style = {{padding: "1rem"}}>No results found</p> : null
+
+        } else {
+            return displayFiltersAndSearchResults()
+        }
+    }
+
     return (
         <>
             {/* Search Bar */}
             <Form action={handleSearch}>
-                <TextField type="search" name="search" iconLeft=<SearchOutlinedIcon/>/>
+                <TextField type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
                 <Button type="submit">Search</Button>
             </Form>
 
-            {userHasSearchedOnce() ? (
-                searchResults.length === 0 ? (
-                    <p> No results found</p>
-                ) : (
-                    <>
-                        {/* Search Filters */}
-                        <FilterTags setSelectedFilterTags={setSelectedFilterTags}></FilterTags>
-
-                        {filteredSearchResults.length === 0 ? (
-                            <p> No filtered search results found</p>
-                        ) : (
-                            searchResultsList()
-                        )}
-                    </>
-                )
-            ) : null}
+            {displaySearchBody()}
         </>
     )
 }

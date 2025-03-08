@@ -3,12 +3,12 @@ import {Office} from "@prisma/client";
 
 interface OfficeFormProps {
     onSubmit: (formData: FormData) => void;
-    office: Office; // This is not Optional as OfficeForm can only be opened in edit mode. There is no addNewOffice
-    // Modal as of now
-    onCancel: () => void;
+    // This is not Optional as OfficeForm can only be opened in edit mode. There is no addNewOffice Modal as of now
+    office: Office;
+    onClose: () => void;
 }
 
-export function OfficeForm({onSubmit, office, onCancel}: OfficeFormProps) {
+export function OfficeForm({onSubmit, office, onClose}: OfficeFormProps) {
     return (
         <Form action={onSubmit}>
             <TextField label="Office Number" name="officeNumber" isReadOnly defaultValue={office.office_number}/>
@@ -21,7 +21,7 @@ export function OfficeForm({onSubmit, office, onCancel}: OfficeFormProps) {
 
             <ButtonGroup>
                 <Button type="submit">Save</Button>
-                <Button variant="secondary" onPress={onCancel}>Cancel</Button>
+                <Button variant="secondary" onPress={onClose}>Cancel</Button>
             </ButtonGroup>
         </Form>
     )

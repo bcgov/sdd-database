@@ -15,8 +15,8 @@
     "@bcgov/design-system-react-components": "^0.5.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.6",
-    "@mui/material": "^6.4.6",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.7",
     "@prisma/client": "^6.4.1",
     "next": "15.2.1",
     "pg": "^8.13.3",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.0.9",
+    "@tailwindcss/postcss": "^4.0.12",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -33,7 +33,7 @@
     "eslint-config-next": "15.2.1",
     "postcss": "^8",
     "prisma": "^6.4.1",
-    "tailwindcss": "^4.0.9",
+    "tailwindcss": "^4.0.12",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   }

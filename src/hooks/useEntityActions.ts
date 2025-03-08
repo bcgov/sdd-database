@@ -10,8 +10,8 @@ import {
     deleteEmployeeAction,
     updateEmployeeAction
 } from "@/actions/employees";
-import {updateOfficeAction} from "@/actions/offices";
-import {searchAction} from "@/actions/search"
+import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
+import {searchAllAction} from "@/actions/search"
 
 import {getEmployeeFullName} from "@/utils";
 
@@ -38,17 +38,30 @@ export function useEntityActions() {
     const handleSearch = async (formData: FormData) => {
         const query = formData.get("search") as string;
         setSearchPhrase(query);
-        await runSearch(query);
+        await runSearchAll(query);
     }
 
-    const runSearch = async (query: string) => {
-            const results = await searchAction(query);   // create local variable to avoid setState timing issue
-            setSearchResults(results);
+    const runSearchAll = async (query: string) => {
+        // create local variable to avoid setState timing issue
+        const results = await searchAllAction(query);
+        setSearchResults(results);
+    }
+
+    const rerunSearch = async () => {
+        if(searchPhrase !== undefined) {
+            await runSearchAll(searchPhrase);
+        }
     }
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
         setIsSelectedSearchResultEditModalOpen(true);
+    }
+
+    const getAllOffices = async () => {
+        const officeSearchResults = await searchOfficesAction()
+
+        setSearchResults(officeSearchResults)
     }
 
     const parseEmployeeFormData = (formData: FormData) => {
@@ -97,9 +110,8 @@ export function useEntityActions() {
 
             await updateEmployeeAction(updatedEmployee);
 
-            if(searchPhrase !== undefined) {
-                await runSearch(searchPhrase);  // This is because employees can be deleted
-            }
+            // We update previous search results just in case an employee is deleted
+            rerunSearch();
         }
     }
 
@@ -126,9 +138,8 @@ export function useEntityActions() {
         if (selectedSearchResult?.type === "employee") {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
 
-            if(searchPhrase !== undefined) {
-                await runSearch(searchPhrase);  // This is because employees can be deleted
-            }
+            // We update previous search results just in case an employee is deleted
+            rerunSearch();
 
             setIsDeleteAlertDialogOpen(false);
             setIsSelectedSearchResultEditModalOpen(false);
@@ -174,6 +185,7 @@ export function useEntityActions() {
         handleSearch,
         handleEdit,
         handleDelete,
-        handleAddNewEmployee
+        handleAddNewEmployee,
+        getAllOffices
     }
 }

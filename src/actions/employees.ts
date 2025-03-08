@@ -3,6 +3,7 @@
 import {Prisma} from "@prisma/client"
 import {Employee} from "@prisma/client";
 import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
+import {Entity} from "@/types/Entity";
 
 interface AddNewEmployeeResult {
     success: boolean;
@@ -41,7 +42,15 @@ export async function updateEmployeeAction(updatedEmployee: Employee) {
 }
 
 export async function searchEmployeesAction(query: string) {
-    return getEmployeesByFilter(query);
+    const employeeSearchResults = await getEmployeesByFilter(query);
+
+    // Attaching the discriminant 'type'
+    const employeesWithType: Entity[] = employeeSearchResults.map(employee => ({
+        ...employee,
+        type: "employee" as const,
+    }))
+
+    return employeesWithType
 }
 
 export async function deleteEmployeeAction(employee_id: string) {

@@ -12,12 +12,22 @@ import {Employee} from "@prisma/client";
 
 interface EmployeeFormProps {
     onSubmit: (formData: FormData) => void;
-    employee?: Employee;    // Optional: Passed only in edit mode
-    onCancel: () => void;
+    // Optional: Passed only in edit mode
+    employee?: Employee;
+    assignOffice?: () => Promise<void>;
+    onClose: () => void;
     onDelete?: () => void;
 }
 
-export function EmployeeForm({onSubmit, employee, onCancel, onDelete}: EmployeeFormProps) {
+
+export function EmployeeForm({onSubmit, employee, assignOffice, onClose, onDelete}: EmployeeFormProps) {
+
+    const openAssignMode = () => {
+        if(assignOffice) {
+            onClose();
+            assignOffice();
+        }
+    }
 
     return (
         <Form action={onSubmit}
@@ -27,38 +37,52 @@ export function EmployeeForm({onSubmit, employee, onCancel, onDelete}: EmployeeF
                   // gap: '0.5rem',
               }}>
 
-            <AccordionGroup>
+            <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["employeeDetails"]} style={{
+                marginTop: "1rem",
+                marginBottom: "1rem",
+            }}>
 
-                <Accordion label="Employee Details">
+                <Accordion label="Employee Details" id="employeeDetails">
+
+                    <div>
+                        <TextField label="First Name"
+                                   name="firstName"
+                                   isRequired
+                                   defaultValue={employee?.first_name}/>
+
+                        <TextField label="Middle Name"
+                                   name="middleName"
+                                   defaultValue={employee?.middle_name ?? undefined}></TextField>
+
+                        <TextField label="Last Name"
+                                   name="lastName"
+                                   isRequired
+                                   defaultValue={employee?.last_name}></TextField>
+
+                        <TextField label="Employee ID"
+                                   name="employeeId"
+                                   isRequired isReadOnly={!!employee} // lock in edit mode
+                                   defaultValue={employee?.employee_id}/>
+
+                        <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
+                    </div>
+
                 </Accordion>
 
-                <Accordion label="Office Details"></Accordion>
+                <Accordion label="Office Details" id="officeDetails">
+                    <TextField label="Office Number" name="officeNumber" isRequired/>
+                    <Button variant="secondary"
+                            onPress={openAssignMode}>Assign Office
+                    </Button>
+                </Accordion>
 
             </AccordionGroup>
-
-            <TextField label="First Name"
-                       name="firstName"
-                       isRequired
-                       defaultValue={employee?.first_name}/>
-
-            <TextField label="Middle Name" name="middleName" defaultValue={employee?.middle_name ?? undefined}></TextField>
-
-            <TextField label="Last Name" name="lastName" isRequired defaultValue={employee?.last_name}></TextField>
-
-            <TextField label="Employee ID"
-                       name="employeeId"
-                       isRequired isReadOnly={!!employee} // lock in edit mode
-                       defaultValue={employee?.employee_id}/>
-
-            <TextField label="Office Number" name="officeNumber" isRequired />
-
-            <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
 
             {/*<div style={{backgroundColor: "gray"}}>*/}
             <ButtonGroup>
                 <Button type="submit">{employee ? "Save" : "Create"}</Button>
                 <Button variant="secondary"
-                        onPress={onCancel}>Cancel</Button>
+                        onPress={onClose}>Cancel</Button>
             </ButtonGroup>
             {/*</div>*/}
 
@@ -67,10 +91,11 @@ export function EmployeeForm({onSubmit, employee, onCancel, onDelete}: EmployeeF
                 <ButtonGroup alignment="end">
                     <Button variant="secondary"
                             danger
-                        onPress={onDelete}
+                            onPress={onDelete}
                     >Delete</Button>
                 </ButtonGroup>
-            ): null}
+            ) : null}
+
         </Form>
     )
 }

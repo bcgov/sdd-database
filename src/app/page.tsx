@@ -37,6 +37,7 @@ export default function Home() {
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
+        getAllOffices,
     } = useEntityActions()
 
     return (
@@ -77,7 +78,8 @@ export default function Home() {
                          triggerButtonText="Add New Employee"
                          modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
-                              onCancel={() => setIsAddNewEmployeeModalOpen(false)}/>
+                              assignOffice={getAllOffices}
+                              onClose={() => setIsAddNewEmployeeModalOpen(false)}/>
             </ModalDialog>
 
             {alert && <InlineAlert title={alert.title}
