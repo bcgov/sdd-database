@@ -1,9 +1,11 @@
 "use server";
 
-import {Prisma} from "@prisma/client"
-import {Employee} from "@prisma/client";
+import {Prisma, Employee} from "@prisma/client"
+
 import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
+
 import {Entity} from "@/types/Entity";
+
 
 interface AddNewEmployeeResult {
     success: boolean;
@@ -41,7 +43,7 @@ export async function updateEmployeeAction(updatedEmployee: Employee) {
     await updateEmployee(updatedEmployee);
 }
 
-export async function searchEmployeesAction(query: string) {
+export async function searchEmployeesAction(query?: string) {
     const employeeSearchResults = await getEmployeesByFilter(query);
 
     // Attaching the discriminant 'type'

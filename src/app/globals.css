@@ -26,7 +26,7 @@ body {
 }
 
 .bcds-react-aria-Tag:not([data-selected]) {
-    background-color: transparent !important;
+    background-color: unset !important;
 }
 
 .bcds-react-aria-Tag[data-focused] {

@@ -3,16 +3,20 @@ import type {Selection} from "@react-types/shared";
 
 
 interface FilterTagsProps {
+    selectedFilterTags: Selection;
     setSelectedFilterTags: (selectedFilterTags: Selection) => void;
+    disableFilterTags: boolean;
 }
 
 
-export function FilterTags({setSelectedFilterTags}: FilterTagsProps) {
+export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFilterTags}: FilterTagsProps) {
 
     return (
         <TagGroup aria-label="Search Tags"
                   selectionMode="multiple"
+                  selectedKeys={selectedFilterTags}
                   onSelectionChange={setSelectedFilterTags}
+                  disabledKeys={disableFilterTags? ["employee", "office"] : []}
         >
             <TagList
                 items={
@@ -21,13 +25,13 @@ export function FilterTags({setSelectedFilterTags}: FilterTagsProps) {
                             id: "employee",
                             textValue: "Employees",
                             size: "medium",
-                            color: "yellow",
+                            color: "green",
                         },
                         {
                             id: "office",
                             textValue: "Offices",
                             size: "medium",
-                            color: "green",
+                            color: "red",
                         },
                     ]}
             >

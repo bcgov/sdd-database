@@ -20,9 +20,10 @@ export default function Home() {
 
     const {
         searchResults,
-        selectedSearchResult,
         selectedFilterTags,
         setSelectedFilterTags,
+        disableFilterTags,
+        selectedSearchResult,
         alert,
         setAlert,
         isSelectedSearchResultEditModalOpen,
@@ -37,7 +38,7 @@ export default function Home() {
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
-        getAllOffices,
+        activateAssignMode
     } = useEntityActions()
 
     return (
@@ -48,6 +49,7 @@ export default function Home() {
                 searchResults={searchResults}
                 selectedFilterTags={selectedFilterTags}
                 setSelectedFilterTags={setSelectedFilterTags}
+                disableFilterTags={disableFilterTags}
                 userHasSearchedOnce={userHasSearchedOnce}
                 searchResultClickHandler={openSearchResultEditModal}
                 handleSearch={handleSearch}
@@ -78,7 +80,7 @@ export default function Home() {
                          triggerButtonText="Add New Employee"
                          modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
-                              assignOffice={getAllOffices}
+                              activateAssignMode={activateAssignMode}
                               onClose={() => setIsAddNewEmployeeModalOpen(false)}/>
             </ModalDialog>
 

@@ -14,6 +14,7 @@ interface SearchProps {
     searchResults: Entity[];
     selectedFilterTags: Selection;
     setSelectedFilterTags: (selectedFilterTags: Selection) => void;
+    disableFilterTags: boolean;
     userHasSearchedOnce: () => boolean;
     searchResultClickHandler: (item: Entity) => void;
     handleSearch: (formData: FormData) => Promise<void>;
@@ -23,6 +24,7 @@ export function Search({
                            searchResults,
                            selectedFilterTags,
                            setSelectedFilterTags,
+                           disableFilterTags,
                            userHasSearchedOnce,
                            searchResultClickHandler,
                            handleSearch
@@ -69,13 +71,15 @@ export function Search({
         return (
             <>
                 {/* Search Filters */}
-                <FilterTags setSelectedFilterTags={setSelectedFilterTags}></FilterTags>
+                <FilterTags selectedFilterTags={selectedFilterTags}
+                            setSelectedFilterTags={setSelectedFilterTags}
+                            disableFilterTags={disableFilterTags}></FilterTags>
 
                 {/* Search Results */}
                 {
                     filteredSearchResults.length === 0 ?
-                    <p style = {{padding: "1rem"}}>No filtered search results found</p> :
-                    displaySearchResults()
+                        <p style={{padding: "1rem"}}>No filtered search results found</p> :
+                        displaySearchResults()
                 }
             </>
         )
@@ -85,7 +89,7 @@ export function Search({
 
         if (searchResults.length === 0) {
 
-            return userHasSearchedOnce() ? <p style = {{padding: "1rem"}}>No results found</p> : null
+            return userHasSearchedOnce() ? <p style={{padding: "1rem"}}>No results found</p> : null
 
         } else {
             return displayFiltersAndSearchResults()
@@ -96,7 +100,7 @@ export function Search({
         <>
             {/* Search Bar */}
             <Form action={handleSearch}>
-                <TextField type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
+                <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
                 <Button type="submit">Search</Button>
             </Form>
 

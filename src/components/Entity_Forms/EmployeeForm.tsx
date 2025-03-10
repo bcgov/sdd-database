@@ -14,20 +14,13 @@ interface EmployeeFormProps {
     onSubmit: (formData: FormData) => void;
     // Optional: Passed only in edit mode
     employee?: Employee;
-    assignOffice?: () => Promise<void>;
+    activateAssignMode?: () => Promise<void>;
     onClose: () => void;
     onDelete?: () => void;
 }
 
 
-export function EmployeeForm({onSubmit, employee, assignOffice, onClose, onDelete}: EmployeeFormProps) {
-
-    const openAssignMode = () => {
-        if(assignOffice) {
-            onClose();
-            assignOffice();
-        }
-    }
+export function EmployeeForm({onSubmit, employee, activateAssignMode, onClose, onDelete}: EmployeeFormProps) {
 
     return (
         <Form action={onSubmit}
@@ -72,7 +65,7 @@ export function EmployeeForm({onSubmit, employee, assignOffice, onClose, onDelet
                 <Accordion label="Office Details" id="officeDetails">
                     <TextField label="Office Number" name="officeNumber" isRequired/>
                     <Button variant="secondary"
-                            onPress={openAssignMode}>Assign Office
+                            onPress={activateAssignMode}>Assign Office
                     </Button>
                 </Accordion>
 

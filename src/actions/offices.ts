@@ -3,7 +3,7 @@
 import {getOfficesByFilter, updateOffice} from "@/prisma-db";
 import {Entity} from "@/types/Entity";
 
-export async function searchOfficesAction(query: string = "") {
+export async function searchOfficesAction(query?: string) {
     const officeSearchResults = await getOfficesByFilter(query);
 
     // Attaching the discriminant 'type'

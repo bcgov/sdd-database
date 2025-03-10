@@ -23,7 +23,10 @@ interface Alert {
 
 export function useEntityActions() {
     const [searchPhrase, setSearchPhrase] = useState<string>();
+
     const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
+    const [disableFilterTags, setDisableFilterTags] = useState(false);
+
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
@@ -41,16 +44,10 @@ export function useEntityActions() {
         await runSearchAll(query);
     }
 
-    const runSearchAll = async (query: string) => {
+    const runSearchAll = async (query?: string) => {
         // create local variable to avoid setState timing issue
         const results = await searchAllAction(query);
         setSearchResults(results);
-    }
-
-    const rerunSearch = async () => {
-        if(searchPhrase !== undefined) {
-            await runSearchAll(searchPhrase);
-        }
     }
 
     const openSearchResultEditModal = (item: Entity) => {
@@ -58,9 +55,19 @@ export function useEntityActions() {
         setIsSelectedSearchResultEditModalOpen(true);
     }
 
+    const activateAssignMode = async () => {
+        setIsAddNewEmployeeModalOpen(false)
+
+        // get all offices
+        const officeSearchResults = await searchOfficesAction()
+        setSearchResults(officeSearchResults)
+
+        setSelectedFilterTags(new Set(["office"]))
+        setDisableFilterTags(true);
+    }
+
     const getAllOffices = async () => {
         const officeSearchResults = await searchOfficesAction()
-
         setSearchResults(officeSearchResults)
     }
 
@@ -68,11 +75,11 @@ export function useEntityActions() {
         return {
             first_name: formData.get("firstName") as string,
             // converting empty middle name to null for clarity in database
-            middle_name: formData.get("middleName") as string || null,
+            middle_name: formData.get("middleName") as string,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
             office_number: formData.get("officeNumber") as string,
-            notes: formData.get("notes") as string || null,
+            notes: formData.get("notes") as string,
         }
     }
 
@@ -110,8 +117,9 @@ export function useEntityActions() {
 
             await updateEmployeeAction(updatedEmployee);
 
-            // We update previous search results just in case an employee is deleted
-            rerunSearch();
+            // We update previous search results just in case anything in the search result card title changes for
+            // this specific item
+            runSearchAll(searchPhrase);
         }
     }
 
@@ -138,8 +146,8 @@ export function useEntityActions() {
         if (selectedSearchResult?.type === "employee") {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
 
-            // We update previous search results just in case an employee is deleted
-            rerunSearch();
+            // We update previous search results in case an employee is deleted
+            runSearchAll(searchPhrase);
 
             setIsDeleteAlertDialogOpen(false);
             setIsSelectedSearchResultEditModalOpen(false);
@@ -153,6 +161,8 @@ export function useEntityActions() {
         const newEmployee: Employee = parseEmployeeFormData(formData);
 
         const result = await addNewEmployeeAction(newEmployee);
+
+        runSearchAll(searchPhrase);
 
         setIsAddNewEmployeeModalOpen(false);
 
@@ -169,9 +179,10 @@ export function useEntityActions() {
 
     return {
         searchResults,
-        selectedSearchResult,
         selectedFilterTags,
         setSelectedFilterTags,
+        disableFilterTags,
+        selectedSearchResult,
         alert,
         setAlert,
         isSelectedSearchResultEditModalOpen,
@@ -186,6 +197,6 @@ export function useEntityActions() {
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
-        getAllOffices
+        activateAssignMode
     }
 }
