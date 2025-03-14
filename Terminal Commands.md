@@ -83,6 +83,14 @@ oc apply -f <filepath of the updated yaml file>
 
 ## Prisma
 
+### Prisma Studio
+
+```shell
+npx prisma studio
+```
+
+### Schema Update
+
 Everytime, the `schema.prisma` file is modified, run the below command to
 
 1. create a new migration file

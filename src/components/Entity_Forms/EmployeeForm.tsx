@@ -7,6 +7,7 @@ import {
     TextArea,
     TextField
 } from "@bcgov/design-system-react-components";
+
 import {Employee} from "@prisma/client";
 
 
@@ -63,7 +64,7 @@ export function EmployeeForm({onSubmit, employee, activateAssignMode, onClose, o
                 </Accordion>
 
                 <Accordion label="Office Details" id="officeDetails">
-                    <TextField label="Office Number" name="officeNumber" isRequired/>
+                    <TextField label="Office Number" name="officeNumber" isRequired defaultValue={employee?.office_number}/>
                     <Button variant="secondary"
                             onPress={activateAssignMode}>Assign Office
                     </Button>

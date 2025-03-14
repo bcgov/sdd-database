@@ -23,6 +23,7 @@ export function DeleteAlertDialog({employee, isOpen, setIsOpen, onDelete}: Delet
                              title={`Are you sure you want to delete this employee '${getEmployeeFullName(employee)}'?`}
                              buttons={[
                                  <Button key="alert-dialog-button-1"
+                                         type="submit"
                                          danger onPress={onDelete}>Delete</Button>,
                                  <Button key="alert-dialog-button-2"
                                          variant="secondary"
