@@ -22,7 +22,7 @@ export default function Home() {
         searchResults,
         selectedFilterTags,
         setSelectedFilterTags,
-        disableFilterTags,
+        assignMode,
         selectedSearchResult,
         alert,
         setAlert,
@@ -49,7 +49,7 @@ export default function Home() {
                 searchResults={searchResults}
                 selectedFilterTags={selectedFilterTags}
                 setSelectedFilterTags={setSelectedFilterTags}
-                disableFilterTags={disableFilterTags}
+                disableFilterTags={assignMode}
                 userHasSearchedOnce={userHasSearchedOnce}
                 searchResultClickHandler={openSearchResultEditModal}
                 handleSearch={handleSearch}

@@ -2,9 +2,9 @@ import type {Selection} from "@react-types/shared"
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
-import {Entity} from "@/types/Entity";
-
 import {Button, Form, TextField} from "@bcgov/design-system-react-components";
+
+import {Entity} from "@/types/Entity";
 
 import {SearchResult} from "@/components/Search/SearchResult";
 import {FilterTags} from "@/components/Search/FilterTags";

@@ -14,6 +14,7 @@ import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
 import {searchAllAction} from "@/actions/search"
 
 import {getEmployeeFullName} from "@/utils";
+import {flushSync} from "react-dom";
 
 interface Alert {
     variant: "success" | "danger";
@@ -25,7 +26,6 @@ export function useEntityActions() {
     const [searchPhrase, setSearchPhrase] = useState<string>();
 
     const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
-    const [disableFilterTags, setDisableFilterTags] = useState(false);
 
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
@@ -34,6 +34,8 @@ export function useEntityActions() {
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
 
+    const [assignMode, setAssignMode] = useState(false);
+
     const [alert, setAlert] = useState<Alert>();
 
     const userHasSearchedOnce = () => searchPhrase !== undefined;
@@ -41,12 +43,20 @@ export function useEntityActions() {
     const handleSearch = async (formData: FormData) => {
         const query = formData.get("search") as string;
         setSearchPhrase(query);
-        await runSearchAll(query);
+
+        await runSearch(query);
     }
 
-    const runSearchAll = async (query?: string) => {
-        // create local variable to avoid setState timing issue
-        const results = await searchAllAction(query);
+    const runSearch = async (query?: string, searchOnlyOffices?: boolean) => {
+
+        let results: Entity[] = [];
+
+        if (searchOnlyOffices || assignMode) {
+            results = await searchOfficesAction(query);
+        } else {
+            results = await searchAllAction(query);
+        }
+
         setSearchResults(results);
     }
 
@@ -56,14 +66,16 @@ export function useEntityActions() {
     }
 
     const activateAssignMode = async () => {
-        setIsAddNewEmployeeModalOpen(false)
+
+        setAssignMode(true);
 
         // get all offices
-        const officeSearchResults = await searchOfficesAction()
-        setSearchResults(officeSearchResults)
+        // passing state as a parameter since setStates are async
+        await runSearch(undefined, true)
 
         setSelectedFilterTags(new Set(["office"]))
-        setDisableFilterTags(true);
+
+        setIsAddNewEmployeeModalOpen(false)
     }
 
     const getAllOffices = async () => {
@@ -119,7 +131,7 @@ export function useEntityActions() {
 
             // We update previous search results just in case anything in the search result card title changes for
             // this specific item
-            runSearchAll(searchPhrase);
+            runSearch(searchPhrase);
         }
     }
 
@@ -147,7 +159,7 @@ export function useEntityActions() {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
 
             // We update previous search results in case an employee is deleted
-            runSearchAll(searchPhrase);
+            runSearch(searchPhrase);
 
             setIsDeleteAlertDialogOpen(false);
             setIsSelectedSearchResultEditModalOpen(false);
@@ -162,7 +174,7 @@ export function useEntityActions() {
 
         const result = await addNewEmployeeAction(newEmployee);
 
-        runSearchAll(searchPhrase);
+        runSearch(searchPhrase);
 
         setIsAddNewEmployeeModalOpen(false);
 
@@ -181,7 +193,7 @@ export function useEntityActions() {
         searchResults,
         selectedFilterTags,
         setSelectedFilterTags,
-        disableFilterTags,
+        assignMode,
         selectedSearchResult,
         alert,
         setAlert,
