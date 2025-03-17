@@ -6,8 +6,8 @@ import {Button, Form, TextField} from "@bcgov/design-system-react-components";
 
 import {Entity} from "@/types/Entity";
 
-import {SearchResult} from "@/components/Search/SearchResult";
 import {FilterTags} from "@/components/Search/FilterTags";
+import {SearchResultsList} from "@/components/Search/SearchResultsList";
 
 
 interface SearchProps {
@@ -39,35 +39,6 @@ export function Search({
         return selectedFilterTags.has(item.type)
     })
 
-    const getSearchResultKey = (item: Entity) => {
-        // Determine a unique key based on the discriminant property
-        let key: string;
-
-        if (item.type === "employee") {
-            key = item.employee_id;
-        } else {
-            key = item.office_number;
-        }
-
-        return key
-    }
-
-    const displaySearchResults = () => {
-        return (
-            <>
-                {
-                    filteredSearchResults.map(item =>
-                        <SearchResult key={getSearchResultKey(item)}
-                                      item={item}
-                                      searchResultClickHandler={searchResultClickHandler}
-                                      assignMode={assignMode}>
-                        </SearchResult>
-                    )
-                }
-            </>
-        )
-    }
-
     const displayFiltersAndSearchResults = () => {
         return (
             <>
@@ -76,12 +47,11 @@ export function Search({
                             setSelectedFilterTags={setSelectedFilterTags}
                             disableFilterTags={assignMode}></FilterTags>
 
-                {/* Search Results */}
-                {
-                    filteredSearchResults.length === 0 ?
-                        <p style={{padding: "1rem"}}>No filtered search results found</p> :
-                        displaySearchResults()
-                }
+                {/* (Filtered) Search Results List */}
+                <SearchResultsList searchResults={filteredSearchResults}
+                                   searchResultClickHandler={searchResultClickHandler}
+                                   assignMode={assignMode}>
+                </SearchResultsList>
             </>
         )
     }
