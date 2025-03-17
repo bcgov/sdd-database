@@ -78,6 +78,7 @@ export default function Home() {
             <ModalDialog isOpen={isAddNewEmployeeModalOpen}
                          setIsOpen={setIsAddNewEmployeeModalOpen}
                          triggerButtonText="Add New Employee"
+                         disableTriggerButton={assignMode}
                          modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
                               activateAssignMode={activateAssignMode}
