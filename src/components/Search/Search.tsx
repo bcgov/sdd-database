@@ -100,7 +100,7 @@ export function Search({
     return (
         <>
             {/* Search Bar */}
-            <Form action={handleSearch}>
+            <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
                 <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
                 <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
             </Form>

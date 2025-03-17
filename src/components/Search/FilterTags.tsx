@@ -17,6 +17,7 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                   selectedKeys={selectedFilterTags}
                   onSelectionChange={setSelectedFilterTags}
                   disabledKeys={disableFilterTags? ["employee", "office"] : []}
+                  style={{margin: "1rem"}}
         >
             <TagList
                 items={
