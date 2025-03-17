@@ -14,7 +14,7 @@ import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
 import {searchAllAction} from "@/actions/search"
 
 import {getEmployeeFullName} from "@/utils";
-import {flushSync} from "react-dom";
+
 
 interface Alert {
     variant: "success" | "danger";
@@ -76,11 +76,6 @@ export function useEntityActions() {
         setSelectedFilterTags(new Set(["office"]))
 
         setIsAddNewEmployeeModalOpen(false)
-    }
-
-    const getAllOffices = async () => {
-        const officeSearchResults = await searchOfficesAction()
-        setSearchResults(officeSearchResults)
     }
 
     const parseEmployeeFormData = (formData: FormData) => {

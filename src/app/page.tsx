@@ -49,7 +49,7 @@ export default function Home() {
                 searchResults={searchResults}
                 selectedFilterTags={selectedFilterTags}
                 setSelectedFilterTags={setSelectedFilterTags}
-                disableFilterTags={assignMode}
+                assignMode={assignMode}
                 userHasSearchedOnce={userHasSearchedOnce}
                 searchResultClickHandler={openSearchResultEditModal}
                 handleSearch={handleSearch}
@@ -65,7 +65,8 @@ export default function Home() {
                         onDelete={() => setIsDeleteAlertDialogOpen(true)}
                     />
 
-                    {selectedSearchResult.type === "employee" &&
+                    {
+                        selectedSearchResult.type === "employee" &&
                         <DeleteAlertDialog
                             employee={selectedSearchResult}
                             isOpen={isDeleteAlertDialogOpen}

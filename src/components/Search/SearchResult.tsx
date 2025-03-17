@@ -1,15 +1,19 @@
-import {Box, Card, CardActionArea, CardContent, Typography} from "@mui/material"
+import {Box, Card, CardActionArea, CardActions, CardContent} from "@mui/material"
+
+import {Button, Text} from "@bcgov/design-system-react-components";
 
 import {Entity} from "@/types/Entity";
 
 import {getEmployeeFullName} from "@/utils";
 
+
 interface SearchResultProps {
     item: Entity;
     searchResultClickHandler: (item: Entity) => void;
+    assignMode: boolean;
 }
 
-export function SearchResult({item, searchResultClickHandler}: SearchResultProps) {
+export function SearchResult({item, searchResultClickHandler, assignMode}: SearchResultProps) {
 
     function getSearchResultCardTitle() {
 
@@ -26,12 +30,21 @@ export function SearchResult({item, searchResultClickHandler}: SearchResultProps
 
     return (
         <Box>
-            <Card elevation={3} sx={{margin: "15px", cursor: "pointer"}}>
-                <CardActionArea onClick={() => searchResultClickHandler(item)}>
+            <Card elevation={3} sx={{margin: "15px", display: "flex"}}>
+
+                <CardActionArea onClick={assignMode ? undefined : () => searchResultClickHandler(item)}
+                                sx={{cursor: "pointer"}}>
                     <CardContent>
-                        <Typography variant="h6">{getSearchResultCardTitle()}</Typography>
+                        <Text size="large">{getSearchResultCardTitle()}</Text>
                     </CardContent>
                 </CardActionArea>
+
+                {
+                    assignMode &&
+                    <CardActions>
+                        <Button>Assign</Button>
+                    </CardActions>
+                }
             </Card>
         </Box>
     )

@@ -14,7 +14,7 @@ interface SearchProps {
     searchResults: Entity[];
     selectedFilterTags: Selection;
     setSelectedFilterTags: (selectedFilterTags: Selection) => void;
-    disableFilterTags: boolean;
+    assignMode: boolean;
     userHasSearchedOnce: () => boolean;
     searchResultClickHandler: (item: Entity) => void;
     handleSearch: (formData: FormData) => Promise<void>;
@@ -24,7 +24,7 @@ export function Search({
                            searchResults,
                            selectedFilterTags,
                            setSelectedFilterTags,
-                           disableFilterTags,
+                           assignMode,
                            userHasSearchedOnce,
                            searchResultClickHandler,
                            handleSearch
@@ -59,7 +59,8 @@ export function Search({
                     filteredSearchResults.map(item =>
                         <SearchResult key={getSearchResultKey(item)}
                                       item={item}
-                                      searchResultClickHandler={searchResultClickHandler}>
+                                      searchResultClickHandler={searchResultClickHandler}
+                                      assignMode={assignMode}>
                         </SearchResult>
                     )
                 }
@@ -73,7 +74,7 @@ export function Search({
                 {/* Search Filters */}
                 <FilterTags selectedFilterTags={selectedFilterTags}
                             setSelectedFilterTags={setSelectedFilterTags}
-                            disableFilterTags={disableFilterTags}></FilterTags>
+                            disableFilterTags={assignMode}></FilterTags>
 
                 {/* Search Results */}
                 {
@@ -101,7 +102,7 @@ export function Search({
             {/* Search Bar */}
             <Form action={handleSearch}>
                 <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
-                <Button type="submit">Search</Button>
+                <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
             </Form>
 
             {displaySearchBody()}
