@@ -192,6 +192,8 @@ export function useEntityActions() {
 
         setIsAddNewEmployeeModalOpen(false)
 
+        setDraftEmployee(undefined)
+
         if (result.success) {
             addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
         } else {

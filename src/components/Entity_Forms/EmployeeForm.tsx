@@ -84,14 +84,16 @@ export function EmployeeForm({
                 </Accordion>
 
                 <Accordion label="Office Details" id="officeDetails">
-                    <TextField label="Office Number"
-                               name="officeNumber"
-                               isRequired
-                               isReadOnly
-                               defaultValue={employee?.office_number}/>
-                    <Button variant="secondary"
-                            onPress={handleAssignOffice}
-                    >Assign Office</Button>
+                    <div>
+                        <TextField label="Office Number"
+                                   name="officeNumber"
+                                   isRequired
+                                   isReadOnly
+                                   defaultValue={employee?.office_number}/>
+                        <Button variant="secondary"
+                                onPress={handleAssignOffice}
+                        >{employee?.office_number ? "Update" : "Assign"} Office</Button>
+                    </div>
                 </Accordion>
 
             </AccordionGroup>

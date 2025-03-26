@@ -22,10 +22,11 @@ export async function getEmployeesByFilter(query?: string) {
     return prisma.employee.findMany({
         where: {
             OR: [
+                {employee_id: {contains: query}},
                 {first_name: {contains: query, mode: 'insensitive'}},
                 {middle_name: {contains: query, mode: 'insensitive'}},
                 {last_name: {contains: query, mode: 'insensitive'}},
-                {employee_id: {contains: query}},
+                {office_number: {contains: query}},
                 {notes: {contains: query, mode: 'insensitive'}},
             ]
         }
