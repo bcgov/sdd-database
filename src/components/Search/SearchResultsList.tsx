@@ -6,6 +6,7 @@ interface SearchResultsListProps {
     searchResults: Entity[]
     searchResultClickHandler: (item: Entity) => void
     assignMode: boolean
+    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
 }
 
 const getSearchResultKey = (item: Entity) => {
@@ -34,7 +35,12 @@ const getSearchResultTitle = (item: Entity) => {
     return title
 }
 
-export function SearchResultsList({searchResults, searchResultClickHandler, assignMode}: SearchResultsListProps) {
+export function SearchResultsList({
+                                      searchResults,
+                                      searchResultClickHandler,
+                                      assignMode,
+                                      assignOfficeClickHandler
+                                  }: SearchResultsListProps) {
     return (
         searchResults.length === 0 ?
 
@@ -44,7 +50,8 @@ export function SearchResultsList({searchResults, searchResultClickHandler, assi
                 <SearchResultItem key={getSearchResultKey(item)}
                                   title={getSearchResultTitle(item)}
                                   searchResultClickHandler={() => searchResultClickHandler(item)}
-                                  assignMode={assignMode}>
+                                  assignMode={assignMode}
+                                  assignOfficeClickHandler={() => assignOfficeClickHandler(item.office_number)}>
                 </SearchResultItem>
             )
     )

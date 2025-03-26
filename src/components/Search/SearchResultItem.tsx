@@ -4,18 +4,24 @@ import {Button, Text} from "@bcgov/design-system-react-components";
 
 
 interface SearchResultItemProps {
-    title: string;
-    searchResultClickHandler: () => void;
-    assignMode: boolean;
+    title: string
+    searchResultClickHandler: () => void
+    assignMode: boolean
+    assignOfficeClickHandler: () => void
 }
 
-export function SearchResultItem({title, searchResultClickHandler, assignMode}: SearchResultItemProps) {
+export function SearchResultItem({
+                                     title,
+                                     searchResultClickHandler,
+                                     assignMode,
+                                     assignOfficeClickHandler
+                                 }: SearchResultItemProps) {
     return (
         <Box>
             <Card elevation={3} sx={{margin: "15px", display: "flex"}}>
 
                 <CardActionArea onClick={assignMode ? undefined : searchResultClickHandler}
-                                sx={{cursor: "pointer"}}>
+                                sx={{cursor: assignMode ? "default" : "pointer"}}>
                     <CardContent>
                         <Text size="large">{title}</Text>
                     </CardContent>
@@ -24,7 +30,7 @@ export function SearchResultItem({title, searchResultClickHandler, assignMode}: 
                 {
                     assignMode &&
                     <CardActions>
-                        <Button>Assign</Button>
+                        <Button onPress={assignOfficeClickHandler}>Assign</Button>
                     </CardActions>
                 }
             </Card>

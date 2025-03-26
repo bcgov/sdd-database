@@ -11,13 +11,14 @@ import {SearchResultsList} from "@/components/Search/SearchResultsList";
 
 
 interface SearchProps {
-    searchResults: Entity[];
-    selectedFilterTags: Selection;
-    setSelectedFilterTags: (selectedFilterTags: Selection) => void;
-    assignMode: boolean;
-    userHasSearchedOnce: () => boolean;
-    searchResultClickHandler: (item: Entity) => void;
-    handleSearch: (formData: FormData) => Promise<void>;
+    searchResults: Entity[]
+    selectedFilterTags: Selection
+    setSelectedFilterTags: (selectedFilterTags: Selection) => void
+    assignMode: boolean
+    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
+    userHasSearchedOnce: () => boolean
+    searchResultClickHandler: (item: Entity) => void
+    handleSearch: (formData: FormData) => Promise<void>
 }
 
 export function Search({
@@ -25,6 +26,7 @@ export function Search({
                            selectedFilterTags,
                            setSelectedFilterTags,
                            assignMode,
+                           assignOfficeClickHandler,
                            userHasSearchedOnce,
                            searchResultClickHandler,
                            handleSearch
@@ -50,7 +52,8 @@ export function Search({
                 {/* (Filtered) Search Results List */}
                 <SearchResultsList searchResults={filteredSearchResults}
                                    searchResultClickHandler={searchResultClickHandler}
-                                   assignMode={assignMode}>
+                                   assignMode={assignMode}
+                                   assignOfficeClickHandler={assignOfficeClickHandler}>
                 </SearchResultsList>
             </>
         )

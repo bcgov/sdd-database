@@ -8,14 +8,16 @@ import {Entity} from "@/types/Entity";
 
 interface EditModalProps {
     item: Entity
+    activateAssignMode: (formData: FormData) => Promise<void>
     isOpen: boolean
-    setIsOpen: (isOpen: boolean) => void,
-    onSubmit: (formData: FormData) => void,
-    onDelete: () => void,
+    setIsOpen: (isOpen: boolean) => void
+    onSubmit: (formData: FormData) => void
+    onDelete: () => void
 }
 
 export function EditModal({
                               item,
+                              activateAssignMode,
                               isOpen,
                               setIsOpen,
                               onSubmit,
@@ -30,19 +32,23 @@ export function EditModal({
     const getModalBody = () => {
         let bodyComponent = null;
 
+        const onClose = () => {
+            setIsOpen(false);
+        }
+
         if (item?.type === "employee") {
 
             bodyComponent = <EmployeeForm onSubmit={onSubmit}
                                           employee={item}
-                                          onClose={() => setIsOpen(false)}
-                                          onDelete={onDelete}
-            />
+                                          activateAssignMode={activateAssignMode}
+                                          onClose={onClose}
+                                          onDelete={onDelete}/>
 
         } else if (item?.type === "office") {
 
             bodyComponent = <OfficeForm onSubmit={onSubmit}
                                         office={item}
-                                        onClose={() => setIsOpen(false)}/>
+                                        onClose={onClose}/>
         }
 
         return bodyComponent;

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+    Footer,
+    Header,
+    InlineAlert,
+} from "@bcgov/design-system-react-components"
 
 import {Search} from "@/components/Search/Search";
 import {EditModal} from "@/components/EditModal";
@@ -9,12 +14,6 @@ import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 
 import {useEntityActions} from "@/hooks/useEntityActions";
 
-import {
-    Footer,
-    Header,
-    InlineAlert,
-} from "@bcgov/design-system-react-components"
-
 
 export default function Home() {
 
@@ -23,6 +22,7 @@ export default function Home() {
         selectedFilterTags,
         setSelectedFilterTags,
         assignMode,
+        draftEmployee,
         selectedSearchResult,
         alert,
         setAlert,
@@ -38,7 +38,8 @@ export default function Home() {
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
-        activateAssignMode
+        activateAssignMode,
+        assignOfficeClickHandler
     } = useEntityActions()
 
     return (
@@ -49,16 +50,18 @@ export default function Home() {
                 searchResults={searchResults}
                 selectedFilterTags={selectedFilterTags}
                 setSelectedFilterTags={setSelectedFilterTags}
-                assignMode={assignMode}
+                handleSearch={handleSearch}
                 userHasSearchedOnce={userHasSearchedOnce}
                 searchResultClickHandler={openSearchResultEditModal}
-                handleSearch={handleSearch}
+                assignMode={assignMode}
+                assignOfficeClickHandler={assignOfficeClickHandler}
             />
 
             {selectedSearchResult &&
                 <>
                     <EditModal
                         item={selectedSearchResult}
+                        activateAssignMode={activateAssignMode}
                         isOpen={isSelectedSearchResultEditModalOpen}
                         setIsOpen={setIsSelectedSearchResultEditModalOpen}
                         onSubmit={handleEdit}
@@ -82,6 +85,7 @@ export default function Home() {
                          disableTriggerButton={assignMode}
                          modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
+                              employee={draftEmployee}
                               activateAssignMode={activateAssignMode}
                               onClose={() => setIsAddNewEmployeeModalOpen(false)}/>
             </ModalDialog>

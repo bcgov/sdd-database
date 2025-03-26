@@ -1,3 +1,5 @@
+import {PressEvent} from "@react-types/shared";
+
 import {
     Accordion,
     AccordionGroup,
@@ -12,16 +14,33 @@ import {Employee} from "@prisma/client";
 
 
 interface EmployeeFormProps {
-    onSubmit: (formData: FormData) => void;
-    // Optional: Passed only in edit mode
-    employee?: Employee;
-    activateAssignMode?: () => Promise<void>;
-    onClose: () => void;
-    onDelete?: () => void;
+    onSubmit: (formData: FormData) => void
+    employee: Employee | undefined;
+    activateAssignMode: (formData: FormData) => Promise<void>
+    onClose: () => void
+    // optional prop only passed in edit mode
+    onDelete?: () => void
 }
 
+export function EmployeeForm({
+                                 onSubmit,
+                                 employee,
+                                 activateAssignMode,
+                                 onClose,
+                                 onDelete
+                             }: EmployeeFormProps) {
 
-export function EmployeeForm({onSubmit, employee, activateAssignMode, onClose, onDelete}: EmployeeFormProps) {
+    const handleAssignOffice = async (e: PressEvent) => {
+
+        // Find the nearest form element
+        const formElement = e.target.closest('form')
+
+        if (formElement) {
+            await activateAssignMode(new FormData(formElement))
+        }
+    }
+
+    const isEditMode = !!onDelete;
 
     return (
         <Form action={onSubmit}
@@ -55,7 +74,8 @@ export function EmployeeForm({onSubmit, employee, activateAssignMode, onClose, o
 
                         <TextField label="Employee ID"
                                    name="employeeId"
-                                   isRequired isReadOnly={!!employee} // lock in edit mode
+                                   isRequired
+                                   isReadOnly={isEditMode} // lock the field in edit mode
                                    defaultValue={employee?.employee_id}/>
 
                         <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
@@ -64,24 +84,28 @@ export function EmployeeForm({onSubmit, employee, activateAssignMode, onClose, o
                 </Accordion>
 
                 <Accordion label="Office Details" id="officeDetails">
-                    <TextField label="Office Number" name="officeNumber" isRequired defaultValue={employee?.office_number}/>
+                    <TextField label="Office Number"
+                               name="officeNumber"
+                               isRequired
+                               isReadOnly
+                               defaultValue={employee?.office_number}/>
                     <Button variant="secondary"
-                            onPress={activateAssignMode}>Assign Office
-                    </Button>
+                            onPress={handleAssignOffice}
+                    >Assign Office</Button>
                 </Accordion>
 
             </AccordionGroup>
 
             {/*<div style={{backgroundColor: "gray"}}>*/}
             <ButtonGroup>
-                <Button type="submit">{employee ? "Save" : "Create"}</Button>
+                <Button type="submit">{isEditMode ? "Save" : "Create"}</Button>
                 <Button variant="secondary"
                         onPress={onClose}>Cancel</Button>
             </ButtonGroup>
             {/*</div>*/}
 
             {/* Only render the delete button in the edit modal */}
-            {employee ? (
+            {isEditMode ? (
                 <ButtonGroup alignment="end">
                     <Button variant="secondary"
                             danger

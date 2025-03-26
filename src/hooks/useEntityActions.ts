@@ -35,6 +35,7 @@ export function useEntityActions() {
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
 
     const [assignMode, setAssignMode] = useState(false);
+    const [draftEmployee, setDraftEmployee] = useState<Employee>();
 
     const [alert, setAlert] = useState<Alert>();
 
@@ -45,6 +46,10 @@ export function useEntityActions() {
         setSearchPhrase(query);
 
         await runSearch(query);
+    }
+
+    const refreshSearchResults = () => {
+        runSearch(searchPhrase)
     }
 
     const runSearch = async (query?: string, searchOnlyOffices?: boolean) => {
@@ -65,7 +70,9 @@ export function useEntityActions() {
         setIsSelectedSearchResultEditModalOpen(true);
     }
 
-    const activateAssignMode = async () => {
+    const activateAssignMode = async (formData: FormData) => {
+
+        setDraftEmployee(parseEmployeeFormData(formData));
 
         setAssignMode(true);
 
@@ -78,10 +85,22 @@ export function useEntityActions() {
         setIsAddNewEmployeeModalOpen(false)
     }
 
-    const parseEmployeeFormData = (formData: FormData) => {
+    const assignOfficeClickHandler = (assignedOfficeNumber: string) => {
+
+        if (draftEmployee) {
+            setDraftEmployee({
+                ...draftEmployee,
+                office_number: assignedOfficeNumber
+            });
+        }
+
+        setAssignMode(false)
+        setIsAddNewEmployeeModalOpen(true)
+    }
+
+    const parseEmployeeFormData = (formData: FormData): Employee => {
         return {
             first_name: formData.get("firstName") as string,
-            // converting empty middle name to null for clarity in database
             middle_name: formData.get("middleName") as string,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
@@ -122,11 +141,11 @@ export function useEntityActions() {
                 employee_id: selectedSearchResult.employee_id
             }
 
-            await updateEmployeeAction(updatedEmployee);
+            await updateEmployeeAction(updatedEmployee)
 
             // We update previous search results just in case anything in the search result card title changes for
             // this specific item
-            runSearch(searchPhrase);
+            refreshSearchResults()
         }
     }
 
@@ -154,10 +173,10 @@ export function useEntityActions() {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
 
             // We update previous search results in case an employee is deleted
-            runSearch(searchPhrase);
+            refreshSearchResults()
 
-            setIsDeleteAlertDialogOpen(false);
-            setIsSelectedSearchResultEditModalOpen(false);
+            setIsDeleteAlertDialogOpen(false)
+            setIsSelectedSearchResultEditModalOpen(false)
 
             addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
         }
@@ -165,13 +184,13 @@ export function useEntityActions() {
 
     const handleAddNewEmployee = async (formData: FormData) => {
 
-        const newEmployee: Employee = parseEmployeeFormData(formData);
+        const newEmployee: Employee = parseEmployeeFormData(formData)
 
-        const result = await addNewEmployeeAction(newEmployee);
+        const result = await addNewEmployeeAction(newEmployee)
 
-        runSearch(searchPhrase);
+        refreshSearchResults()
 
-        setIsAddNewEmployeeModalOpen(false);
+        setIsAddNewEmployeeModalOpen(false)
 
         if (result.success) {
             addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
@@ -189,6 +208,7 @@ export function useEntityActions() {
         selectedFilterTags,
         setSelectedFilterTags,
         assignMode,
+        draftEmployee,
         selectedSearchResult,
         alert,
         setAlert,
@@ -204,6 +224,7 @@ export function useEntityActions() {
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
-        activateAssignMode
+        activateAssignMode,
+        assignOfficeClickHandler
     }
 }
