@@ -16,7 +16,7 @@ export async function addNewEmployee(employee: Employee) {
 }
 
 export async function getEmployeesByFilter(query?: string) {
-    if(!query)
+    if (!query)
         return prisma.employee.findMany()
 
     return prisma.employee.findMany({
@@ -34,7 +34,7 @@ export async function getEmployeesByFilter(query?: string) {
 }
 
 export async function getOfficesByFilter(query?: string) {
-    if(!query)
+    if (!query)
         return prisma.office.findMany()
 
     return prisma.office.findMany({
@@ -52,7 +52,13 @@ export async function getOfficesByFilter(query?: string) {
 export async function updateEmployee(employee: Employee) {
     return prisma.employee.update({
         where: {employee_id: employee.employee_id},
-        data: {first_name: employee.first_name, middle_name: employee.middle_name, last_name: employee.last_name, notes: employee.notes},
+        data: {
+            first_name: employee.first_name,
+            middle_name: employee.middle_name,
+            last_name: employee.last_name,
+            notes: employee.notes,
+            office_number: employee.office_number
+        },
     })
 }
 

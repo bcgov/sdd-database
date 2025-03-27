@@ -22,7 +22,7 @@ export default function Home() {
         selectedFilterTags,
         setSelectedFilterTags,
         assignMode,
-        draftEmployee,
+        draftNewEmployee,
         selectedSearchResult,
         alert,
         setAlert,
@@ -31,13 +31,13 @@ export default function Home() {
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
-        setIsAddNewEmployeeModalOpen,
         openSearchResultEditModal,
         userHasSearchedOnce,
         handleSearch,
         handleEdit,
         handleDelete,
         handleAddNewEmployee,
+        openCloseAddNewEmployeeModal,
         activateAssignMode,
         assignOfficeClickHandler
     } = useEntityActions()
@@ -80,14 +80,14 @@ export default function Home() {
             }
 
             <ModalDialog isOpen={isAddNewEmployeeModalOpen}
-                         setIsOpen={setIsAddNewEmployeeModalOpen}
+                         setIsOpen={openCloseAddNewEmployeeModal}
                          triggerButtonText="Add New Employee"
                          disableTriggerButton={assignMode}
                          modalTitle="Add New Employee">
                 <EmployeeForm onSubmit={handleAddNewEmployee}
-                              employee={draftEmployee}
+                              employee={draftNewEmployee}
                               activateAssignMode={activateAssignMode}
-                              onClose={() => setIsAddNewEmployeeModalOpen(false)}/>
+                              onClose={() => openCloseAddNewEmployeeModal(false)}/>
             </ModalDialog>
 
             {alert && <InlineAlert title={alert.title}
