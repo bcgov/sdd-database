@@ -52,6 +52,20 @@ export async function getOfficesByFilter(query?: string) {
     })
 }
 
+export async function getWorkstationsByFilter(query?: string) {
+    if (!query)
+        return prisma.workstation.findMany()
+
+    return prisma.workstation.findMany({
+        where: {
+            OR: [
+                {asset_tag: {contains: query, mode: 'insensitive'}},
+                {notes: {contains: query, mode: 'insensitive'}},
+            ]
+        }
+    })
+}
+
 export async function updateEmployee(employee: Employee) {
     const {employee_id, ...updatableFields} = employee
 

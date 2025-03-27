@@ -13,10 +13,16 @@ const getSearchResultKey = (item: Entity) => {
     // Determine a unique key based on the discriminant property
     let key: string;
 
-    if (item.type === "employee") {
-        key = item.employee_id;
-    } else {
-        key = item.office_number;
+    switch (item.type) {
+        case "employee":
+            key = item.employee_id;
+            break;
+        case "office":
+            key = item.office_number;
+            break;
+        case "workstation":
+            key = item.asset_tag;
+            break;
     }
 
     return key
@@ -26,10 +32,16 @@ const getSearchResultTitle = (item: Entity) => {
 
     let title = "";
 
-    if (item.type === "employee") {
-        title = `${getEmployeeFullName(item)} (${item.employee_id})`
-    } else {
-        title = `${item.office_name} (${item.office_number})`
+    switch (item.type) {
+        case "employee":
+            title = `${getEmployeeFullName(item)} (${item.employee_id})`
+            break;
+        case "office":
+            title = `${item.office_name} (${item.office_number})`
+            break;
+        case "workstation":
+            title = `Workstation (${item.asset_tag})`
+            break;
     }
 
     return title
@@ -51,7 +63,11 @@ export function SearchResultsList({
                                   title={getSearchResultTitle(item)}
                                   searchResultClickHandler={() => searchResultClickHandler(item)}
                                   assignMode={assignMode}
-                                  assignOfficeClickHandler={() => assignOfficeClickHandler(item.office_number)}>
+                                  assignOfficeClickHandler={() => {
+                                      if (item.type === "office") {
+                                          assignOfficeClickHandler(item.office_number)
+                                      }
+                                  }}>
                 </SearchResultItem>
             )
     )

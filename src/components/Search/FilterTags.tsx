@@ -16,7 +16,7 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                   selectionMode="multiple"
                   selectedKeys={selectedFilterTags}
                   onSelectionChange={setSelectedFilterTags}
-                  disabledKeys={disableFilterTags? ["employee", "office"] : []}
+                  disabledKeys={disableFilterTags? ["employee", "office", "workstation"] : []}
                   style={{margin: "1rem"}}
         >
             <TagList
@@ -33,6 +33,12 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                             textValue: "Offices",
                             size: "medium",
                             color: "red",
+                        },
+                        {
+                            id: "workstation",
+                            textValue: "Workstations",
+                            size: "medium",
+                            color: "yellow",
                         },
                     ]}
             >
