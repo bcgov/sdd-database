@@ -120,7 +120,7 @@ export function useEntityActions() {
             openCloseAddNewEmployeeModal(true)
         } else {
 
-            if (selectedSearchResult) {
+            if (selectedSearchResult && selectedSearchResult.type === "employee") {
 
                 // We are in edit employee modal
                 setSelectedSearchResult({
@@ -136,7 +136,7 @@ export function useEntityActions() {
     const parseEmployeeFormData = (formData: FormData): Employee => {
         return {
             first_name: formData.get("firstName") as string,
-            middle_name: formData.get("middleName") as string,
+            middle_name: formData.get("alternateName") as string,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
             office_number: formData.get("officeNumber") as string,

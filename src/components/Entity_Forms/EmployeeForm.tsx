@@ -63,9 +63,9 @@ export function EmployeeForm({
                                    isRequired
                                    defaultValue={employee?.first_name}/>
 
-                        <TextField label="Middle Name"
-                                   name="middleName"
-                                   defaultValue={employee?.middle_name ?? undefined}></TextField>
+                        <TextField label="Alternate Name"
+                                   name="alternateName"
+                                   defaultValue={employee?.alternate_name ?? undefined}></TextField>
 
                         <TextField label="Last Name"
                                    name="lastName"

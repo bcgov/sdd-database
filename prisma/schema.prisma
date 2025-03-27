@@ -16,7 +16,7 @@ datasource db {
 model Employee {
   employee_id     String  @id
   first_name      String
-  middle_name     String?
+  alternate_name  String?
   last_name       String
   office_number   String
   assigned_office Office  @relation(fields: [office_number], references: [office_number])

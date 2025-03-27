@@ -27,7 +27,7 @@ export async function getEmployeesByFilter(query?: string) {
             OR: [
                 {employee_id: {contains: query}},
                 {first_name: {contains: query, mode: 'insensitive'}},
-                {middle_name: {contains: query, mode: 'insensitive'}},
+                {alternate_name: {contains: query, mode: 'insensitive'}},
                 {last_name: {contains: query, mode: 'insensitive'}},
                 {office_number: {contains: query}},
                 {notes: {contains: query, mode: 'insensitive'}},
