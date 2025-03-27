@@ -30,3 +30,8 @@ model Office {
   notes         String?
   Employee      Employee[]
 }
+
+model Workstation {
+  asset_tag String  @id
+  notes     String?
+}

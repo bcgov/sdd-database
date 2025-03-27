@@ -11,6 +11,7 @@ import {EditModal} from "@/components/EditModal";
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
+import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
 import {useEntityActions} from "@/hooks/useEntityActions";
 
@@ -31,6 +32,8 @@ export default function Home() {
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
+        isAddNewWorkstationModalOpen,
+        setIsAddNewWorkstationModalOpen,
         openSearchResultEditModal,
         userHasSearchedOnce,
         handleSearch,
@@ -38,6 +41,7 @@ export default function Home() {
         handleDelete,
         handleAddNewEmployee,
         openCloseAddNewEmployeeModal,
+        handleAddNewWorkstation,
         activateAssignMode,
         assignOfficeClickHandler
     } = useEntityActions()
@@ -88,6 +92,14 @@ export default function Home() {
                               employee={draftNewEmployee}
                               activateAssignMode={activateAssignMode}
                               onClose={() => openCloseAddNewEmployeeModal(false)}/>
+            </ModalDialog>
+
+            <ModalDialog isOpen={isAddNewWorkstationModalOpen}
+                         setIsOpen={setIsAddNewWorkstationModalOpen}
+                         triggerButtonText="Add New Workstation"
+                         modalTitle="Add New Workstation">
+                <WorkstationForm onSubmit={handleAddNewWorkstation}
+                                 onClose={() => setIsAddNewWorkstationModalOpen(false)}/>
             </ModalDialog>
 
             {alert && <InlineAlert title={alert.title}

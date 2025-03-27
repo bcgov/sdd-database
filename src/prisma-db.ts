@@ -10,6 +10,14 @@ export async function addNewEmployee(employee: Employee) {
     })
 }
 
+export async function addNewWorkstation(workstation: Workstation) {
+    await prisma.workstation.create({
+        data: {
+            ...workstation
+        }
+    })
+}
+
 export async function getEmployeesByFilter(query?: string) {
     if (!query)
         return prisma.employee.findMany()

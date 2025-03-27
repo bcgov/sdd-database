@@ -11,6 +11,7 @@ import {
     updateEmployeeAction
 } from "@/actions/employees";
 import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
+import {addNewWorkstationAction} from "@/actions/workstations";
 import {searchAllAction} from "@/actions/search"
 
 import {getEmployeeFullName} from "@/utils";
@@ -33,6 +34,7 @@ export function useEntityActions() {
     const [isSelectedSearchResultEditModalOpen, setIsSelectedSearchResultEditModalOpen] = useState(false);
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
+    const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
 
     const [assignMode, setAssignMode] = useState(false);
     const [draftNewEmployee, setDraftNewEmployee] = useState<Employee>();
@@ -244,6 +246,23 @@ export function useEntityActions() {
         }
     }
 
+    const handleAddNewWorkstation = async (formData: FormData) => {
+
+        const asset_tag = formData.get("assetTag") as string
+        const notes = formData.get("notes") as string || null
+
+        const newWorkstation = {
+            asset_tag,
+            notes
+        }
+
+        await addNewWorkstationAction(newWorkstation)
+
+        setIsAddNewWorkstationModalOpen(false)
+
+        addSuccessAlert(`New workstatation '${asset_tag}' added!`);
+    }
+
     return {
         searchResults,
         selectedFilterTags,
@@ -259,6 +278,8 @@ export function useEntityActions() {
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
         setIsAddNewEmployeeModalOpen,
+        isAddNewWorkstationModalOpen,
+        setIsAddNewWorkstationModalOpen,
         openSearchResultEditModal,
         userHasSearchedOnce,
         handleSearch,
@@ -266,6 +287,7 @@ export function useEntityActions() {
         handleDelete,
         handleAddNewEmployee,
         openCloseAddNewEmployeeModal,
+        handleAddNewWorkstation,
         activateAssignMode,
         assignOfficeClickHandler
     }
