@@ -1,16 +1,11 @@
-import {PrismaClient, Employee} from "@prisma/client";
+import {PrismaClient, Employee, Workstation} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function addNewEmployee(employee: Employee) {
     await prisma.employee.create({
         data: {
-            employee_id: employee.employee_id,
-            first_name: employee.first_name,
-            middle_name: employee.middle_name,
-            last_name: employee.last_name,
-            office_number: employee.office_number,
-            notes: employee.notes
+            ...employee
         },
     })
 }
@@ -50,15 +45,11 @@ export async function getOfficesByFilter(query?: string) {
 }
 
 export async function updateEmployee(employee: Employee) {
+    const {employee_id, ...updatableFields} = employee
+
     return prisma.employee.update({
-        where: {employee_id: employee.employee_id},
-        data: {
-            first_name: employee.first_name,
-            middle_name: employee.middle_name,
-            last_name: employee.last_name,
-            notes: employee.notes,
-            office_number: employee.office_number
-        },
+        where: {employee_id},
+        data: {...updatableFields},
     })
 }
 
