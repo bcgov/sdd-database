@@ -12,7 +12,7 @@ export default function Updates() {
                 "Added workstations",
                 "Added filtering capability for search results",
                 "Added option to select an office for a employee (through the 'Assign Office' button)",
-                "Added IDIR and Alternate Name fields to the employee table",
+                "Added IDIR and Alternate Name fields from the employee table",
                 "Removed the Middle Name field from the employee table"
 
             ]
