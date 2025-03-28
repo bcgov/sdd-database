@@ -1,7 +1,7 @@
 import {useState} from "react";
 import type {Selection} from "@react-types/shared"
 
-import {Employee} from "@prisma/client";
+import {Employee, Workstation} from "@prisma/client";
 
 import {Entity} from "@/types/Entity";
 
@@ -11,7 +11,7 @@ import {
     updateEmployeeAction
 } from "@/actions/employees";
 import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
-import {addNewWorkstationAction} from "@/actions/workstations";
+import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
 import {searchAllAction} from "@/actions/search"
 
 import {getEmployeeFullName} from "@/utils";
@@ -145,6 +145,13 @@ export function useEntityActions() {
         }
     }
 
+    const parseWorkstationFormData = (formData: FormData): Workstation => {
+        return {
+            asset_tag: formData.get("assetTag") as string,
+            notes: formData.get("notes") as string || null,
+        }
+    }
+
     const addSuccessAlert = (description: string, timeInMs: number = 4500) => {
 
         setAlert({
@@ -179,29 +186,53 @@ export function useEntityActions() {
             }
 
             await updateEmployeeAction(updatedEmployee)
+        }
+    }
 
-            // We update previous search results just in case anything in the search result card title changes for
-            // this specific item
-            refreshSearchResults()
+    const handleEditWorkstation = async (formData: FormData) => {
+        if (selectedSearchResult?.type === "workstation") {
+
+            const updatedWorkstation: Workstation = {
+                ...parseWorkstationFormData(formData),
+                asset_tag: selectedSearchResult.asset_tag,
+            }
+
+            await updateWorkstationAction(updatedWorkstation)
         }
     }
 
     const handleEdit = async (formData: FormData) => {
 
-        let successAlertDescription = ""
+        if (selectedSearchResult) {
 
-        if (selectedSearchResult?.type === "employee") {
-            handleEditEmployee(formData);
-            successAlertDescription = "Employee details updated!"
+            let entityTypeName: string
 
-        } else if (selectedSearchResult?.type === "office") {
-            handleEditOffice(formData);
-            successAlertDescription = "Office details updated!"
+            switch (selectedSearchResult.type) {
+                case "employee":
+                    entityTypeName = "Employee"
+                    await handleEditEmployee(formData);
+                    break
+
+                case "office":
+                    entityTypeName = "Office"
+                    await handleEditOffice(formData);
+                    break
+
+                case "workstation":
+                    entityTypeName = "Workstation"
+                    await handleEditWorkstation(formData);
+                    break
+
+            }
+
+            refreshSearchResults()
+
+            setIsSelectedSearchResultEditModalOpen(false);
+
+            addSuccessAlert(`${entityTypeName} details updated!`);
         }
 
-        setIsSelectedSearchResultEditModalOpen(false);
 
-        addSuccessAlert(successAlertDescription);
     }
 
     const handleDelete = async () => {
@@ -243,26 +274,22 @@ export function useEntityActions() {
     const openCloseAddNewEmployeeModal = (openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
         setIsAddNewEmployeeModalOpen(openModal)
 
-        if(!openModal && clearDraftEditsOnClose){
+        if (!openModal && clearDraftEditsOnClose) {
             setDraftNewEmployee(undefined)
         }
     }
 
     const handleAddNewWorkstation = async (formData: FormData) => {
 
-        const asset_tag = formData.get("assetTag") as string
-        const notes = formData.get("notes") as string || null
-
-        const newWorkstation = {
-            asset_tag,
-            notes
-        }
+        const newWorkstation = parseWorkstationFormData(formData)
 
         await addNewWorkstationAction(newWorkstation)
 
+        refreshSearchResults()
+
         setIsAddNewWorkstationModalOpen(false)
 
-        addSuccessAlert(`New workstatation '${asset_tag}' added!`);
+        addSuccessAlert(`New workstation '${newWorkstation.asset_tag}' added!`);
     }
 
     return {

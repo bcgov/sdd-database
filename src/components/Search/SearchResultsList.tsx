@@ -11,7 +11,7 @@ interface SearchResultsListProps {
 
 const getSearchResultKey = (item: Entity) => {
     // Determine a unique key based on the discriminant property
-    let key: string;
+    let key: string
 
     switch (item.type) {
         case "employee":
@@ -30,7 +30,7 @@ const getSearchResultKey = (item: Entity) => {
 
 const getSearchResultTitle = (item: Entity) => {
 
-    let title = "";
+    let title: string
 
     switch (item.type) {
         case "employee":

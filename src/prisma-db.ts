@@ -87,6 +87,16 @@ export async function updateOffice(office_number: string, notes: string | null) 
     })
 }
 
+export async function updateWorkstation(workstation: Workstation) {
+
+    const {asset_tag, ...updatableFields} = workstation
+
+    return prisma.workstation.update({
+        where: {asset_tag},
+        data: {...updatableFields}
+    })
+}
+
 export async function deleteEmployee(employee_id: string) {
     return prisma.employee.delete({
         where: {employee_id},

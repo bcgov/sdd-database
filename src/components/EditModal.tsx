@@ -5,6 +5,7 @@ import {OfficeForm} from "@/components/Entity_Forms/OfficeForm";
 import {ModalDialog} from "@/components/ModalDialog";
 
 import {Entity} from "@/types/Entity";
+import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
 interface EditModalProps {
     item: Entity
@@ -26,7 +27,20 @@ export function EditModal({
 
     const getModalTitle = () => {
 
-        return `Edit ${item?.type === "employee" ? "Employee" : "Office"}`;
+        let itemTypeName: string;
+
+        switch (item.type) {
+            case "employee":
+                itemTypeName = "Employee"
+                break
+            case "office":
+                itemTypeName = "Office"
+                break
+            case "workstation":
+                itemTypeName = "Workstation"
+                break
+        }
+        return `Edit ${itemTypeName}`
     }
 
     const getModalBody = () => {
@@ -36,19 +50,26 @@ export function EditModal({
             setIsOpen(false);
         }
 
-        if (item?.type === "employee") {
+        switch (item.type) {
+            case "employee":
+                bodyComponent = <EmployeeForm onSubmit={onSubmit}
+                                              employee={item}
+                                              activateAssignMode={activateAssignMode}
+                                              onClose={onClose}
+                                              onDelete={onDelete}/>
+                break
 
-            bodyComponent = <EmployeeForm onSubmit={onSubmit}
-                                          employee={item}
-                                          activateAssignMode={activateAssignMode}
-                                          onClose={onClose}
-                                          onDelete={onDelete}/>
+            case "office":
+                bodyComponent = <OfficeForm onSubmit={onSubmit}
+                                            office={item}
+                                            onClose={onClose}/>
+                break
 
-        } else if (item?.type === "office") {
-
-            bodyComponent = <OfficeForm onSubmit={onSubmit}
-                                        office={item}
-                                        onClose={onClose}/>
+            case "workstation":
+                bodyComponent = <WorkstationForm onSubmit={onSubmit}
+                                                 workstation={item}
+                                                 onClose={onClose}/>
+                break
         }
 
         return bodyComponent;
@@ -65,7 +86,7 @@ export function EditModal({
                     marginBottom: "1rem",
                 }}>
                     <Callout title="Info"
-                             description="Edit below information as you want and then click  'Save'. You should see a Success Alert message on the Home Screen."/>
+                             description="Edit below information as you want and then click 'Save'. You should see a Success Alert message on the Home Screen."/>
                 </div>
 
                 <div style={{
