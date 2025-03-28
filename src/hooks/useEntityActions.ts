@@ -136,9 +136,10 @@ export function useEntityActions() {
     const parseEmployeeFormData = (formData: FormData): Employee => {
         return {
             first_name: formData.get("firstName") as string,
-            middle_name: formData.get("alternateName") as string,
+            alternate_name: formData.get("alternateName") as string,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
+            idir: formData.get("idir") as string,
             office_number: formData.get("officeNumber") as string,
             notes: formData.get("notes") as string,
         }
@@ -173,7 +174,8 @@ export function useEntityActions() {
 
             const updatedEmployee: Employee = {
                 ...parseEmployeeFormData(formData),
-                employee_id: selectedSearchResult.employee_id
+                employee_id: selectedSearchResult.employee_id,
+                idir: selectedSearchResult.idir
             }
 
             await updateEmployeeAction(updatedEmployee)

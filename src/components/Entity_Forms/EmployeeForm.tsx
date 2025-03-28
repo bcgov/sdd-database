@@ -78,6 +78,12 @@ export function EmployeeForm({
                                    isReadOnly={isEditMode} // lock the field in edit mode
                                    defaultValue={employee?.employee_id}/>
 
+                        <TextField label="IDIR"
+                                   name="idir"
+                                   isRequired
+                                   isReadOnly={isEditMode} // lock the field in edit mode
+                                   defaultValue={employee?.idir}/>
+
                         <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
                     </div>
 

@@ -15,6 +15,7 @@ datasource db {
 
 model Employee {
   employee_id     String  @id
+  idir            String  @unique
   first_name      String
   alternate_name  String?
   last_name       String

@@ -26,6 +26,7 @@ export async function getEmployeesByFilter(query?: string) {
         where: {
             OR: [
                 {employee_id: {contains: query}},
+                {idir: {contains: query, mode: 'insensitive'}},
                 {first_name: {contains: query, mode: 'insensitive'}},
                 {alternate_name: {contains: query, mode: 'insensitive'}},
                 {last_name: {contains: query, mode: 'insensitive'}},
@@ -67,7 +68,11 @@ export async function getWorkstationsByFilter(query?: string) {
 }
 
 export async function updateEmployee(employee: Employee) {
-    const {employee_id, ...updatableFields} = employee
+
+    // we don't want to update the employee_id and idir fields as those are read-only and hence the user couldn't
+    // have changed them in the form
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {employee_id, idir: _idir, ...updatableFields} = employee
 
     return prisma.employee.update({
         where: {employee_id},
