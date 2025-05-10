@@ -23,9 +23,23 @@ export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEm
         // Handle unique constraint violation (P2002)
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
 
+            let errorMessage, errorFieldName
+
+            if (Array.isArray(error.meta?.target)) {
+                errorFieldName = error.meta.target[0]
+
+                if (errorFieldName === "employee_id") {
+                    errorMessage = `Employee ID ${employee.employee_id} is already in use for some other employee`
+                } else {
+                    if (errorFieldName === "idir") {
+                        errorMessage = `IDIR ${employee.idir} is already in use for some other employee`
+                    }
+                }
+            }
+
             return {
                 success: false,
-                error: `Employee ID ${employee.employee_id} is already in use for some other employee`
+                error: errorMessage
             };
         }
 
