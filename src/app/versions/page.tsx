@@ -6,6 +6,11 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.6",
+            notes: [
+                "Added unique error message for duplicate IDIR employee insertion attempt"
+            ]
+        },{
             version: "v0.0.5",
             notes: [
                 "Added Offices",
