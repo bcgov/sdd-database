@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.7",
+            notes: [
+                "Fixed bug allowing users to add duplicate IDIR employees by changing case",
+            ]
+        },
+        {
             version: "v0.0.6",
             notes: [
                 "Added unique error message for duplicate IDIR employee insertion attempt"
