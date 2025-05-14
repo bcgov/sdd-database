@@ -101,3 +101,11 @@ Everytime, the `schema.prisma` file is modified, run the below command to
 ```shell
 npx prisma migrate dev --name <nameOfMigration>
 ```
+
+### Seed
+
+To run the seed script in `package.json`, use the following command:
+
+```shell
+npx prisma db seed
+```

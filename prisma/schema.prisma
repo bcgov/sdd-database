@@ -5,17 +5,19 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [citext]
 }
 
 model Employee {
   employee_id     String  @id
-  idir            String  @unique
+  idir            String  @unique @db.Citext
   first_name      String
   alternate_name  String?
   last_name       String
@@ -26,7 +28,7 @@ model Employee {
 
 model Office {
   office_number String     @id
-  office_name   String     @unique
+  office_name   String     @unique @db.Citext
   postal_code   String
   notes         String?
   Employee      Employee[]
