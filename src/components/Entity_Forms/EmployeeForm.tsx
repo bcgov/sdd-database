@@ -5,6 +5,7 @@ import {
     AccordionGroup,
     Button,
     ButtonGroup,
+    Callout,
     Form,
     TextArea,
     TextField
@@ -63,10 +64,6 @@ export function EmployeeForm({
                                    isRequired
                                    defaultValue={employee?.first_name}/>
 
-                        <TextField label="Alternate Name"
-                                   name="alternateName"
-                                   defaultValue={employee?.alternate_name ?? undefined}></TextField>
-
                         <TextField label="Last Name"
                                    name="lastName"
                                    isRequired
@@ -84,6 +81,10 @@ export function EmployeeForm({
                                    isReadOnly={isEditMode} // lock the field in edit mode
                                    defaultValue={employee?.idir}/>
 
+                        <TextField label="Alternate Name"
+                                   name="alternateName"
+                                   defaultValue={employee?.alternate_name ?? undefined}></TextField>
+
                         <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
                     </div>
 
@@ -91,6 +92,13 @@ export function EmployeeForm({
 
                 <Accordion label="Office Details" id="officeDetails">
                     <div>
+                        <div style={{
+                            marginBottom: "1rem",
+                        }}>
+                            <Callout
+                                description={`Click on the ${employee?.office_number ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the Save button below`}></Callout>
+                        </div>
+
                         <TextField label="Office Number"
                                    name="officeNumber"
                                    isRequired

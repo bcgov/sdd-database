@@ -152,7 +152,7 @@ export function useEntityActions() {
         }
     }
 
-    const addSuccessAlert = (description: string, timeInMs: number = 4500) => {
+    const addSuccessAlert = (description: string, timeInMs: number = 6500) => {
 
         setAlert({
             variant: "success",

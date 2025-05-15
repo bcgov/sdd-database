@@ -2,7 +2,7 @@ import type {Selection} from "@react-types/shared"
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
-import {Button, Form, TextField} from "@bcgov/design-system-react-components";
+import {Button, Callout, Form, TextField} from "@bcgov/design-system-react-components";
 
 import {Entity} from "@/types/Entity";
 
@@ -72,6 +72,13 @@ export function Search({
 
     return (
         <>
+            {assignMode && (<div style={{
+                margin: "1rem",
+            }}>
+                <Callout title="Info"
+                         description="You can look up the employee's office using the search box. Once you have it, click the Assign button next to it."></Callout>
+            </div>)}
+
             {/* Search Bar */}
             <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
                 <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
