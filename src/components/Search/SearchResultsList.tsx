@@ -62,12 +62,11 @@ export function SearchResultsList({
                 <SearchResultItem key={getSearchResultKey(item)}
                                   title={getSearchResultTitle(item)}
                                   searchResultClickHandler={() => searchResultClickHandler(item)}
-                                  assignMode={assignMode}
-                                  assignOfficeClickHandler={() => {
-                                      if (item.type === "office") {
-                                          assignOfficeClickHandler(item.office_number)
-                                      }
-                                  }}>
+                                  assignOfficeClickHandler={
+                                      item.type === "office" && assignMode ?
+                                          () => assignOfficeClickHandler(item.office_number) :
+                                          undefined
+                                  }>
                 </SearchResultItem>
             )
     )

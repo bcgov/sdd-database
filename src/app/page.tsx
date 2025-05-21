@@ -27,8 +27,8 @@ export default function Home() {
         selectedSearchResult,
         alert,
         setAlert,
-        isSelectedSearchResultEditModalOpen,
-        setIsSelectedSearchResultEditModalOpen,
+        isEditModalOpen,
+        setIsEditModalOpen,
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
@@ -66,8 +66,8 @@ export default function Home() {
                     <EditModal
                         item={selectedSearchResult}
                         activateAssignMode={activateAssignMode}
-                        isOpen={isSelectedSearchResultEditModalOpen}
-                        setIsOpen={setIsSelectedSearchResultEditModalOpen}
+                        isOpen={isEditModalOpen}
+                        setIsOpen={setIsEditModalOpen}
                         onSubmit={handleEdit}
                         onDelete={() => setIsDeleteAlertDialogOpen(true)}
                     />

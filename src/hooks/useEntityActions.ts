@@ -31,7 +31,7 @@ export function useEntityActions() {
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
-    const [isSelectedSearchResultEditModalOpen, setIsSelectedSearchResultEditModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
     const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
@@ -69,9 +69,13 @@ export function useEntityActions() {
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
-        setIsSelectedSearchResultEditModalOpen(true);
+        setIsEditModalOpen(true);
     }
 
+    /** This function is called when the user clicks on "Assign Office" in the add new employee modal or the "Update
+     * Office" button in the add new employee modal or the edit employee modal.
+     * @param formData
+     */
     const activateAssignMode = async (formData: FormData) => {
 
         const editedEmployee = parseEmployeeFormData(formData);
@@ -96,7 +100,7 @@ export function useEntityActions() {
                 type: "employee",
             });
 
-            setIsSelectedSearchResultEditModalOpen(false);
+            setIsEditModalOpen(false);
         }
     }
 
@@ -128,7 +132,7 @@ export function useEntityActions() {
                     office_number: assignedOfficeNumber
                 })
 
-                setIsSelectedSearchResultEditModalOpen(true)
+                setIsEditModalOpen(true)
             }
         }
     }
@@ -227,7 +231,7 @@ export function useEntityActions() {
 
             refreshSearchResults()
 
-            setIsSelectedSearchResultEditModalOpen(false);
+            setIsEditModalOpen(false);
 
             addSuccessAlert(`${entityTypeName} details updated!`);
         }
@@ -244,7 +248,7 @@ export function useEntityActions() {
             refreshSearchResults()
 
             setIsDeleteAlertDialogOpen(false)
-            setIsSelectedSearchResultEditModalOpen(false)
+            setIsEditModalOpen(false)
 
             addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
         }
@@ -301,8 +305,8 @@ export function useEntityActions() {
         selectedSearchResult,
         alert,
         setAlert,
-        isSelectedSearchResultEditModalOpen,
-        setIsSelectedSearchResultEditModalOpen,
+        isEditModalOpen,
+        setIsEditModalOpen,
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
