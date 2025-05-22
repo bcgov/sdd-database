@@ -109,3 +109,14 @@ To run the seed script in `package.json`, use the following command:
 ```shell
 npx prisma db seed
 ```
+
+## Helm
+
+```shell
+helm list
+```
+
+```shell
+helm upgrade --install <release_name> <chart_name> --namespace <namespace>
+```
+

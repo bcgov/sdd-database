@@ -38,7 +38,7 @@ export default function Home() {
         userHasSearchedOnce,
         handleSearch,
         handleEdit,
-        handleDelete,
+        handleDeleteEmployee,
         handleAddNewEmployee,
         openCloseAddNewEmployeeModal,
         handleAddNewWorkstation,
@@ -78,7 +78,7 @@ export default function Home() {
                             employee={selectedSearchResult}
                             isOpen={isDeleteAlertDialogOpen}
                             setIsOpen={setIsDeleteAlertDialogOpen}
-                            onDelete={handleDelete}/>
+                            onDelete={handleDeleteEmployee}/>
                     }
                 </>
             }

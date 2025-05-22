@@ -14,7 +14,7 @@ import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
 import {searchAllAction} from "@/actions/search"
 
-import {getEmployeeFullName} from "@/utils";
+import {ENTITY_TYPE_NAME, getEmployeeFullName} from "@/utils";
 
 
 interface Alert {
@@ -140,12 +140,12 @@ export function useEntityActions() {
     const parseEmployeeFormData = (formData: FormData): Employee => {
         return {
             first_name: formData.get("firstName") as string,
-            alternate_name: formData.get("alternateName") as string,
+            alternate_name: formData.get("alternateName") as string || null,
             last_name: formData.get("lastName") as string,
             employee_id: formData.get("employeeId") as string,
             idir: formData.get("idir") as string,
             office_number: formData.get("officeNumber") as string,
-            notes: formData.get("notes") as string,
+            notes: formData.get("notes") as string || null,
         }
     }
 
@@ -205,41 +205,26 @@ export function useEntityActions() {
         }
     }
 
+    const editHandlers: Record<Entity["type"], (fd: FormData) => Promise<void>> = {
+        employee: handleEditEmployee,
+        office: handleEditOffice,
+        workstation: handleEditWorkstation
+    }
+
     const handleEdit = async (formData: FormData) => {
 
         if (selectedSearchResult) {
-
-            let entityTypeName: string
-
-            switch (selectedSearchResult.type) {
-                case "employee":
-                    entityTypeName = "Employee"
-                    await handleEditEmployee(formData);
-                    break
-
-                case "office":
-                    entityTypeName = "Office"
-                    await handleEditOffice(formData);
-                    break
-
-                case "workstation":
-                    entityTypeName = "Workstation"
-                    await handleEditWorkstation(formData);
-                    break
-
-            }
+            await editHandlers[selectedSearchResult.type](formData);
 
             refreshSearchResults()
 
             setIsEditModalOpen(false);
 
-            addSuccessAlert(`${entityTypeName} details updated!`);
+            addSuccessAlert(`${ENTITY_TYPE_NAME[selectedSearchResult.type]} details updated!`);
         }
-
-
     }
 
-    const handleDelete = async () => {
+    const handleDeleteEmployee = async () => {
 
         if (selectedSearchResult?.type === "employee") {
             await deleteEmployeeAction(selectedSearchResult.employee_id);
@@ -317,7 +302,7 @@ export function useEntityActions() {
         userHasSearchedOnce,
         handleSearch,
         handleEdit,
-        handleDelete,
+        handleDeleteEmployee,
         handleAddNewEmployee,
         openCloseAddNewEmployeeModal,
         handleAddNewWorkstation,

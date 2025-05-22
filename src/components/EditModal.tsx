@@ -1,11 +1,14 @@
 import {Callout} from "@bcgov/design-system-react-components";
 
+import {Entity} from "@/types/Entity";
+
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 import {OfficeForm} from "@/components/Entity_Forms/OfficeForm";
+import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 import {ModalDialog} from "@/components/ModalDialog";
 
-import {Entity} from "@/types/Entity";
-import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
+import {ENTITY_TYPE_NAME} from "@/utils";
+
 
 interface EditModalProps {
     item: Entity
@@ -24,24 +27,6 @@ export function EditModal({
                               onSubmit,
                               onDelete
                           }: EditModalProps) {
-
-    const getModalTitle = () => {
-
-        let itemTypeName: string;
-
-        switch (item.type) {
-            case "employee":
-                itemTypeName = "Employee"
-                break
-            case "office":
-                itemTypeName = "Office"
-                break
-            case "workstation":
-                itemTypeName = "Workstation"
-                break
-        }
-        return `Edit ${itemTypeName}`
-    }
 
     const getModalBody = () => {
         let bodyComponent = null;
@@ -79,7 +64,7 @@ export function EditModal({
         <>
             <ModalDialog isOpen={isOpen}
                          setIsOpen={setIsOpen}
-                         modalTitle={getModalTitle()}>
+                         modalTitle={`Edit ${ENTITY_TYPE_NAME[item.type]}`}>
 
                 <div style={{
                     marginTop: "1rem",
