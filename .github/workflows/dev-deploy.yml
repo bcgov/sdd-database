@@ -18,12 +18,16 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "latest"
+
       - name: oc login
         uses: redhat-actions/oc-login@v1
         with:
           openshift_server_url: ${{ secrets.OC_SERVER }}
           openshift_token: ${{ secrets.OC_TOKEN }}    # SA token
-          install_oc: true
 
       - name: Start OpenShift build in the tools namespace
         run: |
