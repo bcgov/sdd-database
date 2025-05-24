@@ -1,0 +1,32 @@
+name: Deploy to dev namespace
+
+on:
+  push:
+    branches: [ dev ]
+
+env:
+  TOOLS_NS: a6d989-tools
+
+  # BuildConfig and Deployment name
+  APP: employee-information-database
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: oc login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OC_SERVER }}
+          openshift_token: ${{ secrets.OC_TOKEN }}    # SA token
+
+      - name: Start OpenShift build in the tools namespace
+        run: |
+          # --wait flag tells the client to stream the build log and block until the build completes. It exits with a non-zero status if the build fails.
+          oc start-build $APP --wait -n $TOOLS_NS
+
+#      - name: Add custom tag to the newly created image in the tools namespace
