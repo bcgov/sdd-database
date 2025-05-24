@@ -34,4 +34,13 @@ jobs:
           # --wait flag tells the client to stream the build log and block until the build completes. It exits with a non-zero status if the build fails.
           oc start-build $APP --wait -n $TOOLS_NS
 
-#      - name: Add custom tag to the newly created image in the tools namespace
+      - name: Add custom tag to the newly created image in the tools namespace
+        run: |
+          # dev-<first7charsOfCommit>
+          TAG=dev-${GITHUB_SHA::7}
+          
+          # latest -> dev-<sha>-tools
+          oc tag $APP:latest $APP:${TAG}-tools -n $TOOLS_NS
+          
+          # save for later steps
+          echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
