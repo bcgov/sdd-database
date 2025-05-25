@@ -6,9 +6,10 @@ on:
 
 env:
   TOOLS_NS: a6d989-tools
+  DEV_NS:   a6d989-dev
 
   # BuildConfig and Deployment name
-  APP: employee-information-database
+  APP:      employee-information-database
 
 jobs:
   build-and-deploy:
@@ -44,3 +45,7 @@ jobs:
           
           # save for later steps
           echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
+
+      - name: Import this image in the dev namespace and update the tag
+        run: |
+          oc tag $TOOLS_NS/$APP:${IMAGE_TAG}-tools $DEV_NS/$APP:${IMAGE_TAG}-dev -n $DEV_NS
