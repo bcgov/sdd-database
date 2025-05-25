@@ -11,6 +11,8 @@ env:
   # BuildConfig and Deployment name
   APP:      employee-information-database
 
+  REGISTRY: ${{ secrets.REGISTRY }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -49,3 +51,12 @@ jobs:
       - name: Import this image in the dev namespace and update the tag
         run: |
           oc tag $TOOLS_NS/$APP:${IMAGE_TAG}-tools $DEV_NS/$APP:${IMAGE_TAG}-dev -n $DEV_NS
+
+      - name: Update the deployment to use this new image
+        run: |
+          IMAGE=${REGISTRY}/${DEV_NS}/${APP}:${IMAGE_TAG}-dev
+          oc -n set image deployment/$APP $APP=$IMAGE $DEV_NS
+
+      - name: Wait for deployment to complete
+        run: |
+          oc rollout status deployment/$APP -n $DEV_NS
