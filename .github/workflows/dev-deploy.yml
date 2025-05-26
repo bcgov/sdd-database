@@ -55,7 +55,7 @@ jobs:
       - name: Update the deployment to use this new image
         run: |
           IMAGE=${REGISTRY}/${DEV_NS}/${APP}:${IMAGE_TAG}-dev
-          oc -n set image deployment/$APP $APP=$IMAGE $DEV_NS
+          oc set image deployment/$APP $APP=$IMAGE -n $DEV_NS
 
       - name: Wait for deployment to complete
         run: |
