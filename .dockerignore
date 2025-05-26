@@ -1,6 +1,7 @@
-# Version control
+# Version control, CI/CD configs
 .git
 .gitignore
+.github
 
 # Exclude IDE/editor directories and files
 .idea
