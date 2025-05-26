@@ -9,6 +9,7 @@ export default function Updates() {
             version: "v0.0.7",
             notes: [
                 "Fixed bug allowing users to add duplicate IDIR employees by changing case",
+                "Test"
             ]
         },
         {
