@@ -1,18 +1,18 @@
 import {useState} from "react";
-import type {Selection} from "@react-types/shared"
 
 import {Employee, Workstation} from "@prisma/client";
 
 import {Entity} from "@/types/Entity";
+
+import {useSearch} from "@/hooks/useSearch";
 
 import {
     addNewEmployeeAction,
     deleteEmployeeAction,
     updateEmployeeAction
 } from "@/actions/employees";
-import {searchOfficesAction, updateOfficeAction} from "@/actions/offices";
+import {updateOfficeAction} from "@/actions/offices";
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
-import {searchAllAction} from "@/actions/search"
 
 import {ENTITY_TYPE_NAME, getEmployeeFullName} from "@/utils";
 
@@ -24,11 +24,6 @@ interface Alert {
 }
 
 export function useEntityActions() {
-    const [searchPhrase, setSearchPhrase] = useState<string>();
-
-    const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
-
-    const [searchResults, setSearchResults] = useState<Entity[]>([]);
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -41,31 +36,15 @@ export function useEntityActions() {
 
     const [alert, setAlert] = useState<Alert>();
 
-    const userHasSearchedOnce = () => searchPhrase !== undefined;
-
-    const handleSearch = async (formData: FormData) => {
-        const query = formData.get("search") as string;
-        setSearchPhrase(query);
-
-        await runSearch(query);
-    }
-
-    const refreshSearchResults = () => {
-        runSearch(searchPhrase)
-    }
-
-    const runSearch = async (query?: string, searchOnlyOffices?: boolean) => {
-
-        let results: Entity[] = [];
-
-        if (searchOnlyOffices || assignMode) {
-            results = await searchOfficesAction(query);
-        } else {
-            results = await searchAllAction(query);
-        }
-
-        setSearchResults(results);
-    }
+    const {
+        selectedFilterTags,
+        setSelectedFilterTags,
+        searchResults,
+        userHasSearchedOnce,
+        handleSearch,
+        runSearch,
+        refreshSearchResults
+    } = useSearch(assignMode)
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
@@ -95,6 +74,7 @@ export function useEntityActions() {
             openCloseAddNewEmployeeModal(false, false)
         } else {
 
+            // we update the existing selectedSearchResult with any new edits before we showcase the assign office UI
             setSelectedSearchResult({
                 ...editedEmployee,
                 type: "employee",
