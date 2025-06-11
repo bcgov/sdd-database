@@ -18,9 +18,9 @@ datasource db {
 model Employee {
   employee_id     String  @id
   idir            String  @unique @db.Citext
-  first_name      String
-  alternate_name  String?
-  last_name       String
+  first_name      String  @db.VarChar(30)
+  alternate_name  String? @db.VarChar(30)
+  last_name       String  @db.VarChar(30)
   office_number   String
   assigned_office Office  @relation(fields: [office_number], references: [office_number])
   notes           String?

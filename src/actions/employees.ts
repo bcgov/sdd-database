@@ -13,6 +13,17 @@ interface AddNewEmployeeResult {
 }
 
 export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEmployeeResult> {
+
+    // server-side validation
+    const validationError = validateEmployeeData(employee);
+
+    if(validationError) {
+        return {
+            success: false,
+            error: validationError
+        };
+    }
+
     try {
         await addNewEmployee(employee);
 
@@ -20,10 +31,33 @@ export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEm
 
     } catch (error) {
 
-        // Handle unique constraint violation (P2002)
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        return {
+            success: false,
+            error: getReadablePrismaError(error, employee)
+        };
+    }
+}
 
-            let errorMessage, errorFieldName
+function validateEmployeeData(employee: Employee) {
+
+    if (!employee.first_name) {
+        return "First Name is required";
+    }
+}
+
+function getReadablePrismaError(error: unknown, employee: Employee) {
+
+    let errorMessage = "An unexpected error occurred";
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+
+        if (error.code === "P2000") {
+            errorMessage = "One of the name fields (First Name, Last Name or Alternate Name) is longer than the" +
+                " 30‑character limit. Please shorten it and try again."
+        }
+
+        if (error.code === "P2002") {
+            let errorFieldName
 
             if (Array.isArray(error.meta?.target)) {
                 errorFieldName = error.meta.target[0]
@@ -36,21 +70,12 @@ export async function addNewEmployeeAction(employee: Employee): Promise<AddNewEm
                     }
                 }
             }
-
-            return {
-                success: false,
-                error: errorMessage
-            };
-        }
-
-        console.error(error);
-
-        // For other errors/error codes
-        return {
-            success: false,
-            error: "An unexpected error occurred"
         }
     }
+
+    console.error(error);
+
+    return errorMessage;
 }
 
 export async function updateEmployeeAction(updatedEmployee: Employee) {

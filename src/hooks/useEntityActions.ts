@@ -225,11 +225,10 @@ export function useEntityActions() {
 
         const result = await addNewEmployeeAction(newEmployee)
 
-        refreshSearchResults()
-
         openCloseAddNewEmployeeModal(false)
 
         if (result.success) {
+            refreshSearchResults()
             addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
         } else {
             setAlert({

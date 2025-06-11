@@ -62,7 +62,29 @@ export function EmployeeForm({
                         <TextField label="First Name"
                                    name="firstName"
                                    isRequired
-                                   defaultValue={employee?.first_name}/>
+                                   validate={
+                                       (value) => {
+
+                                           if (!value) {
+                                               return "This is a mandatory field";
+                                           }
+
+                                           if(value.length > 30) {
+                                               return "First name cannot be longer than 30 characters";
+                                           }
+
+                                           if(/\s/.test(value)) {
+                                                  return "First name must be a single word (no spaces)";
+                                             }
+
+                                           if (!/^[A-Za-z]*$/.test(value)) {
+                                               return "First name can contain only alphabets";
+                                           }
+
+                                           return null; // valid, no error
+                                       }}
+                                   defaultValue={employee?.first_name}>
+                        </TextField>
 
                         <TextField label="Last Name"
                                    name="lastName"
