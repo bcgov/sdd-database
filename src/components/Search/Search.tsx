@@ -59,6 +59,13 @@ export function Search({
         )
     }
 
+    const displaySearchBar = () => {
+        return <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
+            <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
+            <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
+        </Form>
+    }
+
     const displaySearchBody = () => {
 
         if (searchResults.length === 0) {
@@ -79,11 +86,7 @@ export function Search({
                          description="You can look up the employee's office using the search box. Once you have it, click the Assign button next to it."></Callout>
             </div>)}
 
-            {/* Search Bar */}
-            <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
-                <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
-                <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
-            </Form>
+            {displaySearchBar()}
 
             {displaySearchBody()}
         </>
