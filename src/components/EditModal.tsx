@@ -1,6 +1,6 @@
 import {Callout} from "@bcgov/design-system-react-components";
 
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 import {OfficeForm} from "@/components/Entity_Forms/OfficeForm";
@@ -16,6 +16,8 @@ interface EditModalProps {
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
     onSubmit: (formData: FormData) => void
+    onSuccess: () => void
+    onError: (error: string) => void
     onDelete: () => void
 }
 
@@ -25,6 +27,8 @@ export function EditModal({
                               isOpen,
                               setIsOpen,
                               onSubmit,
+                              onSuccess,
+                              onError,
                               onDelete
                           }: EditModalProps) {
 
@@ -37,11 +41,12 @@ export function EditModal({
 
         switch (item.type) {
             case "employee":
-                bodyComponent = <EmployeeForm onSubmit={onSubmit}
-                                              employee={item}
+                bodyComponent = <EmployeeForm employee={item}
                                               activateAssignMode={activateAssignMode}
-                                              onClose={onClose}
-                                              onDelete={onDelete}/>
+                                              onSuccess={onSuccess}
+                                              onError={onError}
+                                              onDelete={onDelete}
+                                              onClose={onClose}/>
                 break
 
             case "office":
@@ -81,7 +86,7 @@ export function EditModal({
                     // justifyContent: "space-between",
                     // alignItems: "flex-end"
                 }}>
-                    {getModalBody()} {/* this could be any item of type Entity i.e. Office, Employee*/}
+                    {getModalBody()} {/* this could be any item of type Entity i.e., Office, Employee*/}
                 </div>
             </ModalDialog>
         </>

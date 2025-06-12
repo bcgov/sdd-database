@@ -1,3 +1,5 @@
+import {useActionState, useEffect} from "react";
+
 import {PressEvent} from "@react-types/shared";
 
 import {
@@ -7,29 +9,69 @@ import {
     ButtonGroup,
     Callout,
     Form,
+    // InlineAlert,
     TextArea,
     TextField
 } from "@bcgov/design-system-react-components";
 
 import {Employee} from "@prisma/client";
 
+import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
+
+import {EmployeeActionResult} from "@/types";
+
+import {
+    validateEmployeeIdField,
+    validateEmployeeNameField,
+    validateEmployeeNotesField,
+    validateEmployeeIdirField
+} from "@/validators";
+
 
 interface EmployeeFormProps {
-    onSubmit: (formData: FormData) => void
-    employee: Employee | undefined;
+    employee: Employee | undefined
     activateAssignMode: (formData: FormData) => Promise<void>
-    onClose: () => void
+    onSuccess: () => void
+    onError: (error: string) => void
     // optional prop only passed in edit mode
     onDelete?: () => void
+    onClose: () => void
 }
 
 export function EmployeeForm({
-                                 onSubmit,
                                  employee,
                                  activateAssignMode,
-                                 onClose,
-                                 onDelete
+                                 onSuccess,
+                                 onError,
+                                 onDelete,
+                                 onClose
                              }: EmployeeFormProps) {
+
+    const isEditMode = !!onDelete;
+
+    const initialState: EmployeeActionResult = {status: "idle"};
+
+    const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction;
+
+    const [result, formAction, isPending] = useActionState(serverAction, initialState)
+
+    useEffect(() => {
+
+        switch (result.status) {
+            case "idle":
+                // first render -> do nothing
+                return;
+
+            case "ok":
+                onSuccess();
+                break;
+
+            case "error":
+                onError(result.error);
+                break;
+        }
+
+    }, [result, onError, onSuccess]);
 
     const handleAssignOffice = async (e: PressEvent) => {
 
@@ -41,10 +83,8 @@ export function EmployeeForm({
         }
     }
 
-    const isEditMode = !!onDelete;
-
     return (
-        <Form action={onSubmit}
+        <Form action={formAction}
               style={{
                   // display: "flex",
                   // flexDirection: "column",
@@ -62,52 +102,45 @@ export function EmployeeForm({
                         <TextField label="First Name"
                                    name="firstName"
                                    isRequired
-                                   validate={
-                                       (value) => {
-
-                                           if (!value) {
-                                               return "This is a mandatory field";
-                                           }
-
-                                           if(value.length > 30) {
-                                               return "First name cannot be longer than 30 characters";
-                                           }
-
-                                           if(/\s/.test(value)) {
-                                                  return "First name must be a single word (no spaces)";
-                                             }
-
-                                           if (!/^[A-Za-z]*$/.test(value)) {
-                                               return "First name can contain only alphabets";
-                                           }
-
-                                           return null; // valid, no error
-                                       }}
+                                   validate={value => validateEmployeeNameField(value, "First Name")}
                                    defaultValue={employee?.first_name}>
                         </TextField>
+                        {/*{result.error && <p>{result.error}</p>}*/}
 
                         <TextField label="Last Name"
                                    name="lastName"
                                    isRequired
-                                   defaultValue={employee?.last_name}></TextField>
+                                   validate={value => validateEmployeeNameField(value, "Last Name")}
+                                   defaultValue={employee?.last_name}>
+                        </TextField>
 
                         <TextField label="Employee ID"
                                    name="employeeId"
                                    isRequired
+                                   validate={validateEmployeeIdField}
                                    isReadOnly={isEditMode} // lock the field in edit mode
-                                   defaultValue={employee?.employee_id}/>
+                                   defaultValue={employee?.employee_id}>
+                        </TextField>
 
                         <TextField label="IDIR"
                                    name="idir"
                                    isRequired
+                                   validate={validateEmployeeIdirField}
                                    isReadOnly={isEditMode} // lock the field in edit mode
-                                   defaultValue={employee?.idir}/>
+                                   defaultValue={employee?.idir}>
+                        </TextField>
 
                         <TextField label="Alternate Name"
                                    name="alternateName"
-                                   defaultValue={employee?.alternate_name ?? undefined}></TextField>
+                                   validate={value => validateEmployeeNameField(value, "Alternate Name", false)}
+                                   defaultValue={employee?.alternate_name ?? undefined}>
+                        </TextField>
 
-                        <TextArea label="Notes" name="notes" defaultValue={employee?.notes ?? undefined}></TextArea>
+                        <TextArea label="Notes"
+                                  name="notes"
+                                  maxLength={2000}
+                                  validate={validateEmployeeNotesField}
+                                  defaultValue={employee?.notes ?? undefined}></TextArea>
                     </div>
 
                 </Accordion>
@@ -118,7 +151,8 @@ export function EmployeeForm({
                             marginBottom: "1rem",
                         }}>
                             <Callout
-                                description={`Click on the ${employee?.office_number ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the Save button below`}></Callout>
+                                description={`Click on the ${employee?.office_number ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the ${isEditMode ? "Save" : "Create"} button below`}>
+                            </Callout>
                         </div>
 
                         <TextField label="Office Number"
@@ -136,7 +170,7 @@ export function EmployeeForm({
 
             {/*<div style={{backgroundColor: "gray"}}>*/}
             <ButtonGroup>
-                <Button type="submit">{isEditMode ? "Save" : "Create"}</Button>
+                <Button type="submit" isDisabled={isPending}>{isEditMode ? "Save" : "Create"}</Button>
                 <Button variant="secondary"
                         onPress={onClose}>Cancel</Button>
             </ButtonGroup>

@@ -1,7 +1,7 @@
-import {useState} from "react";
+import {useCallback, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 import {searchOfficesAction} from "@/actions/offices";
 import {searchAllAction} from "@/actions/search";
@@ -21,7 +21,7 @@ export function useSearch(assignMode: boolean) {
         await runSearch(query);
     }
 
-    const runSearch = async (query?: string, searchOnlyOffices?: boolean) => {
+    const runSearch = useCallback(async (query?: string, searchOnlyOffices?: boolean) => {
 
         let results: Entity[] = [];
 
@@ -32,11 +32,9 @@ export function useSearch(assignMode: boolean) {
         }
 
         setSearchResults(results);
-    }
+    }, [assignMode])
 
-    const refreshSearchResults = () => {
-        runSearch(searchPhrase)
-    }
+    const refreshSearchResults = useCallback(() => runSearch(searchPhrase), [runSearch, searchPhrase])
 
     return {
         selectedFilterTags,

@@ -1,5 +1,25 @@
 import {Employee} from "@prisma/client";
-import {Entity} from "@/types/Entity";
+
+import {Entity} from "@/types";
+
+
+export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
+    employee: "Employee",
+    office: "Office",
+    workstation: "Workstation"
+} as const;
+
+export const parseEmployeeFormData = (formData: FormData): Employee => {
+    return {
+        first_name: formData.get("firstName") as string,
+        alternate_name: formData.get("alternateName") as string || null,
+        last_name: formData.get("lastName") as string,
+        employee_id: formData.get("employeeId") as string,
+        idir: formData.get("idir") as string,
+        office_number: formData.get("officeNumber") as string,
+        notes: formData.get("notes") as string || null,
+    }
+}
 
 export const getEmployeeFullName = (employee: Employee | undefined) => {
 
@@ -12,9 +32,3 @@ export const getEmployeeFullName = (employee: Employee | undefined) => {
 
     return fullName;
 }
-
-export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
-    employee: "Employee",
-    office: "Office",
-    workstation: "Workstation"
-} as const;

@@ -1,6 +1,6 @@
 "use server";
 
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 import {searchEmployeesAction} from "@/actions/employees";
 import {searchOfficesAction} from "@/actions/offices";

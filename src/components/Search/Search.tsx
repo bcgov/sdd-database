@@ -4,7 +4,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
 import {Button, Callout, Form, TextField} from "@bcgov/design-system-react-components";
 
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 import {FilterTags} from "@/components/Search/FilterTags";
 import {SearchResultsList} from "@/components/Search/SearchResultsList";

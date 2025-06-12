@@ -7,9 +7,11 @@ import {
 } from "@bcgov/design-system-react-components"
 
 import {Search} from "@/components/Search/Search";
+
 import {EditModal} from "@/components/EditModal";
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
+
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
@@ -39,7 +41,11 @@ export default function Home() {
         handleSearch,
         handleEdit,
         handleDeleteEmployee,
-        handleAddNewEmployee,
+        // handleAddNewEmployee,
+        onAddNewEmployeeSuccess,
+        onAddNewEmployeeError,
+        onEditEmployeeSuccess,
+        onEditEmployeeError,
         openCloseAddNewEmployeeModal,
         handleAddNewWorkstation,
         activateAssignMode,
@@ -69,6 +75,8 @@ export default function Home() {
                         isOpen={isEditModalOpen}
                         setIsOpen={setIsEditModalOpen}
                         onSubmit={handleEdit}
+                        onSuccess={onEditEmployeeSuccess}
+                        onError={onEditEmployeeError}
                         onDelete={() => setIsDeleteAlertDialogOpen(true)}
                     />
 
@@ -88,9 +96,10 @@ export default function Home() {
                          triggerButtonText="Add New Employee"
                          disableTriggerButton={assignMode}
                          modalTitle="Add New Employee">
-                <EmployeeForm onSubmit={handleAddNewEmployee}
-                              employee={draftNewEmployee}
+                <EmployeeForm employee={draftNewEmployee}
                               activateAssignMode={activateAssignMode}
+                              onSuccess={onAddNewEmployeeSuccess}
+                              onError={onAddNewEmployeeError}
                               onClose={() => openCloseAddNewEmployeeModal(false)}/>
             </ModalDialog>
 

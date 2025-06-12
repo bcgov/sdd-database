@@ -1,7 +1,7 @@
 "use server";
 
 import {getOfficesByFilter, updateOffice} from "@/prisma-db";
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 export async function searchOfficesAction(query?: string) {
     const officeSearchResults = await getOfficesByFilter(query);

@@ -1,5 +1,5 @@
 import {SearchResultItem} from "@/components/Search/SearchResultItem";
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 import {getEmployeeFullName} from "@/utils";
 
 interface SearchResultsListProps {

@@ -3,7 +3,7 @@
 import {Workstation} from "@prisma/client";
 
 import {addNewWorkstation, getWorkstationsByFilter, updateWorkstation} from "@/prisma-db";
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 
 export async function addNewWorkstationAction(workstation: Workstation) {

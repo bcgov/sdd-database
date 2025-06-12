@@ -1,20 +1,16 @@
-import {useState} from "react";
+import {useCallback, useState} from "react";
 
 import {Employee, Workstation} from "@prisma/client";
 
-import {Entity} from "@/types/Entity";
+import {Entity} from "@/types";
 
 import {useSearch} from "@/hooks/useSearch";
 
-import {
-    addNewEmployeeAction,
-    deleteEmployeeAction,
-    updateEmployeeAction
-} from "@/actions/employees";
+import {deleteEmployeeAction} from "@/actions/employees";
 import {updateOfficeAction} from "@/actions/offices";
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
 
-import {ENTITY_TYPE_NAME, getEmployeeFullName} from "@/utils";
+import {ENTITY_TYPE_NAME, getEmployeeFullName, parseEmployeeFormData} from "@/utils";
 
 
 interface Alert {
@@ -117,18 +113,6 @@ export function useEntityActions() {
         }
     }
 
-    const parseEmployeeFormData = (formData: FormData): Employee => {
-        return {
-            first_name: formData.get("firstName") as string,
-            alternate_name: formData.get("alternateName") as string || null,
-            last_name: formData.get("lastName") as string,
-            employee_id: formData.get("employeeId") as string,
-            idir: formData.get("idir") as string,
-            office_number: formData.get("officeNumber") as string,
-            notes: formData.get("notes") as string || null,
-        }
-    }
-
     const parseWorkstationFormData = (formData: FormData): Workstation => {
         return {
             asset_tag: formData.get("assetTag") as string,
@@ -136,7 +120,9 @@ export function useEntityActions() {
         }
     }
 
-    const addSuccessAlert = (description: string, timeInMs: number = 6500) => {
+    const addSuccessAlert = (description: string) => {
+
+        const ALERT_TIMEOUT = 6500;
 
         setAlert({
             variant: "success",
@@ -144,10 +130,10 @@ export function useEntityActions() {
             description: description
         })
 
-        // Auto-hide the success alert message after 4.5 seconds
+        // Auto-hide the success alert message after ALERT_TIMEOUT seconds
         setTimeout(() => {
             setAlert(undefined);
-        }, timeInMs)
+        }, ALERT_TIMEOUT)
     }
 
     const handleEditOffice = async (formData: FormData) => {
@@ -161,16 +147,18 @@ export function useEntityActions() {
 
     const handleEditEmployee = async (formData: FormData) => {
 
-        if (selectedSearchResult?.type === "employee") {
+        // if (selectedSearchResult?.type === "employee") {
 
-            const updatedEmployee: Employee = {
-                ...parseEmployeeFormData(formData),
-                employee_id: selectedSearchResult.employee_id,
-                idir: selectedSearchResult.idir
-            }
+            // console.log(formData);
 
-            await updateEmployeeAction(updatedEmployee)
-        }
+            // const updatedEmployee: Employee = {
+            //     ...parseEmployeeFormData(formData),
+            //     employee_id: selectedSearchResult.employee_id,
+            //     idir: selectedSearchResult.idir
+            // }
+            //
+            // await updateEmployeeAction(updatedEmployee)
+        // }
     }
 
     const handleEditWorkstation = async (formData: FormData) => {
@@ -204,6 +192,25 @@ export function useEntityActions() {
         }
     }
 
+    const onEditEmployeeSuccess = useCallback(() => {
+        refreshSearchResults()
+
+        setIsEditModalOpen(false);
+
+        addSuccessAlert(`Employee details updated!`);
+    }, [refreshSearchResults])
+
+    const onEditEmployeeError = useCallback((error: string) => {
+
+        setIsEditModalOpen(false);
+
+        setAlert({
+            variant: "danger",
+            title: "Error: Could not edit employee",
+            description: error
+        })
+    }, [])
+
     const handleDeleteEmployee = async () => {
 
         if (selectedSearchResult?.type === "employee") {
@@ -219,33 +226,53 @@ export function useEntityActions() {
         }
     }
 
-    const handleAddNewEmployee = async (formData: FormData) => {
-
-        const newEmployee: Employee = parseEmployeeFormData(formData)
-
-        const result = await addNewEmployeeAction(newEmployee)
-
-        openCloseAddNewEmployeeModal(false)
-
-        if (result.success) {
-            refreshSearchResults()
-            addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
-        } else {
-            setAlert({
-                variant: "danger",
-                title: `Error: Could not add new employee '${getEmployeeFullName(newEmployee)}'`,
-                description: result.error ?? "An unexpected error occurred."
-            })
-        }
-    }
-
-    const openCloseAddNewEmployeeModal = (openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
+    const openCloseAddNewEmployeeModal = useCallback((openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
         setIsAddNewEmployeeModalOpen(openModal)
 
         if (!openModal && clearDraftEditsOnClose) {
             setDraftNewEmployee(undefined)
         }
-    }
+    }, [])
+
+    const onAddNewEmployeeSuccess = useCallback(() => {
+
+        refreshSearchResults()
+
+        openCloseAddNewEmployeeModal(false)
+
+        addSuccessAlert(`New employee added!`);
+    }, [openCloseAddNewEmployeeModal, refreshSearchResults])
+
+    const onAddNewEmployeeError = useCallback((error: string) => {
+
+        openCloseAddNewEmployeeModal(false, false)
+
+        setAlert({
+            variant: "danger",
+            title: "Error: Could not add new employee",
+            description: error
+        })
+    }, [openCloseAddNewEmployeeModal])
+
+    // const handleAddNewEmployee = async (formData: FormData) => {
+    //
+    //     const newEmployee: Employee = parseEmployeeFormData(formData)
+    //
+    //     const result = await addNewEmployeeAction(newEmployee)
+    //
+    //     openCloseAddNewEmployeeModal(false)
+    //
+    //     if (result.success) {
+    //         refreshSearchResults()
+    //         addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
+    //     } else {
+    //         setAlert({
+    //             variant: "danger",
+    //             title: `Error: Could not add new employee '${getEmployeeFullName(newEmployee)}'`,
+    //             description: result.error ?? "An unexpected error occurred."
+    //         })
+    //     }
+    // }
 
     const handleAddNewWorkstation = async (formData: FormData) => {
 
@@ -282,7 +309,11 @@ export function useEntityActions() {
         handleSearch,
         handleEdit,
         handleDeleteEmployee,
-        handleAddNewEmployee,
+        // handleAddNewEmployee,
+        onAddNewEmployeeSuccess,
+        onAddNewEmployeeError,
+        onEditEmployeeSuccess,
+        onEditEmployeeError,
         openCloseAddNewEmployeeModal,
         handleAddNewWorkstation,
         activateAssignMode,
