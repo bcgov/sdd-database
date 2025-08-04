@@ -26,9 +26,8 @@ Dockerfile
 
 # Documentation
 README.md
-Terminal Commands.md
+docs
 
 # Other directories and files
-Diagrams
 OpenShift Config
 Temporary
