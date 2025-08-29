@@ -1,4 +1,4 @@
-import {useCallback, useState} from "react";
+import {useCallback, useOptimistic, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
 import {Entity} from "@/types";
@@ -6,13 +6,38 @@ import {Entity} from "@/types";
 import {searchOfficesAction} from "@/actions/offices";
 import {searchAllAction} from "@/actions/search";
 
-export function useSearch(assignMode: boolean) {
+
+export function useSearch() {
 
     const [searchPhrase, setSearchPhrase] = useState<string>();
     const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
 
+    const [assignMode, setAssignMode] = useState(false);
+
+    const filteredSearchResults = searchResults.filter((item) => {
+
+        if (selectedFilterTags === "all") return true;
+
+        if (selectedFilterTags.size === 0) return true;
+
+        return selectedFilterTags.has(item.type)
+    })
+
+    // A reducer function used for optimistic deletes.
+    const excludeEmployeeReducer = (filteredSearchResults: Entity[], employeeId: string) => filteredSearchResults.filter(
+        item =>
+            // keep every non-employee item
+            item.type !== "employee" ||
+            // ...or keep an employee whose ID does not match the one we're deleting
+            item.employee_id !== employeeId
+    )
+
+    const [optimisticSearchResults, setOptimisticSearchResults] = useOptimistic(filteredSearchResults, excludeEmployeeReducer);
+
     const userHasSearchedOnce = () => searchPhrase !== undefined;
+
+    const searchResultsAreEmpty = searchResults.length === 0
 
     const handleSearch = async (formData: FormData) => {
         const query = formData.get("search") as string;
@@ -39,8 +64,12 @@ export function useSearch(assignMode: boolean) {
     return {
         selectedFilterTags,
         setSelectedFilterTags,
-        searchResults,
+        assignMode,
+        setAssignMode,
+        optimisticSearchResults,
+        setOptimisticSearchResults,
         userHasSearchedOnce,
+        searchResultsAreEmpty,
         handleSearch,
         runSearch,
         refreshSearchResults

@@ -4,7 +4,7 @@ import {Prisma, Employee} from "@prisma/client"
 
 import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
 
-import {EmployeeActionResult, Entity} from "@/types";
+import {EntityActionResult, Entity} from "@/types";
 
 import {parseEmployeeFormData} from "@/utils";
 
@@ -12,8 +12,11 @@ import {
     validateEmployeeIdField,
     validateEmployeeIdirField,
     validateEmployeeNameField,
-    validateEmployeeNotesField, validateEmployeeOfficeNumberField
+    validateNotesField,
+    validateEmployeeOfficeNumberField
 } from "@/validators";
+
+import {createEntityActions} from "@/actions/createEntityActions";
 
 
 function validateEmployeeData(employee: Employee) {
@@ -21,45 +24,70 @@ function validateEmployeeData(employee: Employee) {
     return (
         validateEmployeeNameField(employee.first_name, "First Name") ??
         validateEmployeeNameField(employee.last_name, "Last Name") ??
-        (employee.alternate_name && validateEmployeeNameField(employee.alternate_name, "Alternate Name", false)) ??
+        (employee.alternate_name ? validateEmployeeNameField(
+            employee.alternate_name,
+            "Alternate Name",
+            {
+                required: false,
+                allowMultipleWords: true
+            }
+        ) : undefined) ??
         validateEmployeeIdField(employee.employee_id) ??
         validateEmployeeIdirField(employee.idir) ??
-        (employee.notes && validateEmployeeNotesField(employee.notes)) ??
+        (employee.notes ? validateNotesField(employee.notes) : undefined) ??
         validateEmployeeOfficeNumberField(employee.office_number)
     )
 }
 
 function getReadablePrismaError(error: unknown, employee: Employee) {
 
-    let errorMessage = "An unexpected error occurred";
+    let errorMessage = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
         const {code, meta} = error;
 
-        if (code === "P2000") {
-            errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Employee ID must be exactly 6 digits long, IDIR can be upto 8 characters long, the Names (First Name, Last Name, Alternate Name) can be up to 30 characters long and Notes can be upto 2000 characters long.`;
-        }
+        switch (code) {
 
-        if (code === "P2002") {
-            let errorFieldName
+            case "P2000": {
 
-            if (Array.isArray(meta?.target)) {
-                errorFieldName = meta.target[0]
+                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Employee ID must be exactly 6 digits long, IDIR can be upto 8 characters long, the Names (First Name, Last Name, Alternate Name) can be up to 30 characters long and Notes can be upto 2000 characters long.`;
 
-                if (errorFieldName === "employee_id") {
-                    errorMessage = `Employee ID ${employee.employee_id} is already in use for some other employee`
-                } else {
-                    if (errorFieldName === "idir") {
-                        errorMessage = `IDIR ${employee.idir} is already in use for some other employee`
+                break;
+            }
+            case "P2002": {
+                let errorFieldName
+
+                if (Array.isArray(meta?.target)) {
+                    errorFieldName = meta.target[0]
+
+                    if (errorFieldName === "employee_id") {
+                        errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
+                    } else {
+                        if (errorFieldName === "idir") {
+                            errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
+                        }
                     }
                 }
-            }
-        }
 
-        if (code === "P2003") {
-            if (meta?.constraint === "Employee_office_number_fkey") {
-                errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
+                break;
+            }
+            case "P2003": {
+                if (meta?.constraint === "Employee_office_number_fkey") {
+                    errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
+                }
+
+                break;
+            }
+            case "P2025": {
+                const modelName = meta?.modelName ?? "record";
+
+                errorMessage = `You are trying to edit a ${modelName} that no longer exists. Please refresh the page to get the latest list of ${modelName}s.`;
+
+                break;
+            }
+            default: {
+                errorMessage += ` Error code: "${code}"`;
             }
         }
     }
@@ -69,42 +97,23 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
     return errorMessage;
 }
 
-type EmployeeAction = "create" | "update";
+const employeeActions = createEntityActions({
+    parse: parseEmployeeFormData,
+    validate: validateEmployeeData,
+    persist: {
+        create: addNewEmployee,
+        update: updateEmployee,
+    },
+    getReadablePrismaError,
+})
 
-async function persistEmployee(mode: EmployeeAction, _prevState: EmployeeActionResult, formData: FormData): Promise<EmployeeActionResult> {
-    const employee: Employee = parseEmployeeFormData(formData);
-
-    // server-side validation
-    const validationError = validateEmployeeData(employee);
-
-    if (validationError) {
-        return {
-            status: "error",
-            error: validationError
-        };
-    }
-
-    try {
-        if (mode === "create") {
-            await addNewEmployee(employee);
-        } else {
-            await updateEmployee(employee);
-        }
-
-        return {status: "ok"};
-
-    } catch (error) {
-
-        return {
-            status: "error",
-            error: getReadablePrismaError(error, employee)
-        };
-    }
+export async function addNewEmployeeAction(prevState: EntityActionResult, formData: FormData) {
+    return employeeActions.addAction(prevState, formData);
 }
 
-export const addNewEmployeeAction = persistEmployee.bind(null, "create")
-
-export const updateEmployeeAction = persistEmployee.bind(null, "update")
+export async function updateEmployeeAction(prevState: EntityActionResult, formData: FormData) {
+    return employeeActions.updateAction(prevState, formData);
+}
 
 export async function searchEmployeesAction(query?: string) {
     const employeeSearchResults = await getEmployeesByFilter(query);

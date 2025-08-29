@@ -1,11 +1,18 @@
 # `src/hooks/` – Custom Hooks Architecture
 
-All reusable state logic lives here. Hooks are categorized by function:
+All reusable state logic lives here. Each hook handles one concern, keeping `page.tsx` clean and declarative.
 
-| Hook | Responsibility |
-|------|----------------|
-| `useEntityActions` | Central hub for UI + state management |
-| `useSearch` | Manages search-related state and functions |
-| `useEntityUIState` | Modal state control |
-| `useEntityAlerts` | Success and error alerts |
-| `useEntityEditCallbacks` | Callbacks for updating entity data |
+---
+
+## 🧭 Overview of Hooks and Responsibilities
+
+| Hook                      | Responsibility                                                                 |
+|---------------------------|---------------------------------------------------------------------------------|
+| `useEntityOrchestration`  | Composes all hooks and exposes only what the page needs (`uiState`, `alerts`, `search`, `actions`, `editHandlers`). |
+| `useEntityActions`        | Handles entity-specific logic: opening modals, assign office flow, optimistic deletes, and success/error handlers. |
+| `useSearch`               | Manages search state: phrase, filters, results, optimistic updates, and refresh logic. |
+| `useEntityUIState`        | Simple modal state (`isEditModalOpen`, `setIsEditModalOpen`).                    |
+| `useEntityAlerts`         | Alert state with helpers for success/error messages (auto-hide for success).     |
+| `useEntityEditCallbacks`  | Provides edit success/error handlers: refresh results, close modal, show alerts. |
+
+---

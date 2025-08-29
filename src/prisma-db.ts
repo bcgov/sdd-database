@@ -1,9 +1,9 @@
-import {PrismaClient, Employee, Workstation} from "@prisma/client";
+import {PrismaClient, Employee, Workstation, Office} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function addNewEmployee(employee: Employee) {
-    await prisma.employee.create({
+    return prisma.employee.create({
         data: {
             ...employee
         },
@@ -11,7 +11,7 @@ export async function addNewEmployee(employee: Employee) {
 }
 
 export async function addNewWorkstation(workstation: Workstation) {
-    await prisma.workstation.create({
+    return prisma.workstation.create({
         data: {
             ...workstation
         }
@@ -71,7 +71,6 @@ export async function updateEmployee(employee: Employee) {
 
     // we don't want to update the employee_id and idir fields as those are read-only and hence the user couldn't
     // have changed them in the form
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {employee_id, idir: _idir, ...updatableFields} = employee
 
     return prisma.employee.update({
@@ -80,10 +79,13 @@ export async function updateEmployee(employee: Employee) {
     })
 }
 
-export async function updateOffice(office_number: string, notes: string | null) {
+export async function updateOffice(office: Office) {
+
+    const {office_number, office_name: _office_name, postal_code: _postal_code, ...updatableFields} = office
+
     return prisma.office.update({
         where: {office_number},
-        data: {notes}
+        data: {...updatableFields},
     })
 }
 

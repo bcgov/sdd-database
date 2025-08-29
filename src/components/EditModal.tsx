@@ -15,7 +15,6 @@ interface EditModalProps {
     activateAssignMode: (formData: FormData) => Promise<void>
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
-    onSubmit: (formData: FormData) => void
     onSuccess: () => void
     onError: (error: string) => void
     onDelete: () => void
@@ -26,7 +25,6 @@ export function EditModal({
                               activateAssignMode,
                               isOpen,
                               setIsOpen,
-                              onSubmit,
                               onSuccess,
                               onError,
                               onDelete
@@ -41,22 +39,26 @@ export function EditModal({
 
         switch (item.type) {
             case "employee":
-                bodyComponent = <EmployeeForm employee={item}
-                                              activateAssignMode={activateAssignMode}
-                                              onSuccess={onSuccess}
-                                              onError={onError}
-                                              onDelete={onDelete}
-                                              onClose={onClose}/>
+                bodyComponent =
+                    <EmployeeForm employee={item}
+                                  activateAssignMode={activateAssignMode}
+                                  onSuccess={onSuccess}
+                                  onError={onError}
+                                  onDelete={onDelete}
+                                  onClose={onClose}>
+                    </EmployeeForm>
                 break
 
             case "office":
-                bodyComponent = <OfficeForm onSubmit={onSubmit}
+                bodyComponent = <OfficeForm onSuccess={onSuccess}
+                                            onError={onError}
                                             office={item}
                                             onClose={onClose}/>
                 break
 
             case "workstation":
-                bodyComponent = <WorkstationForm onSubmit={onSubmit}
+                bodyComponent = <WorkstationForm onSuccess={onSuccess}
+                                                 onError={onError}
                                                  workstation={item}
                                                  onClose={onClose}/>
                 break

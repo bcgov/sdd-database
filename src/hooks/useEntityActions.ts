@@ -1,46 +1,45 @@
-import {useCallback, useState} from "react";
+import {Dispatch, SetStateAction, startTransition, useCallback, useState} from "react";
+import type {Selection} from "@react-types/shared";
 
-import {Employee, Workstation} from "@prisma/client";
+import {Employee} from "@prisma/client";
 
 import {Entity} from "@/types";
 
-import {useSearch} from "@/hooks/useSearch";
-
 import {deleteEmployeeAction} from "@/actions/employees";
-import {updateOfficeAction} from "@/actions/offices";
-import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
 
-import {ENTITY_TYPE_NAME, getEmployeeFullName, parseEmployeeFormData} from "@/utils";
+import {getEmployeeFullName, parseEmployeeFormData} from "@/utils";
 
 
-interface Alert {
-    variant: "success" | "danger";
-    title?: string;
-    description?: string;
+interface UseEntityActionsProps {
+    setIsEditModalOpen: (isOpen: boolean) => void;
+
+    addSuccessAlert: (description: string) => void;
+    addErrorAlert: (title: string, description: string) => void;
+
+    setSelectedFilterTags: Dispatch<SetStateAction<Selection>>
+    setAssignMode: (assignMode: boolean) => void;
+    setOptimisticSearchResults: (employeeId: string) => void;
+    runSearch: (query?: string, searchOnlyOffices?: boolean) => Promise<void>;
+    refreshSearchResults: () => void;
 }
 
-export function useEntityActions() {
+export function useEntityActions({
+                                     setIsEditModalOpen,
+                                     addSuccessAlert,
+                                     addErrorAlert,
+                                     setSelectedFilterTags,
+                                     setAssignMode,
+                                     setOptimisticSearchResults,
+                                     runSearch,
+                                     refreshSearchResults
+                                 }: UseEntityActionsProps) {
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
 
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
     const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
 
-    const [assignMode, setAssignMode] = useState(false);
     const [draftNewEmployee, setDraftNewEmployee] = useState<Employee>();
-
-    const [alert, setAlert] = useState<Alert>();
-
-    const {
-        selectedFilterTags,
-        setSelectedFilterTags,
-        searchResults,
-        userHasSearchedOnce,
-        handleSearch,
-        runSearch,
-        refreshSearchResults
-    } = useSearch(assignMode)
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
@@ -113,119 +112,6 @@ export function useEntityActions() {
         }
     }
 
-    const parseWorkstationFormData = (formData: FormData): Workstation => {
-        return {
-            asset_tag: formData.get("assetTag") as string,
-            notes: formData.get("notes") as string || null,
-        }
-    }
-
-    const addSuccessAlert = (description: string) => {
-
-        const ALERT_TIMEOUT = 6500;
-
-        setAlert({
-            variant: "success",
-            title: "Success",
-            description: description
-        })
-
-        // Auto-hide the success alert message after ALERT_TIMEOUT seconds
-        setTimeout(() => {
-            setAlert(undefined);
-        }, ALERT_TIMEOUT)
-    }
-
-    const handleEditOffice = async (formData: FormData) => {
-
-        if (selectedSearchResult?.type === "office") {
-            const notes = formData.get("notes") as string || null;
-
-            await updateOfficeAction(selectedSearchResult.office_number, notes);
-        }
-    }
-
-    const handleEditEmployee = async (formData: FormData) => {
-
-        // if (selectedSearchResult?.type === "employee") {
-
-            // console.log(formData);
-
-            // const updatedEmployee: Employee = {
-            //     ...parseEmployeeFormData(formData),
-            //     employee_id: selectedSearchResult.employee_id,
-            //     idir: selectedSearchResult.idir
-            // }
-            //
-            // await updateEmployeeAction(updatedEmployee)
-        // }
-    }
-
-    const handleEditWorkstation = async (formData: FormData) => {
-        if (selectedSearchResult?.type === "workstation") {
-
-            const updatedWorkstation: Workstation = {
-                ...parseWorkstationFormData(formData),
-                asset_tag: selectedSearchResult.asset_tag,
-            }
-
-            await updateWorkstationAction(updatedWorkstation)
-        }
-    }
-
-    const editHandlers: Record<Entity["type"], (fd: FormData) => Promise<void>> = {
-        employee: handleEditEmployee,
-        office: handleEditOffice,
-        workstation: handleEditWorkstation
-    }
-
-    const handleEdit = async (formData: FormData) => {
-
-        if (selectedSearchResult) {
-            await editHandlers[selectedSearchResult.type](formData);
-
-            refreshSearchResults()
-
-            setIsEditModalOpen(false);
-
-            addSuccessAlert(`${ENTITY_TYPE_NAME[selectedSearchResult.type]} details updated!`);
-        }
-    }
-
-    const onEditEmployeeSuccess = useCallback(() => {
-        refreshSearchResults()
-
-        setIsEditModalOpen(false);
-
-        addSuccessAlert(`Employee details updated!`);
-    }, [refreshSearchResults])
-
-    const onEditEmployeeError = useCallback((error: string) => {
-
-        setIsEditModalOpen(false);
-
-        setAlert({
-            variant: "danger",
-            title: "Error: Could not edit employee",
-            description: error
-        })
-    }, [])
-
-    const handleDeleteEmployee = async () => {
-
-        if (selectedSearchResult?.type === "employee") {
-            await deleteEmployeeAction(selectedSearchResult.employee_id);
-
-            // We update previous search results in case an employee is deleted
-            refreshSearchResults()
-
-            setIsDeleteAlertDialogOpen(false)
-            setIsEditModalOpen(false)
-
-            addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
-        }
-    }
-
     const openCloseAddNewEmployeeModal = useCallback((openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
         setIsAddNewEmployeeModalOpen(openModal)
 
@@ -241,82 +127,72 @@ export function useEntityActions() {
         openCloseAddNewEmployeeModal(false)
 
         addSuccessAlert(`New employee added!`);
-    }, [openCloseAddNewEmployeeModal, refreshSearchResults])
+
+    }, [openCloseAddNewEmployeeModal, refreshSearchResults, addSuccessAlert])
 
     const onAddNewEmployeeError = useCallback((error: string) => {
 
         openCloseAddNewEmployeeModal(false, false)
 
-        setAlert({
-            variant: "danger",
-            title: "Error: Could not add new employee",
-            description: error
-        })
-    }, [openCloseAddNewEmployeeModal])
+        addErrorAlert("Error: Could not add new employee", error)
 
-    // const handleAddNewEmployee = async (formData: FormData) => {
-    //
-    //     const newEmployee: Employee = parseEmployeeFormData(formData)
-    //
-    //     const result = await addNewEmployeeAction(newEmployee)
-    //
-    //     openCloseAddNewEmployeeModal(false)
-    //
-    //     if (result.success) {
-    //         refreshSearchResults()
-    //         addSuccessAlert(`New employee '${getEmployeeFullName(newEmployee)}' added!`);
-    //     } else {
-    //         setAlert({
-    //             variant: "danger",
-    //             title: `Error: Could not add new employee '${getEmployeeFullName(newEmployee)}'`,
-    //             description: result.error ?? "An unexpected error occurred."
-    //         })
-    //     }
-    // }
+    }, [openCloseAddNewEmployeeModal, addErrorAlert])
 
-    const handleAddNewWorkstation = async (formData: FormData) => {
-
-        const newWorkstation = parseWorkstationFormData(formData)
-
-        await addNewWorkstationAction(newWorkstation)
-
+    const onAddNewWorkstationSuccess = useCallback(() => {
         refreshSearchResults()
 
         setIsAddNewWorkstationModalOpen(false)
 
-        addSuccessAlert(`New workstation '${newWorkstation.asset_tag}' added!`);
+        addSuccessAlert(`New workstation added!`);
+    }, [refreshSearchResults, addSuccessAlert])
+
+    const onAddNewWorkstationError = useCallback((error: string) => {
+        setIsAddNewWorkstationModalOpen(false)
+
+        addErrorAlert("Error: Could not add new workstation", error)
+    }, [addErrorAlert])
+
+    const removeEmployeeById = async (employeeId: string) => {
+        // Optimistic Overlay
+        startTransition(() => {
+            // This line below immediately applies excludeEmployeeReducer to remove that employee from the UI before
+            // the server delete action is called (instant feedback).
+            setOptimisticSearchResults(employeeId);
+        })
+
+        // close dialogs + toast
+        setIsDeleteAlertDialogOpen(false)
+        setIsEditModalOpen(false)
+
+        if (selectedSearchResult?.type === "employee") {
+            addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
+        }
+
+        // Server mutation
+        try {
+            await deleteEmployeeAction(employeeId);
+        } finally {
+            // always re-sync with DB
+            refreshSearchResults()
+        }
     }
 
     return {
-        searchResults,
-        selectedFilterTags,
-        setSelectedFilterTags,
-        assignMode,
-        draftNewEmployee,
         selectedSearchResult,
-        alert,
-        setAlert,
-        isEditModalOpen,
-        setIsEditModalOpen,
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
         isAddNewEmployeeModalOpen,
-        setIsAddNewEmployeeModalOpen,
         isAddNewWorkstationModalOpen,
         setIsAddNewWorkstationModalOpen,
+        draftNewEmployee,
         openSearchResultEditModal,
-        userHasSearchedOnce,
-        handleSearch,
-        handleEdit,
-        handleDeleteEmployee,
-        // handleAddNewEmployee,
+        activateAssignMode,
+        assignOfficeClickHandler,
+        openCloseAddNewEmployeeModal,
         onAddNewEmployeeSuccess,
         onAddNewEmployeeError,
-        onEditEmployeeSuccess,
-        onEditEmployeeError,
-        openCloseAddNewEmployeeModal,
-        handleAddNewWorkstation,
-        activateAssignMode,
-        assignOfficeClickHandler
+        onAddNewWorkstationSuccess,
+        onAddNewWorkstationError,
+        removeEmployeeById
     }
 }

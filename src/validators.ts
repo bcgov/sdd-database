@@ -10,9 +10,23 @@ function validateMaxLength(value: string, maxLength: number, label: string) {
     }
 }
 
-export function validateEmployeeNameField(value: string, label: string, required: boolean = true) {
-    const NAME_MAX_LENGTH = 30;
+function validateOnlyLettersAndNumbers(value: string, label: string) {
+    if (!/^[A-Za-z0-9]*$/.test(value)) {
+        return `${label} can only contain letters and numbers (no special characters)`;
+    }
+}
 
+export function validateEmployeeNameField(
+    value: string,
+    label: string,
+    {
+        required = true,
+        allowMultipleWords = false
+    }: {
+        required?: boolean;
+        allowMultipleWords?: boolean;
+    } = {}
+) {
     if (required) {
         const requiredError = validateRequiredField(value, label)
 
@@ -21,18 +35,30 @@ export function validateEmployeeNameField(value: string, label: string, required
         }
     }
 
-    if (/\s/.test(value)) {
-        return `${label} must be a single word (no spaces)`;
+    const multipleWordsRegex = /^$|^[A-Za-z]+(?: [A-Za-z]+)*$/;
+    const singleWordRegex = /^$|^[A-Za-z]+$/;
+
+    const pattern = allowMultipleWords ? multipleWordsRegex : singleWordRegex;
+
+    if (!pattern.test(value)) {
+
+        let errorMessage = `${label} can contain only alphabets`;
+
+        if (allowMultipleWords) {
+            errorMessage += `  and spaces in between words`;
+        } else {
+            errorMessage += ` and must be a single word`;
+        }
+
+        return errorMessage;
     }
+
+    const NAME_MAX_LENGTH = 30;
 
     const maxLengthError = validateMaxLength(value, NAME_MAX_LENGTH, label);
 
     if (maxLengthError) {
         return maxLengthError;
-    }
-
-    if (!/^[A-Za-z]*$/.test(value)) {
-        return `${label} can contain only alphabets`;
     }
 }
 
@@ -71,12 +97,14 @@ export function validateEmployeeIdirField(value: string, label: string = "IDIR")
         return maxLengthError;
     }
 
-    if (!/^[A-Za-z0-9]+$/.test(value)) {
-        return `${label} can only contain letters and numbers (no special characters)`;
+    const invalidCharacterError= validateOnlyLettersAndNumbers(value, label);
+
+    if (invalidCharacterError) {
+        return invalidCharacterError;
     }
 }
 
-export function validateEmployeeNotesField(value: string, label: string = "Notes") {
+export function validateNotesField(value: string, label: string = "Notes") {
     const NOTES_MAX_LENGTH = 2000;
 
     const maxLengthError = validateMaxLength(value, NOTES_MAX_LENGTH, label);
@@ -91,5 +119,25 @@ export function validateEmployeeOfficeNumberField(value: string, label: string =
 
     if (requiredError) {
         return requiredError;
+    }
+}
+
+export function validateAssetTagField(value: string, label: string = "Asset Tag") {
+    const requiredError = validateRequiredField(value, label);
+
+    if (requiredError) {
+        return requiredError;
+    }
+
+    const invalidCharacterError= validateOnlyLettersAndNumbers(value, label);
+
+    if (invalidCharacterError) {
+        return invalidCharacterError;
+    }
+
+    const validLengths = [8, 10, 14];
+
+    if (!validLengths.includes(value.length)) {
+        return `${label} must be exactly 8, 10, or 14 characters long.`;
     }
 }

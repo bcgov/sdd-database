@@ -15,107 +15,83 @@ import {ModalDialog} from "@/components/ModalDialog";
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
-import {useEntityActions} from "@/hooks/useEntityActions";
+import {useEntityOrchestration} from "@/hooks/useEntityOrchestration";
 
 
 export default function Home() {
 
-    const {
-        searchResults,
-        selectedFilterTags,
-        setSelectedFilterTags,
-        assignMode,
-        draftNewEmployee,
-        selectedSearchResult,
-        alert,
-        setAlert,
-        isEditModalOpen,
-        setIsEditModalOpen,
-        isDeleteAlertDialogOpen,
-        setIsDeleteAlertDialogOpen,
-        isAddNewEmployeeModalOpen,
-        isAddNewWorkstationModalOpen,
-        setIsAddNewWorkstationModalOpen,
-        openSearchResultEditModal,
-        userHasSearchedOnce,
-        handleSearch,
-        handleEdit,
-        handleDeleteEmployee,
-        // handleAddNewEmployee,
-        onAddNewEmployeeSuccess,
-        onAddNewEmployeeError,
-        onEditEmployeeSuccess,
-        onEditEmployeeError,
-        openCloseAddNewEmployeeModal,
-        handleAddNewWorkstation,
-        activateAssignMode,
-        assignOfficeClickHandler
-    } = useEntityActions()
+    const {uiState, alerts, search, actions, editHandlers} = useEntityOrchestration()
 
     return (
         <>
             <Header title="Employee Information"></Header>
 
             <Search
-                searchResults={searchResults}
-                selectedFilterTags={selectedFilterTags}
-                setSelectedFilterTags={setSelectedFilterTags}
-                handleSearch={handleSearch}
-                userHasSearchedOnce={userHasSearchedOnce}
-                searchResultClickHandler={openSearchResultEditModal}
-                assignMode={assignMode}
-                assignOfficeClickHandler={assignOfficeClickHandler}
-            />
+                selectedFilterTags={search.selectedFilterTags}
+                setSelectedFilterTags={search.setSelectedFilterTags}
+                handleSearch={search.handleSearch}
+                userHasSearchedOnce={search.userHasSearchedOnce}
+                searchResultsAreEmpty={search.searchResultsAreEmpty}
+                visibleSearchResults={search.optimisticSearchResults}
+                searchResultClickHandler={actions.openSearchResultEditModal}
+                assignMode={search.assignMode}
+                assignOfficeClickHandler={actions.assignOfficeClickHandler}>
+            </Search>
 
-            {selectedSearchResult &&
+            {actions.selectedSearchResult &&
                 <>
                     <EditModal
-                        item={selectedSearchResult}
-                        activateAssignMode={activateAssignMode}
-                        isOpen={isEditModalOpen}
-                        setIsOpen={setIsEditModalOpen}
-                        onSubmit={handleEdit}
-                        onSuccess={onEditEmployeeSuccess}
-                        onError={onEditEmployeeError}
-                        onDelete={() => setIsDeleteAlertDialogOpen(true)}
-                    />
+                        item={actions.selectedSearchResult}
+                        activateAssignMode={actions.activateAssignMode}
+                        isOpen={uiState.isEditModalOpen}
+                        setIsOpen={uiState.setIsEditModalOpen}
+                        onSuccess={editHandlers.onEditSuccess}
+                        onError={editHandlers.onEditError}
+                        onDelete={() => actions.setIsDeleteAlertDialogOpen(true)}>
+                    </EditModal>
 
                     {
-                        selectedSearchResult.type === "employee" &&
+                        actions.selectedSearchResult.type === "employee" &&
                         <DeleteAlertDialog
-                            employee={selectedSearchResult}
-                            isOpen={isDeleteAlertDialogOpen}
-                            setIsOpen={setIsDeleteAlertDialogOpen}
-                            onDelete={handleDeleteEmployee}/>
+                            employee={actions.selectedSearchResult}
+                            isOpen={actions.isDeleteAlertDialogOpen}
+                            setIsOpen={actions.setIsDeleteAlertDialogOpen}
+                            onDelete={actions.removeEmployeeById}>
+                        </DeleteAlertDialog>
                     }
                 </>
             }
 
-            <ModalDialog isOpen={isAddNewEmployeeModalOpen}
-                         setIsOpen={openCloseAddNewEmployeeModal}
+            <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
+                         setIsOpen={actions.openCloseAddNewEmployeeModal}
                          triggerButtonText="Add New Employee"
-                         disableTriggerButton={assignMode}
+                         disableTriggerButton={search.assignMode}
                          modalTitle="Add New Employee">
-                <EmployeeForm employee={draftNewEmployee}
-                              activateAssignMode={activateAssignMode}
-                              onSuccess={onAddNewEmployeeSuccess}
-                              onError={onAddNewEmployeeError}
-                              onClose={() => openCloseAddNewEmployeeModal(false)}/>
+                <EmployeeForm employee={actions.draftNewEmployee}
+                              activateAssignMode={actions.activateAssignMode}
+                              onSuccess={actions.onAddNewEmployeeSuccess}
+                              onError={actions.onAddNewEmployeeError}
+                              onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
+                </EmployeeForm>
             </ModalDialog>
 
-            <ModalDialog isOpen={isAddNewWorkstationModalOpen}
-                         setIsOpen={setIsAddNewWorkstationModalOpen}
+            <ModalDialog isOpen={actions.isAddNewWorkstationModalOpen}
+                         setIsOpen={actions.setIsAddNewWorkstationModalOpen}
                          triggerButtonText="Add New Workstation"
                          modalTitle="Add New Workstation">
-                <WorkstationForm onSubmit={handleAddNewWorkstation}
-                                 onClose={() => setIsAddNewWorkstationModalOpen(false)}/>
+                <WorkstationForm onSuccess={actions.onAddNewWorkstationSuccess}
+                                 onError={actions.onAddNewWorkstationError}
+                                 onClose={() => actions.setIsAddNewWorkstationModalOpen(false)}>
+                </WorkstationForm>
             </ModalDialog>
 
-            {alert && <InlineAlert title={alert.title}
-                                   description={alert.description}
-                                   isCloseable
-                                   onClose={() => setAlert(undefined)}
-                                   variant={alert.variant}></InlineAlert>}
+            {alerts.alert &&
+                <InlineAlert title={alerts.alert.title}
+                             description={alerts.alert.description}
+                             isCloseable
+                             onClose={() => alerts.setAlert(undefined)}
+                             variant={alerts.alert.variant}>
+                </InlineAlert>}
 
             <Footer hideAcknowledgement hideLogoAndLinks></Footer>
         </>

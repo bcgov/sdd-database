@@ -3,7 +3,7 @@ import {Entity} from "@/types";
 import {getEmployeeFullName} from "@/utils";
 
 interface SearchResultsListProps {
-    searchResults: Entity[]
+    visibleSearchResults: Entity[]
     searchResultClickHandler: (item: Entity) => void
     assignMode: boolean
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
@@ -48,17 +48,14 @@ const getSearchResultTitle = (item: Entity) => {
 }
 
 export function SearchResultsList({
-                                      searchResults,
+                                      visibleSearchResults,
                                       searchResultClickHandler,
                                       assignMode,
                                       assignOfficeClickHandler
                                   }: SearchResultsListProps) {
     return (
-        searchResults.length === 0 ?
-
-            <p style={{padding: "1rem"}}>No filtered search results found</p> :
-
-            searchResults.map(item =>
+        <>
+            {visibleSearchResults.map(item =>
                 <SearchResultItem key={getSearchResultKey(item)}
                                   title={getSearchResultTitle(item)}
                                   searchResultClickHandler={() => searchResultClickHandler(item)}
@@ -68,6 +65,7 @@ export function SearchResultsList({
                                           undefined
                                   }>
                 </SearchResultItem>
-            )
+            )}
+        </>
     )
 }

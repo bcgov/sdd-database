@@ -1,7 +1,69 @@
 "use server";
 
+import {Office, Prisma} from "@prisma/client";
+
 import {getOfficesByFilter, updateOffice} from "@/prisma-db";
-import {Entity} from "@/types";
+
+import {Entity, EntityActionResult} from "@/types";
+
+import {validateNotesField} from "@/validators";
+
+import {createEntityActions} from "@/actions/createEntityActions";
+
+
+const parseOfficeFormData = (formData: FormData): Office => {
+    return {
+        office_number: formData.get("officeNumber") as string,
+        office_name: formData.get("officeName") as string,
+        postal_code: formData.get("postalCode") as string,
+        notes: formData.get("notes") as string || null,
+    }
+}
+
+function validateOfficeData(office: Office) {
+    return office.notes ? validateNotesField(office.notes) : undefined
+}
+
+function getReadablePrismaError(error: unknown) {
+
+    let errorMessage = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+
+        const {code} = error;
+
+        switch (code) {
+
+            case "P2000": {
+                errorMessage = `Notes can be upto 2000 characters long. Please shorten it and try again.`;
+                break;
+            }
+            default: {
+                errorMessage += ` Error code: "${code}"`;
+            }
+        }
+    }
+
+    console.error(error);
+
+    return errorMessage;
+}
+
+const officeActions = createEntityActions({
+    parse: parseOfficeFormData,
+    validate: validateOfficeData,
+    persist: {
+        create: async () => {
+            throw new Error("Creating new office is not supported.");
+        },
+        update: updateOffice
+    },
+    getReadablePrismaError
+})
+
+export async function updateOfficeAction(prevState: EntityActionResult, formData: FormData) {
+    return officeActions.updateAction(prevState, formData);
+}
 
 export async function searchOfficesAction(query?: string) {
     const officeSearchResults = await getOfficesByFilter(query);
@@ -13,8 +75,4 @@ export async function searchOfficesAction(query?: string) {
     }))
 
     return officesWithType
-}
-
-export async function updateOfficeAction(office_number: string, notes: string | null) {
-    await updateOffice(office_number, notes);
 }

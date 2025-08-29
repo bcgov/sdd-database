@@ -6,6 +6,14 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.8",
+            notes: [
+                "Added field validations restricting typos and preventing inaccurate data entry",
+                "Performance improvements across the board especially with the delete operation",
+                "Search Filter Tags are now always visible despite no search results being present",
+            ]
+        },
+        {
             version: "v0.0.7",
             notes: [
                 "Fixed bug allowing users to add duplicate IDIR employees by changing case"

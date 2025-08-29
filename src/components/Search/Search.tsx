@@ -11,70 +11,70 @@ import {SearchResultsList} from "@/components/Search/SearchResultsList";
 
 
 interface SearchProps {
-    searchResults: Entity[]
     selectedFilterTags: Selection
     setSelectedFilterTags: (selectedFilterTags: Selection) => void
+    visibleSearchResults: Entity[]
     assignMode: boolean
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
     userHasSearchedOnce: () => boolean
+    searchResultsAreEmpty: boolean
     searchResultClickHandler: (item: Entity) => void
     handleSearch: (formData: FormData) => Promise<void>
 }
 
 export function Search({
-                           searchResults,
                            selectedFilterTags,
                            setSelectedFilterTags,
+                           visibleSearchResults,
                            assignMode,
                            assignOfficeClickHandler,
+                           searchResultsAreEmpty,
                            userHasSearchedOnce,
                            searchResultClickHandler,
                            handleSearch
                        }: SearchProps) {
 
-    const filteredSearchResults = searchResults.filter((item) => {
-
-        if (selectedFilterTags === "all") return true;
-
-        if (selectedFilterTags.size === 0) return true;
-
-        return selectedFilterTags.has(item.type)
-    })
-
-    const displayFiltersAndSearchResults = () => {
-        return (
-            <>
-                {/* Search Filters */}
-                <FilterTags selectedFilterTags={selectedFilterTags}
-                            setSelectedFilterTags={setSelectedFilterTags}
-                            disableFilterTags={assignMode}></FilterTags>
-
-                {/* (Filtered) Search Results List */}
-                <SearchResultsList searchResults={filteredSearchResults}
-                                   searchResultClickHandler={searchResultClickHandler}
-                                   assignMode={assignMode}
-                                   assignOfficeClickHandler={assignOfficeClickHandler}>
-                </SearchResultsList>
-            </>
-        )
-    }
-
-    const displaySearchBar = () => {
-        return <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
+    const renderSearchBar = () => (
+        <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
             <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
             <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
         </Form>
+    )
+
+    const renderFilters = () => (
+        <FilterTags selectedFilterTags={selectedFilterTags}
+                    setSelectedFilterTags={setSelectedFilterTags}
+                    disableFilterTags={assignMode}>
+        </FilterTags>
+    )
+
+    const renderSearchResults = () => {
+
+        {/* (Filtered) Search Results List */}
+        return (
+            <SearchResultsList visibleSearchResults={visibleSearchResults}
+                               searchResultClickHandler={searchResultClickHandler}
+                               assignMode={assignMode}
+                               assignOfficeClickHandler={assignOfficeClickHandler}>
+            </SearchResultsList>
+        )
     }
 
-    const displaySearchBody = () => {
+    const showBody = userHasSearchedOnce()
 
-        if (searchResults.length === 0) {
-
-            return userHasSearchedOnce() ? <p style={{padding: "1rem"}}>No results found</p> : null
-
-        } else {
-            return displayFiltersAndSearchResults()
+    const renderResultsOrEmpty = () => {
+        // Case 1: Search results are empty
+        if (searchResultsAreEmpty) {
+            return <p style={{padding: "1rem"}}>No results found</p>
         }
+
+        // Case 2: Search results are not empty but filtered results are empty
+        if (visibleSearchResults.length === 0) {
+            return <p style={{padding: "1rem"}}>No filtered search results found</p>
+        }
+
+        // Case 3: Search results are not empty and filtered results are not empty
+        return renderSearchResults()
     }
 
     return (
@@ -86,9 +86,14 @@ export function Search({
                          description="You can look up the employee's office using the search box. Once you have it, click the Assign button next to it."></Callout>
             </div>)}
 
-            {displaySearchBar()}
+            {renderSearchBar()}
 
-            {displaySearchBody()}
+            {showBody && (
+                <>
+                    {renderFilters()}
+                    {renderResultsOrEmpty()}
+                </>
+            )}
         </>
     )
 }

@@ -24,11 +24,11 @@ model Office {
   office_number String     @id
   office_name   String     @unique @db.Citext
   postal_code   String
-  notes         String?
+  notes         String?    @db.VarChar(2000)
   Employee      Employee[]
 }
 
 model Workstation {
-  asset_tag String  @id
-  notes     String?
+  asset_tag String  @id @db.Citext
+  notes     String? @db.VarChar(2000)
 }

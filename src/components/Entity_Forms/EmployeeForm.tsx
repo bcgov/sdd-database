@@ -9,7 +9,6 @@ import {
     ButtonGroup,
     Callout,
     Form,
-    // InlineAlert,
     TextArea,
     TextField
 } from "@bcgov/design-system-react-components";
@@ -18,13 +17,13 @@ import {Employee} from "@prisma/client";
 
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
 
-import {EmployeeActionResult} from "@/types";
+import {EntityActionResult} from "@/types";
 
 import {
     validateEmployeeIdField,
     validateEmployeeNameField,
-    validateEmployeeNotesField,
-    validateEmployeeIdirField
+    validateNotesField,
+    validateEmployeeIdirField,
 } from "@/validators";
 
 
@@ -49,7 +48,7 @@ export function EmployeeForm({
 
     const isEditMode = !!onDelete;
 
-    const initialState: EmployeeActionResult = {status: "idle"};
+    const initialState: EntityActionResult = {status: "idle"};
 
     const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction;
 
@@ -132,15 +131,24 @@ export function EmployeeForm({
 
                         <TextField label="Alternate Name"
                                    name="alternateName"
-                                   validate={value => validateEmployeeNameField(value, "Alternate Name", false)}
+                                   validate={value => validateEmployeeNameField(
+                                       value,
+                                       "Alternate Name",
+                                       {
+                                           required: false,
+                                           allowMultipleWords: true
+                                       }
+                                   )
+                                   }
                                    defaultValue={employee?.alternate_name ?? undefined}>
                         </TextField>
 
                         <TextArea label="Notes"
                                   name="notes"
                                   maxLength={2000}
-                                  validate={validateEmployeeNotesField}
-                                  defaultValue={employee?.notes ?? undefined}></TextArea>
+                                  validate={validateNotesField}
+                                  defaultValue={employee?.notes ?? undefined}>
+                        </TextArea>
                     </div>
 
                 </Accordion>
@@ -165,7 +173,6 @@ export function EmployeeForm({
                         >{employee?.office_number ? "Update" : "Assign"} Office</Button>
                     </div>
                 </Accordion>
-
             </AccordionGroup>
 
             {/*<div style={{backgroundColor: "gray"}}>*/}
