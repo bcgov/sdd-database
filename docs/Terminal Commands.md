@@ -95,7 +95,7 @@ Everytime, the `schema.prisma` file is modified, run the below command to
 
 1. create a new migration file
 2. execute the migration against the database
-3. installs the prisma client package (if it does not exists)
+3. installs the prisma client package (if it does not exist)
 4. generates the prisma client with which we can interact with the database
 
 ```shell
@@ -104,7 +104,7 @@ npx prisma migrate dev --name <nameOfMigration>
 
 ### Seed
 
-To run the seed script in `package.json`, use the following command:
+To run the seed script `prisma/seedOffices.ts`, use the following command:
 
 ```shell
 npx prisma db seed
