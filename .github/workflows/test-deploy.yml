@@ -1,12 +1,12 @@
-name: Deploy to dev namespace
+name: Deploy to test namespace
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ test ]
 
 env:
   TOOLS_NS: a6d989-tools
-  DEV_NS:   a6d989-dev
+  TEST_NS:   a6d989-test
 
   # BuildConfig and Deployment name
   APP:      employee-information-database
@@ -17,7 +17,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     concurrency:
-        group: "dev-deploy"
+        group: "test-deploy"
         cancel-in-progress: true
 
     steps:
@@ -42,24 +42,24 @@ jobs:
 
       - name: Add custom tag to the newly created image in the tools namespace
         run: |
-          # dev-<first7charsOfCommit>
-          TAG=dev-${GITHUB_SHA::7}
-          
-          # latest -> dev-<sha>-tools
-          oc -n $TOOLS_NS tag $APP:latest $APP:${TAG}-tools
-          
-          # save for later steps
-          echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
+            # test-<first7charsOfCommit>
+            TAG=test-${GITHUB_SHA::7}
+            
+            # latest -> test-<sha>-tools
+            oc -n $TOOLS_NS tag $APP:latest $APP:${TAG}-tools
+            
+            # save for later steps
+            echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
 
-      - name: Import this image in the dev namespace and update the tag
+      - name: Import this image in the test namespace and update the tag
         run: |
-          oc -n $DEV_NS tag $TOOLS_NS/$APP:${IMAGE_TAG}-tools $DEV_NS/$APP:${IMAGE_TAG}-dev
+          oc -n $TEST_NS tag $TOOLS_NS/$APP:${IMAGE_TAG}-tools $TEST_NS/$APP:${IMAGE_TAG}-test
 
       - name: Update the deployment to use this new image
         run: |
-          IMAGE=${REGISTRY}/${DEV_NS}/${APP}:${IMAGE_TAG}-dev
-          oc -n $DEV_NS set image deployment/$APP $APP=$IMAGE
+          IMAGE=${REGISTRY}/${TEST_NS}/${APP}:${IMAGE_TAG}-test
+          oc -n $TEST_NS set image deployment/$APP $APP=$IMAGE
 
-      - name: Wait for deployment to complete
+      - name: Wait for rollout to finish
         run: |
-          oc -n $DEV_NS rollout status deployment/$APP
+          oc -n $TEST_NS rollout status deployment/$APP
