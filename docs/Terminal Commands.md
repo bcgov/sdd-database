@@ -113,7 +113,7 @@ npx prisma db seed
 ## Helm
 
 ```shell
-helm list
+helm list -n a6d989-dev
 ```
 
 ```shell
