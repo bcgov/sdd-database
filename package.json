@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+
+    "pf:dev": "oc -n a6d989-dev port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-4sw2t 5432:5432",
+    "pf:test": "oc -n a6d989-test port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-b2m4v 5433:5432",
+
+    "dev:dev": "dotenv -e .env.development.local -- next dev",
+    "dev:test": "dotenv -e .env.test.local -- next dev",
+
+    "studio:dev": "dotenv -e .env.development.local -- npx prisma studio --port 5555",
+    "studio:test": "dotenv -e .env.test.local -- npx prisma studio --port 5556"
   },
   "dependencies": {
     "@bcgov/design-system-react-components": "^0.5.1",
@@ -26,6 +35,7 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "postcss": "^8",
