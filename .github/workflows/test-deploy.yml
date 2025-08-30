@@ -60,6 +60,6 @@ jobs:
           IMAGE=${REGISTRY}/${TEST_NS}/${APP}:${IMAGE_TAG}-test
           oc -n $TEST_NS set image deployment/$APP $APP=$IMAGE
 
-      - name: Wait for rollout to finish
+      - name: Wait for deployment to complete
         run: |
           oc -n $TEST_NS rollout status deployment/$APP
