@@ -1,6 +1,6 @@
 # Data Processing Steps
 
-**The following data transformations are applied to source data from the Access Database before migrating the data onto this new web application.**
+The following data transformations are applied to source data from the Access Database before migrating the data onto this new web application.
 
 ## 1. Connect to Oracle ODS.em_organization_employee Table
 - Established a connection to the Oracle database to access the **`ODS.em_organization_employee`** table.
