@@ -22,9 +22,12 @@ export default function Home() {
 
     const {uiState, alerts, search, actions, editHandlers} = useEntityOrchestration()
 
+    const appEnv = process.env.NEXT_PUBLIC_APP_ENV
+    const title = appEnv === "Production" ? "Employee Information" : `Employee Information (${appEnv})`
+
     return (
         <>
-            <Header title="Employee Information"></Header>
+            <Header title={title}></Header>
 
             <Search
                 selectedFilterTags={search.selectedFilterTags}
