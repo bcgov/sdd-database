@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.9",
+            notes: [
+                "Test environment is now live",
+            ]
+        },
+        {
             version: "v0.0.8",
             notes: [
                 "Added field validations restricting typos and preventing inaccurate data entry",
