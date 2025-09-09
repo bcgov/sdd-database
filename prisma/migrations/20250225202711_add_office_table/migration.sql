@@ -4,7 +4,6 @@ CREATE TABLE "Office" (
     "office_name" TEXT NOT NULL,
     "office_type" TEXT NOT NULL,
     "postal_code" TEXT NOT NULL,
-    "notes" TEXT,
 
     CONSTRAINT "Office_pkey" PRIMARY KEY ("office_number")
 );

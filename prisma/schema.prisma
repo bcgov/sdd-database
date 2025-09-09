@@ -25,7 +25,6 @@ model Office {
   office_name   String     @unique @db.Citext
   office_type   String     
   postal_code   String
-  notes         String?    @db.VarChar(2000)
   Employee      Employee[]
 }
 

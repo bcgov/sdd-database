@@ -6,7 +6,7 @@ import {getOfficesByFilter, updateOffice} from "@/prisma-db";
 
 import {Entity, EntityActionResult} from "@/types";
 
-import {validateNotesField} from "@/validators";
+import {validateEmployeeOfficeNumberField} from "@/validators";
 
 import {createEntityActions} from "@/actions/createEntityActions";
 
@@ -22,7 +22,7 @@ const parseOfficeFormData = (formData: FormData): Office => {
 }
 
 function validateOfficeData(office: Office) {
-    return office.notes ? validateNotesField(office.notes) : undefined
+    return office.office_number ? validateEmployeeOfficeNumberField(office.office_number) : undefined
 }
 
 function getReadablePrismaError(error: unknown) {

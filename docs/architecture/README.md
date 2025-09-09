@@ -85,7 +85,6 @@ Each link provides a detailed breakdown.
      ``` 
      {
          office_number: string
-         notes: string | null
          office_name: string
          office_type: string
          postal_code: string
@@ -108,8 +107,8 @@ Each link provides a detailed breakdown.
          |
          {
              office_number: string;
-             notes: string | null;
              office_name: string;
+             office_type: string;
              postal_code: string;
              type: "office";
           }
