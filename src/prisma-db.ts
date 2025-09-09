@@ -46,6 +46,7 @@ export async function getOfficesByFilter(query?: string) {
             OR: [
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
+                {office_type: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
                 {notes: {contains: query, mode: 'insensitive'}},
             ]
@@ -81,7 +82,7 @@ export async function updateEmployee(employee: Employee) {
 
 export async function updateOffice(office: Office) {
 
-    const {office_number, office_name: _office_name, postal_code: _postal_code, ...updatableFields} = office
+    const {office_number, office_name: _office_name, office_type: _office_type, postal_code: _postal_code, ...updatableFields} = office
 
     return prisma.office.update({
         where: {office_number},

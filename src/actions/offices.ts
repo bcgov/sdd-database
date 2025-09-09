@@ -15,6 +15,7 @@ const parseOfficeFormData = (formData: FormData): Office => {
     return {
         office_number: formData.get("officeNumber") as string,
         office_name: formData.get("officeName") as string,
+        office_type: formData.get("officeType") as string,
         postal_code: formData.get("postalCode") as string,
         notes: formData.get("notes") as string || null,
     }

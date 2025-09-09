@@ -2,6 +2,7 @@
 CREATE TABLE "Office" (
     "office_number" INTEGER NOT NULL,
     "office_name" TEXT NOT NULL,
+    "office_type" TEXT NOT NULL,
     "postal_code" TEXT NOT NULL,
     "notes" TEXT,
 

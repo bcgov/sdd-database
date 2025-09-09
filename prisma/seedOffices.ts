@@ -12,11 +12,13 @@ async function main() {
                 {
                     office_number: "3",
                     office_name: "Vancouver - Prevention and Loss Management Services",
+                    office_type: "SDPR Office",
                     postal_code: "V3V5V9"
                 },
                 {
                     office_number: "200",
                     office_name: "Vancouver Coastal Office",
+                    office_type: "Service BC Office",
                     postal_code: "V6E3S7",
                     notes: "18th/19th Floor - shared office with ISD/ELMSD/MCF\n" +
                         "LWS Site"
