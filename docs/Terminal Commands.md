@@ -107,7 +107,7 @@ npx prisma migrate dev --name <nameOfMigration>
 To run the seed script `prisma/seedOffices.ts`, use the following command:
 
 ```shell
-npx prisma db seed
+npx dotenv -e .env.development.local -- prisma db seed
 ```
 
 ## Helm
