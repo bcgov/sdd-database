@@ -99,7 +99,7 @@ Everytime, the `schema.prisma` file is modified, run the below command to
 4. generates the prisma client with which we can interact with the database
 
 ```shell
-npx prisma migrate dev --name <nameOfMigration>
+npx dotenv -e .env.development.local -- npx prisma migrate dev --name add_branch_id_to_employee
 ```
 
 ### Seed

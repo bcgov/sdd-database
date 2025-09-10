@@ -1,36 +1,40 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [citext]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Employee {
-  employee_id     String  @id @db.VarChar(6)
-  first_name      String  @db.VarChar(30)
-  last_name       String  @db.VarChar(30)
-  notes           String? @db.VarChar(2000)
+  employee_id String  @id @db.VarChar(6)
+  first_name  String  @db.VarChar(30)
+  last_name   String  @db.VarChar(30)
+  notes       String? @db.VarChar(2000)
+
   office_number   String
-  alternate_name  String? @db.VarChar(30)
-  idir            String  @unique @db.Citext
-  assigned_office Office  @relation(fields: [office_number], references: [office_number])
+  assigned_office Office @relation(fields: [office_number], references: [office_number])
+
+  alternate_name String? @db.VarChar(30)
+  idir           String  @unique @db.Citext
+
+  branch_id Int
+  branch    Branch @relation(fields: [branch_id], references: [id])
 }
 
 model Branch {
-  id           Int           @id @default(autoincrement())
-  name         String        @unique @db.Citext
-  programAreas ProgramArea[]
+  id            Int           @id @default(autoincrement())
+  name          String        @unique @db.Citext
+  program_areas ProgramArea[]
+  employees     Employee[]
 }
 
 model ProgramArea {
-  id       Int    @id @default(autoincrement())
-  name     String @unique @db.Citext
-  branchId Int
-  branch   Branch @relation(fields: [branchId], references: [id])
+  id        Int    @id @default(autoincrement())
+  name      String @unique @db.Citext
+  branch_id Int
+  branch    Branch @relation(fields: [branch_id], references: [id])
 }
 
 model Office {
@@ -38,7 +42,7 @@ model Office {
   office_name   String     @unique @db.Citext
   postal_code   String
   notes         String?    @db.VarChar(2000)
-  Employee      Employee[]
+  employees     Employee[]
 }
 
 model Workstation {
