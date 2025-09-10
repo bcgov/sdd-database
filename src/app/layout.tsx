@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export function generateMetadata(): Metadata {
-    const appEnv = process.env.NEXT_PUBLIC_APP_ENV ?? "Production";
+    const appEnv = process.env.APP_ENV ?? "Production";
     const title = appEnv === "Production" ? "Employee Information Prod" : `Employee Information (${appEnv})`;
 
     return {
