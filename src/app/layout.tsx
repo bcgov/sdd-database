@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
     const appEnv = process.env.NEXT_PUBLIC_APP_ENV ?? "Production";
     const title = appEnv === "Production" ? "Employee Information Prod" : `Employee Information (${appEnv})`;
 
