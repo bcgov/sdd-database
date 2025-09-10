@@ -20,6 +20,19 @@ model Employee {
   assigned_office Office  @relation(fields: [office_number], references: [office_number])
 }
 
+model Branch {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique @db.Citext
+  programAreas ProgramArea[]
+}
+
+model ProgramArea {
+  id       Int    @id @default(autoincrement())
+  name     String @unique @db.Citext
+  branchId Int
+  branch   Branch @relation(fields: [branchId], references: [id])
+}
+
 model Office {
   office_number String     @id
   office_name   String     @unique @db.Citext
