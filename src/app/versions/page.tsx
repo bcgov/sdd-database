@@ -6,10 +6,6 @@ export default function Updates() {
 
     const changelog = [
         {
-            version: "v0.0.13",
-            notes: [
-            ]
-        },{
             version: "v0.0.9",
             notes: [
                 "Test environment is now live",
