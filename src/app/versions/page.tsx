@@ -8,6 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.10",
             notes: [
+                "In the browser, tab title now has the environment name: Employee Information (Development) or" +
+                " Employee Information (Test)"
             ]
         },{
             version: "v0.0.9",
