@@ -6,7 +6,7 @@ export default function Updates() {
 
     const changelog = [
         {
-            version: "v0.0.12",
+            version: "v0.0.13",
             notes: [
             ]
         },{
