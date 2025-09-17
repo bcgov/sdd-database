@@ -9,6 +9,7 @@ import {
     ButtonGroup,
     Callout,
     Form,
+    Select,
     TextArea,
     TextField
 } from "@bcgov/design-system-react-components";
@@ -16,6 +17,8 @@ import {
 import {Employee} from "@prisma/client";
 
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
+
+import {useBranches} from "@/hooks/useBranches";
 
 import {EntityActionResult} from "@/types";
 
@@ -53,6 +56,8 @@ export function EmployeeForm({
     const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction;
 
     const [result, formAction, isPending] = useActionState(serverAction, initialState)
+
+    const {branches} = useBranches(); // [{ id, name }, {id, name}] or null on first render
 
     useEffect(() => {
 
@@ -142,6 +147,21 @@ export function EmployeeForm({
                                    }
                                    defaultValue={employee?.alternate_name ?? undefined}>
                         </TextField>
+
+                        <Select
+                            label="Branch"
+                            name="branch"
+                            isRequired
+                            items={(branches ?? []).map((branch) => (
+                                {
+                                    id: String(branch.id),
+                                    label: branch.name,
+                                }
+                            ))}
+                            defaultSelectedKey={employee ? String(employee?.branch_id) : undefined}
+                            placeholder="Select a Branch"
+                        >
+                        </Select>
 
                         <TextArea label="Notes"
                                   name="notes"

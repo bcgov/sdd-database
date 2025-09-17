@@ -1,5 +1,11 @@
 import {Employee, Office, Workstation} from "@prisma/client";
 
+
+export type BranchOption = {
+    id: number
+    name: string
+}
+
 // discriminated union
 export type Entity =
     | (Employee & { type: "employee" })

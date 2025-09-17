@@ -18,6 +18,18 @@ export async function addNewWorkstation(workstation: Workstation) {
     })
 }
 
+export async function getBranches() {
+    return prisma.branch.findMany({
+        select: {
+            id: true,
+            name: true,
+        },
+        orderBy: {
+            name: "asc"
+        }
+    })
+}
+
 export async function getEmployeesByFilter(query?: string) {
     if (!query)
         return prisma.employee.findMany()

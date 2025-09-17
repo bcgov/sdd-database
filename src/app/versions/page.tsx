@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.11",
+            notes: [
+                "Add Branch field for Employee"
+            ]
+        },
+        {
             version: "v0.0.10",
             notes: [
                 "In the browser, tab title now has the environment name: Employee Information (Development) or" +

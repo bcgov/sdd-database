@@ -11,12 +11,13 @@ export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
 
 export const parseEmployeeFormData = (formData: FormData): Employee => {
     return {
+        office_number: formData.get("officeNumber") as string,
+        idir: formData.get("idir") as string,
         first_name: formData.get("firstName") as string,
         alternate_name: formData.get("alternateName") as string || null,
         last_name: formData.get("lastName") as string,
         employee_id: formData.get("employeeId") as string,
-        idir: formData.get("idir") as string,
-        office_number: formData.get("officeNumber") as string,
+        branch_id: Number(formData.get("branch")),
         notes: formData.get("notes") as string || null,
     }
 }

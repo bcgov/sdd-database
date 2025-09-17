@@ -13,7 +13,8 @@ import {
     validateEmployeeIdirField,
     validateEmployeeNameField,
     validateNotesField,
-    validateEmployeeOfficeNumberField
+    validateEmployeeOfficeNumberField,
+    validateEmployeeBranchField
 } from "@/validators";
 
 import {createEntityActions} from "@/actions/createEntityActions";
@@ -22,8 +23,9 @@ import {createEntityActions} from "@/actions/createEntityActions";
 function validateEmployeeData(employee: Employee) {
 
     return (
+        validateEmployeeOfficeNumberField(employee.office_number) ??
+        validateEmployeeIdirField(employee.idir) ??
         validateEmployeeNameField(employee.first_name, "First Name") ??
-        validateEmployeeNameField(employee.last_name, "Last Name") ??
         (employee.alternate_name ? validateEmployeeNameField(
             employee.alternate_name,
             "Alternate Name",
@@ -32,20 +34,26 @@ function validateEmployeeData(employee: Employee) {
                 allowMultipleWords: true
             }
         ) : undefined) ??
+        validateEmployeeNameField(employee.last_name, "Last Name") ??
         validateEmployeeIdField(employee.employee_id) ??
-        validateEmployeeIdirField(employee.idir) ??
-        (employee.notes ? validateNotesField(employee.notes) : undefined) ??
-        validateEmployeeOfficeNumberField(employee.office_number)
+        validateEmployeeBranchField(employee.branch_id, "Branch") ??
+        (employee.notes ? validateNotesField(employee.notes) : undefined)
     )
 }
 
 function getReadablePrismaError(error: unknown, employee: Employee) {
 
-    let errorMessage = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
+    const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
+
+    let errorMessage = base;
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
+        console.error("at start");
+
         const {code, meta} = error;
+
+        console.log(`code :'${code}', message: '${error.message}'`);
 
         switch (code) {
 
@@ -76,6 +84,9 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 if (meta?.constraint === "Employee_office_number_fkey") {
                     errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
                 }
+                else if (meta?.constraint === "Employee_branch_id_fkey") {
+                    errorMessage = `It seems like a branch wasn't selected for this new employee. Please select a branch and try again.`;
+                }
 
                 break;
             }
@@ -87,8 +98,13 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 break;
             }
             default: {
+                console.log("in default")
                 errorMessage += ` Error code: "${code}"`;
             }
+        }
+        // If we didn’t set a specific message in the matched case, append the code as a safety net.
+        if (errorMessage === base) {
+            errorMessage += ` Error code: "${code}"`;
         }
     }
 
