@@ -8,19 +8,16 @@ datasource db {
 }
 
 model Employee {
-  employee_id String  @id @db.VarChar(6)
-  first_name  String  @db.VarChar(30)
-  last_name   String  @db.VarChar(30)
-  notes       String? @db.VarChar(2000)
-
   office_number   String
-  assigned_office Office @relation(fields: [office_number], references: [office_number])
-
-  alternate_name String? @db.VarChar(30)
-  idir           String  @unique @db.Citext
-
-  branch_id Int
-  branch    Branch @relation(fields: [branch_id], references: [id])
+  idir            String  @unique @db.Citext
+  first_name      String  @db.VarChar(30)
+  alternate_name  String? @db.VarChar(30)
+  last_name       String  @db.VarChar(30)
+  employee_id     String  @id @db.VarChar(6)
+  branch_id       Int
+  notes           String? @db.VarChar(2000)
+  assigned_office Office  @relation(fields: [office_number], references: [office_number])
+  branch          Branch  @relation(fields: [branch_id], references: [id])
 }
 
 model Branch {

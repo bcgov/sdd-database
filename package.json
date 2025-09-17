@@ -1,6 +1,6 @@
 {
   "name": "sdd-database",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,8 +11,8 @@
     "pf:dev": "oc -n a6d989-dev port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-4sw2t 5432:5432",
     "pf:test": "oc -n a6d989-test port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-b2m4v 5433:5432",
 
-    "dev:dev": "dotenv -e .env.development.local -- next dev",
-    "dev:test": "dotenv -e .env.test.local -- next dev",
+    "localhost:dev": "dotenv -e .env.development.local -- next dev",
+    "localhost:test": "dotenv -e .env.test.local -- next dev",
 
     "studio:dev": "dotenv -e .env.development.local -- npx prisma studio --port 5555",
     "studio:test": "dotenv -e .env.test.local -- npx prisma studio --port 5556"
@@ -23,8 +23,8 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "@prisma/client": "^6.16.0",
-    "next": "15.5.2",
+    "@prisma/client": "^6.16.2",
+    "next": "15.5.3",
     "pg": "^8.16.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
@@ -37,9 +37,9 @@
     "@types/react-dom": "^19",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9",
-    "eslint-config-next": "15.5.2",
+    "eslint-config-next": "15.5.3",
     "postcss": "^8",
-    "prisma": "^6.16.0",
+    "prisma": "^6.16.2",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.20.5",
     "typescript": "^5"
