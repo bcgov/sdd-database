@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.12",
             notes: [
-                "Search now works with branch names as well"
+                "Search now works with branch names as well",
+                "Fix a bug that prevented office assign mode is load list of offices by default"
             ]
         },
         {

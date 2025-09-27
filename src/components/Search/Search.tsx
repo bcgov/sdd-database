@@ -60,7 +60,7 @@ export function Search({
         )
     }
 
-    const showBody = userHasSearchedOnce()
+    const showBody = userHasSearchedOnce() || assignMode
 
     const renderResultsOrEmpty = () => {
         // Case 1: Search results are empty
