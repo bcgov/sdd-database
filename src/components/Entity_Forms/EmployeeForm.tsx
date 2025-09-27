@@ -109,7 +109,6 @@ export function EmployeeForm({
                                    validate={value => validateEmployeeNameField(value, "First Name")}
                                    defaultValue={employee?.first_name}>
                         </TextField>
-                        {/*{result.error && <p>{result.error}</p>}*/}
 
                         <TextField label="Last Name"
                                    name="lastName"
