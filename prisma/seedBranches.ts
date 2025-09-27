@@ -1,19 +1,25 @@
-import { PrismaClient } from "@prisma/client"
+import {PrismaClient} from "@prisma/client"
 
 export async function seedBranches(prismaClient: PrismaClient) {
 
-    await prismaClient.branch.deleteMany()
+    const branchNames = [
+        "Community Integration Services",
+        "Prevention and Loss Management Services",
+        "Community Services",
+        "Strategic Services",
+        "Virtual Services",
+        "Operations Support",
+        "Office of the ADM",
+        "Non SDD",
+    ]
 
-    await prismaClient.branch.createMany({
-        data: [
-            { name: "Community Integration Services" },
-            { name: "Prevention and Loss Management Services" },
-            { name: "Community Services" },
-            { name: "Strategic Services" },
-            { name: "Virtual Services" },
-            { name: "Operations Support" },
-            { name: "Office of the ADM" },
-            { name: "Non SDD" },
-        ]
-    })
+    await Promise.all(
+        branchNames.map(branchName =>
+            prismaClient.branch.upsert({
+                where: {name: branchName},
+                update: {},
+                create: {name: branchName}
+            })
+        )
+    )
 }

@@ -15,7 +15,10 @@
     "localhost:test": "dotenv -e .env.test.local -- next dev",
 
     "studio:dev": "dotenv -e .env.development.local -- npx prisma studio --port 5555",
-    "studio:test": "dotenv -e .env.test.local -- npx prisma studio --port 5556"
+    "studio:test": "dotenv -e .env.test.local -- npx prisma studio --port 5556",
+
+    "seed:dev": "npx dotenv -e .env.development.local -- prisma db seed",
+    "seed:test": "npx dotenv -e .env.test.local -- prisma db seed"
   },
   "dependencies": {
     "@bcgov/design-system-react-components": "^0.5.1",
