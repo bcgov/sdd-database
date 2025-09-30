@@ -15,31 +15,41 @@ model Employee {
   last_name       String  @db.VarChar(30)
   employee_id     String  @id @db.VarChar(6)
   branch_id       Int
+  program_area_id Int
   notes           String? @db.VarChar(2000)
-  assigned_office Office  @relation(fields: [office_number], references: [office_number])
-  branch          Branch  @relation(fields: [branch_id], references: [id])
+
+  assigned_office Office      @relation(fields: [office_number], references: [office_number])
+  branch          Branch      @relation(fields: [branch_id], references: [id])
+  program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
 }
 
 model Branch {
-  id            Int           @id @default(autoincrement())
-  name          String        @unique @db.Citext
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
   program_areas ProgramArea[]
   employees     Employee[]
 }
 
 model ProgramArea {
   id        Int    @id @default(autoincrement())
-  name      String @unique @db.Citext
+  name      String @db.Citext
   branch_id Int
-  branch    Branch @relation(fields: [branch_id], references: [id])
+
+  branch    Branch     @relation(fields: [branch_id], references: [id])
+  employees Employee[]
+
+  // Names are unique WITHIN a branch (same program area name can exist under different branches)
+  @@unique([branch_id, name])
 }
 
 model Office {
-  office_number String     @id
-  office_name   String     @unique @db.Citext
+  office_number String  @id
+  office_name   String  @unique @db.Citext
   postal_code   String
-  notes         String?    @db.VarChar(2000)
-  employees     Employee[]
+  notes         String? @db.VarChar(2000)
+
+  employees Employee[]
 }
 
 model Workstation {
