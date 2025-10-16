@@ -67,6 +67,7 @@
 - Housing And Municipal Affairs (1)
 - Post-Secondary Education And Future Skills (1)
 - Public Safety And Solicitor General (1)
+- Public Service Agency (1)
 - SDPR - AD (2)
 - SDPR - ADMO (1)
 - SDPR - CSD (16)
@@ -78,4 +79,4 @@
 - SDPR - Strategic Human Resources (1)
 - Transportation And Transit (1)
 - Water, Land and Resource Stewardship (1)
-- Other
+- Other (1)

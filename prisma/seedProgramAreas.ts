@@ -49,6 +49,7 @@ const programsByBranch: Record<string, string[]> = {
         "Housing And Municipal Affairs",
         "Post-Secondary Education And Future Skills",
         "Public Safety And Solicitor General",
+        "Public Service Agency",
         "SDPR - AD",
         "SDPR - ADMO",
         "SDPR - CSD",
@@ -69,6 +70,7 @@ export async function seedProgramAreas(prismaClient: PrismaClient) {
 
         const branch = await prismaClient.branch.findUnique({
             where: { name: branchName },
+            select: { id: true }
         })
 
         if (!branch) {
@@ -76,22 +78,10 @@ export async function seedProgramAreas(prismaClient: PrismaClient) {
             continue;
         }
 
-        await Promise.all(
-            programAreas.map( programArea =>
-            prismaClient.programArea.upsert({
-                where: {
-                    //  Prisma-generated synthetic name for the unique constraint [branch_id, name]
-                    branch_id_name: {
-                        branch_id: branch.id,
-                        name: programArea
-                    }
-                },
-                update: {},
-                create: {
-                    name: programArea,
-                    branch_id: branch.id
-                }
-            })
-        ))
+        const rows = programAreas.map( (name) => ({name, branch_id: branch.id }))
+
+        const result = await prismaClient.programArea.createMany({data: rows, skipDuplicates: true})
+
+        console.log(`   • ${branchName}: inserted ${result.count} new program areas`)
     }
 }
