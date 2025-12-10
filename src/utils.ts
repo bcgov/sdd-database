@@ -18,6 +18,7 @@ export const parseEmployeeFormData = (formData: FormData): Employee => {
         last_name: formData.get("lastName") as string,
         employee_id: formData.get("employeeId") as string,
         branch_id: Number(formData.get("branch")),
+        program_area_id: Number(formData.get("programArea")),
         notes: formData.get("notes") as string || null,
     }
 }

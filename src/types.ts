@@ -6,6 +6,11 @@ export type BranchOption = {
     name: string
 }
 
+export type ProgramAreaOption = {
+    id: number
+    name: string
+}
+
 // discriminated union
 export type Entity =
     | (Employee & { type: "employee" })

@@ -130,6 +130,14 @@ export function validateEmployeeBranchField(value: number, label: string = "Bran
     }
 }
 
+export function validateEmployeeProgramAreaField(value: number, label: string = "Program Area") {
+    const requiredError = validateRequiredField(value, label);
+
+    if (requiredError) {
+        return requiredError;
+    }
+}
+
 export function validateAssetTagField(value: string, label: string = "Asset Tag") {
     const requiredError = validateRequiredField(value, label);
 

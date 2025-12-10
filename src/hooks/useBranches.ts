@@ -4,6 +4,7 @@ import {fetchBranches} from "@/actions/branches";
 
 import {BranchOption} from "@/types";
 
+
 export function useBranches() {
 
     const [branches, setBranches] = useState<BranchOption[] | null>(null);

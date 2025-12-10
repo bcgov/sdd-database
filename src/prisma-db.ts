@@ -30,6 +30,19 @@ export async function getBranches() {
     })
 }
 
+export async function getProgramAreasByBranch(branch_id: number) {
+    return prisma.programArea.findMany({
+        where: {branch_id},
+        select: {
+            id: true,
+            name: true,
+        },
+        orderBy: {
+            name: "asc"
+        }
+    })
+}
+
 export async function getEmployeesByFilter(query?: string) {
     if (!query)
         return prisma.employee.findMany()
@@ -45,6 +58,7 @@ export async function getEmployeesByFilter(query?: string) {
                 {employee_id: {contains: query}},
                 // 🔎 match by Branch name (string) via relation filter
                 {branch: {name: {contains: query, mode: 'insensitive'}}},
+                {program_area: {name: {contains: query, mode: 'insensitive'}}},
                 {notes: {contains: query, mode: 'insensitive'}},
             ]
         }

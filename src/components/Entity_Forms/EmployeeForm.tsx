@@ -1,4 +1,4 @@
-import {useActionState, useEffect} from "react";
+import {useActionState, useEffect, useState} from "react";
 
 import {PressEvent} from "@react-types/shared";
 
@@ -19,6 +19,7 @@ import {Employee} from "@prisma/client";
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
 
 import {useBranches} from "@/hooks/useBranches";
+import {useProgramAreas} from "@/hooks/useProgramAreas";
 
 import {EntityActionResult} from "@/types";
 
@@ -58,6 +59,11 @@ export function EmployeeForm({
     const [result, formAction, isPending] = useActionState(serverAction, initialState)
 
     const {branches} = useBranches(); // [{ id, name }, {id, name}] or null on first render
+
+    const selectedBranchIdInitialState = employee ? employee?.branch_id : undefined
+    const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(selectedBranchIdInitialState);
+
+    const {programAreas} = useProgramAreas(selectedBranchId);
 
     useEffect(() => {
 
@@ -151,14 +157,34 @@ export function EmployeeForm({
                             label="Branch"
                             name="branch"
                             isRequired
-                            items={(branches ?? []).map((branch) => (
+                            items={(branches ?? []).map(branch => (
                                 {
-                                    id: String(branch.id),
+                                    id: branch.id,
                                     label: branch.name,
                                 }
                             ))}
-                            defaultSelectedKey={employee ? String(employee?.branch_id) : undefined}
+                            selectedKey={selectedBranchId}
+                            onSelectionChange={key => {
+                                const numericKey = typeof key === "string" ? Number(key) : key;
+                                setSelectedBranchId(numericKey);
+                            }}
                             placeholder="Select a Branch"
+                        >
+                        </Select>
+
+                        <Select
+                            label="Program Area"
+                            name="programArea"
+                            isRequired
+                            isDisabled={!selectedBranchId}
+                            items={(programAreas ?? []).map(programArea => (
+                                {
+                                    id: programArea.id,
+                                    label: programArea.name,
+                                }
+                            ))}
+                            defaultSelectedKey={employee ? employee.program_area_id : undefined}
+                            placeholder="Select a Program Area"
                         >
                         </Select>
 

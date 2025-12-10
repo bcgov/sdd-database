@@ -14,7 +14,8 @@ import {
     validateEmployeeNameField,
     validateNotesField,
     validateEmployeeOfficeNumberField,
-    validateEmployeeBranchField
+    validateEmployeeBranchField,
+    validateEmployeeProgramAreaField
 } from "@/validators";
 
 import {createEntityActions} from "@/actions/createEntityActions";
@@ -37,6 +38,7 @@ function validateEmployeeData(employee: Employee) {
         validateEmployeeNameField(employee.last_name, "Last Name") ??
         validateEmployeeIdField(employee.employee_id) ??
         validateEmployeeBranchField(employee.branch_id, "Branch") ??
+        validateEmployeeProgramAreaField(employee.program_area_id, "Program Area") ??
         (employee.notes ? validateNotesField(employee.notes) : undefined)
     )
 }
@@ -87,7 +89,9 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 else if (meta?.constraint === "Employee_branch_id_fkey") {
                     errorMessage = `It seems like a branch wasn't selected for this new employee. Please select a branch and try again.`;
                 }
-
+                else if (meta?.constraint === "Employee_program_area_id_fkey") {
+                    errorMessage = `It seems like a program area wasn't selected for this new employee. Please select a program area and try again.`;
+                }
                 break;
             }
             case "P2025": {
