@@ -1,9 +1,7 @@
 import {Dispatch, SetStateAction, startTransition, useCallback, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
-import {Employee} from "@prisma/client";
-
-import {Entity} from "@/types";
+import {EmployeeFormState, Entity} from "@/types";
 
 import {deleteEmployeeAction} from "@/actions/employees";
 
@@ -39,7 +37,7 @@ export function useEntityActions({
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
     const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
 
-    const [draftNewEmployee, setDraftNewEmployee] = useState<Employee>();
+    const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormState>();
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
@@ -51,9 +49,6 @@ export function useEntityActions({
      * @param formData
      */
     const activateAssignMode = async (formData: FormData) => {
-
-        const editedEmployee = parseEmployeeFormData(formData);
-
         setAssignMode(true);
 
         // get all offices
@@ -62,18 +57,44 @@ export function useEntityActions({
 
         setSelectedFilterTags(new Set(["office"]));
 
+        saveEmployeeFormData(formData);
+    }
+
+    /**
+     * This function takes a snapshot of employee form data before closing the modal.
+     * For add new employee modal, we use the draftNewEmployee state
+     * For edit employee modal, we use the selectedSearchResult state
+     *
+     * @param formData
+     */
+    const saveEmployeeFormData = (formData: FormData) => {
+
+        const employeeSnapshot: EmployeeFormState = {
+            ...parseEmployeeFormData(formData),
+            ui_branch_id: Number(formData.get("branch")),
+        }
+
         if (isAddNewEmployeeModalOpen) {
 
-            setDraftNewEmployee(editedEmployee);
+            setDraftNewEmployee(employeeSnapshot);
 
             openCloseAddNewEmployeeModal(false, false)
         } else {
 
             // we update the existing selectedSearchResult with any new edits before we showcase the assign office UI
-            setSelectedSearchResult({
-                ...editedEmployee,
-                type: "employee",
-            });
+            setSelectedSearchResult(prev => {
+
+                // this is just defensible coding, code will ideally never branch in this block
+                if (!prev || prev.type !== "employee") {
+                    addErrorAlert("Error: Something went wrong.", "Please refresh the webpage and try again");
+                    return prev
+                }
+
+                return {
+                    ...prev,
+                    ...employeeSnapshot,
+                }
+            })
 
             setIsEditModalOpen(false);
         }
@@ -83,11 +104,6 @@ export function useEntityActions({
 
         setAssignMode(false)
 
-        /** For add new employee modal, we use the draftNewEmployee state to track edits before user clicks
-         * on "Assign Office".
-         * For edit employee modal, we use the selectedSearchResult state to track edits before user clicks
-         * on "Assign Office".
-         */
         if (draftNewEmployee) {
 
             // We are in add new employee modal

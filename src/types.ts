@@ -1,4 +1,4 @@
-import {Employee, Office, Workstation} from "@prisma/client";
+import {Prisma, Employee, ProgramArea, Office, Workstation} from "@prisma/client";
 
 
 export type BranchOption = {
@@ -11,9 +11,26 @@ export type ProgramAreaOption = {
     name: string
 }
 
+export type EmployeeFormState = Employee & {
+    // present for hydrated employees (selectedSearchResult), absent for drafts (draftEmployee)
+    program_area?: ProgramArea;
+
+    // UI-only branch cache (so branch prefill survives modal close/open)
+    ui_branch_id?: number;
+}
+
+// “Hydrated employee” (what comes from DB when we do include: { program_area: true })
+type EmployeeWithProgramArea = Prisma.EmployeeGetPayload<{
+    include: {program_area: true}
+}>
+
+type EmployeeEntity = EmployeeWithProgramArea & {
+    ui_branch_id?: number;
+};
+
 // discriminated union
 export type Entity =
-    | (Employee & { type: "employee" })
+    | (EmployeeEntity & { type: "employee" })
     | (Office & { type: "office" })
     | (Workstation & { type: "workstation" })
 

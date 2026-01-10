@@ -14,12 +14,10 @@ model Employee {
   alternate_name  String? @db.VarChar(30)
   last_name       String  @db.VarChar(30)
   employee_id     String  @id @db.VarChar(6)
-  branch_id       Int
   program_area_id Int
   notes           String? @db.VarChar(2000)
 
   assigned_office Office      @relation(fields: [office_number], references: [office_number])
-  branch          Branch      @relation(fields: [branch_id], references: [id])
   program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
 }
 
@@ -28,7 +26,6 @@ model Branch {
   name String @unique @db.Citext
 
   program_areas ProgramArea[]
-  employees     Employee[]
 }
 
 model ProgramArea {

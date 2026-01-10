@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.13",
+            notes: [
+                "Added Program Area field for Employee"
+            ]
+        },
+        {
             version: "v0.0.12",
             notes: [
                 "Search now works with branch names as well",
@@ -15,7 +21,7 @@ export default function Updates() {
         {
             version: "v0.0.11",
             notes: [
-                "Add Branch field for Employee"
+                "Added Branch field for Employee"
             ]
         },
         {

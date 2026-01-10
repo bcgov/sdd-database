@@ -14,7 +14,6 @@ import {
     validateEmployeeNameField,
     validateNotesField,
     validateEmployeeOfficeNumberField,
-    validateEmployeeBranchField,
     validateEmployeeProgramAreaField
 } from "@/validators";
 
@@ -37,7 +36,6 @@ function validateEmployeeData(employee: Employee) {
         ) : undefined) ??
         validateEmployeeNameField(employee.last_name, "Last Name") ??
         validateEmployeeIdField(employee.employee_id) ??
-        validateEmployeeBranchField(employee.branch_id, "Branch") ??
         validateEmployeeProgramAreaField(employee.program_area_id, "Program Area") ??
         (employee.notes ? validateNotesField(employee.notes) : undefined)
     )
@@ -85,9 +83,6 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
             case "P2003": {
                 if (meta?.constraint === "Employee_office_number_fkey") {
                     errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
-                }
-                else if (meta?.constraint === "Employee_branch_id_fkey") {
-                    errorMessage = `It seems like a branch wasn't selected for this new employee. Please select a branch and try again.`;
                 }
                 else if (meta?.constraint === "Employee_program_area_id_fkey") {
                     errorMessage = `It seems like a program area wasn't selected for this new employee. Please select a program area and try again.`;

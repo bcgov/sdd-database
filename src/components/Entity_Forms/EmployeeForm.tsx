@@ -14,14 +14,12 @@ import {
     TextField
 } from "@bcgov/design-system-react-components";
 
-import {Employee} from "@prisma/client";
-
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
 
 import {useBranches} from "@/hooks/useBranches";
 import {useProgramAreas} from "@/hooks/useProgramAreas";
 
-import {EntityActionResult} from "@/types";
+import {EmployeeFormState, EntityActionResult} from "@/types";
 
 import {
     validateEmployeeIdField,
@@ -32,7 +30,7 @@ import {
 
 
 interface EmployeeFormProps {
-    employee: Employee | undefined
+    employee: EmployeeFormState | undefined
     activateAssignMode: (formData: FormData) => Promise<void>
     onSuccess: () => void
     onError: (error: string) => void
@@ -60,8 +58,8 @@ export function EmployeeForm({
 
     const {branches} = useBranches(); // [{ id, name }, {id, name}] or null on first render
 
-    const selectedBranchIdInitialState = employee ? employee?.branch_id : undefined
-    const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(selectedBranchIdInitialState);
+    const initialSelectedBranchId = employee?.ui_branch_id ?? employee?.program_area?.branch_id
+    const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(initialSelectedBranchId);
 
     const {programAreas} = useProgramAreas(selectedBranchId);
 
