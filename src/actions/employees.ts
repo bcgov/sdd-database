@@ -1,8 +1,8 @@
 "use server";
 
-import {Prisma, Employee} from "@prisma/client"
+import {Prisma, type Employee} from "@/generated/prisma/client"
 
-import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/prisma-db";
+import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/db/prisma-db";
 
 import {EntityActionResult, Entity} from "@/types";
 

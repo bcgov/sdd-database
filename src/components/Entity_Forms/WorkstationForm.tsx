@@ -2,7 +2,7 @@ import {useActionState, useEffect} from "react";
 
 import {Button, ButtonGroup, Form, TextArea, TextField} from "@bcgov/design-system-react-components";
 
-import {Workstation} from "@prisma/client";
+import type {Workstation} from "@/generated/prisma/client";
 
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
 

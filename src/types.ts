@@ -1,4 +1,4 @@
-import {Prisma, Employee, ProgramArea, Office, Workstation} from "@prisma/client";
+import type {Prisma, Employee, ProgramArea, Office, Workstation} from "@/generated/prisma/client";
 
 
 export type BranchOption = {

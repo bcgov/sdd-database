@@ -1,12 +1,12 @@
 "use server";
 
-import {Prisma, Workstation} from "@prisma/client";
+import {Prisma, type Workstation} from "@/generated/prisma/client";
 
 import {
     addNewWorkstation,
     getWorkstationsByFilter,
     updateWorkstation
-} from "@/prisma-db";
+} from "@/db/prisma-db";
 
 import {Entity, EntityActionResult} from "@/types";
 

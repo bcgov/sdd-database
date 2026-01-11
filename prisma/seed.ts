@@ -1,10 +1,9 @@
-import {PrismaClient} from "@prisma/client"
+import {pool, prisma} from "@/db/client"
 
 import {seedOffices} from "./seedOffices"
 import {seedBranches} from "./seedBranches"
 import {seedProgramAreas} from "./seedProgramAreas";
 
-const prisma = new PrismaClient()
 
 async function main() {
     console.log("🌱 Starting seed...");
@@ -27,5 +26,8 @@ main()
         process.exit(1);
     })
     .finally(async () => {
+        // close prisma client + release any DB resources help by Prisma in this seed script process
         await prisma.$disconnect()
+        // close pg pool so that the Node process can exit cleanly (no hanging connections)
+        await pool.end()
     })

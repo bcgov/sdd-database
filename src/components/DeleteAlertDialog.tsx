@@ -1,6 +1,6 @@
 import {AlertDialog, Button, DialogTrigger, Modal} from "@bcgov/design-system-react-components";
 
-import {Employee} from "@prisma/client";
+import type {Employee} from "@/generated/prisma/client";
 
 import {getEmployeeFullName} from "@/utils";
 

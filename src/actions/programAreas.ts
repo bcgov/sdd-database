@@ -1,6 +1,6 @@
 "use server";
 
-import {getProgramAreasByBranch} from "@/prisma-db";
+import {getProgramAreasByBranch} from "@/db/prisma-db";
 
 import {ProgramAreaOption} from "@/types";
 

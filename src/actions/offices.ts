@@ -1,8 +1,8 @@
 "use server";
 
-import {Office, Prisma} from "@prisma/client";
+import {Prisma, type Office} from "@/generated/prisma/client";
 
-import {getOfficesByFilter, updateOffice} from "@/prisma-db";
+import {getOfficesByFilter, updateOffice} from "@/db/prisma-db";
 
 import {Entity, EntityActionResult} from "@/types";
 

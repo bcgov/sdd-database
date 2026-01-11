@@ -2,7 +2,7 @@ import {useActionState, useEffect} from "react";
 
 import {Button, ButtonGroup, Form, TextArea, TextField} from "@bcgov/design-system-react-components";
 
-import {Office} from "@prisma/client";
+import type {Office} from "@/generated/prisma/client";
 
 import {updateOfficeAction} from "@/actions/offices";
 

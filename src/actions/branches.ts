@@ -1,6 +1,6 @@
 "use server";
 
-import {getBranches} from "@/prisma-db";
+import {getBranches} from "@/db/prisma-db";
 
 import {BranchOption} from "@/types";
 

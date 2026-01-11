@@ -1,4 +1,4 @@
-import {Employee} from "@prisma/client";
+import type {Employee} from "@/generated/prisma/client";
 
 import {Entity} from "@/types";
 

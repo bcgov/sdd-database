@@ -1,4 +1,4 @@
-import {PrismaClient} from "@prisma/client"
+import {PrismaClient} from "@/generated/prisma/client"
 
 const programsByBranch: Record<string, string[]> = {
     "Community Integration Services": [

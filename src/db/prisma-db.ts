@@ -1,6 +1,7 @@
-import {PrismaClient, Employee, Workstation, Office} from "@prisma/client";
+import {prisma} from "./client";
 
-const prisma = new PrismaClient();
+import type {Employee, Workstation, Office} from "@/generated/prisma/client";
+
 
 export async function addNewEmployee(employee: Employee) {
     return prisma.employee.create({
