@@ -25,12 +25,11 @@ COPY package*.json ./
 
 RUN npm install --production
 
-# Copy Prisma Client from builder
-COPY --from=builder /app/node_modules/.prisma /app/node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma /app/node_modules/@prisma
-
 COPY --from=builder /app/.next /app/.next
 COPY --from=builder /app/next.config.ts /app/next.config.ts
+
+# Copy Prisma Client from builder
+COPY --from=builder /app/src/generated /app/src/generated
 
 EXPOSE 3000
 
