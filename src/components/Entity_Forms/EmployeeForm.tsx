@@ -162,10 +162,9 @@ export function EmployeeForm({
                                 }
                             ))}
                             selectedKey={selectedBranchId}
-                            onSelectionChange={key => {
-                                const numericKey = typeof key === "string" ? Number(key) : key;
-                                setSelectedBranchId(numericKey);
-                            }}
+                            onSelectionChange={(key) =>
+                                setSelectedBranchId(key == null ? undefined : Number(key))
+                            }
                             placeholder="Select a Branch"
                         >
                         </Select>
