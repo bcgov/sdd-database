@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "pf:dev": "oc -n a6d989-dev port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-5cx4r 5432:5432",
-    "pf:test": "oc -n a6d989-test port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-b2m4v 5433:5432",
+    "pf:test": "oc -n a6d989-test port-forward pod/crunchy-postgres-pgbouncer-57b8bf579-2qpv7 5433:5432",
     "localhost:dev": "dotenv -e .env.development.local -- next dev",
     "localhost:test": "dotenv -e .env.test.local -- next dev",
     "studio:dev": "dotenv -e .env.development.local -- npx prisma studio --port 5555",
@@ -31,7 +31,8 @@
     "next": "16.1.1",
     "pg": "^8.16.3",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

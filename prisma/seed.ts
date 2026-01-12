@@ -1,4 +1,4 @@
-import {pool, prisma} from "@/db/client"
+import {pool, prisma} from "@/db/prisma"
 
 import {seedOffices} from "./seedOffices"
 import {seedBranches} from "./seedBranches"
