@@ -42,10 +42,9 @@ model ProgramArea {
 }
 
 model Office {
-  office_number String  @id
-  office_name   String  @unique @db.Citext
+  office_number String @id
+  office_name   String @unique @db.Citext
   postal_code   String
-  notes         String? @db.VarChar(2000)
 
   employees Employee[]
 }

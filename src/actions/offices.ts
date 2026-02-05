@@ -6,8 +6,6 @@ import {getOfficesByFilter, updateOffice} from "@/db/prisma-db";
 
 import {Entity, EntityActionResult} from "@/types";
 
-import {validateNotesField} from "@/validators";
-
 import {createEntityActions} from "@/actions/createEntityActions";
 
 
@@ -16,12 +14,7 @@ const parseOfficeFormData = (formData: FormData): Office => {
         office_number: formData.get("officeNumber") as string,
         office_name: formData.get("officeName") as string,
         postal_code: formData.get("postalCode") as string,
-        notes: formData.get("notes") as string || null,
     }
-}
-
-function validateOfficeData(office: Office) {
-    return office.notes ? validateNotesField(office.notes) : undefined
 }
 
 function getReadablePrismaError(error: unknown) {
@@ -51,7 +44,6 @@ function getReadablePrismaError(error: unknown) {
 
 const officeActions = createEntityActions({
     parse: parseOfficeFormData,
-    validate: validateOfficeData,
     persist: {
         create: async () => {
             throw new Error("Creating new office is not supported.");

@@ -57,14 +57,6 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
 
             <TextField label="Postal Code" name="postalCode" isReadOnly defaultValue={office.postal_code}/>
 
-            <TextArea
-                label="Notes"
-                name="notes"
-                maxLength={2000}
-                validate={validateNotesField}
-                defaultValue={office.notes ?? undefined}>
-            </TextArea>
-
             <ButtonGroup>
                 <Button type="submit" isDisabled={isPending}>Save</Button>
                 <Button variant="secondary" onPress={onClose}>Cancel</Button>

@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.14",
+            notes: [
+                "Remove notes field from office modal"
+            ]
+        },
+        {
             version: "v0.0.13",
             notes: [
                 "Added Program Area field for Employee"

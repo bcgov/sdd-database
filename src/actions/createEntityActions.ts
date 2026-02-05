@@ -2,7 +2,7 @@ import {EntityActionResult} from "@/types";
 
 interface EntityActionConfig<T> {
     parse: (formData: FormData) => T;
-    validate: (entity: T) => string | undefined;
+    validate?: (entity: T) => string | undefined;
     persist: {
         create:  (entity: T) => Promise<T>;
         update:  (entity: T) => Promise<T>;
@@ -16,7 +16,7 @@ export function createEntityActions<T>(config: EntityActionConfig<T>) {
     async function persistEntity(mode: "create" | "update", _prevState: EntityActionResult, formData: FormData): Promise<EntityActionResult> {
         const entity: T = parse(formData);
 
-        const validationError = validate(entity);
+        const validationError = validate?.(entity);
         if (validationError) {
             return {
                 status: "error",
