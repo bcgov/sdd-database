@@ -81,7 +81,6 @@ export type EmployeeFormState = Employee & {
       ``` 
       {
           office_number: string
-          notes: string | null
           office_name: string
           postal_code: string
       } | undefined
