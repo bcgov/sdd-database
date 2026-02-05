@@ -80,7 +80,6 @@ export async function getOfficesByFilter(query?: string) {
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
-                {notes: {contains: query, mode: 'insensitive'}},
             ]
         }
     })
