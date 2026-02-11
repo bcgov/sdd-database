@@ -44,6 +44,7 @@ model ProgramArea {
 model Office {
   office_number String @id
   office_name   String @unique @db.Citext
+  address       String @db.VarChar(45)
   postal_code   String
 
   employees Employee[]

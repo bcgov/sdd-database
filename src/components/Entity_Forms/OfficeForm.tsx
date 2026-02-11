@@ -6,8 +6,6 @@ import type {Office} from "@/generated/prisma/client";
 
 import {updateOfficeAction} from "@/actions/offices";
 
-import {validateNotesField} from "@/validators";
-
 import {EntityActionResult} from "@/types";
 
 
@@ -53,7 +51,9 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
                        defaultValue={office.office_number}>
             </TextField>
 
-            <TextField label="Office Name" name="officeName" isReadOnly defaultValue={office.office_name}/>
+            <TextField label="Name" name="officeName" isReadOnly defaultValue={office.office_name}/>
+
+            <TextField label="Address" name="address" isReadOnly defaultValue={office.address}/>
 
             <TextField label="Postal Code" name="postalCode" isReadOnly defaultValue={office.postal_code}/>
 

@@ -13,6 +13,7 @@ const parseOfficeFormData = (formData: FormData): Office => {
     return {
         office_number: formData.get("officeNumber") as string,
         office_name: formData.get("officeName") as string,
+        address: formData.get("address") as string,
         postal_code: formData.get("postalCode") as string,
     }
 }
@@ -22,22 +23,8 @@ function getReadablePrismaError(error: unknown) {
     let errorMessage = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-
-        const {code} = error;
-
-        switch (code) {
-
-            case "P2000": {
-                errorMessage = `Notes can be upto 2000 characters long. Please shorten it and try again.`;
-                break;
-            }
-            default: {
-                errorMessage += ` Error code: "${code}"`;
-            }
-        }
+        errorMessage += ` Error code: "${error.code}"`;
     }
-
-    console.error(error);
 
     return errorMessage;
 }
