@@ -1,6 +1,6 @@
 {
   "name": "sdd-database",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,6 +13,8 @@
     "localhost:test": "dotenv -e .env.test.local -- next dev",
     "studio:dev": "dotenv -e .env.development.local -- npx prisma studio --port 5555",
     "studio:test": "dotenv -e .env.test.local -- npx prisma studio --port 5556",
+    "reset:dev": "npx dotenv -e .env.development.local -- npx prisma migrate reset",
+    "reset:test": "npx dotenv -e .env.test.local -- npx prisma migrate reset",
     "seed:dev": "npx dotenv -e .env.development.local -- prisma db seed",
     "seed:test": "npx dotenv -e .env.test.local -- prisma db seed",
     "migrate:dev": "npx dotenv -e .env.development.local -- npx prisma migrate dev --name",

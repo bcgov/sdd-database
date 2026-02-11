@@ -80,6 +80,7 @@ export async function getOfficesByFilter(query?: string) {
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
                 {address: {contains: query, mode: 'insensitive'}},
+                {city: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
             ]
         }
@@ -119,6 +120,7 @@ export async function updateOffice(office: Office) {
         office_name: _office_name,
         postal_code: _postal_code,
         address: _address,
+        city: _city,
         ...updatableFields
     } = office
 

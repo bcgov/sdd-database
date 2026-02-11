@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.16",
+            notes: [
+                "Add city field to office modal"
+            ]
+        },
+        {
             version: "v0.0.15",
             notes: [
                 "Add address field to office modal"

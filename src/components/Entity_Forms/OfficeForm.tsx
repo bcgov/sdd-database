@@ -55,6 +55,8 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
 
             <TextField label="Address" name="address" isReadOnly defaultValue={office.address}/>
 
+            <TextField label="City" name="city" isReadOnly defaultValue={office.city}/>
+
             <TextField label="Postal Code" name="postalCode" isReadOnly defaultValue={office.postal_code}/>
 
             <ButtonGroup>
