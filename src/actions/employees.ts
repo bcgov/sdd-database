@@ -49,8 +49,6 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
-        console.error("at start");
-
         const {code, meta} = error;
 
         console.log(`code :'${code}', message: '${error.message}'`);
@@ -64,27 +62,28 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 break;
             }
             case "P2002": {
-                let errorFieldName
+                const errorFieldName = meta?.driverAdapterError?.cause?.constraint?.fields?.[0] as string | undefined;
 
-                if (Array.isArray(meta?.target)) {
-                    errorFieldName = meta.target[0]
-
-                    if (errorFieldName === "employee_id") {
-                        errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
+                if (errorFieldName === "employee_id") {
+                    errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
+                } else {
+                    if (errorFieldName === "idir") {
+                        errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
                     } else {
-                        if (errorFieldName === "idir") {
-                            errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
-                        }
+                        // fallback if we can't determine the exact field
+                        errorMessage = `A record already exists with the same unique value. Please verify Employee ID and IDIR and try again.`;
                     }
                 }
 
                 break;
             }
             case "P2003": {
-                if (meta?.constraint === "Employee_office_number_fkey") {
+
+                const foriegnKey = meta?.driverAdapterError?.cause?.constraint?.index
+
+                if (foriegnKey === "Employee_office_number_fkey") {
                     errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
-                }
-                else if (meta?.constraint === "Employee_program_area_id_fkey") {
+                } else if (foriegnKey === "Employee_program_area_id_fkey") {
                     errorMessage = `It seems like a program area wasn't selected for this new employee. Please select a program area and try again.`;
                 }
                 break;
@@ -97,7 +96,6 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 break;
             }
             default: {
-                console.log("in default")
                 errorMessage += ` Error code: "${code}"`;
             }
         }

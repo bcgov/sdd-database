@@ -2,9 +2,9 @@ import {PrismaClient} from "@/generated/prisma/client"
 
 const offices = [
     {
-        office_number: "3",
-        office_name: "Vancouver - Prevention and Loss Management Services",
-        postal_code: "V3V5V9",
+        office_number: "0",
+        office_name: "Castlegar - Front Counter",
+        postal_code: "V1N 1H3",
     },
     {
         office_number: "200",
