@@ -41,6 +41,21 @@ function validateEmployeeData(employee: Employee) {
     )
 }
 
+type DriverAdapterErrorMeta = {
+    cause?: {
+        constraint?: {
+            fields?: string[];
+            index?: string;
+        }
+    }
+}
+
+function getDriverAdapterError(meta: Record<string, unknown> | undefined) {
+    const dae = meta?.driverAdapterError;
+
+    return dae && typeof dae === "object" ? (dae as DriverAdapterErrorMeta) : undefined;
+}
+
 function getReadablePrismaError(error: unknown, employee: Employee) {
 
     const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
@@ -62,7 +77,9 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
                 break;
             }
             case "P2002": {
-                const errorFieldName = meta?.driverAdapterError?.cause?.constraint?.fields?.[0] as string | undefined;
+
+                const dae = getDriverAdapterError(meta);
+                const errorFieldName = dae?.cause?.constraint?.fields?.[0];
 
                 if (errorFieldName === "employee_id") {
                     errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
@@ -79,7 +96,8 @@ function getReadablePrismaError(error: unknown, employee: Employee) {
             }
             case "P2003": {
 
-                const foriegnKey = meta?.driverAdapterError?.cause?.constraint?.index
+                const dae = getDriverAdapterError(meta);
+                const foriegnKey = dae?.cause?.constraint?.index
 
                 if (foriegnKey === "Employee_office_number_fkey") {
                     errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
