@@ -44,6 +44,18 @@ export async function getProgramAreasByBranch(branch_id: number) {
     })
 }
 
+export async function getOfficeTypes() {
+    return prisma.officeType.findMany({
+        select: {
+            id: true,
+            name: true,
+        },
+        orderBy: {
+            name: "asc"
+        }
+    })
+}
+
 export async function getEmployeesByFilter(query?: string) {
     if (!query)
         return prisma.employee.findMany({include: {program_area: true}})    // hydrate ProgramArea
@@ -79,6 +91,7 @@ export async function getOfficesByFilter(query?: string) {
             OR: [
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
+                {office_type: {name: {contains: query, mode: 'insensitive'}}},
                 {address: {contains: query, mode: 'insensitive'}},
                 {city: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
@@ -118,6 +131,7 @@ export async function updateOffice(office: Office) {
     const {
         office_number,
         office_name: _office_name,
+        type_id: _type_id,
         postal_code: _postal_code,
         address: _address,
         city: _city,

@@ -1,10 +1,12 @@
 import {useActionState, useEffect} from "react";
 
-import {Button, ButtonGroup, Form, TextArea, TextField} from "@bcgov/design-system-react-components";
+import {Button, ButtonGroup, Form, Select, TextField} from "@bcgov/design-system-react-components";
 
 import type {Office} from "@/generated/prisma/client";
 
 import {updateOfficeAction} from "@/actions/offices";
+
+import {useOfficeTypes} from "@/hooks/useOfficeTypes";
 
 import {EntityActionResult} from "@/types";
 
@@ -24,6 +26,8 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
     }
 
     const [result, formAction, isPending] = useActionState(updateOfficeAction, initialState)
+
+    const {officeTypes} = useOfficeTypes(); // [{ id, name }, {id, name}] or null on first render
 
     useEffect(() => {
 
@@ -52,6 +56,18 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
             </TextField>
 
             <TextField label="Name" name="officeName" isReadOnly defaultValue={office.office_name}/>
+
+            <Select label="Type"
+                    name="type"
+                    items={(officeTypes ?? []).map(type => (
+                        {
+                            id: type.id,
+                            label: type.name
+                        }
+                    ))}
+                    isDisabled
+                    defaultValue={office.type_id}>
+            </Select>
 
             <TextField label="Address" name="address" isReadOnly defaultValue={office.address}/>
 

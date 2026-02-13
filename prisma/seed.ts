@@ -3,10 +3,14 @@ import {pool, prisma} from "@/db/prisma"
 import {seedOffices} from "./seedOffices"
 import {seedBranches} from "./seedBranches"
 import {seedProgramAreas} from "./seedProgramAreas";
+import {seedOfficeTypes} from "./seedOfficeTypes";
 
 
 async function main() {
     console.log("🌱 Starting seed...");
+
+    console.log("➡️ Seeding office types...");
+    await seedOfficeTypes(prisma);
 
     console.log("➡️ Seeding offices...");
     await seedOffices(prisma);

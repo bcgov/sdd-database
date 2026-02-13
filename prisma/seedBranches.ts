@@ -1,5 +1,6 @@
 import {PrismaClient} from "@/generated/prisma/client"
 
+
 const branchNames = [
     "Community Integration Services",
     "Prevention and Loss Management Services",

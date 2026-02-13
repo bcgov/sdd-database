@@ -11,6 +11,11 @@ export type ProgramAreaOption = {
     name: string
 }
 
+export type OfficeTypeOption = {
+    id: number
+    name: string
+}
+
 export type EmployeeFormState = Employee & {
     // present for hydrated employees (selectedSearchResult), absent for drafts (draftEmployee)
     program_area?: ProgramArea;
