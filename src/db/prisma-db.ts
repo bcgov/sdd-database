@@ -56,6 +56,18 @@ export async function getOfficeTypes() {
     })
 }
 
+export async function getTypesOfClientServices() {
+    return prisma.typeOfClientService.findMany({
+        select: {
+            id: true,
+            name: true,
+        },
+        orderBy: {
+            name: "asc"
+        }
+    })
+}
+
 export async function getEmployeesByFilter(query?: string) {
     if (!query)
         return prisma.employee.findMany({include: {program_area: true}})    // hydrate ProgramArea
@@ -92,6 +104,7 @@ export async function getOfficesByFilter(query?: string) {
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
                 {office_type: {name: {contains: query, mode: 'insensitive'}}},
+                {client_service_type: {name: {contains: query, mode: 'insensitive'}}},
                 {address: {contains: query, mode: 'insensitive'}},
                 {city: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
@@ -132,6 +145,7 @@ export async function updateOffice(office: Office) {
         office_number,
         office_name: _office_name,
         type_id: _type_id,
+        client_service_type_id: _client_service_type_id,
         postal_code: _postal_code,
         address: _address,
         city: _city,

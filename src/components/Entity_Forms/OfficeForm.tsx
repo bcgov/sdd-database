@@ -7,6 +7,7 @@ import type {Office} from "@/generated/prisma/client";
 import {updateOfficeAction} from "@/actions/offices";
 
 import {useOfficeTypes} from "@/hooks/useOfficeTypes";
+import {useTypesOfClientServices} from "@/hooks/useTypesOfClientServices";
 
 import {EntityActionResult} from "@/types";
 
@@ -28,6 +29,7 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
     const [result, formAction, isPending] = useActionState(updateOfficeAction, initialState)
 
     const {officeTypes} = useOfficeTypes(); // [{ id, name }, {id, name}] or null on first render
+    const {typesOfClientServices} = useTypesOfClientServices();
 
     useEffect(() => {
 
@@ -67,6 +69,18 @@ export function OfficeForm({office, onSuccess, onError, onClose}: OfficeFormProp
                     ))}
                     isDisabled
                     defaultValue={office.type_id}>
+            </Select>
+
+            <Select label="Type of Client Services"
+                    name="typeOfClientServices"
+                    items={(typesOfClientServices ?? []).map(typeOfClientService => (
+                        {
+                            id: typeOfClientService.id,
+                            label: typeOfClientService.name
+                        }
+                    ))}
+                    isDisabled
+                    defaultValue={office.client_service_type_id}>
             </Select>
 
             <TextField label="Address" name="address" isReadOnly defaultValue={office.address}/>

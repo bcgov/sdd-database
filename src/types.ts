@@ -16,6 +16,11 @@ export type OfficeTypeOption = {
     name: string
 }
 
+export type TypeOfClientServiceOption = {
+    id: number
+    name: string
+}
+
 export type EmployeeFormState = Employee & {
     // present for hydrated employees (selectedSearchResult), absent for drafts (draftEmployee)
     program_area?: ProgramArea;
