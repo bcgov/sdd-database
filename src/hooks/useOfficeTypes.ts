@@ -2,12 +2,12 @@ import {useEffect, useState} from "react";
 
 import {fetchOfficeTypes} from "@/actions/officeTypes";
 
-import {OfficeTypeOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
 export function useOfficeTypes() {
 
-    const [officeTypes, setOfficeTypes] = useState<OfficeTypeOption[] | null>(null);
+    const [officeTypes, setOfficeTypes] = useState<LookupOption[] | null>(null);
 
     useEffect(() => {
 

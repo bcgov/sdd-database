@@ -2,12 +2,12 @@ import {useEffect, useState} from "react";
 
 import {fetchTypesOfClientServices} from "@/actions/typesOfClientServices";
 
-import {TypeOfClientServiceOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
 export function useTypesOfClientServices() {
 
-    const [typesOfClientServices, setTypesOfClientServices] = useState<TypeOfClientServiceOption[] | null>(null);
+    const [typesOfClientServices, setTypesOfClientServices] = useState<LookupOption[] | null>(null);
 
     useEffect(() => {
 

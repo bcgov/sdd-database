@@ -2,12 +2,12 @@ import {useEffect, useState} from "react";
 
 import {fetchBranches} from "@/actions/branches";
 
-import {BranchOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
 export function useBranches() {
 
-    const [branches, setBranches] = useState<BranchOption[] | null>(null);
+    const [branches, setBranches] = useState<LookupOption[] | null>(null);
 
     useEffect(() => {
 

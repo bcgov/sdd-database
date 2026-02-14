@@ -1,25 +1,10 @@
 import type {Prisma, Employee, ProgramArea, Office, Workstation} from "@/generated/prisma/client";
 
 
-export type BranchOption = {
-    id: number
-    name: string
-}
-
-export type ProgramAreaOption = {
-    id: number
-    name: string
-}
-
-export type OfficeTypeOption = {
-    id: number
-    name: string
-}
-
-export type TypeOfClientServiceOption = {
-    id: number
-    name: string
-}
+export type LookupOption = {
+    id: number;
+    name: string;
+};
 
 export type EmployeeFormState = Employee & {
     // present for hydrated employees (selectedSearchResult), absent for drafts (draftEmployee)

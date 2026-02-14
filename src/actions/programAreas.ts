@@ -2,9 +2,9 @@
 
 import {getProgramAreasByBranch} from "@/db/prisma-db";
 
-import {ProgramAreaOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
-export async function fetchProgramAreasByBranch(branchId: number): Promise<ProgramAreaOption[]> {
+export async function fetchProgramAreasByBranch(branchId: number): Promise<LookupOption[]> {
     return getProgramAreasByBranch(branchId);
 }

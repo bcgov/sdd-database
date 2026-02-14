@@ -2,12 +2,12 @@ import {useEffect, useState} from "react";
 
 import {fetchProgramAreasByBranch} from "@/actions/programAreas";
 
-import {ProgramAreaOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
 export function useProgramAreas(branchId?: number) {
 
-    const [programAreas, setProgramAreas] = useState<ProgramAreaOption[] | null>(null);
+    const [programAreas, setProgramAreas] = useState<LookupOption[] | null>(null);
 
     useEffect(() => {
 

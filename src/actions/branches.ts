@@ -2,9 +2,9 @@
 
 import {getBranches} from "@/db/prisma-db";
 
-import {BranchOption} from "@/types";
+import {LookupOption} from "@/types";
 
 
-export async function fetchBranches(): Promise<BranchOption[]> {
+export async function fetchBranches(): Promise<LookupOption[]> {
     return getBranches();
 }

@@ -1,11 +1,11 @@
 "use server";
 
 
-import {OfficeTypeOption} from "@/types";
+import {LookupOption} from "@/types";
 
 import {getOfficeTypes} from "@/db/prisma-db";
 
 
-export async function fetchOfficeTypes(): Promise<OfficeTypeOption[]> {
+export async function fetchOfficeTypes(): Promise<LookupOption[]> {
     return getOfficeTypes();
 }
