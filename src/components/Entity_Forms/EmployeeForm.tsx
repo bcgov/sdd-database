@@ -16,8 +16,8 @@ import {
 
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
 
-import {useBranches} from "@/hooks/useBranches";
-import {useProgramAreas} from "@/hooks/useProgramAreas";
+import {useBranches} from "@/hooks/lookups/useBranches";
+import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
 
 import {EmployeeFormState, EntityActionResult} from "@/types";
 

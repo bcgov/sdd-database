@@ -6,8 +6,8 @@ import type {Office} from "@/generated/prisma/client";
 
 import {updateOfficeAction} from "@/actions/offices";
 
-import {useOfficeTypes} from "@/hooks/useOfficeTypes";
-import {useTypesOfClientServices} from "@/hooks/useTypesOfClientServices";
+import {useOfficeTypes} from "@/hooks/lookups/useOfficeTypes";
+import {useTypesOfClientServices} from "@/hooks/lookups/useTypesOfClientServices";
 
 import {EntityActionResult} from "@/types";
 
