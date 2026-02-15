@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.19",
+            notes: [
+                "Clean up office popup"
+            ]
+        },
+        {
             version: "v0.0.18",
             notes: [
                 "Add type of client services dropdown for an office"
