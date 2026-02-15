@@ -30,7 +30,7 @@ export function EditModal({
                               onDelete
                           }: EditModalProps) {
 
-    const modalVerb = item.type === "office" ? "View" : "Edit"; // v1 rule: Office is view-only
+    const modalVerb = item.type !== "office" ? "Edit" : "";
     const modalTitle = `${modalVerb} ${ENTITY_TYPE_NAME[item.type]}`
 
     const getModalBody = () => {

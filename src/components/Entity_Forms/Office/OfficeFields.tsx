@@ -2,7 +2,7 @@ import type {Office} from "@/generated/prisma/client";
 
 import {LookupOption} from "@/types";
 
-import {Select, TextField} from "@bcgov/design-system-react-components";
+import {Accordion, AccordionGroup, Select, TextField} from "@bcgov/design-system-react-components";
 
 
 interface OfficeFieldsProps {
@@ -13,66 +13,78 @@ interface OfficeFieldsProps {
 }
 
 export function OfficeFields({
-                          office,
-                          officeTypes,
-                          typesOfClientServices,
-                          isReadOnly
-                      }: OfficeFieldsProps) {
+                                 office,
+                                 officeTypes,
+                                 typesOfClientServices,
+                                 isReadOnly
+                             }: OfficeFieldsProps) {
     return (
-        <>
-            <TextField label="Office Number"
-                       name="officeNumber"
-                       isReadOnly={isReadOnly}
-                       defaultValue={office.office_number}>
-            </TextField>
+        <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["officeDetails", "address"]} style={{
+            marginTop: "1rem",
+            marginBottom: "1rem",
+        }}>
+            <Accordion label="Office Details" id="officeDetails">
+                <div>
+                    <TextField label="Office Number"
+                               name="officeNumber"
+                               isReadOnly={isReadOnly}
+                               defaultValue={office.office_number}>
+                    </TextField>
 
-            <TextField label="Name"
-                       name="officeName"
-                       isReadOnly={isReadOnly}
-                       defaultValue={office.office_name}>
-            </TextField>
+                    <TextField label="Office Name"
+                               name="officeName"
+                               isReadOnly={isReadOnly}
+                               defaultValue={office.office_name}>
+                    </TextField>
 
-            <Select label="Type"
-                    name="type"
-                    items={officeTypes.map(type => (
-                        {
-                            id: type.id,
-                            label: type.name
-                        }
-                    ))}
-                    isDisabled={isReadOnly}
-                    defaultValue={office.type_id}>
-            </Select>
+                    <Select label="Type of Office"
+                            name="type"
+                            items={officeTypes.map(type => (
+                                {
+                                    id: type.id,
+                                    label: type.name
+                                }
+                            ))}
+                            isDisabled={isReadOnly}
+                            defaultValue={office.type_id}>
+                    </Select>
 
-            <Select label="Type of Client Services"
-                    name="typeOfClientServices"
-                    items={typesOfClientServices.map(typeOfClientService => (
-                        {
-                            id: typeOfClientService.id,
-                            label: typeOfClientService.name
-                        }
-                    ))}
-                    isDisabled={isReadOnly}
-                    defaultValue={office.client_service_type_id}>
-            </Select>
+                    <Select label="Type of Client Services"
+                            name="typeOfClientServices"
+                            items={typesOfClientServices.map(typeOfClientService => (
+                                {
+                                    id: typeOfClientService.id,
+                                    label: typeOfClientService.name
+                                }
+                            ))}
+                            isDisabled={isReadOnly}
+                            defaultValue={office.client_service_type_id}>
+                    </Select>
+                </div>
+            </Accordion>
 
-            <TextField label="Address"
-                       name="address"
-                       isReadOnly={isReadOnly}
-                       defaultValue={office.address}>
-            </TextField>
+            <Accordion label="Address" id="address">
+                <div>
+                    <TextField label="Street Address"
+                               name="address"
+                               isReadOnly={isReadOnly}
+                               defaultValue={office.address}>
+                    </TextField>
 
-            <TextField label="City"
-                       name="city"
-                       isReadOnly={isReadOnly}
-                       defaultValue={office.city}>
-            </TextField>
+                    <TextField label="City"
+                               name="city"
+                               isReadOnly={isReadOnly}
+                               defaultValue={office.city}>
+                    </TextField>
 
-            <TextField label="Postal Code"
-                       name="postalCode"
-                       isReadOnly={isReadOnly}
-                       defaultValue={office.postal_code}>
-            </TextField>
-        </>
+                    <TextField label="Postal Code"
+                               name="postalCode"
+                               isReadOnly={isReadOnly}
+                               defaultValue={office.postal_code}>
+                    </TextField>
+                </div>
+            </Accordion>
+
+        </AccordionGroup>
     )
 }
