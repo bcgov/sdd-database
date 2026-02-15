@@ -139,25 +139,6 @@ export async function updateEmployee(employee: Employee) {
     })
 }
 
-export async function updateOffice(office: Office) {
-
-    const {
-        office_number,
-        office_name: _office_name,
-        type_id: _type_id,
-        client_service_type_id: _client_service_type_id,
-        postal_code: _postal_code,
-        address: _address,
-        city: _city,
-        ...updatableFields
-    } = office
-
-    return prisma.office.update({
-        where: {office_number},
-        data: {...updatableFields},
-    })
-}
-
 export async function updateWorkstation(workstation: Workstation) {
 
     const {asset_tag, ...updatableFields} = workstation

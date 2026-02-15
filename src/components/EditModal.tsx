@@ -3,7 +3,7 @@ import {Callout} from "@bcgov/design-system-react-components";
 import {Entity} from "@/types";
 
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
-import {OfficeForm} from "@/components/Entity_Forms/OfficeForm";
+import {OfficeForm} from "@/components/Entity_Forms/Office/OfficeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 import {ModalDialog} from "@/components/ModalDialog";
 
@@ -30,12 +30,13 @@ export function EditModal({
                               onDelete
                           }: EditModalProps) {
 
+    const modalVerb = item.type === "office" ? "View" : "Edit"; // v1 rule: Office is view-only
+    const modalTitle = `${modalVerb} ${ENTITY_TYPE_NAME[item.type]}`
+
     const getModalBody = () => {
         let bodyComponent = null;
 
-        const onClose = () => {
-            setIsOpen(false);
-        }
+        const onClose = () => setIsOpen(false);
 
         switch (item.type) {
             case "employee":
@@ -50,10 +51,7 @@ export function EditModal({
                 break
 
             case "office":
-                bodyComponent = <OfficeForm onSuccess={onSuccess}
-                                            onError={onError}
-                                            office={item}
-                                            onClose={onClose}/>
+                bodyComponent = <OfficeForm office={item}/>
                 break
 
             case "workstation":
@@ -67,19 +65,30 @@ export function EditModal({
         return bodyComponent;
     }
 
+    const displayCallout = () => {
+
+        let calloutComponent = null;
+
+        if (item.type !== "office") {   // this callout is only for editable entities
+            calloutComponent = <div style={{
+                marginTop: "1rem",
+                marginBottom: "1rem",
+            }}>
+                <Callout title="Info"
+                         description="Edit below information as you want and then click 'Save'. You should see a Success Alert message on the Home Screen."/>
+            </div>
+        }
+
+        return calloutComponent;
+    }
+
     return (
         <>
             <ModalDialog isOpen={isOpen}
                          setIsOpen={setIsOpen}
-                         modalTitle={`Edit ${ENTITY_TYPE_NAME[item.type]}`}>
+                         modalTitle={modalTitle}>
 
-                <div style={{
-                    marginTop: "1rem",
-                    marginBottom: "1rem",
-                }}>
-                    <Callout title="Info"
-                             description="Edit below information as you want and then click 'Save'. You should see a Success Alert message on the Home Screen."/>
-                </div>
+                {displayCallout()}
 
                 <div style={{
                     // backgroundColor: "lightyellow",
