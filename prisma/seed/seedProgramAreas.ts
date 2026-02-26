@@ -81,8 +81,6 @@ export async function seedProgramAreas(prismaClient: PrismaClient) {
 
         const rows = programAreas.map( (name) => ({name, branch_id: branch.id }))
 
-        const result = await prismaClient.programArea.createMany({data: rows, skipDuplicates: true})
-
-        console.log(`   • ${branchName}: inserted ${result.count} new program areas`)
+        await prismaClient.programArea.createMany({data: rows, skipDuplicates: true})
     }
 }

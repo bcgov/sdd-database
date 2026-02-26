@@ -1,6 +1,6 @@
 import {prisma} from "./client";
 
-import type {Employee, Workstation, Office} from "@/generated/prisma/client";
+import type {Employee, Workstation} from "@/generated/prisma/client";
 
 
 export async function addNewEmployee(employee: Employee) {

@@ -122,7 +122,6 @@ export function validateEmployeeOfficeNumberField(value: string, label: string =
     }
 }
 
-
 export function validateEmployeeProgramAreaField(value: number, label: string = "Program Area") {
     const requiredError = validateRequiredField(value, label);
 

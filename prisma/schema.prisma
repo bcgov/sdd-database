@@ -44,12 +44,12 @@ model ProgramArea {
 
 model Office {
   office_number          String @id
-  office_name            String @unique @db.Citext
+  office_name            String @db.VarChar(35)
   type_id                Int
   client_service_type_id Int
   address                String @db.VarChar(45)
   city                   String @db.VarChar(20)
-  postal_code            String
+  postal_code            String @db.VarChar(7)
 
   office_type         OfficeType          @relation(fields: [type_id], references: [id])
   client_service_type TypeOfClientService @relation(fields: [client_service_type_id], references: [id])

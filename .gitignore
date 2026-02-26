@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# Seed/import data snapshots
+prisma/data/
+
 # prisma output
 /src/generated/prisma
 
@@ -41,7 +44,6 @@ yarn-error.log*
 
 # But keep examples
 !.env*.local.example
-
 
 # vercel
 .vercel

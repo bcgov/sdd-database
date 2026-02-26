@@ -16,8 +16,9 @@ node_modules
 # environment files
 .env*
 
-# database
-prisma/migrations
+# database / prisma
+prisma/*
+!prisma/schema.prisma
 
 # Exclude docker and kubernetes-related files
 Dockerfile

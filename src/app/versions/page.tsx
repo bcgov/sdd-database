@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.20",
+            notes: [
+                "Add all offices from the Office Information table in Access Database"
+            ]
+        },
+        {
             version: "v0.0.19",
             notes: [
                 "Clean up office popup"
