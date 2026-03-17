@@ -131,10 +131,11 @@ export function EmployeeForm({
 
                         <TextField label="IDIR"
                                    name="idir"
-                                   isRequired
+                                   description="If IDIR is unknown, leave this field blank"
                                    validate={validateEmployeeIdirField}
-                                   isReadOnly={isEditMode} // lock the field in edit mode
-                                   defaultValue={employee?.idir}>
+                                   isReadOnly={isEditMode && !!employee?.idir} // idir can't be changed once it is
+                            // set for an employee
+                                   defaultValue={employee?.idir ?? undefined}>
                         </TextField>
 
                         <TextField label="Alternate Name"
@@ -144,7 +145,6 @@ export function EmployeeForm({
                                        "Alternate Name",
                                        {
                                            required: false,
-                                           allowMultipleWords: true
                                        }
                                    )
                                    }

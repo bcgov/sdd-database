@@ -21,7 +21,7 @@ export function validateEmployeeNameField(
     label: string,
     {
         required = true,
-        allowMultipleWords = false
+        allowMultipleWords = true
     }: {
         required?: boolean;
         allowMultipleWords?: boolean;
@@ -35,17 +35,17 @@ export function validateEmployeeNameField(
         }
     }
 
-    const multipleWordsRegex = /^$|^[A-Za-z]+(?: [A-Za-z]+)*$/;
-    const singleWordRegex = /^$|^[A-Za-z]+$/;
+    const multipleWordsRegex = /^$|^[A-Za-z]+(?:[-'][A-Za-z]+)*\.?(?: [A-Za-z]+(?:[-'][A-Za-z]+)*\.?)*$/;
+    const singleWordRegex = /^$|^[A-Za-z]+(?:[-'][A-Za-z]+)*\.?$/;
 
     const pattern = allowMultipleWords ? multipleWordsRegex : singleWordRegex;
 
     if (!pattern.test(value)) {
 
-        let errorMessage = `${label} can contain only alphabets`;
+        let errorMessage = `${label} can contain only alphabets, apostrophes or hyphens within words, optional periods after words`;
 
         if (allowMultipleWords) {
-            errorMessage += `  and spaces in between words`;
+            errorMessage += ` and single spaces in between words`;
         } else {
             errorMessage += ` and must be a single word`;
         }
@@ -84,12 +84,6 @@ export function validateEmployeeIdField(value: string, label: string = "Employee
 export function validateEmployeeIdirField(value: string, label: string = "IDIR") {
 
     const IDIR_MAX_LENGTH = 8;
-
-    const requiredError = validateRequiredField(value, label);
-
-    if (requiredError) {
-        return requiredError;
-    }
 
     const maxLengthError = validateMaxLength(value, IDIR_MAX_LENGTH, label);
 

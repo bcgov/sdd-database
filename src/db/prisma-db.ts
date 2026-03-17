@@ -129,13 +129,31 @@ export async function getWorkstationsByFilter(query?: string) {
 
 export async function updateEmployee(employee: Employee) {
 
-    // we don't want to update the employee_id and idir fields as those are read-only and hence the user couldn't
-    // have changed them in the form
-    const {employee_id, idir: _idir, ...updatableFields} = employee
+    const existingEmployee = await prisma.employee.findUnique({
+        where: {
+            employee_id: employee.employee_id,
+        },
+        select: {
+            idir: true,
+        }
+    })
+
+    if(!existingEmployee) {
+        throw new Error(`Employee with employee id ${employee.employee_id} not found`)
+    }
+
+    // employee_id is immutable.
+    // idir can be added later if it is currently missing, but once an idir already exists in DB, it cannot be changed.
+    const {employee_id, idir, ...rest} = employee
+
+    // we don't update idir if existing employee already has idir set
+    const data = existingEmployee.idir
+        ? rest
+        : {...rest, idir}
 
     return prisma.employee.update({
         where: {employee_id},
-        data: {...updatableFields},
+        data,
     })
 }
 

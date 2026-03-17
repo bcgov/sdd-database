@@ -10,7 +10,7 @@ datasource db {
 
 model Employee {
   office_number   String
-  idir            String  @unique @db.Citext
+  idir            String? @unique @db.Citext
   first_name      String  @db.VarChar(30)
   alternate_name  String? @db.VarChar(30)
   last_name       String  @db.VarChar(30)

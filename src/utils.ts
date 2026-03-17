@@ -12,7 +12,7 @@ export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
 export const parseEmployeeFormData = (formData: FormData): Employee => {
     return {
         office_number: formData.get("officeNumber") as string,
-        idir: formData.get("idir") as string,
+        idir: (formData.get("idir") as string).toUpperCase() || null,   // normalizing to maintain consistency in the DB
         first_name: formData.get("firstName") as string,
         alternate_name: formData.get("alternateName") as string || null,
         last_name: formData.get("lastName") as string,

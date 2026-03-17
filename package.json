@@ -1,6 +1,6 @@
 {
   "name": "sdd-database",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -26,12 +26,12 @@
     "@bcgov/design-system-react-components": "^0.6.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.8",
-    "@mui/material": "^7.3.8",
-    "@prisma/adapter-pg": "^7.4.1",
-    "@prisma/client": "^7.4.1",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
+    "@prisma/adapter-pg": "^7.5.0",
+    "@prisma/client": "^7.5.0",
     "next": "16.1.6",
-    "pg": "^8.19.0",
+    "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "server-only": "^0.0.1"
@@ -40,7 +40,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25",
-    "@types/pg": "^8.16.0",
+    "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
@@ -48,7 +48,7 @@
     "eslint-config-next": "16.1.6",
     "exceljs": "^4.4.0",
     "postcss": "^8",
-    "prisma": "^7.4.1",
+    "prisma": "^7.5.0",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5"

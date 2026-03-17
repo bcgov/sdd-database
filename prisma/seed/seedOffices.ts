@@ -4,20 +4,28 @@ import path from "path"
 
 import type ExcelJS from "exceljs";
 
-import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../excel";
+import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "./excel";
 
 import {
-    assertCity, assertLookupValue,
+    assertLookupValue,
+    assertCity,
     assertOfficeAddress,
     assertOfficeName,
     assertOfficeNumber,
-    assertPostalCode, assertUnique,
-} from "../offices.validators";
+    assertPostalCode
+} from "./validators/offices.validators";
+
+import {assertUnique} from "./validators/common.validators";
 
 
-const EXCEL_FILE_PATH = path.join(process.cwd(), "prisma", "data", "Office Information.xlsx")
+const OFFICE_INFORMATION_FILE_PATH = path.join(
+    process.cwd(),
+    "prisma",
+    "data",
+    "Office Information.xlsx"
+)
 
-const REQUIRED_HEADERS = [
+const OFFICE_INFORMATION_REQUIRED_HEADERS = [
     "OfficeNum",
     "Office Name",
     "Office Address",
@@ -30,9 +38,9 @@ const REQUIRED_HEADERS = [
 
 export async function seedOffices(prismaClient: PrismaClient) {
 
-    const worksheet = await loadWorksheetFromFile(EXCEL_FILE_PATH)
+    const worksheet = await loadWorksheetFromFile(OFFICE_INFORMATION_FILE_PATH)
 
-    const headerToCol = getRequiredHeaderToCol(worksheet, REQUIRED_HEADERS)
+    const headerToCol = getRequiredHeaderToCol(worksheet, OFFICE_INFORMATION_REQUIRED_HEADERS)
 
     const seenOfficeNumbers = new Map<string, number>();
 
@@ -98,19 +106,19 @@ function buildLookup(rows: Array<{ id: number; name: string }>) {
 function parseOfficeRow(
     row: ExcelJS.Row,
     rowNumber: number,
-    headerToCol: Record<(typeof REQUIRED_HEADERS)[number], number>,
+    headerToCol: Record<(typeof OFFICE_INFORMATION_REQUIRED_HEADERS)[number], number>,
     seenOfficeNumbers: Map<string, number>,
     officeTypeLookup: Map<string, number>,
     clientServiceTypeLookup: Map<string, number>,
 ) {
     // office number
-    const officeNumberString = getCellString(row, headerToCol, "OfficeNum")
-    assertOfficeNumber(officeNumberString, rowNumber)
-    assertUnique(seenOfficeNumbers, officeNumberString, rowNumber, "office number")
+    const officeNumber = getCellString(row, headerToCol, "OfficeNum")
+    assertOfficeNumber(officeNumber, rowNumber)
+    assertUnique(seenOfficeNumbers, officeNumber, rowNumber, "office number")
 
     // office name
-    const officeNameString = getCellString(row, headerToCol, "Office Name")
-    assertOfficeName(officeNameString, rowNumber)
+    const officeName = getCellString(row, headerToCol, "Office Name")
+    assertOfficeName(officeName, rowNumber)
 
     // office address
     const address = getCellString(row, headerToCol, "Office Address")
@@ -133,8 +141,8 @@ function parseOfficeRow(
     const clientServiceTypeId = assertLookupValue(clientServiceType, "Type of Client Services", rowNumber, clientServiceTypeLookup)
 
     return {
-        office_number: officeNumberString,
-        office_name: officeNameString,
+        office_number: officeNumber,
+        office_name: officeName,
         type_id: officeTypeId,
         client_service_type_id: clientServiceTypeId,
         address,

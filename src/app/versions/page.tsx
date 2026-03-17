@@ -6,6 +6,14 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.21",
+            notes: [
+                "First Name and Last Name (like Alternate Name) now support multiple words unlike only accepting" +
+                " single words that it did so far",
+                "Additionally, name fields now accept periods, hyphens and apostrophes",
+                "Employees can now be created without an IDIR"
+            ]
+        },{
             version: "v0.0.20",
             notes: [
                 "Add all offices from the Office Information table in Access Database"
@@ -101,7 +109,7 @@ export default function Updates() {
             version: "v0.0.5",
             notes: [
                 "Added Offices",
-                "Added workstations",
+                "Added Workstations",
                 "Added filtering capability for search results",
                 "Added option to select an office for a employee (through the 'Assign Office' button)",
                 "Added IDIR and Alternate Name fields from the employee table",

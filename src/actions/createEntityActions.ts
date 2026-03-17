@@ -13,7 +13,11 @@ interface EntityActionConfig<T> {
 export function createEntityActions<T>(config: EntityActionConfig<T>) {
     const {parse, validate, persist, getReadablePrismaError} = config;
 
-    async function persistEntity(mode: "create" | "update", _prevState: EntityActionResult, formData: FormData): Promise<EntityActionResult> {
+    async function persistEntity(
+        mode: "create" | "update",
+        _prevState: EntityActionResult,
+        formData: FormData
+    ): Promise<EntityActionResult> {
         const entity: T = parse(formData);
 
         const validationError = validate?.(entity);

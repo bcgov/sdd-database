@@ -24,14 +24,13 @@ function validateEmployeeData(employee: Employee) {
 
     return (
         validateEmployeeOfficeNumberField(employee.office_number) ??
-        validateEmployeeIdirField(employee.idir) ??
+        (employee.idir? validateEmployeeIdirField(employee.idir) : undefined) ??
         validateEmployeeNameField(employee.first_name, "First Name") ??
         (employee.alternate_name ? validateEmployeeNameField(
             employee.alternate_name,
             "Alternate Name",
             {
                 required: false,
-                allowMultipleWords: true
             }
         ) : undefined) ??
         validateEmployeeNameField(employee.last_name, "Last Name") ??

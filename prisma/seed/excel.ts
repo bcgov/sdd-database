@@ -14,7 +14,7 @@ export async function loadWorksheetFromFile(filePath: string, excelSheetIndex = 
     return worksheet
 }
 
-function logSheetInfo(worksheet: ExcelJS.Worksheet) {
+export function logSheetInfo(worksheet: ExcelJS.Worksheet) {
     console.log("Excel loaded.")
     console.log("Sheet name: ", worksheet.name)
     console.log("Row count: ", worksheet.rowCount)
@@ -27,32 +27,8 @@ export function getRequiredHeaderToCol<const Headers extends readonly string[]>(
 }
 
 /**
- * Function says give me a requiredHeaders array (the exact list of header strings).
- * I will return an object whose keys are exactly those strings and whose values are numbers.
+ * Parses and maps all headers in the Excel file to the column number
  *
- * H[number]: If Headers is an array type, Headers[number] means "any element of that array"
- * @return Record<Headers[number], number>: If Headers is readonly ["OfficeNum", "Office Name"], then Headers[number] becomes
- * "OfficeNum" | "Office Name" and hence Record <Headers[number], number> becomes Record<"OfficeNum"| "Office Name", number>
- */
-export function assertRequiredHeaders<const Headers extends readonly string[]>(headerToCol: Record<string, number>, requiredHeaders: Headers): Record<Headers[number], number> {
-
-    const requiredHeaderToCol: Partial<Record<Headers[number], number>> = {}
-
-    for (const requiredHeader of requiredHeaders as ReadonlyArray<Headers[number]>) {
-
-        const col = headerToCol[requiredHeader]
-
-        if (col === undefined) {
-            throw new Error(`Missing required column header: "${requiredHeader}"`)
-        } else {
-            requiredHeaderToCol[requiredHeader] = col
-        }
-    }
-
-    return requiredHeaderToCol as Record<Headers[number], number>
-}
-
-/**
  * Returns an object like
  * {
  *   "OfficeNum": 1,
@@ -78,6 +54,34 @@ function getHeaderToCol(worksheet: ExcelJS.Worksheet): Record<string, number> {
     })
 
     return headerToCol
+}
+
+/**
+ * Makes sure that the headerToCol object does include all the required headers
+ *
+ * Function says give me a requiredHeaders array (the exact list of header strings).
+ * I will return an object whose keys are exactly those strings and whose values are numbers.
+ *
+ * H[number]: If Headers is an array type, Headers[number] means "any element of that array"
+ * @return Record<Headers[number], number>: If Headers is readonly ["OfficeNum", "Office Name"], then Headers[number] becomes
+ * "OfficeNum" | "Office Name" and hence Record <Headers[number], number> becomes Record<"OfficeNum"| "Office Name", number>
+ */
+function assertRequiredHeaders<const Headers extends readonly string[]>(headerToCol: Record<string, number>, requiredHeaders: Headers): Record<Headers[number], number> {
+
+    const requiredHeaderToCol: Partial<Record<Headers[number], number>> = {}
+
+    for (const requiredHeader of requiredHeaders as ReadonlyArray<Headers[number]>) {
+
+        const col = headerToCol[requiredHeader]
+
+        if (col === undefined) {
+            throw new Error(`Missing required column header: "${requiredHeader}"`)
+        } else {
+            requiredHeaderToCol[requiredHeader] = col
+        }
+    }
+
+    return requiredHeaderToCol as Record<Headers[number], number>
 }
 
 export function getCellString<const Headers extends readonly string[]>(row: ExcelJS.Row, headerToCol: Record<Headers[number], number>, header: Headers[number]) {
@@ -116,4 +120,14 @@ function cellToString(value: ExcelJS.CellValue) {
 
     // Fallback: If it’s some other object type you didn’t explicitly handle (hyperlink, error, etc.), it converts it to string anyway instead of crashing.
     return String(value).trim();
+}
+
+export function getRowValues(row: ExcelJS.Row, columnCount: number) {
+    const values: ExcelJS.CellValue[] = []
+
+    for (let col = 1; col <= columnCount; col++) {
+        values.push(row.getCell(col).value)
+    }
+
+    return values
 }
