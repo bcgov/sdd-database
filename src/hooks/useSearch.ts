@@ -25,12 +25,12 @@ export function useSearch() {
     })
 
     // A reducer function used for optimistic deletes.
-    const excludeEmployeeReducer = (filteredSearchResults: Entity[], employeeId: string) => filteredSearchResults.filter(
+    const excludeEmployeeReducer = (filteredSearchResults: Entity[], id: number) => filteredSearchResults.filter(
         item =>
             // keep every non-employee item
             item.type !== "employee" ||
             // ...or keep an employee whose ID does not match the one we're deleting
-            item.employee_id !== employeeId
+            item.id !== id
     )
 
     const [optimisticSearchResults, setOptimisticSearchResults] = useOptimistic(filteredSearchResults, excludeEmployeeReducer);

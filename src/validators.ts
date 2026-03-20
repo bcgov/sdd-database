@@ -66,10 +66,8 @@ export function validateEmployeeIdField(value: string, label: string = "Employee
 
     const EMPLOYEE_ID_LENGTH = 6;
 
-    const requiredError = validateRequiredField(value, label);
-
-    if (requiredError) {
-        return requiredError;
+    if (!value) {
+        return;
     }
 
     if (value.length !== EMPLOYEE_ID_LENGTH) {

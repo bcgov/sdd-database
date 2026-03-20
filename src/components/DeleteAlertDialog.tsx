@@ -1,12 +1,11 @@
 import {AlertDialog, Button, DialogTrigger, Modal} from "@bcgov/design-system-react-components";
 
-import type {Employee} from "@/generated/prisma/client";
-
 import {getEmployeeFullName} from "@/utils";
+import {EmployeeSearchResult} from "@/types";
 
 
 interface DeleteAlertDialogProps {
-    employee: Employee;
+    employee: EmployeeSearchResult;
     isOpen: boolean;
     setIsOpen: (isDeleteAlertDialogOpen: boolean) => void;
     /**
@@ -14,7 +13,7 @@ interface DeleteAlertDialogProps {
      * It **first** updates local UI (useOptimistic) and **then** calls the
      * server action that actually deletes the record.
      */
-    onDelete: (employeeId: string) => Promise<void>;
+    onDelete: (id: number) => Promise<void>;
 }
 
 export function DeleteAlertDialog({employee, isOpen, setIsOpen, onDelete}: DeleteAlertDialogProps) {
@@ -29,7 +28,7 @@ export function DeleteAlertDialog({employee, isOpen, setIsOpen, onDelete}: Delet
                                  <Button key="alert-dialog-button-1"
                                          type="submit"
                                          danger
-                                         onPress={() => onDelete(employee.employee_id)}>
+                                         onPress={() => onDelete(employee.id)}>
                                      Delete
                                  </Button>,
                                  <Button key="alert-dialog-button-2"

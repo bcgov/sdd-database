@@ -19,7 +19,7 @@ import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
 import {useBranches} from "@/hooks/lookups/useBranches";
 import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
 
-import {EmployeeFormState, EntityActionResult} from "@/types";
+import {EmployeeFormValues, EmployeeSearchResult, EntityActionResult} from "@/types";
 
 import {
     validateEmployeeIdField,
@@ -30,7 +30,7 @@ import {
 
 
 interface EmployeeFormProps {
-    employee: EmployeeFormState | undefined
+    employee: EmployeeFormValues | EmployeeSearchResult | undefined
     activateAssignMode: (formData: FormData) => Promise<void>
     onSuccess: () => void
     onError: (error: string) => void
@@ -58,7 +58,10 @@ export function EmployeeForm({
 
     const {branches} = useBranches(); // [{ id, name }, {id, name}] or null on first render
 
-    const initialSelectedBranchId = employee?.ui_branch_id ?? employee?.program_area?.branch_id
+    const uiBranchId = employee && "ui_branch_id" in employee ? employee.ui_branch_id : undefined
+    const hydratedBranchId = employee && "program_area" in employee ? employee.program_area?.branch_id : undefined
+    const initialSelectedBranchId = uiBranchId ?? hydratedBranchId
+
     const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(initialSelectedBranchId);
 
     const {programAreas} = useProgramAreas(selectedBranchId);
@@ -99,6 +102,11 @@ export function EmployeeForm({
                   // gap: '0.5rem',
               }}>
 
+            {/* pass employee.id through FormData in edit mode */}
+            {isEditMode && employee?.id !== undefined ? (
+                <input type="hidden" name="id" value={employee.id}/>
+            ) : null}
+
             <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["employeeDetails"]} style={{
                 marginTop: "1rem",
                 marginBottom: "1rem",
@@ -107,6 +115,15 @@ export function EmployeeForm({
                 <Accordion label="Employee Details" id="employeeDetails">
 
                     <div>
+
+                        <div style={{
+                            marginBottom: "1rem",
+                        }}>
+                            <Callout
+                                description={`If Employee ID or IDIR is unknown, leave those fields blank`}>
+                            </Callout>
+                        </div>
+
                         <TextField label="First Name"
                                    name="firstName"
                                    isRequired
@@ -123,18 +140,15 @@ export function EmployeeForm({
 
                         <TextField label="Employee ID"
                                    name="employeeId"
-                                   isRequired
                                    validate={validateEmployeeIdField}
-                                   isReadOnly={isEditMode} // lock the field in edit mode
-                                   defaultValue={employee?.employee_id}>
+                                   isReadOnly={isEditMode && !!employee?.employee_id} // employee id can't be changed once it is set for an employee
+                                   defaultValue={employee?.employee_id ?? undefined}>
                         </TextField>
 
                         <TextField label="IDIR"
                                    name="idir"
-                                   description="If IDIR is unknown, leave this field blank"
                                    validate={validateEmployeeIdirField}
-                                   isReadOnly={isEditMode && !!employee?.idir} // idir can't be changed once it is
-                            // set for an employee
+                                   isReadOnly={isEditMode && !!employee?.idir} // idir can't be changed once it is set for an employee
                                    defaultValue={employee?.idir ?? undefined}>
                         </TextField>
 

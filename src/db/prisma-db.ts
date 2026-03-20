@@ -1,9 +1,10 @@
 import {prisma} from "./client";
 
-import type {Employee, Workstation} from "@/generated/prisma/client";
+import type {Workstation} from "@/generated/prisma/client";
+import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
 
 
-export async function addNewEmployee(employee: Employee) {
+export async function addNewEmployee(employee: EmployeeFormValues) {
     return prisma.employee.create({
         data: {
             ...employee
@@ -68,7 +69,7 @@ export async function getTypesOfClientServices() {
     })
 }
 
-export async function getEmployeesByFilter(query?: string) {
+export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
     if (!query)
         return prisma.employee.findMany({include: {program_area: true}})    // hydrate ProgramArea
 
@@ -127,32 +128,39 @@ export async function getWorkstationsByFilter(query?: string) {
     })
 }
 
-export async function updateEmployee(employee: Employee) {
+export async function updateEmployee(employee: EmployeeFormValues) {
+
+    if(employee.id === undefined) {
+        throw new Error("Didn't find the employee primary key id. Can't update employee")
+    }
 
     const existingEmployee = await prisma.employee.findUnique({
         where: {
-            employee_id: employee.employee_id,
+            id: employee.id,
         },
         select: {
+            employee_id: true,
             idir: true,
         }
     })
 
     if(!existingEmployee) {
-        throw new Error(`Employee with employee id ${employee.employee_id} not found`)
+        throw new Error(`Employee with id ${employee.id} not found`)
     }
 
-    // employee_id is immutable.
-    // idir can be added later if it is currently missing, but once an idir already exists in DB, it cannot be changed.
-    const {employee_id, idir, ...rest} = employee
+    // employee_id and idir are immutable once set.
+    // If currently missing in DB, they may be added later.
+    const {id, employee_id, idir, ...rest} = employee
 
-    // we don't update idir if existing employee already has idir set
-    const data = existingEmployee.idir
-        ? rest
-        : {...rest, idir}
+    // we don't update employee_id and idir if existing employee already has them set
+    const data = {
+        ...rest,
+        ...(existingEmployee.employee_id ? {} : {employee_id}),
+        ...(existingEmployee.idir ? {} : {idir}),
+    }
 
     return prisma.employee.update({
-        where: {employee_id},
+        where: {id},
         data,
     })
 }
@@ -167,8 +175,8 @@ export async function updateWorkstation(workstation: Workstation) {
     })
 }
 
-export async function deleteEmployee(employee_id: string) {
+export async function deleteEmployee(id: number) {
     return prisma.employee.delete({
-        where: {employee_id},
+        where: {id},
     })
 }

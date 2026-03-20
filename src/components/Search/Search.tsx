@@ -50,7 +50,7 @@ export function Search({
 
     const renderSearchResults = () => {
 
-        {/* (Filtered) Search Results List */}
+        // (Filtered) Search Results List
         return (
             <SearchResultsList visibleSearchResults={visibleSearchResults}
                                searchResultClickHandler={searchResultClickHandler}

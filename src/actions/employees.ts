@@ -4,7 +4,7 @@ import {Prisma, type Employee} from "@/generated/prisma/client"
 
 import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/db/prisma-db";
 
-import {EntityActionResult, Entity} from "@/types";
+import {EntityActionResult, Entity, EmployeeFormValues} from "@/types";
 
 import {parseEmployeeFormData} from "@/utils";
 
@@ -20,11 +20,11 @@ import {
 import {createEntityActions} from "@/actions/createEntityActions";
 
 
-function validateEmployeeData(employee: Employee) {
+function validateEmployeeData(employee: EmployeeFormValues) {
 
     return (
         validateEmployeeOfficeNumberField(employee.office_number) ??
-        (employee.idir? validateEmployeeIdirField(employee.idir) : undefined) ??
+        (employee.idir ? validateEmployeeIdirField(employee.idir) : undefined) ??
         validateEmployeeNameField(employee.first_name, "First Name") ??
         (employee.alternate_name ? validateEmployeeNameField(
             employee.alternate_name,
@@ -34,7 +34,7 @@ function validateEmployeeData(employee: Employee) {
             }
         ) : undefined) ??
         validateEmployeeNameField(employee.last_name, "Last Name") ??
-        validateEmployeeIdField(employee.employee_id) ??
+        (employee.employee_id ? validateEmployeeIdField(employee.employee_id) : undefined) ??
         validateEmployeeProgramAreaField(employee.program_area_id, "Program Area") ??
         (employee.notes ? validateNotesField(employee.notes) : undefined)
     )
@@ -55,7 +55,7 @@ function getDriverAdapterError(meta: Record<string, unknown> | undefined) {
     return dae && typeof dae === "object" ? (dae as DriverAdapterErrorMeta) : undefined;
 }
 
-function getReadablePrismaError(error: unknown, employee: Employee) {
+function getReadablePrismaError(error: unknown, employee: EmployeeFormValues) {
 
     const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
 
@@ -145,7 +145,7 @@ export async function updateEmployeeAction(prevState: EntityActionResult, formDa
     return employeeActions.updateAction(prevState, formData);
 }
 
-export async function searchEmployeesAction(query?: string) {
+export async function searchEmployeesAction(query?: string): Promise<Entity[]> {
     const employeeSearchResults = await getEmployeesByFilter(query);
 
     // Attaching the discriminant 'type'
@@ -157,6 +157,6 @@ export async function searchEmployeesAction(query?: string) {
     return employeesWithType
 }
 
-export async function deleteEmployeeAction(employee_id: string) {
-    await deleteEmployee(employee_id);
+export async function deleteEmployeeAction(id: number) {
+    await deleteEmployee(id);
 }

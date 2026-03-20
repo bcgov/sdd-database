@@ -1,4 +1,4 @@
-import type {Prisma, Employee, ProgramArea, Office, Workstation} from "@/generated/prisma/client";
+import type {Prisma, Office, Workstation} from "@/generated/prisma/client";
 
 
 export type LookupOption = {
@@ -6,20 +6,28 @@ export type LookupOption = {
     name: string;
 };
 
-export type EmployeeFormState = Employee & {
-    // present for hydrated employees (selectedSearchResult), absent for drafts (draftEmployee)
-    program_area?: ProgramArea;
+// employee form/draft state used by create/edit modals
+export type EmployeeFormValues = {
+    id?: number;
+    office_number: string;
+    idir: string | null;
+    first_name: string;
+    alternate_name: string | null;
+    last_name: string;
+    employee_id: string | null;
+    program_area_id: number;
+    notes: string | null;
 
-    // UI-only branch cache (so branch prefill survives modal close/open)
+    // UI-only branch cache so branch prefill survives modal close/open
     ui_branch_id?: number;
 }
 
-// “Hydrated employee” (what comes from DB when we do include: { program_area: true })
-type EmployeeWithProgramArea = Prisma.EmployeeGetPayload<{
+// employee returned from DB search results with hydrated program area
+export type EmployeeSearchResult = Prisma.EmployeeGetPayload<{
     include: {program_area: true}
 }>
 
-type EmployeeEntity = EmployeeWithProgramArea & {
+type EmployeeEntity = EmployeeSearchResult & {
     ui_branch_id?: number;
 };
 

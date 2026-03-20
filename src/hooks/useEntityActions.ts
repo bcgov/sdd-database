@@ -1,7 +1,7 @@
 import {Dispatch, SetStateAction, startTransition, useCallback, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
-import {EmployeeFormState, Entity} from "@/types";
+import {EmployeeFormValues, Entity} from "@/types";
 
 import {deleteEmployeeAction} from "@/actions/employees";
 
@@ -16,7 +16,7 @@ interface UseEntityActionsProps {
 
     setSelectedFilterTags: Dispatch<SetStateAction<Selection>>
     setAssignMode: (assignMode: boolean) => void;
-    setOptimisticSearchResults: (employeeId: string) => void;
+    setOptimisticSearchResults: (id: number) => void;
     runSearch: (query?: string, searchOnlyOffices?: boolean) => Promise<void>;
     refreshSearchResults: () => void;
 }
@@ -37,7 +37,7 @@ export function useEntityActions({
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
     const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
 
-    const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormState>();
+    const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormValues>();
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
@@ -69,7 +69,7 @@ export function useEntityActions({
      */
     const saveEmployeeFormData = (formData: FormData) => {
 
-        const employeeSnapshot: EmployeeFormState = {
+        const employeeSnapshot: EmployeeFormValues = {
             ...parseEmployeeFormData(formData),
             ui_branch_id: Number(formData.get("branch")),
         }
@@ -168,12 +168,12 @@ export function useEntityActions({
         addErrorAlert("Error: Could not add new workstation", error)
     }, [addErrorAlert])
 
-    const removeEmployeeById = async (employeeId: string) => {
+    const removeEmployeeById = async (id: number) => {
         // Optimistic Overlay
         startTransition(() => {
             // This line below immediately applies excludeEmployeeReducer to remove that employee from the UI before
             // the server delete action is called (instant feedback).
-            setOptimisticSearchResults(employeeId);
+            setOptimisticSearchResults(id);
         })
 
         // close dialogs + toast
@@ -186,7 +186,7 @@ export function useEntityActions({
 
         // Server mutation
         try {
-            await deleteEmployeeAction(employeeId);
+            await deleteEmployeeAction(id);
         } finally {
             // always re-sync with DB
             refreshSearchResults()

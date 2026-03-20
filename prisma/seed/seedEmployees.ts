@@ -4,11 +4,10 @@ import path from "path";
 
 import ExcelJS from "exceljs";
 
-import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile, logSheetInfo} from "./excel";
+import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile} from "./excel";
 import {assertEmployeeId, assertName, assertIdir, assertNotes} from "./validators/employees.validators";
 import {assertUnique} from "./validators/common.validators";
 import {assertOfficeNumber} from "./validators/offices.validators";
-import {branchNames} from "./constants";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -53,9 +52,18 @@ const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "REDEPLOY"
 ] as const)
 
-const validBranchNames = new Set<string>(branchNames)
+type ParsedEmployeeRow = {
+    office_number: string
+    idir: string | null
+    first_name: string
+    alternate_name: string | null
+    last_name: string
+    employee_id: string | null
+    program_area_id: number
+    notes: string | null
+}
 
-export async function seedEmployees(prismaClient: PrismaClient)  {
+export async function seedEmployees(prismaClient: PrismaClient) {
     const computersAndLaptopsWorksheet = await loadWorksheetFromFile(COMPUTERS_AND_LAPTOPS_FILE_PATH)
     const employeeIdLookupWorksheet = await loadWorksheetFromFile(EMPLOYEE_ID_LOOKUP_FILE_PATH)
 
@@ -79,149 +87,140 @@ export async function seedEmployees(prismaClient: PrismaClient)  {
         })
     )
 
-    const employeeIdirCounts = buildEmployeeIdirCounts(
+    const rowsByRealIdir = buildRowsByRealIdir(
         computersAndLaptopsWorksheet,
         computersAndLaptopsHeaderToCol
     )
 
     // create Employee Seed Edge Cases Output Excel Workbook
     const employeeSeedEdgeCasesWorkbook = new ExcelJS.Workbook()
-    const placeholderIdirWorksheet = employeeSeedEdgeCasesWorkbook.addWorksheet("Placeholder IDIR")
-    const blankIdirWorksheet = employeeSeedEdgeCasesWorkbook.addWorksheet("Blank IDIR")
-    const multipleRowsPerIdirWorksheet = employeeSeedEdgeCasesWorkbook.addWorksheet("Multiple Rows Per IDIR")
-    const employeeIdNotFoundWorksheet = employeeSeedEdgeCasesWorkbook.addWorksheet("Employee ID Not Found")
+    const conflictingDuplicateIdirRows = employeeSeedEdgeCasesWorkbook.addWorksheet("Conflicting Duplicate IDIR Rows")
 
-    // copy header row from source Computers and Laptops sheet into all edge-case sheets
+    // copy header row from source Computers and Laptops sheet into edge-case sheet
     const headerRow = computersAndLaptopsWorksheet.getRow(1)
     const headerValues = getRowValues(headerRow, computersAndLaptopsWorksheet.columnCount)
-    placeholderIdirWorksheet.addRow(headerValues)
-    blankIdirWorksheet.addRow(headerValues)
-    multipleRowsPerIdirWorksheet.addRow(headerValues)
-    employeeIdNotFoundWorksheet.addRow(headerValues)
+    conflictingDuplicateIdirRows.addRow(headerValues)
 
-    for (let r= 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
+    const finalEmployeeRows: ParsedEmployeeRow[] = []
+
+    // This prevents handling the same duplicate-IDIR group multiple times.
+    // If one IDIR appears in 3 rows, the main loop below sees it 3 times.
+    // You only want to process that grouped set once.
+    const processedRealIdirs = new Set<string>()
+
+    for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
-        // skip fully empty rows
-        if (!row.hasValues) continue
+        // skip rows that are effectively empty for employee seeding
+        if (isEffectivelyEmptyEmployeeRow(row, computersAndLaptopsHeaderToCol)) continue
 
         // skip non employee rows
         if (isNotAnEmployee(row, computersAndLaptopsHeaderToCol)) continue
 
-        // employee exists but IDIR is still a placeholder
-        const idir = getCellString(row, computersAndLaptopsHeaderToCol, "IDIR")
-        if (idir === "IDIR") {
-            placeholderIdirWorksheet.addRow(
-                getRowValues(row, computersAndLaptopsWorksheet.columnCount)
-            );
-            continue
-        }
+        const rawIdir = getCellString(row, computersAndLaptopsHeaderToCol, "IDIR")
 
-        // employee exists but IDIR is blank / missing
-        if (!idir) {
-            blankIdirWorksheet.addRow(
-                getRowValues(row, computersAndLaptopsWorksheet.columnCount)
-            );
-            continue
-        }
+        // if row has a real IDIR and that IDIR occurs in more than one row in the source sheet
+        if (rawIdir && rawIdir !== "IDIR" && (rowsByRealIdir.get(rawIdir)?.length ?? 0) > 1) {
 
-        // multiple rows with the same idir
-        if ((employeeIdirCounts.get(idir) ?? 0) > 1) {
-            multipleRowsPerIdirWorksheet.addRow(
-                getRowValues(row, computersAndLaptopsWorksheet.columnCount)
+            if (processedRealIdirs.has(rawIdir)) {
+                continue
+            }
+
+            processedRealIdirs.add(rawIdir)
+
+            const groupedRows = rowsByRealIdir.get(rawIdir) ?? []
+
+            const parsedRows = groupedRows.map((groupedRow) =>
+                parseEmployeeRow(
+                    groupedRow,
+                    groupedRow.number,
+                    computersAndLaptopsHeaderToCol,
+                    employeeIdLookup,
+                    programAreaLookup
+                )
             )
-            continue
-        }
 
-        // real IDIR exists, but no matching employee ID found in lookup file
-        const employeeId = employeeIdLookup.get(idir)
-        if (!employeeId) {
-            employeeIdNotFoundWorksheet.addRow(
-                getRowValues(row, computersAndLaptopsWorksheet.columnCount)
-            );
-            continue;
+            if (areEmployeeRowsConsistent(parsedRows)) {
+                const mergedEmployeeData = mergeEmployeeRows(parsedRows)
+                finalEmployeeRows.push(mergedEmployeeData)
+            } else {
+                for (const groupedRow of groupedRows) {
+                    conflictingDuplicateIdirRows.addRow(
+                        getRowValues(groupedRow, computersAndLaptopsWorksheet.columnCount)
+                    )
+                }
+            }
+            // This skips the normal single-row flow for that row, because duplicate group has already been handled.
+            continue
         }
 
         const employeeData = parseEmployeeRow(
             row,
             r,
             computersAndLaptopsHeaderToCol,
-            employeeId,
+            employeeIdLookup,
             programAreaLookup
         )
 
-        // console.log(employeeData)
-
-        await prismaClient.employee.upsert({
-            where: {
-                employee_id: employeeData.employee_id
-            },
-            update: {
-                office_number: employeeData.office_number,
-                idir: employeeData.idir,
-                first_name: employeeData.first_name,
-                alternate_name: employeeData.alternate_name,
-                last_name: employeeData.last_name,
-                program_area_id: employeeData.program_area_id,
-                notes: employeeData.notes
-            },
-            create: employeeData
-        })
+        finalEmployeeRows.push(employeeData)
     }
 
+    console.log(`Prepared ${finalEmployeeRows.length} employee rows for insert`)
+
+    // await replaceEmployees(prismaClient, finalEmployeeRows)
+
     // write workbook only if at least one edge-case row exists
-    const hasPlaceholderIdirRows = placeholderIdirWorksheet.rowCount > 1
-    const hasBlankIdirRows = blankIdirWorksheet.rowCount > 1
-    const hasMultipleRowsPerIdirRows = multipleRowsPerIdirWorksheet.rowCount > 1
-    const hasEmployeeIdNotFoundRows = employeeIdNotFoundWorksheet.rowCount > 1
-    if (
-        hasPlaceholderIdirRows ||
-        hasBlankIdirRows ||
-        hasMultipleRowsPerIdirRows ||
-        hasEmployeeIdNotFoundRows
-    ) {
+    const hasConflictingDuplicateIdirRows = conflictingDuplicateIdirRows.rowCount > 1
+    if (hasConflictingDuplicateIdirRows) {
         await employeeSeedEdgeCasesWorkbook.xlsx.writeFile(EMPLOYEE_SEED_EDGE_CASES_OUTPUT_FILE_PATH)
         console.log(`Wrote employee seed edge cases to ${EMPLOYEE_SEED_EDGE_CASES_OUTPUT_FILE_PATH}`)
     }
 }
 
-function isNotAnEmployee(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>) {
-
-    const assignedTo = getCellString(row, headerToCol, "Assigned To")
-
-    return NON_EMPLOYEE_ASSIGNED_TO_VALUES.has(assignedTo)
-}
-
-function buildEmployeeIdirCounts(
+/**
+ * Store all rows belonging to the same IDIR together.
+ * Why?
+ * Because duplicate IDIR rows may represent:
+ *    •	the same employee with multiple assets
+ *
+ * So now you can inspect the full group and decide:
+ *    •	can these rows be merged into one employee?
+ *    •	or are they conflicting and need manual review?
+ *
+ * Blank or placeholder IDIR rows are not grouped here.
+ *
+ * @param worksheet
+ * @param headerToCol
+ */
+function buildRowsByRealIdir(
     worksheet: ExcelJS.Worksheet,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
 ) {
-    const idirCounts = new Map<string, number>()
+    const rowsByIdir = new Map<string, ExcelJS.Row[]>()
 
     for (let r = 2; r <= worksheet.rowCount; r++) {
         const row = worksheet.getRow(r)
 
-        if(!row.hasValues) continue
-        if(isNotAnEmployee(row, headerToCol)) continue
+        if (!row.hasValues) continue
 
-        const idir = getCellString(row, headerToCol, "IDIR")
+        if (isNotAnEmployee(row, headerToCol)) continue
 
-        // ignore placeholder and blank IDIR rows for this duplicate check
-        if (!idir || idir === "IDIR") continue
+        const rawIdir = getCellString(row, headerToCol, "IDIR")
 
-        idirCounts.set(idir, (idirCounts.get(idir) ?? 0) + 1)
+        if (!rawIdir || rawIdir === "IDIR") continue
+
+        const group = rowsByIdir.get(rawIdir) ?? []
+        group.push(row)
+        rowsByIdir.set(rawIdir, group)
     }
 
-    return idirCounts
+    return rowsByIdir
 }
 
 function buildEmployeeIdLookup(
     employeeIdLookupWorksheet: ExcelJS.Worksheet,
-    employeeIdLookupHeaderToCol: Record<(typeof EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS)[number], number>)
-{
-    const lookup = new Map<string, string>();
+    employeeIdLookupHeaderToCol: Record<(typeof EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS)[number], number>) {
+    const lookup = new Map<string, string | null>();
     const seenLookupIdirs = new Map<string, number>();
 
     for (let r = 2; r <= employeeIdLookupWorksheet.rowCount; r++) {
@@ -229,11 +228,18 @@ function buildEmployeeIdLookup(
 
         if (!row.hasValues) continue
 
-        const idir = getCellString(row, employeeIdLookupHeaderToCol, "IDIR").toUpperCase()
+        const rawIdir = getCellString(row, employeeIdLookupHeaderToCol, "IDIR")
+        const idir = rawIdir.toUpperCase()
         const employeeId = getCellString(row, employeeIdLookupHeaderToCol, "EMPLID")
 
+        if(!idir) continue
+        
         assertIdir(idir, r)
-        assertEmployeeId(employeeId, r)
+
+        if(employeeId) {
+            assertEmployeeId(employeeId, r)
+        }
+
         assertUnique(seenLookupIdirs, idir, r, "IDIR in Employee ID Lookup")
 
         lookup.set(idir, employeeId)
@@ -242,6 +248,15 @@ function buildEmployeeIdLookup(
     return lookup
 }
 
+/** Pulls all existing ProgramArea rows from DB and builds a lookup map like:
+ * "Community Services::Area A Staff" -> 7
+ *
+ * That allows your Excel text fields:
+ *  •	Branch
+ *  •	Program Area
+ *  to be converted into the foreign key:
+ *  program_area_id
+ */
 function buildProgramAreaLookup(
     rows: Array<{
         id: number
@@ -259,53 +274,72 @@ function buildProgramAreaLookup(
     return lookup
 }
 
-function normalizeBranchName(rawBranchName: string, rowNumber: number) {
-    const remappedBranchNames: Record<string, string> = {
-        "Community Integration Services Branch": "Community Integration Services",
-        "Strategic Services Branch": "Strategic Services",
-    }
+function isEffectivelyEmptyEmployeeRow(
+    row: ExcelJS.Row,
+    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
+) {
+    const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
+    const rawIdir = getCellString(row, headerToCol, "IDIR")
+    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+    const rawStatus = getCellString(row, headerToCol, "Status")
+    const rawBranch = getCellString(row, headerToCol, "Branch")
+    const rawProgramArea = getCellString(row, headerToCol, "Program Area")
 
-    const normalizedBranchName = remappedBranchNames[rawBranchName] ?? rawBranchName
-
-    if(!validBranchNames.has(normalizedBranchName)) {
-        throw new Error(`No normalized Branch mapping found for "${rawBranchName}" at row ${rowNumber}`)
-    }
-
-    return normalizedBranchName
+    return (
+        !rawOfficeNumber &&
+        !rawAssignedTo &&
+        !rawStatus &&
+        !rawBranch &&
+        !rawProgramArea &&
+        !rawIdir
+    )
 }
 
-function normalizeProgramAreaName(rawProgramArea: string, rowNumber: number) {
-    const remappedProgramAreaNames: Record<string, string> = {
-        "COMMUNITY INTEGRATION SERVICES - SERVICE DELIVERY": "Service Delivery",
-        "Community Integration Services - Service Delivery": "Service Delivery",
-        "COMMUNITY INTEGRATION SERVICES - PRACTICE AND PERFORMANCE": "Practice And Performance",
-        "EXECUTIVE DIRECTOR COMMUNITY INTEGRATION SERVICES": "Executive Director",
+function isNotAnEmployee(
+    row: ExcelJS.Row,
+    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>) {
 
-        "COMMUNITY SERVICES - AREA A STAFF": "Area A Staff",
+    const assignedTo = getCellString(row, headerToCol, "Assigned To")
+
+    return NON_EMPLOYEE_ASSIGNED_TO_VALUES.has(assignedTo)
+}
+
+function normalizeProgramAreaName(rawProgramArea: string) {
+    const remappedProgramAreaNames: Record<string, string> = {
+        "Community Integration Services - Service Delivery": "Service Delivery",
+        "Community Integration Services - Practice And Performance": "Practice and Performance",
+        "Executive Director Community Integration Services": "Executive Director",
+
         "Community Services - Area A Staff": "Area A Staff",
-        "COMMUNITY SERVICES - AREA B STAFF": "Area B Staff",
         "Community Services - Area B Staff": "Area B Staff",
-        "COMMUNITY SERVICES - AREA C STAFF": "Area C Staff",
         "Community Services - Area C Staff": "Area C Staff",
 
         "ADM - Service Delivery Division": "Service Delivery Division",
 
-        "FINANCE, CONTRACTS AND RECORDS MANAGEMENT": "Finance, Contracts And Records Management",
-        "RECRUITMENT, STAFFING, FACILITIES, AND ASSETS": "Recruitment, Staffing, Facilities, And Assets",
-        "EXECUTIVE DIRECTOR  - OPERATIONS SUPPORT": "Executive Director",
-        "Analytics And Business Inteligence": "Analytics And Business Intelligence",
+        "Finance, Contracts And Records Management": "Finance, Contracts and Records Management",
+        "Recruitment, Staffing, Facilities, And Assets": "Recruitment, Staffing, Facilities, and Assets",
+        "Executive Director - Operations Support": "Executive Director",
+        "Analytics And Business Inteligence": "Analytics and Business Intelligence",
+        "Communications Engagement And Organizational Health": "Communications Engagement and Organizational Health",
 
-        "PLMS OPERATIONS": "Operations",
         "PLMS Operations": "Operations",
-        "PROGRAM INTEGRITY & EVALUATION": "Program Integrity & Evaluation",
-        "EXECUTIVE DIRECTOR PREVENTION AND LOSS MANAGEMENT SERVICES": "Executive Director",
+        "Executive Director Prevention and Loss Management Services": "Executive Director",
 
+        "Strategic Partnerships And Communications": "Strategic Partnerships and Communications",
         "Executive Director-Strategic Services": "Executive Director",
 
-        "INTAKE": "Intake",
-        "CONTACT CENTRE": "Contact Centre",
-        "HEALTH & SPECIALIZED SERVICES": "Health & Specialized Services",
-        "EXECUTIVE DIRECTOR-VIRTUAL SERVICES": "Executive Director",
+        "Executive Director - Virtual Services": "Executive Director",
+
+        "Ministry Of Attorney General": "Attorney General",
+        "Ministry Of Children And Family Development": "Children and Family Development",
+        "Citizens Services": "Citizens' Services",
+        "Ministry Of Forests": "Forests",
+        "Ministry Of Health": "Health",
+        "Housing And Municipal Affairs": "Housing and Municipal Affairs",
+        "Ministry Of Infrastructure": "Infrastructure",
+        "Post Secondary Education And Skills": "Post-Secondary Education and Future Skills",
+        "Ministry of Transportation and Transit": "Transportation and Transit",
+        "Ministry Of Water, Land, Resource And Stewardship": "Water, Land and Resource Stewardship"
     }
 
     const normalizedProgramAreaName = remappedProgramAreaNames[rawProgramArea] ?? rawProgramArea
@@ -317,17 +351,26 @@ function parseEmployeeRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>,
-    employeeId: string,
+    employeeIdLookup: Map<string, string | null>,
     programAreaLookup: Map<string, number>,
-) {
+): ParsedEmployeeRow {
 
     // office number
     const officeNumber = getCellString(row, headerToCol, "OfficeNum")
     assertOfficeNumber(officeNumber, rowNumber)
 
-    // idir
-    const idir = getCellString(row, headerToCol, "IDIR")
-    assertIdir(idir, rowNumber)
+    // idir (optional)
+    const rawIdir = getCellString(row, headerToCol, "IDIR")
+    const idir = rawIdir && rawIdir !== "IDIR" ? rawIdir : null
+    if (idir) {
+        assertIdir(idir, rowNumber)
+    }
+
+    // employee id (optional, only available if idir exists in lookup)
+    const employeeId = idir ? (employeeIdLookup.get(idir) ?? null) : null
+    if (employeeId) {
+        assertEmployeeId(employeeId, rowNumber)
+    }
 
     // notes
     const rawNotes = getCellString(row, headerToCol, "Status")
@@ -341,21 +384,20 @@ function parseEmployeeRow(
     assertName(parsedAssignedTo.firstName, "First Name", rowNumber)
     assertName(parsedAssignedTo.lastName, "Last Name", rowNumber)
 
-    if(parsedAssignedTo.alternateName){
+    if (parsedAssignedTo.alternateName) {
         assertName(parsedAssignedTo.alternateName, "Alternate Name", rowNumber)
     }
 
     // program area
-    const rawBranchName = getCellString(row, headerToCol, "Branch")
-    const branchName = normalizeBranchName(rawBranchName, rowNumber)
+    const branchName = getCellString(row, headerToCol, "Branch")
 
     const rawProgramAreaName = getCellString(row, headerToCol, "Program Area")
-    const programAreaName = normalizeProgramAreaName(rawProgramAreaName, rowNumber)
+    const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
 
     const programAreaKey = `${branchName}::${programAreaName}`
     const programAreaId = programAreaLookup.get(programAreaKey)
 
-    if(!programAreaId){
+    if (!programAreaId) {
         throw new Error(
             `No Program Area found for Branch "${branchName}" and Program Area "${programAreaName}" at row ${rowNumber}`
         )
@@ -376,7 +418,7 @@ function parseEmployeeRow(
 function parseAssignedTo(assignedTo: string, rowNumber: number) {
     const parts = assignedTo.split(",").map(part => part.trim())
 
-    if(parts.length !== 2) {
+    if (parts.length !== 2) {
         throw new Error(
             `Assigned To could not be parsed into employee name fields at row ${rowNumber}. Expected a name like "Last, First". Got "${assignedTo}"`
         )
@@ -397,7 +439,7 @@ function parseAssignedTo(assignedTo: string, rowNumber: number) {
     }
 
     const alternateNameMatch = firstNameAndPossibleAlternateName.match(/^(.+?) \((.+)\)$/)
-    if(alternateNameMatch) {
+    if (alternateNameMatch) {
         const [, firstName, alternateName] = alternateNameMatch
 
         return {
@@ -412,4 +454,55 @@ function parseAssignedTo(assignedTo: string, rowNumber: number) {
         alternateName: null,
         lastName,
     }
+}
+
+function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
+    if (rows.length <= 1) {
+        return true
+    }
+
+    const firstRow = rows[0]
+
+    return rows.every(row =>
+        row.office_number === firstRow.office_number &&
+        row.idir === firstRow.idir &&
+        row.first_name === firstRow.first_name &&
+        row.alternate_name === firstRow.alternate_name &&
+        row.last_name === firstRow.last_name &&
+        row.employee_id === firstRow.employee_id &&
+        row.program_area_id === firstRow.program_area_id
+    )
+}
+
+function mergeEmployeeRows(rows: ParsedEmployeeRow[]): ParsedEmployeeRow {
+    const firstRow = rows[0]
+
+    const mergedNotes = Array.from(
+        new Set(
+            rows
+                .map(row => row.notes?.trim())
+                .filter((note): note is string => !!note)   // remove empty notes, and after doing that, treat every remaining note as a string.
+        )
+    ).join("\n")
+
+    return {
+        ...firstRow,
+        notes: mergedNotes || null
+    }
+}
+
+async function replaceEmployees(
+    prismaClient: PrismaClient,
+    employeeRows: ParsedEmployeeRow[]
+) {
+    await prismaClient.$transaction(async (tx) => {
+        // tx is transaction scoped prisma client
+        await tx.employee.deleteMany()
+
+        for (const employeeData of employeeRows) {
+            await tx.employee.create({
+                data: employeeData,
+            })
+        }
+    })
 }

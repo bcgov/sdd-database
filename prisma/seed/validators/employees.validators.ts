@@ -4,7 +4,6 @@ import {assertMaxLength, assertNonEmpty} from "./common.validators";
 export function assertIdir(idir: string, rowNumber: number) {
     const label = "IDIR"
 
-    assertNonEmpty(idir, label, rowNumber)
     assertMaxLength(idir, label, rowNumber, 8)
 
     if(!/^[A-Z0-9]*$/.test(idir)) {
@@ -14,8 +13,6 @@ export function assertIdir(idir: string, rowNumber: number) {
 
 export function assertEmployeeId(employeeId: string, rowNumber: number) {
     const label = "Employee ID"
-
-    assertNonEmpty(employeeId, label, rowNumber)
 
     if(employeeId.length !== 6) {
         throw new Error(`${label} must be exactly 6 digits (got (${employeeId.length} chars)  at row ${rowNumber})`)

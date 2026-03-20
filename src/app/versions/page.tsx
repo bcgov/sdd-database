@@ -6,6 +6,13 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.22",
+            notes: [
+                "Employees can now be created without an Employee ID",
+                "Employee search results now display IDIR instead of employee id in brackets"
+            ]
+        },
+        {
             version: "v0.0.21",
             notes: [
                 "First Name and Last Name (like Alternate Name) now support multiple words unlike only accepting" +

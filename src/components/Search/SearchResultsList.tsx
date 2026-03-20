@@ -15,13 +15,13 @@ const getSearchResultKey = (item: Entity) => {
 
     switch (item.type) {
         case "employee":
-            key = item.employee_id;
+            key = `employee-${item.id}`;
             break;
         case "office":
-            key = item.office_number;
+            key = `office-${item.office_number}`;
             break;
         case "workstation":
-            key = item.asset_tag;
+            key = `workstation-${item.asset_tag}`;
             break;
     }
 
@@ -34,7 +34,9 @@ const getSearchResultTitle = (item: Entity) => {
 
     switch (item.type) {
         case "employee":
-            title = `${getEmployeeFullName(item)} (${item.employee_id})`
+            title = item.idir
+                ? `${getEmployeeFullName(item)} (${item.idir})`
+                : getEmployeeFullName(item)
             break;
         case "office":
             title = `${item.office_name} (${item.office_number})`
