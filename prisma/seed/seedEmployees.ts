@@ -16,6 +16,7 @@ const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
     "data",
     "Computers and Laptops.xlsx"
 );
+
 const EMPLOYEE_ID_LOOKUP_FILE_PATH = path.join(
     process.cwd(),
     "prisma",

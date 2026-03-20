@@ -6,6 +6,7 @@ import {seedProgramAreas} from "./seedProgramAreas";
 import {seedOfficeTypes} from "./seedOfficeTypes";
 import {seedTypesOfClientServices} from "./seedTypesOfClientServices";
 import {seedEmployees} from "./seedEmployees";
+import {seedWorkspaces} from "./seedWorkspaces";
 
 
 async function main() {
@@ -19,6 +20,9 @@ async function main() {
 
     console.log("➡️ Seeding offices...");
     await seedOffices(prisma);
+
+    console.log("➡️ Seeding workspaces...")
+    await seedWorkspaces(prisma);
 
     console.log("➡️ Seeding branches...");
     await seedBranches(prisma);

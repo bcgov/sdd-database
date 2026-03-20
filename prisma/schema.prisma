@@ -10,7 +10,7 @@ datasource db {
 
 model Employee {
   id              Int     @id @default(autoincrement())
-  office_number   String
+  office_number   String  @db.VarChar(3)
   idir            String? @unique @db.Citext
   first_name      String  @db.VarChar(30)
   alternate_name  String? @db.VarChar(30)
@@ -44,7 +44,7 @@ model ProgramArea {
 }
 
 model Office {
-  office_number          String @id
+  office_number          String @id @db.VarChar(3)
   office_name            String @db.VarChar(35)
   type_id                Int
   client_service_type_id Int
@@ -55,7 +55,8 @@ model Office {
   office_type         OfficeType          @relation(fields: [type_id], references: [id])
   client_service_type TypeOfClientService @relation(fields: [client_service_type_id], references: [id])
 
-  employees Employee[]
+  employees  Employee[]
+  workspaces Workspace[]
 }
 
 model OfficeType {
@@ -70,6 +71,15 @@ model TypeOfClientService {
   name String @unique @db.Citext
 
   offices Office[]
+}
+
+model Workspace {
+  office_number    String @db.VarChar(3)
+  workspace_number String @db.VarChar(4)
+
+  assigned_office Office @relation(fields: [office_number], references: [office_number])
+
+  @@id([office_number, workspace_number]) // composite primary key
 }
 
 model Workstation {
