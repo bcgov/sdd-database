@@ -2,17 +2,19 @@
 
 import {Entity} from "@/types";
 
-import {searchEmployeesAction} from "@/actions/employees";
-import {searchOfficesAction} from "@/actions/offices";
-import {searchWorkstationsAction} from "@/actions/workstations";
+import {searchEmployeesAction} from "@/actions/entities/employees";
+import {searchOfficesAction} from "@/actions/entities/offices";
+import {searchWorkspacesAction} from "@/actions/entities/workspaces";
+import {searchWorkstationsAction} from "@/actions/entities/workstations";
 
 
 export async function searchAllAction(query?: string): Promise<Entity[]> {
-    const [employeeSearchResults, officeSearchResults, workstationSearchResults] = await Promise.all([
+    const [employeeSearchResults, officeSearchResults, workspaceSearchResults, workstationSearchResults] = await Promise.all([
         searchEmployeesAction(query),
         searchOfficesAction(query),
+        searchWorkspacesAction(query),
         searchWorkstationsAction(query),
     ])
 
-    return [...employeeSearchResults, ...officeSearchResults, ...workstationSearchResults];
+    return [...employeeSearchResults, ...officeSearchResults, ...workspaceSearchResults, ...workstationSearchResults];
 }

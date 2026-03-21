@@ -20,6 +20,9 @@ const getSearchResultKey = (item: Entity) => {
         case "office":
             key = `office-${item.office_number}`;
             break;
+        case "workspace":
+            key = `workspace-${item.office_number}-${item.workspace_number}`;
+            break;
         case "workstation":
             key = `workstation-${item.asset_tag}`;
             break;
@@ -40,6 +43,9 @@ const getSearchResultTitle = (item: Entity) => {
             break;
         case "office":
             title = `${item.office_name} (${item.office_number})`
+            break;
+        case "workspace":
+            title = `Workspace ${item.workspace_number} (Office ${item.office_number})`;
             break;
         case "workstation":
             title = `Workstation (${item.asset_tag})`

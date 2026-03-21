@@ -81,7 +81,7 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                 {first_name: {contains: query, mode: 'insensitive'}},
                 {alternate_name: {contains: query, mode: 'insensitive'}},
                 {last_name: {contains: query, mode: 'insensitive'}},
-                {employee_id: {contains: query}},
+                {employee_id: {contains: query, mode: 'insensitive'}},
                 // 🔎 match by Branch name via ProgramArea -> Branch using a relation filter
                 {program_area: {branch: {name: {contains: query, mode: 'insensitive'}}}},
                 // 🔎 match by Program Area name
@@ -109,6 +109,20 @@ export async function getOfficesByFilter(query?: string) {
                 {address: {contains: query, mode: 'insensitive'}},
                 {city: {contains: query, mode: 'insensitive'}},
                 {postal_code: {contains: query, mode: 'insensitive'}},
+            ]
+        }
+    })
+}
+
+export async function getWorkspacesByFilter(query?: string) {
+    if(!query)
+        return prisma.workspace.findMany()
+
+    return prisma.workspace.findMany({
+        where: {
+            OR: [
+                {office_number: {contains: query, mode: 'insensitive'}},
+                {workspace_number: {contains: query, mode: 'insensitive'}},
             ]
         }
     })

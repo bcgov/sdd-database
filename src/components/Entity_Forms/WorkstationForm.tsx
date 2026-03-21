@@ -4,7 +4,7 @@ import {Button, ButtonGroup, Form, TextArea, TextField} from "@bcgov/design-syst
 
 import type {Workstation} from "@/generated/prisma/client";
 
-import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/workstations";
+import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/entities/workstations";
 
 import {EntityActionResult} from "@/types";
 

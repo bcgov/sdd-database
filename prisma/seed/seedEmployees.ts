@@ -320,7 +320,7 @@ function normalizeProgramAreaName(rawProgramArea: string) {
         "Finance, Contracts And Records Management": "Finance, Contracts and Records Management",
         "Recruitment, Staffing, Facilities, And Assets": "Recruitment, Staffing, Facilities, and Assets",
         "Executive Director - Operations Support": "Executive Director",
-        "Analytics And Business Inteligence": "Analytics and Business Intelligence",
+        "Analytics And Business Intelligence": "Analytics and Business Intelligence",
         "Communications Engagement And Organizational Health": "Communications Engagement and Organizational Health",
 
         "PLMS Operations": "Operations",

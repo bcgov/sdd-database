@@ -5,9 +5,12 @@ import {Entity} from "@/types";
 import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
 import {OfficeForm} from "@/components/Entity_Forms/Office/OfficeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
+import {WorkspaceForm} from "@/components/Entity_Forms/Workspace/WorkspaceForm";
+
 import {ModalDialog} from "@/components/ModalDialog";
 
 import {ENTITY_TYPE_NAME} from "@/utils";
+
 
 
 interface EditModalProps {
@@ -30,7 +33,9 @@ export function EditModal({
                               onDelete
                           }: EditModalProps) {
 
-    const modalVerb = item.type !== "office" ? "Edit" : "";
+    const isEditableEntity = item.type === "employee" || item.type === "workstation";
+
+    const modalVerb = isEditableEntity ? "Edit" : "";
     const modalTitle = `${modalVerb} ${ENTITY_TYPE_NAME[item.type]}`
 
     const getModalBody = () => {
@@ -54,6 +59,10 @@ export function EditModal({
                 bodyComponent = <OfficeForm office={item}/>
                 break
 
+            case "workspace":
+                bodyComponent = <WorkspaceForm workspace={item}/>
+                break
+
             case "workstation":
                 bodyComponent = <WorkstationForm onSuccess={onSuccess}
                                                  onError={onError}
@@ -69,7 +78,7 @@ export function EditModal({
 
         let calloutComponent = null;
 
-        if (item.type !== "office") {   // this callout is only for editable entities
+        if (isEditableEntity) {   // this callout is only for editable entities
             calloutComponent = <div style={{
                 marginTop: "1rem",
                 marginBottom: "1rem",

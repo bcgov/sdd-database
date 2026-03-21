@@ -4,6 +4,7 @@ import {EmployeeFormValues, Entity} from "@/types";
 export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
     employee: "Employee",
     office: "Office",
+    workspace: "Workspace",
     workstation: "Workstation"
 } as const;
 

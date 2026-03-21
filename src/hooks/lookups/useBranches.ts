@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {fetchBranches} from "@/actions/branches";
+import {fetchBranches} from "@/actions/lookups/branches";
 
 import {LookupOption} from "@/types";
 

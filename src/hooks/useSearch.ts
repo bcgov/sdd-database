@@ -3,7 +3,7 @@ import type {Selection} from "@react-types/shared";
 
 import {Entity} from "@/types";
 
-import {searchOfficesAction} from "@/actions/offices";
+import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
 
 

@@ -8,9 +8,9 @@ interface OfficeFormProps {
     office: Office;
 }
 
-export function OfficeForm(props: OfficeFormProps) {
+export function OfficeForm({office}: OfficeFormProps) {
 
-    const officeLookupProps = useOfficeLookupProps(props.office);
+    const officeLookupProps = useOfficeLookupProps(office);
 
     return <OfficeFields {...officeLookupProps} isReadOnly/>
 }

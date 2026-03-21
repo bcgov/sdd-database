@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {fetchProgramAreasByBranch} from "@/actions/programAreas";
+import {fetchProgramAreasByBranch} from "@/actions/lookups/programAreas";
 
 import {LookupOption} from "@/types";
 

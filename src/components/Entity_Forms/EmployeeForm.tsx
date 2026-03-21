@@ -14,7 +14,7 @@ import {
     TextField
 } from "@bcgov/design-system-react-components";
 
-import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/employees";
+import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employees";
 
 import {useBranches} from "@/hooks/lookups/useBranches";
 import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";

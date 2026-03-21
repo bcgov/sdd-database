@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.23",
+            notes: [
+                "Added workspace entity: workspace number and office number"
+            ]
+        },
+        {
             version: "v0.0.22",
             notes: [
                 "Employees can now be created without an Employee ID",

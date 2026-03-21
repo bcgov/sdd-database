@@ -1,4 +1,4 @@
-import type {Prisma, Office, Workstation} from "@/generated/prisma/client";
+import type {Prisma, Office, Workstation, Workspace} from "@/generated/prisma/client";
 
 
 export type LookupOption = {
@@ -35,6 +35,7 @@ type EmployeeEntity = EmployeeSearchResult & {
 export type Entity =
     | (EmployeeEntity & { type: "employee" })
     | (Office & { type: "office" })
+    | (Workspace & { type: "workspace" })
     | (Workstation & { type: "workstation" })
 
 export type EntityActionResult =

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {fetchOfficeTypes} from "@/actions/officeTypes";
+import {fetchOfficeTypes} from "@/actions/lookups/officeTypes";
 
 import {LookupOption} from "@/types";
 

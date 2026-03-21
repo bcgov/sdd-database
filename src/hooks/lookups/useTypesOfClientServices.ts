@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {fetchTypesOfClientServices} from "@/actions/typesOfClientServices";
+import {fetchTypesOfClientServices} from "@/actions/lookups/typesOfClientServices";
 
 import {LookupOption} from "@/types";
 

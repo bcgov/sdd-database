@@ -3,7 +3,7 @@ import type {Selection} from "@react-types/shared";
 
 import {EmployeeFormValues, Entity} from "@/types";
 
-import {deleteEmployeeAction} from "@/actions/employees";
+import {deleteEmployeeAction} from "@/actions/entities/employees";
 
 import {getEmployeeFullName, parseEmployeeFormData} from "@/utils";
 
