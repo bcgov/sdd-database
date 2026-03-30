@@ -23,6 +23,7 @@ export function useEntityOrchestration() {
         setSelectedFilterTags,
         assignMode,
         setAssignMode,
+        setAssignOfficeNumber,
         optimisticSearchResults,
         setOptimisticSearchResults,
         userHasSearchedOnce,
@@ -50,7 +51,10 @@ export function useEntityOrchestration() {
         addErrorAlert,
 
         setSelectedFilterTags,
+
         setAssignMode,
+        setAssignOfficeNumber,
+
         setOptimisticSearchResults,
         runSearch,
         refreshSearchResults

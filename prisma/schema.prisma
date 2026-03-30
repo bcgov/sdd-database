@@ -21,6 +21,8 @@ model Employee {
 
   assigned_office Office      @relation(fields: [office_number], references: [office_number])
   program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
+
+  workspace Workspace?
 }
 
 model Branch {
@@ -77,7 +79,12 @@ model Workspace {
   office_number    String @db.VarChar(3)
   workspace_number String @db.VarChar(4)
 
-  assigned_office Office @relation(fields: [office_number], references: [office_number])
+  // makes non-null employee IDs unique to ensure one employee cannot occupy multiple workspaces
+  // Also, this references employee's internal id not employee_id
+  employee_id Int? @unique
+
+  assigned_office   Office    @relation(fields: [office_number], references: [office_number])
+  assigned_employee Employee? @relation(fields: [employee_id], references: [id])
 
   @@id([office_number, workspace_number]) // composite primary key
 }

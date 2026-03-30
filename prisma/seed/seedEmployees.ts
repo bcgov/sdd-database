@@ -8,6 +8,8 @@ import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFi
 import {assertEmployeeId, assertName, assertIdir, assertNotes} from "./validators/employees.validators";
 import {assertUnique} from "./validators/common.validators";
 import {assertOfficeNumber} from "./validators/offices.validators";
+import {assertNoDuplicates} from "./assertions";
+import {parseAssignedTo} from "./parsers";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -168,7 +170,13 @@ export async function seedEmployees(prismaClient: PrismaClient) {
 
     console.log(`Prepared ${finalEmployeeRows.length} employee rows for insert`)
 
-    // await replaceEmployees(prismaClient, finalEmployeeRows)
+    assertNoDuplicates(finalEmployeeRows, {
+        getKey: row => row.employee_id!,
+        label: "employee_id",
+        shouldSkip: row => !row.employee_id
+    })
+
+    await replaceEmployees(prismaClient, finalEmployeeRows)
 
     // write workbook only if at least one edge-case row exists
     const hasConflictingDuplicateIdirRows = conflictingDuplicateIdirRows.rowCount > 1
@@ -218,6 +226,12 @@ function buildRowsByRealIdir(
     return rowsByIdir
 }
 
+/**
+ * Here, we are talking about Employee Id and not the internal employee primary key
+ * Map <idir, employee id>
+ * @param employeeIdLookupWorksheet
+ * @param employeeIdLookupHeaderToCol
+ */
 function buildEmployeeIdLookup(
     employeeIdLookupWorksheet: ExcelJS.Worksheet,
     employeeIdLookupHeaderToCol: Record<(typeof EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS)[number], number>) {
@@ -231,13 +245,15 @@ function buildEmployeeIdLookup(
 
         const rawIdir = getCellString(row, employeeIdLookupHeaderToCol, "IDIR")
         const idir = rawIdir.toUpperCase()
-        const employeeId = getCellString(row, employeeIdLookupHeaderToCol, "EMPLID")
 
-        if(!idir) continue
-        
+        const rawEmployeeId = getCellString(row, employeeIdLookupHeaderToCol, "EMPLID")
+        const employeeId = rawEmployeeId || null
+
+        if (!idir) continue
+
         assertIdir(idir, r)
 
-        if(employeeId) {
+        if (employeeId) {
             assertEmployeeId(employeeId, r)
         }
 
@@ -416,47 +432,6 @@ function parseEmployeeRow(
     }
 }
 
-function parseAssignedTo(assignedTo: string, rowNumber: number) {
-    const parts = assignedTo.split(",").map(part => part.trim())
-
-    if (parts.length !== 2) {
-        throw new Error(
-            `Assigned To could not be parsed into employee name fields at row ${rowNumber}. Expected a name like "Last, First". Got "${assignedTo}"`
-        )
-    }
-
-    const [lastName, firstNameAndPossibleAlternateName] = parts
-
-    if (!lastName) {
-        throw new Error(
-            `Assigned To is missing last name at row ${rowNumber}. Got "${assignedTo}"`
-        )
-    }
-
-    if (!firstNameAndPossibleAlternateName) {
-        throw new Error(
-            `Assigned To is missing first name at row ${rowNumber}. Got "${assignedTo}"`
-        )
-    }
-
-    const alternateNameMatch = firstNameAndPossibleAlternateName.match(/^(.+?) \((.+)\)$/)
-    if (alternateNameMatch) {
-        const [, firstName, alternateName] = alternateNameMatch
-
-        return {
-            firstName,
-            alternateName,
-            lastName,
-        }
-    }
-
-    return {
-        firstName: firstNameAndPossibleAlternateName,
-        alternateName: null,
-        lastName,
-    }
-}
-
 function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
     if (rows.length <= 1) {
         return true
@@ -496,14 +471,18 @@ async function replaceEmployees(
     prismaClient: PrismaClient,
     employeeRows: ParsedEmployeeRow[]
 ) {
-    await prismaClient.$transaction(async (tx) => {
-        // tx is transaction scoped prisma client
-        await tx.employee.deleteMany()
 
-        for (const employeeData of employeeRows) {
-            await tx.employee.create({
-                data: employeeData,
-            })
-        }
-    })
+    await prismaClient.employee.deleteMany()
+    await prismaClient.employee.createMany({data: employeeRows})
+
+    // await prismaClient.$transaction(async (tx) => {
+    //     // tx is transaction scoped prisma client
+    //     await tx.employee.deleteMany()
+    //
+    //     for (const employeeData of employeeRows) {
+    //         await tx.employee.create({
+    //             data: employeeData,
+    //         })
+    //     }
+    // })
 }

@@ -1,7 +1,7 @@
 import {Dispatch, SetStateAction, startTransition, useCallback, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
-import {EmployeeFormValues, Entity} from "@/types";
+import {AssignMode, EmployeeFormValues, Entity, SearchOptions} from "@/types";
 
 import {deleteEmployeeAction} from "@/actions/entities/employees";
 
@@ -15,9 +15,12 @@ interface UseEntityActionsProps {
     addErrorAlert: (title: string, description: string) => void;
 
     setSelectedFilterTags: Dispatch<SetStateAction<Selection>>
-    setAssignMode: (assignMode: boolean) => void;
+
+    setAssignMode: (assignMode: AssignMode) => void;
+    setAssignOfficeNumber: (officeNumber: string | undefined) => void;
+
     setOptimisticSearchResults: (id: number) => void;
-    runSearch: (query?: string, searchOnlyOffices?: boolean) => Promise<void>;
+    runSearch: (query?: string, options?: SearchOptions) => Promise<void>;
     refreshSearchResults: () => void;
 }
 
@@ -27,35 +30,72 @@ export function useEntityActions({
                                      addErrorAlert,
                                      setSelectedFilterTags,
                                      setAssignMode,
+                                     setAssignOfficeNumber,
                                      setOptimisticSearchResults,
                                      runSearch,
                                      refreshSearchResults
                                  }: UseEntityActionsProps) {
-    const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
-
-    const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
-    const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
-    const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
 
     const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormValues>();
+    const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
+
+    const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
+    const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
+    const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
 
     const openSearchResultEditModal = (item: Entity) => {
         setSelectedSearchResult(item);
         setIsEditModalOpen(true);
     }
 
-    /** This function is called when the user clicks on "Assign Office" in the add new employee modal or the "Update
-     * Office" button in the add new employee modal or the edit employee modal.
+    /** This function is called when the user clicks on "Assign Workspace/Office" in the add new employee modal or the
+     *  "Update Workspace/Office" button in the add new employee modal or the edit employee modal.
+     * @param mode
      * @param formData
      */
-    const activateAssignMode = async (formData: FormData) => {
-        setAssignMode(true);
+    const activateAssignMode = async (mode: AssignMode, formData: FormData) => {
 
-        // get all offices
-        // passing state as a parameter since setStates are async
-        await runSearch(undefined, true)
+        if (mode === "workspace") {
+            const officeNumber = formData.get("officeNumber") as string;
 
-        setSelectedFilterTags(new Set(["office"]));
+            if (officeNumber) {
+                setAssignOfficeNumber(officeNumber)
+                await enterAssignMode(mode, formData, officeNumber)
+            } else {
+                addErrorAlert(
+                    "Error: Office required",
+                    "Please assign an office before assigning a workspace"
+                )
+            }
+        }
+
+        if (mode === "office") {
+            await enterAssignMode(mode, formData)
+        }
+
+    }
+
+    /**
+     * Function does 3 things:
+     * Setting the mode
+     * setting the matching filter tag
+     * running the right search
+     * @param mode
+     * @param formData
+     * @param officeNumber
+     */
+    const enterAssignMode = async (
+        mode: AssignMode,
+        formData: FormData,
+        officeNumber?: string
+    ) => {
+
+        setAssignMode(mode);
+
+        // passing mode as a parameter since setStates are async
+        await runSearch(undefined, {modeOverride: mode, officeNumber})
+
+        setSelectedFilterTags(new Set([mode]));
 
         saveEmployeeFormData(formData);
     }
@@ -81,7 +121,7 @@ export function useEntityActions({
             openCloseAddNewEmployeeModal(false, false)
         } else {
 
-            // we update the existing selectedSearchResult with any new edits before we showcase the assign office UI
+            // Preserve in-progress employee edits before leaving the modal for assign mode
             setSelectedSearchResult(prev => {
 
                 // this is just defensible coding, code will ideally never branch in this block
@@ -100,30 +140,81 @@ export function useEntityActions({
         }
     }
 
-    const assignOfficeClickHandler = (assignedOfficeNumber: string) => {
-
-        setAssignMode(false)
+    const assignWorkspaceClickHandler = (assignedWorkspaceNumber: string) => {
+        setAssignMode("none")
+        setAssignOfficeNumber(undefined)
 
         if (draftNewEmployee) {
-
             // We are in add new employee modal
             setDraftNewEmployee({
                 ...draftNewEmployee,
-                office_number: assignedOfficeNumber
+                ui_workspace_number: assignedWorkspaceNumber,
             })
-
             openCloseAddNewEmployeeModal(true)
         } else {
-
-            if (selectedSearchResult && selectedSearchResult.type === "employee") {
+            if (selectedSearchResult?.type === "employee") {
 
                 // We are in edit employee modal
                 setSelectedSearchResult({
                     ...selectedSearchResult,
-                    office_number: assignedOfficeNumber
+                    ui_workspace_number: assignedWorkspaceNumber,
                 })
 
                 setIsEditModalOpen(true)
+            }
+        }
+    }
+
+    const assignOfficeClickHandler = (assignedOfficeNumber: string) => {
+        setAssignMode("none")
+
+        if (draftNewEmployee) {
+            // We are in add new employee modal
+
+            const officeChanged = draftNewEmployee.office_number !== assignedOfficeNumber
+
+            const nextWorkspaceNumber: EmployeeFormValues["ui_workspace_number"] = officeChanged ? undefined : draftNewEmployee.ui_workspace_number
+
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                office_number: assignedOfficeNumber,
+                ui_workspace_number: nextWorkspaceNumber
+            })
+            openCloseAddNewEmployeeModal(true)
+        } else {
+
+            if (selectedSearchResult?.type === "employee") {
+
+                const officeChanged = selectedSearchResult.office_number !== assignedOfficeNumber
+
+                const nextWorkspaceNumber: EmployeeFormValues["ui_workspace_number"] = officeChanged ? undefined : selectedSearchResult.ui_workspace_number
+
+                // We are in edit employee modal
+                setSelectedSearchResult({
+                    ...selectedSearchResult,
+                    office_number: assignedOfficeNumber,
+                    ui_workspace_number: nextWorkspaceNumber,
+                    workspace: officeChanged ? null : selectedSearchResult.workspace
+                })
+
+                setIsEditModalOpen(true)
+            }
+        }
+    }
+
+    const removeWorkspaceClickHandler = () => {
+        if (draftNewEmployee) {
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_workspace_number: undefined
+            })
+        } else {
+            if (selectedSearchResult?.type === "employee") {
+                setSelectedSearchResult({
+                    ...selectedSearchResult,
+                    ui_workspace_number: undefined,
+                    workspace: null
+                })
             }
         }
     }
@@ -204,6 +295,8 @@ export function useEntityActions({
         openSearchResultEditModal,
         activateAssignMode,
         assignOfficeClickHandler,
+        assignWorkspaceClickHandler,
+        removeWorkspaceClickHandler,
         openCloseAddNewEmployeeModal,
         onAddNewEmployeeSuccess,
         onAddNewEmployeeError,

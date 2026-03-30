@@ -1,12 +1,13 @@
 import {SearchResultItem} from "@/components/Search/SearchResultItem";
-import {Entity} from "@/types";
+import {AssignMode, Entity} from "@/types";
 import {getEmployeeFullName} from "@/utils";
 
 interface SearchResultsListProps {
     visibleSearchResults: Entity[]
     searchResultClickHandler: (item: Entity) => void
-    assignMode: boolean
+    assignMode: AssignMode
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspaceNumber: string) => void
 }
 
 const getSearchResultKey = (item: Entity) => {
@@ -55,11 +56,29 @@ const getSearchResultTitle = (item: Entity) => {
     return title
 }
 
+const getAssignClickHandler = (
+    item: Entity,
+    assignMode: AssignMode,
+    assignOfficeClickHandler: (assignedOfficeNumber: string) => void,
+    assignWorkspaceClickHandler: (workspaceNumber: string) => void
+) => {
+    if (item.type === "office" && assignMode === "office") {
+        return () => assignOfficeClickHandler(item.office_number)
+    }
+
+    if (item.type === "workspace" && assignMode === "workspace") {
+        return () => assignWorkspaceClickHandler(item.workspace_number)
+    }
+
+    return undefined;
+}
+
 export function SearchResultsList({
                                       visibleSearchResults,
                                       searchResultClickHandler,
                                       assignMode,
-                                      assignOfficeClickHandler
+                                      assignOfficeClickHandler,
+                                      assignWorkspaceClickHandler
                                   }: SearchResultsListProps) {
     return (
         <>
@@ -67,11 +86,15 @@ export function SearchResultsList({
                 <SearchResultItem key={getSearchResultKey(item)}
                                   title={getSearchResultTitle(item)}
                                   searchResultClickHandler={() => searchResultClickHandler(item)}
-                                  assignOfficeClickHandler={
-                                      item.type === "office" && assignMode ?
-                                          () => assignOfficeClickHandler(item.office_number) :
-                                          undefined
-                                  }>
+                                  assignClickHandler={
+                                      getAssignClickHandler(
+                                          item,
+                                          assignMode,
+                                          assignOfficeClickHandler,
+                                          assignWorkspaceClickHandler
+                                      )
+                                  }
+                >
                 </SearchResultItem>
             )}
         </>

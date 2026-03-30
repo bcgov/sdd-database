@@ -4,8 +4,8 @@ interface EntityActionConfig<T> {
     parse: (formData: FormData) => T;
     validate?: (entity: T) => string | undefined;
     persist: {
-        create:  (entity: T) => Promise<T>;
-        update:  (entity: T) => Promise<T>;
+        create:  (entity: T) => Promise<unknown>;
+        update:  (entity: T) => Promise<unknown>;
     }
     getReadablePrismaError: (error: unknown, entity: T) => string;
 }

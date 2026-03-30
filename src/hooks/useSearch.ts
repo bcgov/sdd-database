@@ -1,10 +1,11 @@
 import {useCallback, useOptimistic, useState} from "react";
 import type {Selection} from "@react-types/shared";
 
-import {Entity} from "@/types";
+import {AssignMode, Entity, SearchOptions} from "@/types";
 
 import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
+import {searchAssignableWorkspacesAction, searchWorkspacesAction} from "@/actions/entities/workspaces";
 
 
 export function useSearch() {
@@ -13,7 +14,8 @@ export function useSearch() {
     const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
 
-    const [assignMode, setAssignMode] = useState(false);
+    const [assignMode, setAssignMode] = useState<AssignMode>("none");
+    const [assignOfficeNumber, setAssignOfficeNumber] = useState<string>();
 
     const filteredSearchResults = searchResults.filter((item) => {
 
@@ -46,18 +48,35 @@ export function useSearch() {
         await runSearch(query);
     }
 
-    const runSearch = useCallback(async (query?: string, searchOnlyOffices?: boolean) => {
+    const runSearch = useCallback(async (query?: string, options?: SearchOptions) => {
+
+        const effectiveMode = options?.modeOverride ?? assignMode
+        const effectiveOfficeNumber = options?.officeNumber ?? assignOfficeNumber;
 
         let results: Entity[] = [];
 
-        if (searchOnlyOffices || assignMode) {
-            results = await searchOfficesAction(query);
-        } else {
-            results = await searchAllAction(query);
+        switch (effectiveMode) {
+
+            case "office":
+                results = await searchOfficesAction(query);
+                break;
+
+            case "workspace":
+                if (!effectiveOfficeNumber) {
+                    console.warn("Workspace search requested without officeNumber")
+                    results = []
+                } else {
+                    results = await searchAssignableWorkspacesAction(effectiveOfficeNumber, query);
+                }
+                break;
+
+            case "none":
+                results = await searchAllAction(query);
+                break;
         }
 
         setSearchResults(results);
-    }, [assignMode])
+    }, [assignMode, assignOfficeNumber]);
 
     const refreshSearchResults = useCallback(() => runSearch(searchPhrase), [runSearch, searchPhrase])
 
@@ -66,6 +85,7 @@ export function useSearch() {
         setSelectedFilterTags,
         assignMode,
         setAssignMode,
+        setAssignOfficeNumber,
         optimisticSearchResults,
         setOptimisticSearchResults,
         userHasSearchedOnce,

@@ -1,8 +1,13 @@
 "use server";
 
-import {Prisma, type Employee} from "@/generated/prisma/client"
+import {Prisma} from "@/generated/prisma/client"
 
-import {addNewEmployee, getEmployeesByFilter, updateEmployee, deleteEmployee} from "@/db/prisma-db";
+import {
+    addNewEmployeeWithWorkspace,
+    getEmployeesByFilter,
+    updateEmployeeWithWorkspace,
+    deleteEmployee
+} from "@/db/prisma-db";
 
 import {EntityActionResult, Entity, EmployeeFormValues} from "@/types";
 
@@ -131,8 +136,8 @@ const employeeActions = createEntityActions({
     parse: parseEmployeeFormData,
     validate: validateEmployeeData,
     persist: {
-        create: addNewEmployee,
-        update: updateEmployee,
+        create: addNewEmployeeWithWorkspace,
+        update: updateEmployeeWithWorkspace,
     },
     getReadablePrismaError,
 })

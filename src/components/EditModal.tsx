@@ -1,8 +1,8 @@
 import {Callout} from "@bcgov/design-system-react-components";
 
-import {Entity} from "@/types";
+import {AssignMode, Entity} from "@/types";
 
-import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
+import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
 import {OfficeForm} from "@/components/Entity_Forms/Office/OfficeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 import {WorkspaceForm} from "@/components/Entity_Forms/Workspace/WorkspaceForm";
@@ -12,10 +12,10 @@ import {ModalDialog} from "@/components/ModalDialog";
 import {ENTITY_TYPE_NAME} from "@/utils";
 
 
-
 interface EditModalProps {
     item: Entity
-    activateAssignMode: (formData: FormData) => Promise<void>
+    activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
+    handleRemoveWorkspace: () => void
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
     onSuccess: () => void
@@ -26,6 +26,7 @@ interface EditModalProps {
 export function EditModal({
                               item,
                               activateAssignMode,
+                              handleRemoveWorkspace,
                               isOpen,
                               setIsOpen,
                               onSuccess,
@@ -48,6 +49,7 @@ export function EditModal({
                 bodyComponent =
                     <EmployeeForm employee={item}
                                   activateAssignMode={activateAssignMode}
+                                  handleRemoveWorkspace={handleRemoveWorkspace}
                                   onSuccess={onSuccess}
                                   onError={onError}
                                   onDelete={onDelete}

@@ -17,10 +17,19 @@ export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
             >
             </TextField>
 
-            <TextField label="Office Number"
-                       name="officeNumber"
-                       isReadOnly
-                       defaultValue={workspace.office_number}>
+            <TextField
+                label="Office Number"
+                name="officeNumber"
+                isReadOnly
+                defaultValue={workspace.office_number}>
+            </TextField>
+
+            <TextField
+                label="Assigned Employee Internal ID"
+                name="employeeId"
+                isReadOnly
+                defaultValue={workspace.employee_id?.toString() ?? "Unassigned"}
+            >
             </TextField>
         </div>
     )

@@ -9,6 +9,9 @@ export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
 } as const;
 
 export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues => {
+
+    const workspaceNumber = formData.get("workspaceNumber") as string;
+    
     return {
         id: formData.get("id") ? Number(formData.get("id")) : undefined,
         office_number: formData.get("officeNumber") as string,
@@ -19,6 +22,7 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
         employee_id: (formData.get("employeeId") as string) || null,
         program_area_id: Number(formData.get("programArea")),
         notes: formData.get("notes") as string || null,
+        ui_workspace_number: workspaceNumber !== "Unassigned" ? workspaceNumber : undefined,
     }
 }
 

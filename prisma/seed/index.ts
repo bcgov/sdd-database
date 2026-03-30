@@ -21,9 +21,6 @@ async function main() {
     console.log("➡️ Seeding offices...");
     await seedOffices(prisma);
 
-    console.log("➡️ Seeding workspaces...")
-    await seedWorkspaces(prisma);
-
     console.log("➡️ Seeding branches...");
     await seedBranches(prisma);
 
@@ -32,6 +29,9 @@ async function main() {
 
     console.log("➡️ Seeding employees...");
     await seedEmployees(prisma);
+
+    console.log("➡️ Seeding workspaces...")
+    await seedWorkspaces(prisma);
 
     console.log("✅ Seeding complete");
 }

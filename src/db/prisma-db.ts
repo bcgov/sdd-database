@@ -4,12 +4,30 @@ import type {Workstation} from "@/generated/prisma/client";
 import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
 
 
-export async function addNewEmployee(employee: EmployeeFormValues) {
+async function addNewEmployee(employee: EmployeeFormValues) {
+
+    const {
+        id,
+        ui_branch_id,
+        ui_workspace_number,
+        ...employeeDbFields
+    } = employee
+
     return prisma.employee.create({
-        data: {
-            ...employee
-        },
+        data: employeeDbFields
     })
+}
+
+export async function addNewEmployeeWithWorkspace(employee: EmployeeFormValues) {
+    const createdEmployee = await addNewEmployee(employee);
+
+    await syncEmployeeWorkspace(
+        createdEmployee.id,
+        employee.office_number,
+        employee.ui_workspace_number
+    )
+
+    return createdEmployee
 }
 
 export async function addNewWorkstation(workstation: Workstation) {
@@ -71,7 +89,12 @@ export async function getTypesOfClientServices() {
 
 export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
     if (!query)
-        return prisma.employee.findMany({include: {program_area: true}})    // hydrate ProgramArea
+        return prisma.employee.findMany({
+            include: {
+                program_area: true,
+                workspace: true
+            }
+        })    // hydrate ProgramArea
 
     return prisma.employee.findMany({
         where: {
@@ -90,7 +113,8 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
             ]
         },
         include: {
-            program_area: true
+            program_area: true,
+            workspace: true
         }
     })
 }
@@ -115,7 +139,7 @@ export async function getOfficesByFilter(query?: string) {
 }
 
 export async function getWorkspacesByFilter(query?: string) {
-    if(!query)
+    if (!query)
         return prisma.workspace.findMany()
 
     return prisma.workspace.findMany({
@@ -124,6 +148,26 @@ export async function getWorkspacesByFilter(query?: string) {
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {workspace_number: {contains: query, mode: 'insensitive'}},
             ]
+        }
+    })
+}
+
+export async function getAssignableWorkspacesByFilter(officeNumber: string, query?: string) {
+    return prisma.workspace.findMany({
+        where: {
+            office_number: officeNumber,
+            employee_id: null,
+            ...(query
+                ? {
+                    workspace_number: {
+                        contains: query,
+                        mode: 'insensitive'
+                    }
+                }
+                : {})
+        },
+        orderBy: {
+            workspace_number: "asc"
         }
     })
 }
@@ -142,9 +186,9 @@ export async function getWorkstationsByFilter(query?: string) {
     })
 }
 
-export async function updateEmployee(employee: EmployeeFormValues) {
+async function updateEmployee(employee: EmployeeFormValues) {
 
-    if(employee.id === undefined) {
+    if (employee.id === undefined) {
         throw new Error("Didn't find the employee primary key id. Can't update employee")
     }
 
@@ -158,13 +202,21 @@ export async function updateEmployee(employee: EmployeeFormValues) {
         }
     })
 
-    if(!existingEmployee) {
+    if (!existingEmployee) {
         throw new Error(`Employee with id ${employee.id} not found`)
     }
 
     // employee_id and idir are immutable once set.
     // If currently missing in DB, they may be added later.
-    const {id, employee_id, idir, ...rest} = employee
+    const {
+        id,
+        employee_id,
+        idir,
+        // we extract ui_branch_id and ui_workspace_number to ignore them
+        ui_branch_id,
+        ui_workspace_number,
+        ...rest
+    } = employee
 
     // we don't update employee_id and idir if existing employee already has them set
     const data = {
@@ -176,6 +228,51 @@ export async function updateEmployee(employee: EmployeeFormValues) {
     return prisma.employee.update({
         where: {id},
         data,
+    })
+}
+
+export async function updateEmployeeWithWorkspace(employee: EmployeeFormValues) {
+    const updatedEmployee = await updateEmployee(employee)
+
+    await syncEmployeeWorkspace(
+        updatedEmployee.id,
+        employee.office_number,
+        employee.ui_workspace_number
+    )
+
+    return updatedEmployee
+}
+
+async function syncEmployeeWorkspace(
+    employeeId: number,
+    officeNumber: string,
+    workspaceNumber?: string
+) {
+    await prisma.$transaction(async (tx) => {
+        // Clear any existing workspace currently assigned to this employee
+        await tx.workspace.updateMany({
+            where: {
+                employee_id: employeeId,
+            },
+            data: {
+                employee_id: null,
+            }
+        })
+
+        // Assign the requested workspace, if one was selected
+        if (workspaceNumber) {
+            await tx.workspace.update({
+                where: {
+                    office_number_workspace_number: {
+                        office_number: officeNumber,
+                        workspace_number: workspaceNumber,
+                    }
+                },
+                data: {
+                    employee_id: employeeId,
+                }
+            })
+        }
     })
 }
 

@@ -4,7 +4,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
 import {Button, Callout, Form, TextField} from "@bcgov/design-system-react-components";
 
-import {Entity} from "@/types";
+import {AssignMode, Entity} from "@/types";
 
 import {FilterTags} from "@/components/Search/FilterTags";
 import {SearchResultsList} from "@/components/Search/SearchResultsList";
@@ -14,8 +14,9 @@ interface SearchProps {
     selectedFilterTags: Selection
     setSelectedFilterTags: (selectedFilterTags: Selection) => void
     visibleSearchResults: Entity[]
-    assignMode: boolean
+    assignMode: AssignMode
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspaceNumber: string) => void
     userHasSearchedOnce: () => boolean
     searchResultsAreEmpty: boolean
     searchResultClickHandler: (item: Entity) => void
@@ -28,23 +29,43 @@ export function Search({
                            visibleSearchResults,
                            assignMode,
                            assignOfficeClickHandler,
+                           assignWorkspaceClickHandler,
                            searchResultsAreEmpty,
                            userHasSearchedOnce,
                            searchResultClickHandler,
                            handleSearch
                        }: SearchProps) {
 
+    const getAssignModeCallout = () => {
+        switch (assignMode) {
+            case "office":
+                return {
+                    title: "Available Offices",
+                    description: "Use the search box to find the employee's office, then click Assign next to the correct result"
+                }
+            case "workspace":
+                return {
+                    title: "Available Empty Workspaces in Employee's Office",
+                    description: "Use the search box to find a workspace in the selected office, then click Assign next to the correct result"
+                }
+            default:
+                return null
+        }
+    }
+
+    const assignModeCallout = getAssignModeCallout()
+
     const renderSearchBar = () => (
         <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
             <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
-            <Button type="submit" variant={assignMode ? "secondary" : "primary"}>Search</Button>
+            <Button type="submit" variant={assignMode !== "none" ? "secondary" : "primary"}>Search</Button>
         </Form>
     )
 
     const renderFilters = () => (
         <FilterTags selectedFilterTags={selectedFilterTags}
                     setSelectedFilterTags={setSelectedFilterTags}
-                    disableFilterTags={assignMode}>
+                    disableFilterTags={assignMode !== "none"}>
         </FilterTags>
     )
 
@@ -55,12 +76,13 @@ export function Search({
             <SearchResultsList visibleSearchResults={visibleSearchResults}
                                searchResultClickHandler={searchResultClickHandler}
                                assignMode={assignMode}
-                               assignOfficeClickHandler={assignOfficeClickHandler}>
+                               assignOfficeClickHandler={assignOfficeClickHandler}
+                               assignWorkspaceClickHandler={assignWorkspaceClickHandler}>
             </SearchResultsList>
         )
     }
 
-    const showBody = userHasSearchedOnce() || assignMode
+    const showBody = userHasSearchedOnce() || assignMode !== "none"
 
     const renderResultsOrEmpty = () => {
         // Case 1: Search results are empty
@@ -79,12 +101,18 @@ export function Search({
 
     return (
         <>
-            {assignMode && (<div style={{
-                margin: "1rem",
-            }}>
-                <Callout title="Info"
-                         description="You can look up the employee's office using the search box. Once you have it, click the Assign button next to it."></Callout>
-            </div>)}
+            {
+                assignModeCallout && (
+                    <div style={{
+                        margin: "1rem",
+                    }}>
+                        <Callout title={assignModeCallout.title}
+                                 description={assignModeCallout.description}>
+
+                        </Callout>
+                    </div>
+                )
+            }
 
             {renderSearchBar()}
 

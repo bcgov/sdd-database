@@ -12,7 +12,7 @@ import {EditModal} from "@/components/EditModal";
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
 
-import {EmployeeForm} from "@/components/Entity_Forms/EmployeeForm";
+import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
 import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
 import {useEntityOrchestration} from "@/hooks/useEntityOrchestration";
@@ -35,7 +35,8 @@ export default function Home() {
                 visibleSearchResults={search.optimisticSearchResults}
                 searchResultClickHandler={actions.openSearchResultEditModal}
                 assignMode={search.assignMode}
-                assignOfficeClickHandler={actions.assignOfficeClickHandler}>
+                assignOfficeClickHandler={actions.assignOfficeClickHandler}
+                assignWorkspaceClickHandler={actions.assignWorkspaceClickHandler}>
             </Search>
 
             {actions.selectedSearchResult &&
@@ -43,6 +44,7 @@ export default function Home() {
                     <EditModal
                         item={actions.selectedSearchResult}
                         activateAssignMode={actions.activateAssignMode}
+                        handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
                         isOpen={uiState.isEditModalOpen}
                         setIsOpen={uiState.setIsEditModalOpen}
                         onSuccess={editHandlers.onEditSuccess}
@@ -65,10 +67,11 @@ export default function Home() {
             <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
                          setIsOpen={actions.openCloseAddNewEmployeeModal}
                          triggerButtonText="Add New Employee"
-                         disableTriggerButton={search.assignMode}
+                         disableTriggerButton={search.assignMode !== "none"}
                          modalTitle="Add New Employee">
                 <EmployeeForm employee={actions.draftNewEmployee}
                               activateAssignMode={actions.activateAssignMode}
+                              handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
                               onSuccess={actions.onAddNewEmployeeSuccess}
                               onError={actions.onAddNewEmployeeError}
                               onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
@@ -78,6 +81,7 @@ export default function Home() {
             <ModalDialog isOpen={actions.isAddNewWorkstationModalOpen}
                          setIsOpen={actions.setIsAddNewWorkstationModalOpen}
                          triggerButtonText="Add New Workstation"
+                         disableTriggerButton={search.assignMode !== "none"}
                          modalTitle="Add New Workstation">
                 <WorkstationForm onSuccess={actions.onAddNewWorkstationSuccess}
                                  onError={actions.onAddNewWorkstationError}
