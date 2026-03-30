@@ -1,6 +1,6 @@
 "use server";
 
-import {getProgramAreasByBranch} from "@/db/prisma-db";
+import {getProgramAreasByBranch} from "@/db/data-access/lookups";
 
 import {LookupOption} from "@/types";
 

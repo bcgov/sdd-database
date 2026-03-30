@@ -2,7 +2,7 @@
 
 import {LookupOption} from "@/types";
 
-import {getTypesOfClientServices} from "@/db/prisma-db";
+import {getTypesOfClientServices} from "@/db/data-access/lookups";
 
 
 export async function fetchTypesOfClientServices(): Promise<LookupOption[]> {

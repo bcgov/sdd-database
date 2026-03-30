@@ -7,7 +7,7 @@ import {
     getEmployeesByFilter,
     updateEmployeeWithWorkspace,
     deleteEmployee
-} from "@/db/prisma-db";
+} from "@/db/data-access/employees";
 
 import {EntityActionResult, Entity, EmployeeFormValues} from "@/types";
 

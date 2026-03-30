@@ -1,6 +1,6 @@
 "use server";
 
-import {getAssignableWorkspacesByFilter, getWorkspacesByFilter} from "@/db/prisma-db";
+import {getAssignableWorkspacesByFilter, getWorkspacesByFilter} from "@/db/data-access/workspaces";
 import {Entity} from "@/types";
 
 

@@ -1,6 +1,4 @@
-import {prisma} from "./client";
-
-import type {Workstation} from "@/generated/prisma/client";
+import {prisma} from "@/db/client";
 import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
 
 
@@ -28,63 +26,6 @@ export async function addNewEmployeeWithWorkspace(employee: EmployeeFormValues) 
     )
 
     return createdEmployee
-}
-
-export async function addNewWorkstation(workstation: Workstation) {
-    return prisma.workstation.create({
-        data: {
-            ...workstation
-        }
-    })
-}
-
-export async function getBranches() {
-    return prisma.branch.findMany({
-        select: {
-            id: true,
-            name: true,
-        },
-        orderBy: {
-            name: "asc"
-        }
-    })
-}
-
-export async function getProgramAreasByBranch(branch_id: number) {
-    return prisma.programArea.findMany({
-        where: {branch_id},
-        select: {
-            id: true,
-            name: true,
-        },
-        orderBy: {
-            name: "asc"
-        }
-    })
-}
-
-export async function getOfficeTypes() {
-    return prisma.officeType.findMany({
-        select: {
-            id: true,
-            name: true,
-        },
-        orderBy: {
-            name: "asc"
-        }
-    })
-}
-
-export async function getTypesOfClientServices() {
-    return prisma.typeOfClientService.findMany({
-        select: {
-            id: true,
-            name: true,
-        },
-        orderBy: {
-            name: "asc"
-        }
-    })
 }
 
 export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
@@ -115,73 +56,6 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
         include: {
             program_area: true,
             workspace: true
-        }
-    })
-}
-
-export async function getOfficesByFilter(query?: string) {
-    if (!query)
-        return prisma.office.findMany()
-
-    return prisma.office.findMany({
-        where: {
-            OR: [
-                {office_number: {contains: query, mode: 'insensitive'}},
-                {office_name: {contains: query, mode: 'insensitive'}},
-                {office_type: {name: {contains: query, mode: 'insensitive'}}},
-                {client_service_type: {name: {contains: query, mode: 'insensitive'}}},
-                {address: {contains: query, mode: 'insensitive'}},
-                {city: {contains: query, mode: 'insensitive'}},
-                {postal_code: {contains: query, mode: 'insensitive'}},
-            ]
-        }
-    })
-}
-
-export async function getWorkspacesByFilter(query?: string) {
-    if (!query)
-        return prisma.workspace.findMany()
-
-    return prisma.workspace.findMany({
-        where: {
-            OR: [
-                {office_number: {contains: query, mode: 'insensitive'}},
-                {workspace_number: {contains: query, mode: 'insensitive'}},
-            ]
-        }
-    })
-}
-
-export async function getAssignableWorkspacesByFilter(officeNumber: string, query?: string) {
-    return prisma.workspace.findMany({
-        where: {
-            office_number: officeNumber,
-            employee_id: null,
-            ...(query
-                ? {
-                    workspace_number: {
-                        contains: query,
-                        mode: 'insensitive'
-                    }
-                }
-                : {})
-        },
-        orderBy: {
-            workspace_number: "asc"
-        }
-    })
-}
-
-export async function getWorkstationsByFilter(query?: string) {
-    if (!query)
-        return prisma.workstation.findMany()
-
-    return prisma.workstation.findMany({
-        where: {
-            OR: [
-                {asset_tag: {contains: query, mode: 'insensitive'}},
-                {notes: {contains: query, mode: 'insensitive'}},
-            ]
         }
     })
 }
@@ -273,16 +147,6 @@ async function syncEmployeeWorkspace(
                 }
             })
         }
-    })
-}
-
-export async function updateWorkstation(workstation: Workstation) {
-
-    const {asset_tag, ...updatableFields} = workstation
-
-    return prisma.workstation.update({
-        where: {asset_tag},
-        data: {...updatableFields}
     })
 }
 

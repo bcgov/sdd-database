@@ -1,6 +1,6 @@
 "use server";
 
-import {getOfficesByFilter} from "@/db/prisma-db";
+import {getOfficesByFilter} from "@/db/data-access/offices";
 
 import {Entity} from "@/types";
 

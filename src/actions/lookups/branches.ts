@@ -1,6 +1,6 @@
 "use server";
 
-import {getBranches} from "@/db/prisma-db";
+import {getBranches} from "@/db/data-access/lookups";
 
 import {LookupOption} from "@/types";
 

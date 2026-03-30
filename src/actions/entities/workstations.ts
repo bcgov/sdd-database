@@ -6,7 +6,7 @@ import {
     addNewWorkstation,
     getWorkstationsByFilter,
     updateWorkstation
-} from "@/db/prisma-db";
+} from "@/db/data-access/workstations";
 
 import {Entity, EntityActionResult} from "@/types";
 
