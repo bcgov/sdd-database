@@ -33,6 +33,9 @@ export async function getAssignableWorkspacesByFilter(officeNumber: string, quer
         },
         orderBy: {
             workspace_number: "asc"
-        }
+        },
+        // this should be null
+        // However, adding this to align with type Entity
+        ...workspaceWithAssignedEmployeeArgs
     })
 }
