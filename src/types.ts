@@ -1,4 +1,5 @@
-import type {Prisma, Office, Workstation, Workspace} from "@/generated/prisma/client";
+import type {Prisma, Office, Workstation} from "@/generated/prisma/client";
+import {workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
 
 
 export type LookupOption = {
@@ -33,6 +34,8 @@ export type EmployeeSearchResult = Prisma.EmployeeGetPayload<{
     }
 }>
 
+export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceWithAssignedEmployeeArgs>
+
 type EmployeeEntity = EmployeeSearchResult & {
     ui_branch_id?: number;
     ui_workspace_number?: string;
@@ -42,7 +45,7 @@ type EmployeeEntity = EmployeeSearchResult & {
 export type Entity =
     | (EmployeeEntity & { type: "employee" })
     | (Office & { type: "office" })
-    | (Workspace & { type: "workspace" })
+    | (WorkspaceSearchResult & { type: "workspace" })
     | (Workstation & { type: "workstation" })
 
 export type EntityActionResult =

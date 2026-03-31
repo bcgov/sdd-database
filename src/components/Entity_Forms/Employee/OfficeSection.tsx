@@ -3,12 +3,14 @@ import {Accordion, Button, Callout, TextField} from "@bcgov/design-system-react-
 
 interface OfficeSectionProps {
     officeNumber: string | undefined
+    hasOfficeAssignment: boolean
     isEditMode: boolean
     handleAssignOffice: (e: PressEvent) => Promise<void>
 }
 
 export function OfficeSection({
     officeNumber,
+    hasOfficeAssignment,
     isEditMode,
     handleAssignOffice
 }: OfficeSectionProps) {
@@ -19,7 +21,7 @@ export function OfficeSection({
                     marginBottom: "1rem",
                 }}>
                     <Callout
-                        description={`Click on the ${officeNumber ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the ${isEditMode ? "Save" : "Create"} button below`}>
+                        description={`Click on the ${hasOfficeAssignment ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the ${isEditMode ? "Save" : "Create"} button below`}>
                     </Callout>
                 </div>
 
@@ -31,7 +33,7 @@ export function OfficeSection({
 
                 <Button variant="secondary"
                         onPress={handleAssignOffice}
-                >{officeNumber ? "Update" : "Assign"} Office</Button>
+                >{hasOfficeAssignment ? "Update" : "Assign"} Office</Button>
             </div>
         </Accordion>
     )

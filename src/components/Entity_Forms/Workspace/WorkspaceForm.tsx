@@ -1,9 +1,9 @@
-import type {Workspace} from "@/generated/prisma/client";
 import {WorkspaceFields} from "@/components/Entity_Forms/Workspace/WorkspaceFields";
+import {WorkspaceSearchResult} from "@/types";
 
 
 interface WorkspaceFormProps {
-    workspace: Workspace;
+    workspace: WorkspaceSearchResult;
 }
 
 export function WorkspaceForm({workspace}: WorkspaceFormProps) {

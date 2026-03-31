@@ -65,6 +65,7 @@ export function EmployeeForm({
     const {programAreas} = useProgramAreas(selectedBranchId);
 
     const hasOfficeAssignment = !!employee?.office_number
+    const officeNumber = employee?.office_number ?? "Unassigned"
 
     const uiWorkspaceNumber = employee && "ui_workspace_number" in employee
         ? employee.ui_workspace_number
@@ -132,7 +133,8 @@ export function EmployeeForm({
                 </EmployeeSection>
 
                 <OfficeSection
-                    officeNumber={employee?.office_number}
+                    officeNumber={officeNumber}
+                    hasOfficeAssignment={hasOfficeAssignment}
                     isEditMode={isEditMode}
                     handleAssignOffice={(e) => handleAssign("office", e)}>
                 </OfficeSection>

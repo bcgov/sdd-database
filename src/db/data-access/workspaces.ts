@@ -1,9 +1,10 @@
 import {prisma} from "@/db/client";
+import {workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
 
 
 export async function getWorkspacesByFilter(query?: string) {
     if (!query)
-        return prisma.workspace.findMany()
+        return prisma.workspace.findMany(workspaceWithAssignedEmployeeArgs);
 
     return prisma.workspace.findMany({
         where: {
@@ -11,7 +12,8 @@ export async function getWorkspacesByFilter(query?: string) {
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {workspace_number: {contains: query, mode: 'insensitive'}},
             ]
-        }
+        },
+        ...workspaceWithAssignedEmployeeArgs
     })
 }
 

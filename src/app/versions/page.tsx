@@ -8,7 +8,7 @@ export default function Updates() {
         {
             version: "v0.0.23",
             notes: [
-                "Added workspace entity: workspace number and office number",
+                "Added workspace entity which shows workspace number, office number and assigned employee details",
                 "Employee supports workspace assignment",
                 "Dev and Test environments are now only accessible within the gov network (in a gov office, or on" +
                 " the VPN)"
