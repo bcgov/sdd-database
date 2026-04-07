@@ -1,4 +1,4 @@
-import {EmployeeFormValues, EmployeeSearchResult, LookupOption} from "@/types";
+import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
 import {Accordion, Callout, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {
     validateEmployeeIdField,
@@ -6,25 +6,34 @@ import {
     validateEmployeeNameField,
     validateNotesField
 } from "@/validators";
+import {EmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
 
 
 interface EmployeeSectionProps {
     employee: EmployeeFormValues | EmployeeSearchResult | undefined
-    branches: LookupOption[]
-    programAreas: LookupOption[]
-    selectedBranchId: number | undefined
-    setSelectedBranchId: (branchId: number | undefined) => void
+    lookupState: EmployeeLookupState
     isEditMode: boolean
 }
 
 export function EmployeeSection({
-    employee,
-    branches,
-    programAreas,
-    selectedBranchId,
-    setSelectedBranchId,
-    isEditMode
-}: EmployeeSectionProps) {
+                                    employee,
+                                    lookupState,
+                                    isEditMode
+                                }: EmployeeSectionProps) {
+
+    const {
+        branches,
+        programAreas,
+        jobTitles,
+        selectedBranchId,
+        handleBranchSelectionChange,
+        selectedProgramAreaId,
+        handleProgramAreaSelectionChange,
+        selectedJobTitleId,
+        setSelectedJobTitleId,
+        isJobTitleRequired
+    } = lookupState;
+
     return (
         <Accordion label="Employee Details" id="employeeDetails">
 
@@ -78,39 +87,56 @@ export function EmployeeSection({
                            defaultValue={employee?.alternate_name ?? undefined}>
                 </TextField>
 
-                <Select
-                    label="Branch"
-                    name="branch"
-                    isRequired
-                    items={(branches ?? []).map(branch => (
-                        {
-                            id: branch.id,
-                            label: branch.name,
+                <Select label="Branch"
+                        name="branch"
+                        isRequired
+                        items={branches.map(branch => (
+                            {
+                                id: branch.id,
+                                label: branch.name,
+                            }
+                        ))}
+                        selectedKey={selectedBranchId}
+                        onSelectionChange={(key) =>
+                            handleBranchSelectionChange(key == null ? undefined : Number(key))
                         }
-                    ))}
-                    selectedKey={selectedBranchId}
-                    onSelectionChange={(key) =>
-                        setSelectedBranchId(key == null ? undefined : Number(key))
-                    }
-                    placeholder="Select a Branch"
+                        placeholder="Select a Branch"
                 >
                 </Select>
 
-                <Select
-                    label="Program Area"
-                    name="programArea"
-                    isRequired
-                    isDisabled={!selectedBranchId}
-                    items={(programAreas ?? []).map(programArea => (
-                        {
-                            id: programArea.id,
-                            label: programArea.name,
-                        }
-                    ))}
-                    defaultSelectedKey={employee ? employee.program_area_id : undefined}
-                    placeholder="Select a Program Area"
+                <Select label="Program Area"
+                        name="programArea"
+                        isRequired
+                        isDisabled={!selectedBranchId}
+                        items={programAreas.map(programArea => (
+                            {
+                                id: programArea.id,
+                                label: programArea.name,
+                            }
+                        ))}
+                        selectedKey={selectedProgramAreaId}
+                        onSelectionChange={(key) =>
+                            handleProgramAreaSelectionChange(key == null ? undefined : Number(key))}
+                        placeholder="Select a Program Area"
                 >
                 </Select>
+
+                <Select label="Job Title"
+                        name="jobTitle"
+                        isRequired={isJobTitleRequired}
+                        isDisabled={!selectedProgramAreaId || jobTitles.length === 0}
+                        items={jobTitles.map(jobTitle => (
+                            {
+                                id: jobTitle.id,
+                                label: jobTitle.name,
+                            }
+                        ))}
+                        selectedKey={selectedJobTitleId}
+                        onSelectionChange={(key) =>
+                            setSelectedJobTitleId(key == null ? undefined : Number(key))}
+                        placeholder="Select a Job Title">
+                </Select>
+
 
                 <TextArea label="Notes"
                           name="notes"

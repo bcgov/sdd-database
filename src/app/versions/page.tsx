@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.24",
+            notes: [
+                "Add Job Tile field",
+            ]
+        },
+        {
             version: "v0.0.23",
             notes: [
                 "Added workspace entity which shows workspace number, office number and assigned employee details",

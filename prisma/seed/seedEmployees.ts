@@ -5,11 +5,20 @@ import path from "path";
 import ExcelJS from "exceljs";
 
 import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile} from "./excel";
-import {assertEmployeeId, assertName, assertIdir, assertNotes} from "./validators/employees.validators";
+import {
+    assertEmployeeId,
+    assertName,
+    assertIdir,
+    assertNotes,
+    assertBranch,
+    assertProgramArea, assertJobTitle
+} from "./validators/employees.validators";
 import {assertUnique} from "./validators/common.validators";
 import {assertOfficeNumber} from "./validators/offices.validators";
 import {assertNoDuplicates} from "./assertions";
 import {parseAssignedTo} from "./parsers";
+import {buildIdLookupByName, idNameSelect} from "./lookups";
+import {normalizeJobTitleName, normalizeProgramAreaName} from "./normalizers/employees.normalizers";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -39,7 +48,8 @@ const COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS = [
     "Assigned To",
     "Status",
     "Branch",
-    "Program Area"
+    "Program Area",
+    "JobTitle"
 ] as const
 
 const EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS = [
@@ -49,10 +59,10 @@ const EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS = [
 
 const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "Free Address",
-    "Vacant",
     "HOLD",
     "PUBLIC JobBank Kiosk",
-    "REDEPLOY"
+    "REDEPLOY",
+    "Vacant",
 ] as const)
 
 type ParsedEmployeeRow = {
@@ -63,6 +73,7 @@ type ParsedEmployeeRow = {
     last_name: string
     employee_id: string | null
     program_area_id: number
+    job_title_id: number | null
     notes: string | null
 }
 
@@ -86,6 +97,21 @@ export async function seedEmployees(prismaClient: PrismaClient) {
                         name: true,
                     }
                 }
+            }
+        })
+    )
+
+    const jobTitleLookup = buildIdLookupByName(
+        await prismaClient.jobTitle.findMany({
+            select: idNameSelect
+        })
+    )
+
+    const allowedProgramAreaJobTitlePairs = buildAllowedProgramAreaJobTitlePairs(
+        await prismaClient.programAreaJobTitle.findMany({
+            select: {
+                program_area_id: true,
+                job_title_id: true,
             }
         })
     )
@@ -139,7 +165,9 @@ export async function seedEmployees(prismaClient: PrismaClient) {
                     groupedRow.number,
                     computersAndLaptopsHeaderToCol,
                     employeeIdLookup,
-                    programAreaLookup
+                    programAreaLookup,
+                    jobTitleLookup,
+                    allowedProgramAreaJobTitlePairs
                 )
             )
 
@@ -162,7 +190,9 @@ export async function seedEmployees(prismaClient: PrismaClient) {
             r,
             computersAndLaptopsHeaderToCol,
             employeeIdLookup,
-            programAreaLookup
+            programAreaLookup,
+            jobTitleLookup,
+            allowedProgramAreaJobTitlePairs
         )
 
         finalEmployeeRows.push(employeeData)
@@ -176,7 +206,7 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         shouldSkip: row => !row.employee_id
     })
 
-    await replaceEmployees(prismaClient, finalEmployeeRows)
+    await prismaClient.employee.createMany({data: finalEmployeeRows})
 
     // write workbook only if at least one edge-case row exists
     const hasConflictingDuplicateIdirRows = conflictingDuplicateIdirRows.rowCount > 1
@@ -291,6 +321,21 @@ function buildProgramAreaLookup(
     return lookup
 }
 
+function buildAllowedProgramAreaJobTitlePairs(
+    rows: Array<{
+        program_area_id: number
+        job_title_id: number
+    }>
+) {
+    const lookup = new Set<string>()
+
+    for (const row of rows) {
+        lookup.add(`${row.program_area_id}::${row.job_title_id}`)
+    }
+
+    return lookup
+}
+
 function isEffectivelyEmptyEmployeeRow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
@@ -301,6 +346,7 @@ function isEffectivelyEmptyEmployeeRow(
     const rawStatus = getCellString(row, headerToCol, "Status")
     const rawBranch = getCellString(row, headerToCol, "Branch")
     const rawProgramArea = getCellString(row, headerToCol, "Program Area")
+    const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
 
     return (
         !rawOfficeNumber &&
@@ -308,6 +354,7 @@ function isEffectivelyEmptyEmployeeRow(
         !rawStatus &&
         !rawBranch &&
         !rawProgramArea &&
+        !rawJobTitle &&
         !rawIdir
     )
 }
@@ -321,55 +368,14 @@ function isNotAnEmployee(
     return NON_EMPLOYEE_ASSIGNED_TO_VALUES.has(assignedTo)
 }
 
-function normalizeProgramAreaName(rawProgramArea: string) {
-    const remappedProgramAreaNames: Record<string, string> = {
-        "Community Integration Services - Service Delivery": "Service Delivery",
-        "Community Integration Services - Practice And Performance": "Practice and Performance",
-        "Executive Director Community Integration Services": "Executive Director",
-
-        "Community Services - Area A Staff": "Area A Staff",
-        "Community Services - Area B Staff": "Area B Staff",
-        "Community Services - Area C Staff": "Area C Staff",
-
-        "ADM - Service Delivery Division": "Service Delivery Division",
-
-        "Finance, Contracts And Records Management": "Finance, Contracts and Records Management",
-        "Recruitment, Staffing, Facilities, And Assets": "Recruitment, Staffing, Facilities, and Assets",
-        "Executive Director - Operations Support": "Executive Director",
-        "Analytics And Business Intelligence": "Analytics and Business Intelligence",
-        "Communications Engagement And Organizational Health": "Communications Engagement and Organizational Health",
-
-        "PLMS Operations": "Operations",
-        "Executive Director Prevention and Loss Management Services": "Executive Director",
-
-        "Strategic Partnerships And Communications": "Strategic Partnerships and Communications",
-        "Executive Director-Strategic Services": "Executive Director",
-
-        "Executive Director - Virtual Services": "Executive Director",
-
-        "Ministry Of Attorney General": "Attorney General",
-        "Ministry Of Children And Family Development": "Children and Family Development",
-        "Citizens Services": "Citizens' Services",
-        "Ministry Of Forests": "Forests",
-        "Ministry Of Health": "Health",
-        "Housing And Municipal Affairs": "Housing and Municipal Affairs",
-        "Ministry Of Infrastructure": "Infrastructure",
-        "Post Secondary Education And Skills": "Post-Secondary Education and Future Skills",
-        "Ministry of Transportation and Transit": "Transportation and Transit",
-        "Ministry Of Water, Land, Resource And Stewardship": "Water, Land and Resource Stewardship"
-    }
-
-    const normalizedProgramAreaName = remappedProgramAreaNames[rawProgramArea] ?? rawProgramArea
-
-    return normalizedProgramAreaName
-}
-
 function parseEmployeeRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>,
     employeeIdLookup: Map<string, string | null>,
     programAreaLookup: Map<string, number>,
+    jobTitleLookup: Map<string, number>,
+    allowedProgramAreaJobTitlePairs: Set<string>
 ): ParsedEmployeeRow {
 
     // office number
@@ -407,8 +413,11 @@ function parseEmployeeRow(
 
     // program area
     const branchName = getCellString(row, headerToCol, "Branch")
+    assertBranch(branchName, rowNumber)
 
     const rawProgramAreaName = getCellString(row, headerToCol, "Program Area")
+    assertProgramArea(rawProgramAreaName, rowNumber)
+
     const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
 
     const programAreaKey = `${branchName}::${programAreaName}`
@@ -420,6 +429,33 @@ function parseEmployeeRow(
         )
     }
 
+    // job title
+    const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
+    const isNonSddBranch = branchName === "Non SDD"
+
+    assertJobTitle(rawJobTitle, rowNumber, !isNonSddBranch)
+
+    const jobTitle = rawJobTitle ? normalizeJobTitleName(rawJobTitle) : ""
+    let jobTitleId: number | null = null
+
+    if (jobTitle) {
+        jobTitleId = jobTitleLookup.get(jobTitle) ?? null
+
+        if (!jobTitleId) {
+            throw new Error(
+                `No Job Title found for Job Title "${rawJobTitle}" at row ${rowNumber}`
+            )
+        }
+    }
+
+    if(jobTitleId != null) {
+        const pairKey = `${programAreaId}::${jobTitleId}`
+
+        if(!allowedProgramAreaJobTitlePairs.has(pairKey)) {
+            throw new Error(`Job Title "${rawJobTitle}" is not allowed for Program Area "${programAreaName}" under Branch "${branchName}" at row ${rowNumber}`)
+        }
+    }
+
     return {
         office_number: officeNumber,
         idir,
@@ -428,6 +464,7 @@ function parseEmployeeRow(
         last_name: parsedAssignedTo.lastName,
         employee_id: employeeId,
         program_area_id: programAreaId,
+        job_title_id: jobTitleId,
         notes
     }
 }
@@ -446,7 +483,8 @@ function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
         row.alternate_name === firstRow.alternate_name &&
         row.last_name === firstRow.last_name &&
         row.employee_id === firstRow.employee_id &&
-        row.program_area_id === firstRow.program_area_id
+        row.program_area_id === firstRow.program_area_id &&
+        row.job_title_id === firstRow.job_title_id
     )
 }
 
@@ -465,24 +503,4 @@ function mergeEmployeeRows(rows: ParsedEmployeeRow[]): ParsedEmployeeRow {
         ...firstRow,
         notes: mergedNotes || null
     }
-}
-
-async function replaceEmployees(
-    prismaClient: PrismaClient,
-    employeeRows: ParsedEmployeeRow[]
-) {
-
-    await prismaClient.employee.deleteMany()
-    await prismaClient.employee.createMany({data: employeeRows})
-
-    // await prismaClient.$transaction(async (tx) => {
-    //     // tx is transaction scoped prisma client
-    //     await tx.employee.deleteMany()
-    //
-    //     for (const employeeData of employeeRows) {
-    //         await tx.employee.create({
-    //             data: employeeData,
-    //         })
-    //     }
-    // })
 }

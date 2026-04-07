@@ -1,5 +1,5 @@
-function validateRequiredField(value: string | number, label: string) {
-    if (!value) {   // note this will also exclude the number 0
+function validateRequiredField(value: string | number | null | undefined, label: string) {
+    if (value == null || value == "") {
         return `${label} is required`;
     }
 }
@@ -115,6 +115,14 @@ export function validateEmployeeOfficeNumberField(value: string, label: string =
 }
 
 export function validateEmployeeProgramAreaField(value: number, label: string = "Program Area") {
+    const requiredError = validateRequiredField(value, label);
+
+    if (requiredError) {
+        return requiredError;
+    }
+}
+
+export function validateEmployeeJobTitleField(value: number | null, label: string = "Job Title") {
     const requiredError = validateRequiredField(value, label);
 
     if (requiredError) {

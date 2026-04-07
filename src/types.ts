@@ -17,6 +17,7 @@ export type EmployeeFormValues = {
     last_name: string;
     employee_id: string | null;
     program_area_id: number;
+    job_title_id: number | null;
     notes: string | null;
 
     // UI-only branch cache so branch prefill survives modal close/open

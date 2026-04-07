@@ -1,11 +1,12 @@
 import {PrismaClient} from "@/generated/prisma/client"
+import {buildIdLookupByName, idNameSelect} from "./lookups";
 
 
 const programsByBranch: Record<string, string[]> = {
     "Community Integration Services": [
-        "Service Delivery",
-        "Practice and Performance",
         "Executive Director",
+        "Practice and Performance",
+        "Service Delivery",
     ],
     "Community Services": [
         "Area A Staff",
@@ -17,29 +18,29 @@ const programsByBranch: Record<string, string[]> = {
         "Service Delivery Division",
     ],
     "Operations Support": [
-        "Finance, Contracts and Records Management",
-        "Recruitment, Staffing, Facilities, and Assets",
-        "Executive Director",
         "Analytics and Business Intelligence",
         "Communications Engagement and Organizational Health",
+        "Executive Director",
+        "Finance, Contracts and Records Management",
+        "Recruitment, Staffing, Facilities, and Assets",
     ],
     "Prevention and Loss Management Services": [
         "Criminal Investigation Unit",
-        "Operations",
-        "Program Integrity & Evaluation",
         "Executive Director",
+        "Operations",
+        "Program Integrity and Evaluation",
     ],
     "Strategic Services": [
-        "Strategic Partnerships and Communications",
-        "Knowledge Management",
         "Executive Director",
-        "Strategic Projects & Technology Integration",
+        "Knowledge Management",
+        "Strategic Partnerships and Communications",
+        "Strategic Projects and Technology Integration",
     ],
     "Virtual Services": [
-        "Intake",
         "Contact Centre",
-        "Health & Specialized Services",
         "Executive Director",
+        "Health and Specialized Services",
+        "Intake",
     ],
     "Non SDD": [
         "Attorney General",
@@ -68,20 +69,34 @@ const programsByBranch: Record<string, string[]> = {
 };
 
 export async function seedProgramAreas(prismaClient: PrismaClient) {
+
+    const branchLookup = buildIdLookupByName(
+        await prismaClient.branch.findMany({
+            select: idNameSelect
+        })
+    )
+
+    const rowsToInsert: Array<{
+        name: string
+        branch_id: number
+    }> = []
+
     for (const [branchName, programAreas] of Object.entries(programsByBranch)) {
 
-        const branch = await prismaClient.branch.findUnique({
-            where: { name: branchName },
-            select: { id: true }
-        })
+        const branchId = branchLookup.get(branchName)
 
-        if (!branch) {
+        if (!branchId) {
             console.warn(`⚠️ Skipping branch ${branchName} because it doesn't exist yet.`);
             continue;
         }
 
-        const rows = programAreas.map( (name) => ({name, branch_id: branch.id }))
-
-        await prismaClient.programArea.createMany({data: rows, skipDuplicates: true})
+        for (const programAreaName of programAreas) {
+            rowsToInsert.push({
+                name: programAreaName,
+                branch_id: branchId
+            })
+        }
     }
+
+    await prismaClient.programArea.createMany({data: rowsToInsert})
 }

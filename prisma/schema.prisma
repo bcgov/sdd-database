@@ -17,10 +17,12 @@ model Employee {
   last_name       String  @db.VarChar(30)
   employee_id     String? @unique @db.VarChar(6)
   program_area_id Int
+  job_title_id    Int?
   notes           String? @db.VarChar(2000)
 
   assigned_office Office      @relation(fields: [office_number], references: [office_number])
   program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
+  job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
 
   workspace Workspace?
 }
@@ -39,10 +41,29 @@ model ProgramArea {
 
   branch Branch @relation(fields: [branch_id], references: [id])
 
-  employees Employee[]
+  employees               Employee[]
+  program_area_job_titles ProgramAreaJobTitle[]
 
   // Names are unique WITHIN a branch (same program area name can exist under different branches)
   @@unique([branch_id, name])
+}
+
+model JobTitle {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  program_area_job_titles ProgramAreaJobTitle[]
+  employees               Employee[]
+}
+
+model ProgramAreaJobTitle {
+  program_area_id Int
+  job_title_id    Int
+
+  program_area ProgramArea @relation(fields: [program_area_id], references: [id])
+  job_title    JobTitle    @relation(fields: [job_title_id], references: [id])
+
+  @@id([program_area_id, job_title_id])
 }
 
 model Office {

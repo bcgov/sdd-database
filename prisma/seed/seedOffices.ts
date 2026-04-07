@@ -16,6 +16,7 @@ import {
 } from "./validators/offices.validators";
 
 import {assertUnique} from "./validators/common.validators";
+import {buildIdLookupByName, idNameSelect} from "./lookups";
 
 
 const OFFICE_INFORMATION_FILE_PATH = path.join(
@@ -35,6 +36,16 @@ const OFFICE_INFORMATION_REQUIRED_HEADERS = [
     "Type of Client Services",
 ] as const;
 
+type ParsedOfficeRow = {
+    office_number: string
+    office_name: string
+    type_id: number
+    client_service_type_id: number
+    address: string
+    city: string
+    postal_code: string
+}
+
 
 export async function seedOffices(prismaClient: PrismaClient) {
 
@@ -44,22 +55,19 @@ export async function seedOffices(prismaClient: PrismaClient) {
 
     const seenOfficeNumbers = new Map<string, number>();
 
-    const officeTypeLookup = buildLookup(
+    const officeTypeLookup = buildIdLookupByName(
         await prismaClient.officeType.findMany({
-            select: {
-                id: true,
-                name: true,
-            },
+            select: idNameSelect
         })
     )
-    const clientServiceTypeLookup = buildLookup(
+
+    const clientServiceTypeLookup = buildIdLookupByName(
         await prismaClient.typeOfClientService.findMany({
-            select: {
-                id: true,
-                name: true,
-            },
+            select: idNameSelect
         })
     )
+
+    const rowsToInsert: ParsedOfficeRow[] = []
 
     for (let r = 2; r <= worksheet.rowCount; r++) {
         const row = worksheet.getRow(r)
@@ -76,31 +84,11 @@ export async function seedOffices(prismaClient: PrismaClient) {
             clientServiceTypeLookup
         )
 
-        await prismaClient.office.upsert({
-            where: {
-                office_number: officeData.office_number
-            },
-            update: {
-                office_name: officeData.office_name,
-                type_id: officeData.type_id,
-                client_service_type_id: officeData.client_service_type_id,
-                address: officeData.address,
-                city: officeData.city,
-                postal_code: officeData.postal_code,
-            },
-            create: officeData
-        })
-    }
-}
-
-function buildLookup(rows: Array<{ id: number; name: string }>) {
-    const lookup = new Map<string, number>()
-
-    for (const row of rows) {
-        lookup.set(row.name, row.id)
+        rowsToInsert.push(officeData)
     }
 
-    return lookup
+    console.log(`Prepared ${rowsToInsert.length} offices for insert`)
+    await prismaClient.office.createMany({data: rowsToInsert})
 }
 
 function parseOfficeRow(
@@ -110,7 +98,7 @@ function parseOfficeRow(
     seenOfficeNumbers: Map<string, number>,
     officeTypeLookup: Map<string, number>,
     clientServiceTypeLookup: Map<string, number>,
-) {
+): ParsedOfficeRow {
     // office number
     const officeNumber = getCellString(row, headerToCol, "OfficeNum")
     assertOfficeNumber(officeNumber, rowNumber)

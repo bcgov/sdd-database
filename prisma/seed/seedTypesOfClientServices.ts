@@ -9,16 +9,10 @@ const typesOfClientServices = [
     "Prevention and Loss Management Services Criminal Investigations Unit",
     "MCFD",
     "ServiceBC",
-]
+] as const
 
 export async function seedTypesOfClientServices(prismaClient: PrismaClient) {
-    await Promise.all(
-        typesOfClientServices.map(typeOfClientService =>
-            prismaClient.typeOfClientService.upsert({
-                where: {name: typeOfClientService},
-                update: {},
-                create: {name: typeOfClientService},
-            })
-        )
-    )
+    await prismaClient.typeOfClientService.createMany({
+        data: typesOfClientServices.map(name => ({name}))
+    })
 }

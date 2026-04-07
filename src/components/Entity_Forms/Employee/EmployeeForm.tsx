@@ -11,14 +11,12 @@ import {
 
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employees";
 
-import {useBranches} from "@/hooks/lookups/useBranches";
-import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
-
 import {AssignMode, EmployeeFormValues, EmployeeSearchResult, EntityActionResult} from "@/types";
 
 import {WorkspaceSection} from "@/components/Entity_Forms/Employee/WorkspaceSection";
 import {OfficeSection} from "@/components/Entity_Forms/Employee/OfficeSection";
 import {EmployeeSection} from "@/components/Entity_Forms/Employee/EmployeeSection";
+import {useEmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
 
 
 interface EmployeeFormProps {
@@ -50,19 +48,7 @@ export function EmployeeForm({
 
     const [result, formAction, isPending] = useActionState(serverAction, initialState)
 
-    const {branches} = useBranches(); // [{ id, name }, {id, name}] or null on first render
-
-    const uiBranchId = employee && "ui_branch_id" in employee
-        ? employee.ui_branch_id
-        : undefined
-    const hydratedBranchId = employee && "program_area" in employee
-        ? employee.program_area?.branch_id
-        : undefined
-    const initialSelectedBranchId = uiBranchId ?? hydratedBranchId
-
-    const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(initialSelectedBranchId);
-
-    const {programAreas} = useProgramAreas(selectedBranchId);
+    const employeeLookupState = useEmployeeLookupState(employee);
 
     const hasOfficeAssignment = !!employee?.office_number
     const officeNumber = employee?.office_number ?? "Unassigned"
@@ -125,10 +111,7 @@ export function EmployeeForm({
 
                 <EmployeeSection
                     employee={employee}
-                    branches={branches ?? []}
-                    programAreas={programAreas ?? []}
-                    selectedBranchId={selectedBranchId}
-                    setSelectedBranchId={setSelectedBranchId}
+                    lookupState={employeeLookupState}
                     isEditMode={isEditMode}>
                 </EmployeeSection>
 

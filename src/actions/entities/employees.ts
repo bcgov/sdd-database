@@ -19,15 +19,17 @@ import {
     validateEmployeeNameField,
     validateNotesField,
     validateEmployeeOfficeNumberField,
-    validateEmployeeProgramAreaField
+    validateEmployeeProgramAreaField,
+    validateEmployeeJobTitleField
 } from "@/validators";
 
 import {createEntityActions} from "@/actions/createEntityActions";
+import {getBranchNameByProgramAreaId} from "@/db/data-access/lookups";
 
 
-function validateEmployeeData(employee: EmployeeFormValues) {
+async function validateEmployeeData(employee: EmployeeFormValues) {
 
-    return (
+    const fieldValidationError =
         validateEmployeeOfficeNumberField(employee.office_number) ??
         (employee.idir ? validateEmployeeIdirField(employee.idir) : undefined) ??
         validateEmployeeNameField(employee.first_name, "First Name") ??
@@ -42,7 +44,20 @@ function validateEmployeeData(employee: EmployeeFormValues) {
         (employee.employee_id ? validateEmployeeIdField(employee.employee_id) : undefined) ??
         validateEmployeeProgramAreaField(employee.program_area_id, "Program Area") ??
         (employee.notes ? validateNotesField(employee.notes) : undefined)
-    )
+
+    if (fieldValidationError) {
+        return fieldValidationError
+    }
+
+    const branchName = await getBranchNameByProgramAreaId(employee.program_area_id)
+
+    if (!branchName) {
+        return `The selected Program Area is invalid. Please reselect a Program Area and try again.`
+    }
+
+    if(branchName !== "Non SDD") {
+        return validateEmployeeJobTitleField(employee.job_title_id, "Job Title")
+    }
 }
 
 type DriverAdapterErrorMeta = {
@@ -101,12 +116,20 @@ function getReadablePrismaError(error: unknown, employee: EmployeeFormValues) {
             case "P2003": {
 
                 const dae = getDriverAdapterError(meta);
-                const foriegnKey = dae?.cause?.constraint?.index
+                const foreignKey = dae?.cause?.constraint?.index
 
-                if (foriegnKey === "Employee_office_number_fkey") {
-                    errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`;
-                } else if (foriegnKey === "Employee_program_area_id_fkey") {
-                    errorMessage = `It seems like a program area wasn't selected for this new employee. Please select a program area and try again.`;
+                switch(foreignKey) {
+                    case "Employee_office_number_fkey":
+                        errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`
+                        break
+
+                    case "Employee_program_area_id_fkey":
+                        errorMessage = `It seems like a program area wasn't selected for this new employee. Please select a program area and try again.`
+                        break
+
+                    case "Employee_job_title_id_fkey":
+                        errorMessage = `It seems like a job title wasn't selected for this new employee. Please select a job title and try again.`
+                        break
                 }
                 break;
             }

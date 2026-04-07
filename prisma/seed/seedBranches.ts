@@ -13,13 +13,8 @@ const branchNames = [
 ] as const
 
 export async function seedBranches(prismaClient: PrismaClient) {
-    await Promise.all(
-        branchNames.map(branchName =>
-            prismaClient.branch.upsert({
-                where: {name: branchName},
-                update: {},
-                create: {name: branchName}
-            })
-        )
-    )
+
+    await prismaClient.branch.createMany({
+        data: branchNames.map(name => ({name}))
+    })
 }

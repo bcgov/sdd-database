@@ -17,16 +17,10 @@ const officeTypes = [
     "Regional",
     "ServiceBC",
     "Strategic Services Branch"
-]
+] as const
 
 export async function seedOfficeTypes(prismaClient: PrismaClient) {
-    await Promise.all(
-        officeTypes.map(officeType =>
-            prismaClient.officeType.upsert({
-                where: {name: officeType},
-                update: {},
-                create: {name: officeType},
-            })
-        )
-    )
+    await prismaClient.officeType.createMany({
+        data: officeTypes.map(name => ({name}))
+    })
 }

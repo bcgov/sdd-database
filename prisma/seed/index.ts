@@ -7,11 +7,25 @@ import {seedOfficeTypes} from "./seedOfficeTypes";
 import {seedTypesOfClientServices} from "./seedTypesOfClientServices";
 import {seedEmployees} from "./seedEmployees";
 import {seedWorkspaces} from "./seedWorkspaces";
+import {seedJobTitles} from "./seedJobTitles";
+import {seedProgramAreaJobTitles} from "./seedProgramAreaJobTitles";
 
 
-async function main() {
-    console.log("🌱 Starting seed...");
+async function clearSeedTables() {
+    console.log("🧹 Clearing existing seed data...");
 
+    await prisma.workspace.deleteMany()
+    await prisma.employee.deleteMany()
+    await prisma.programAreaJobTitle.deleteMany()
+    await prisma.jobTitle.deleteMany()
+    await prisma.programArea.deleteMany()
+    await prisma.branch.deleteMany()
+    await prisma.office.deleteMany()
+    await prisma.typeOfClientService.deleteMany()
+    await prisma.officeType.deleteMany()
+}
+
+async function seedTables() {
     console.log("➡️ Seeding office types...");
     await seedOfficeTypes(prisma);
 
@@ -27,11 +41,24 @@ async function main() {
     console.log("➡️ Seeding program areas...");
     await seedProgramAreas(prisma);
 
+    console.log("➡️ Seeding job titles...");
+    await seedJobTitles(prisma);
+
+    console.log("➡️ Seeding program area job titles...");
+    await seedProgramAreaJobTitles(prisma);
+
     console.log("➡️ Seeding employees...");
     await seedEmployees(prisma);
 
     console.log("➡️ Seeding workspaces...")
     await seedWorkspaces(prisma);
+}
+
+async function main() {
+    console.log("🌱 Starting seed...");
+
+    await clearSeedTables()
+    await seedTables()
 
     console.log("✅ Seeding complete");
 }

@@ -99,7 +99,7 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
 
     console.log(`Prepared ${finalWorkspaceRows.length} workspace rows for insert`)
 
-    await replaceWorkspaces(prismaClient, finalWorkspaceRows)
+    await prismaClient.workspace.createMany({data: finalWorkspaceRows})
 }
 
 function isIncompleteWorkspaceRow(
@@ -226,13 +226,4 @@ function parseWorkspaceRow(
         workspace_number: rawWorkspaceNumber,
         employee_id: employeeId
     }
-}
-
-async function replaceWorkspaces(
-    prismaClient: PrismaClient,
-    workspaceRows: ParsedWorkspaceRow[]
-) {
-
-    await prismaClient.workspace.deleteMany()
-    await prismaClient.workspace.createMany({data: workspaceRows})
 }

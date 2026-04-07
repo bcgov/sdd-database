@@ -1,6 +1,6 @@
 {
   "name": "sdd-database",
-  "version": "0.0.21",
+  "version": "0.0.24",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -26,11 +26,11 @@
     "@bcgov/design-system-react-components": "^0.6.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.9",
-    "@mui/material": "^7.3.9",
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
-    "next": "16.2.1",
+    "@mui/icons-material": "^9.0.0",
+    "@mui/material": "^9.0.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "next": "16.2.2",
     "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -44,12 +44,12 @@
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
     "eslint": "^10",
-    "eslint-config-next": "16.2.1",
+    "eslint-config-next": "16.2.2",
     "exceljs": "^4.4.0",
     "postcss": "^8",
-    "prisma": "^7.5.0",
+    "prisma": "^7.7.0",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^6"
   }
 }
