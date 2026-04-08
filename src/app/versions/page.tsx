@@ -6,6 +6,13 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.256",
+            notes: [
+                "Added the long awaited scroll wheel to the employee modal",
+                "Delete button on the empoyee modal now lives on the same line as the save and cancel buttons"
+            ]
+        },
+        {
             version: "v0.0.25",
             notes: [
                 "Added Workspace Category",
@@ -15,7 +22,7 @@ export default function Updates() {
         {
             version: "v0.0.24",
             notes: [
-                "Add Job Tile field",
+                "Added Job Tile field",
             ]
         },
         {

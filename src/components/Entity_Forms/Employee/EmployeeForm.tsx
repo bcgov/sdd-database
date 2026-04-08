@@ -104,32 +104,40 @@ export function EmployeeForm({
                 <input type="hidden" name="id" value={employee.id}/>
             ) : null}
 
-            <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["employeeDetails"]} style={{
-                marginTop: "1rem",
-                marginBottom: "1rem",
-            }}>
+            <div
+                style={{
+                    maxHeight: "60vh",
+                    overflowY: "auto",
+                    paddingRight: "0.5rem",
+                }}
+            >
+                <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["employeeDetails"]} style={{
+                    marginTop: "1rem",
+                    marginBottom: "1rem",
+                }}>
 
-                <EmployeeSection
-                    employee={employee}
-                    lookupState={employeeLookupState}
-                    isEditMode={isEditMode}>
-                </EmployeeSection>
+                    <EmployeeSection
+                        employee={employee}
+                        lookupState={employeeLookupState}
+                        isEditMode={isEditMode}>
+                    </EmployeeSection>
 
-                <OfficeSection
-                    officeNumber={officeNumber}
-                    hasOfficeAssignment={hasOfficeAssignment}
-                    isEditMode={isEditMode}
-                    handleAssignOffice={(e) => handleAssign("office", e)}>
-                </OfficeSection>
+                    <OfficeSection
+                        officeNumber={officeNumber}
+                        hasOfficeAssignment={hasOfficeAssignment}
+                        isEditMode={isEditMode}
+                        handleAssignOffice={(e) => handleAssign("office", e)}>
+                    </OfficeSection>
 
-                <WorkspaceSection
-                    workspaceNumber={workspaceNumber}
-                    hasOfficeAssignment={hasOfficeAssignment}
-                    hasWorkspaceAssignment={hasWorkspaceAssignment}
-                    handleAssignWorkspace={(e) => handleAssign("workspace", e)}
-                    handleRemoveWorkspace={handleRemoveWorkspace}>
-                </WorkspaceSection>
-            </AccordionGroup>
+                    <WorkspaceSection
+                        workspaceNumber={workspaceNumber}
+                        hasOfficeAssignment={hasOfficeAssignment}
+                        hasWorkspaceAssignment={hasWorkspaceAssignment}
+                        handleAssignWorkspace={(e) => handleAssign("workspace", e)}
+                        handleRemoveWorkspace={handleRemoveWorkspace}>
+                    </WorkspaceSection>
+                </AccordionGroup>
+            </div>
 
             {/*<div style={{backgroundColor: "gray"}}>*/}
             <ButtonGroup>
@@ -143,20 +151,20 @@ export function EmployeeForm({
                         onPress={onClose}>
                     Cancel
                 </Button>
+
+                {/* Only render the delete button in the edit modal */}
+                {isEditMode ? (
+                    <ButtonGroup alignment="end">
+                        <Button size="large"
+                                variant="secondary"
+                                danger
+                                onPress={onDelete}>
+                            Delete
+                        </Button>
+                    </ButtonGroup>
+                ) : null}
             </ButtonGroup>
             {/*</div>*/}
-
-            {/* Only render the delete button in the edit modal */}
-            {isEditMode ? (
-                <ButtonGroup alignment="end">
-                    <Button size="large"
-                            variant="secondary"
-                            danger
-                            onPress={onDelete}>
-                        Delete
-                    </Button>
-                </ButtonGroup>
-            ) : null}
 
         </Form>
     )
