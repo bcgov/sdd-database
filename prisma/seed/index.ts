@@ -1,20 +1,22 @@
 import {pool, prisma} from "@/db/prisma"
 
-import {seedOffices} from "./seedOffices"
-import {seedBranches} from "./seedBranches"
-import {seedProgramAreas} from "./seedProgramAreas";
-import {seedOfficeTypes} from "./seedOfficeTypes";
-import {seedTypesOfClientServices} from "./seedTypesOfClientServices";
-import {seedEmployees} from "./seedEmployees";
-import {seedWorkspaces} from "./seedWorkspaces";
-import {seedJobTitles} from "./seedJobTitles";
-import {seedProgramAreaJobTitles} from "./seedProgramAreaJobTitles";
+import {seedOffices} from "./entities/seedOffices"
+import {seedBranches} from "./entities/seedBranches"
+import {seedProgramAreas} from "./entities/seedProgramAreas";
+import {seedOfficeTypes} from "./entities/seedOfficeTypes";
+import {seedTypesOfClientServices} from "./entities/seedTypesOfClientServices";
+import {seedEmployees} from "./entities/seedEmployees";
+import {seedWorkspaces} from "./entities/seedWorkspaces";
+import {seedJobTitles} from "./entities/seedJobTitles";
+import {seedProgramAreaJobTitles} from "./entities/seedProgramAreaJobTitles";
+import {seedWorkspaceCategories} from "./entities/seedWorkspaceCategories";
 
 
 async function clearSeedTables() {
     console.log("🧹 Clearing existing seed data...");
 
     await prisma.workspace.deleteMany()
+    await prisma.workspaceCategory.deleteMany()
     await prisma.employee.deleteMany()
     await prisma.programAreaJobTitle.deleteMany()
     await prisma.jobTitle.deleteMany()
@@ -49,6 +51,9 @@ async function seedTables() {
 
     console.log("➡️ Seeding employees...");
     await seedEmployees(prisma);
+
+    console.log("➡️ Seeding workspace categories...");
+    await seedWorkspaceCategories(prisma);
 
     console.log("➡️ Seeding workspaces...")
     await seedWorkspaces(prisma);

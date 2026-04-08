@@ -39,9 +39,7 @@ export function normalizeProgramAreaName(rawProgramArea: string) {
         "Ministry Of Water, Land, Resource And Stewardship": "Water, Land and Resource Stewardship"
     }
 
-    const normalizedProgramAreaName = remappedProgramAreaNames[rawProgramArea] ?? rawProgramArea
-
-    return normalizedProgramAreaName
+    return remappedProgramAreaNames[rawProgramArea] ?? rawProgramArea
 }
 
 export function normalizeJobTitleName(rawJobTitle: string) {
@@ -58,6 +56,8 @@ export function normalizeJobTitleName(rawJobTitle: string) {
         "Director, Strategic Partnerships and Communications": "Director",
         "Director, Strategic Projects and Technology Integration": "Director",
 
+        "Employment Assistance Worker": "Employment Assistance Worker (EAW)",
+
         "Executive Director, Community Integration Services": "Executive Director",
         "Executive Director, Operations Support": "Executive Director",
         "Executive Director, PLMS": "Executive Director",
@@ -71,7 +71,5 @@ export function normalizeJobTitleName(rawJobTitle: string) {
         "Quality and Compliance Specialists": "Quality and Compliance Specialist",
     }
 
-    const normalizedJobTitleName = remappedJobTitleNames[rawJobTitle] ?? rawJobTitle
-
-    return normalizedJobTitleName
+    return remappedJobTitleNames[rawJobTitle] ?? rawJobTitle
 }

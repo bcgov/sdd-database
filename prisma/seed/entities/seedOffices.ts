@@ -4,19 +4,18 @@ import path from "path"
 
 import type ExcelJS from "exceljs";
 
-import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "./excel";
+import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 
 import {
-    assertLookupValue,
     assertCity,
     assertOfficeAddress,
     assertOfficeName,
     assertOfficeNumber,
     assertPostalCode
-} from "./validators/offices.validators";
+} from "../validators/offices.validators";
 
-import {assertUnique} from "./validators/common.validators";
-import {buildIdLookupByName, idNameSelect} from "./lookups";
+import {assertUnique, assertLookupValue} from "../validators/common.validators";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 
 
 const OFFICE_INFORMATION_FILE_PATH = path.join(

@@ -1,12 +1,15 @@
 import path from "path";
 import type {PrismaClient} from "@/generated/prisma/client";
-import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "./excel";
 import ExcelJS from "exceljs";
-import {assertOfficeNumber} from "./validators/offices.validators";
-import {assertWorkspaceNumber} from "./validators/workspace.validators";
-import {assertIdir, assertName} from "./validators/employees.validators";
-import {assertNoDuplicates} from "./assertions";
-import {parseAssignedTo} from "./parsers";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
+import {assertNoDuplicates} from "../shared/assertions";
+import {assertOfficeNumber} from "../validators/offices.validators";
+import {assertIdir, assertName} from "../validators/employees.validators";
+import {assertWorkspaceNumber} from "../validators/workspace.validators";
+import {parseAssignedTo} from "../shared/parsers";
+import {normalizeCategoryName} from "../normalizers/workspaces.normalizers";
+import {assertLookupValue} from "../validators/common.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -20,7 +23,8 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "OfficeNum",
     "IDIR",
     "Assigned To",
-    "Workspace Number"
+    "Workspace Number",
+    "Workspace Category",
 ] as const
 
 const NON_WORKSPACE_VALUES = new Set<string>([
@@ -40,6 +44,7 @@ const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
 type ParsedWorkspaceRow = {
     office_number: string
     workspace_number: string
+    category_id: number
     employee_id: number | null
 }
 
@@ -59,6 +64,12 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
         }
     })
 
+    const categoryLookup = buildIdLookupByName(
+        await prismaClient.workspaceCategory.findMany({
+            select: idNameSelect
+        })
+    )
+
     const employeeIdByIdir = buildEmployeeIdByIdirLookup(employeeRows)
 
     const employeeIdByOfficeAndName = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
@@ -76,6 +87,7 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
             row,
             r,
             headerToCol,
+            categoryLookup,
             employeeIdByIdir,
             employeeIdByOfficeAndName,
         )
@@ -170,15 +182,30 @@ function parseWorkspaceRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>,
+    categoryLookup: Map<string, number>,
     employeeIdByIdir: Map<string, number>,
     employeeIdByOfficeAndNameLookup: Map<string, number>,
 ): ParsedWorkspaceRow {
+    // office number
     const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
     assertOfficeNumber(rawOfficeNumber, rowNumber)
 
+    // workspace number
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     assertWorkspaceNumber(rawWorkspaceNumber, rowNumber)
 
+    // category
+    const rawCategory = getCellString(row, headerToCol, "Workspace Category")
+    const category = normalizeCategoryName(rawCategory)
+    const categoryId = assertLookupValue(category, "Category",rowNumber, categoryLookup)
+
+    if(!categoryId) {
+        throw new Error(
+            `No Workspace Category found for "${rawCategory}" at row ${rowNumber}`
+        )
+    }
+
+    // Assigned Employee
     const rawIdir = getCellString(row, headerToCol, "IDIR")
     const idir = rawIdir && rawIdir !== "IDIR" ? rawIdir : null
     if (idir) {
@@ -224,6 +251,7 @@ function parseWorkspaceRow(
     return {
         office_number: rawOfficeNumber,
         workspace_number: rawWorkspaceNumber,
+        category_id: categoryId,
         employee_id: employeeId
     }
 }

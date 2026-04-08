@@ -50,6 +50,7 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                 {program_area: {branch: {name: {contains: query, mode: 'insensitive'}}}},
                 // 🔎 match by Program Area name
                 {program_area: {name: {contains: query, mode: 'insensitive'}}},
+                {job_title: {name: {contains: query, mode: 'insensitive'}}},
                 {notes: {contains: query, mode: 'insensitive'}},
             ]
         },

@@ -4,6 +4,7 @@ import {Prisma} from "@/generated/prisma/client";
 export const workspaceWithAssignedEmployeeArgs =
     {
         include: {
+            category: true,
             assigned_employee: {
                 select: {
                     idir: true,

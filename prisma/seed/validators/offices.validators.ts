@@ -1,18 +1,6 @@
 import {assertMaxLength, assertNonEmpty} from "./common.validators";
 
 
-export function assertLookupValue(rawValue: string, label: string, rowNumber: number, lookup: Map<string, number>) {
-    assertNonEmpty(rawValue, label, rowNumber)
-
-    const id = lookup.get(rawValue)
-
-    if (id === undefined) {
-        throw new Error(`${label} "${rawValue}" at row ${rowNumber} is not a valid option.`)
-    }
-
-    return id
-}
-
 export function assertOfficeNumber(officeNumber: string, rowNumber: number) {
 
     assertNonEmpty(officeNumber, "Office Number", rowNumber)

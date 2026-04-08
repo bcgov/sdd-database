@@ -22,8 +22,7 @@ export function SearchResultItem({
         <Box>
             <Card elevation={3} sx={{margin: "15px", display: "flex"}}>
 
-                <CardActionArea onClick={isAssignMode ? undefined : searchResultClickHandler}
-                                sx={{cursor: isAssignMode ? "default" : "pointer"}}>
+                <CardActionArea onClick={searchResultClickHandler}>
                     <CardContent>
                         <Text size="large">{title}</Text>
                     </CardContent>

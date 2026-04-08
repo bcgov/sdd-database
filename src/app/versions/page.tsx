@@ -6,6 +6,13 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.25",
+            notes: [
+                "Added Workspace Category",
+                "Can check out extra details by clicking on search results during office/workspace assignment"
+            ]
+        },
+        {
             version: "v0.0.24",
             notes: [
                 "Add Job Tile field",

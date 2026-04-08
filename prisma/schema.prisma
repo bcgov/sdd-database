@@ -97,17 +97,27 @@ model TypeOfClientService {
 }
 
 model Workspace {
-  office_number    String @db.VarChar(3)
-  workspace_number String @db.VarChar(4)
+  office_number    String  @db.VarChar(3)
+  workspace_number String  @db.VarChar(4)
+  category_id      Int
+  notes            String? @db.VarChar(2000)
 
   // makes non-null employee IDs unique to ensure one employee cannot occupy multiple workspaces
   // Also, this references employee's internal id not employee_id
   employee_id Int? @unique
 
-  assigned_office   Office    @relation(fields: [office_number], references: [office_number])
-  assigned_employee Employee? @relation(fields: [employee_id], references: [id])
+  category          WorkspaceCategory @relation(fields: [category_id], references: [id])
+  assigned_office   Office            @relation(fields: [office_number], references: [office_number])
+  assigned_employee Employee?         @relation(fields: [employee_id], references: [id])
 
   @@id([office_number, workspace_number]) // composite primary key
+}
+
+model WorkspaceCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  workspaces Workspace[]
 }
 
 model Workstation {

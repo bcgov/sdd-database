@@ -22,7 +22,7 @@ const jobTitles = [
     "Director, Criminal Operations",
     "Director, Partnerships, Performance and Practice",
     "Director, Service Delivery",
-    "Employment Assistance Worker",
+    "Employment Assistance Worker (EAW)",
     "Executive Administrative Assistant",
     "Executive Director",
     "Executive Director, Service Delivery",

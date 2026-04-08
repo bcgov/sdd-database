@@ -1,4 +1,10 @@
-import {Accordion, AccordionGroup, TextField} from "@bcgov/design-system-react-components";
+import {
+    Accordion,
+    AccordionGroup,
+    Select,
+    TextArea,
+    TextField
+} from "@bcgov/design-system-react-components";
 
 import {WorkspaceSearchResult} from "@/types";
 
@@ -9,6 +15,7 @@ interface WorkspaceFieldsProps {
 
 export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
     const hasAssignedEmployee = !!workspace.assigned_employee
+    const hasNotes = !!workspace.notes
 
     return (
         <AccordionGroup allowsMultipleExpanded
@@ -20,59 +27,72 @@ export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
 
             <Accordion label="Workspace Details" id="workspaceDetails">
                 <div>
-                    <TextField
-                        label="Workspace Number"
-                        name="number"
-                        isReadOnly
-                        defaultValue={workspace.workspace_number}
+                    <TextField label="Workspace Number"
+                               name="number"
+                               isReadOnly
+                               defaultValue={workspace.workspace_number}
                     >
                     </TextField>
 
-                    <TextField
-                        label="Office Number"
-                        name="officeNumber"
-                        isReadOnly
-                        defaultValue={workspace.office_number}>
+                    <TextField label="Office Number"
+                               name="officeNumber"
+                               isReadOnly
+                               defaultValue={workspace.office_number}>
                     </TextField>
+
+                    <Select label="Category"
+                            items={[
+                                {
+                                    id: workspace.category.id,
+                                    label: workspace.category.name,
+                                }
+                            ]}
+                            isDisabled
+                            defaultValue={workspace.category_id}>
+                    </Select>
+
+                    {hasNotes &&
+                        <TextArea label="Notes"
+                                  name="notes"
+                                  isReadOnly
+                                  maxLength={2000}
+                                  defaultValue={workspace.notes ?? undefined}>
+                        </TextArea>}
                 </div>
             </Accordion>
 
             {hasAssignedEmployee && (
                 <Accordion label="Assigned Employee Details" id="assignedEmployeeDetails">
-                <div>
-                    <TextField
-                        label="First Name"
-                        name="firstName"
-                        isReadOnly
-                        defaultValue={workspace.assigned_employee?.first_name}
-                    >
-                    </TextField>
+                    <div>
+                        <TextField label="First Name"
+                                   name="firstName"
+                                   isReadOnly
+                                   defaultValue={workspace.assigned_employee?.first_name}
+                        >
+                        </TextField>
 
-                    <TextField
-                        label="Last Name"
-                        name="lastName"
-                        isReadOnly
-                        defaultValue={workspace.assigned_employee?.last_name}
-                    >
-                    </TextField>
+                        <TextField label="Last Name"
+                                   name="lastName"
+                                   isReadOnly
+                                   defaultValue={workspace.assigned_employee?.last_name}
+                        >
+                        </TextField>
 
-                    <TextField
-                        label="Alternate Name"
-                        name="alternateName"
-                        isReadOnly
-                        defaultValue={workspace.assigned_employee?.alternate_name ?? ""}
-                    >
-                    </TextField>
+                        <TextField label="Alternate Name"
+                                   name="alternateName"
+                                   isReadOnly
+                                   defaultValue={workspace.assigned_employee?.alternate_name ?? ""}
+                        >
+                        </TextField>
 
-                    <TextField
-                        label="IDIR"
-                        name="idir"
-                        isReadOnly
-                        defaultValue={workspace.assigned_employee?.idir ?? ""}
-                    >
-                    </TextField>
-                </div>
-            </Accordion>)}
+                        <TextField label="IDIR"
+                                   name="idir"
+                                   isReadOnly
+                                   defaultValue={workspace.assigned_employee?.idir ?? ""}
+                        >
+                        </TextField>
+                    </div>
+                </Accordion>)}
         </AccordionGroup>
     )
 }

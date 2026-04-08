@@ -4,7 +4,7 @@ import path from "path";
 
 import ExcelJS from "exceljs";
 
-import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile} from "./excel";
+import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile} from "../shared/excel";
 import {
     assertEmployeeId,
     assertName,
@@ -12,13 +12,13 @@ import {
     assertNotes,
     assertBranch,
     assertProgramArea, assertJobTitle
-} from "./validators/employees.validators";
-import {assertUnique} from "./validators/common.validators";
-import {assertOfficeNumber} from "./validators/offices.validators";
-import {assertNoDuplicates} from "./assertions";
-import {parseAssignedTo} from "./parsers";
-import {buildIdLookupByName, idNameSelect} from "./lookups";
-import {normalizeJobTitleName, normalizeProgramAreaName} from "./normalizers/employees.normalizers";
+} from "../validators/employees.validators";
+import {assertLookupValue, assertUnique} from "../validators/common.validators";
+import {assertOfficeNumber} from "../validators/offices.validators";
+import {assertNoDuplicates} from "../shared/assertions";
+import {parseAssignedTo} from "../shared/parsers";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {normalizeJobTitleName, normalizeProgramAreaName} from "../normalizers/employees.normalizers";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -421,13 +421,12 @@ function parseEmployeeRow(
     const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
 
     const programAreaKey = `${branchName}::${programAreaName}`
-    const programAreaId = programAreaLookup.get(programAreaKey)
-
-    if (!programAreaId) {
-        throw new Error(
-            `No Program Area found for Branch "${branchName}" and Program Area "${programAreaName}" at row ${rowNumber}`
-        )
-    }
+    const programAreaId = assertLookupValue(
+        programAreaKey,
+        "Program Area",
+        rowNumber,
+        programAreaLookup
+    )
 
     // job title
     const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
@@ -436,17 +435,9 @@ function parseEmployeeRow(
     assertJobTitle(rawJobTitle, rowNumber, !isNonSddBranch)
 
     const jobTitle = rawJobTitle ? normalizeJobTitleName(rawJobTitle) : ""
-    let jobTitleId: number | null = null
-
-    if (jobTitle) {
-        jobTitleId = jobTitleLookup.get(jobTitle) ?? null
-
-        if (!jobTitleId) {
-            throw new Error(
-                `No Job Title found for Job Title "${rawJobTitle}" at row ${rowNumber}`
-            )
-        }
-    }
+    const jobTitleId = jobTitle
+        ? assertLookupValue(jobTitle, "Job Title", rowNumber, jobTitleLookup)
+        : null
 
     if(jobTitleId != null) {
         const pairKey = `${programAreaId}::${jobTitleId}`

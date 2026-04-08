@@ -1,5 +1,5 @@
 import {PrismaClient} from "@/generated/prisma/client";
-import {buildIdLookupByName, idNameSelect} from "./lookups";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 
 
 const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> = {
@@ -37,7 +37,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Client Service Worker (CSW)",
             "Contractor",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
@@ -47,7 +47,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Client Service Worker (CSW)",
             "Contractor",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
@@ -57,7 +57,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Client Service Worker (CSW)",
             "Contractor",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
@@ -157,7 +157,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
         ],
         "Operations": [
             "Director",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager",
             "Quality and Compliance Specialist",
             "Supervisor, Prevention and Compliance",
@@ -226,7 +226,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Assistant Supervisor (ADS)",
             "Client Service Worker (CSW)",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
@@ -240,7 +240,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Assistant Supervisor (ADS)",
             "Client Service Worker (CSW)",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
@@ -249,7 +249,7 @@ const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> =
             "Assistant Supervisor (ADS)",
             "Client Service Worker (CSW)",
             "Director, Service Delivery",
-            "Employment Assistance Worker",
+            "Employment Assistance Worker (EAW)",
             "Manager, Service Delivery",
             "Supervisor, Administrative Services",
             "Supervisor, Service Delivery",
