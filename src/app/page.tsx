@@ -35,6 +35,7 @@ export default function Home() {
                 visibleSearchResults={search.optimisticSearchResults}
                 searchResultClickHandler={actions.openSearchResultEditModal}
                 assignMode={search.assignMode}
+                cancelAssignModeHandler={actions.cancelAssignModeHandler}
                 assignOfficeClickHandler={actions.assignOfficeClickHandler}
                 assignWorkspaceClickHandler={actions.assignWorkspaceClickHandler}>
             </Search>
@@ -64,30 +65,33 @@ export default function Home() {
                 </>
             }
 
-            <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
-                         setIsOpen={actions.openCloseAddNewEmployeeModal}
-                         triggerButtonText="Add New Employee"
-                         disableTriggerButton={search.assignMode !== "none"}
-                         modalTitle="Add New Employee">
-                <EmployeeForm employee={actions.draftNewEmployee}
-                              activateAssignMode={actions.activateAssignMode}
-                              handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
-                              onSuccess={actions.onAddNewEmployeeSuccess}
-                              onError={actions.onAddNewEmployeeError}
-                              onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
-                </EmployeeForm>
-            </ModalDialog>
+            {/*Only show add new employee and add new workspace buttons outside assign mode*/}
+            {search.assignMode === "none" &&
+                <>
+                    <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
+                                 setIsOpen={actions.openCloseAddNewEmployeeModal}
+                                 triggerButtonText="Add New Employee"
+                                 modalTitle="Add New Employee">
+                        <EmployeeForm employee={actions.draftNewEmployee}
+                                      activateAssignMode={actions.activateAssignMode}
+                                      handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
+                                      onSuccess={actions.onAddNewEmployeeSuccess}
+                                      onError={actions.onAddNewEmployeeError}
+                                      onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
+                        </EmployeeForm>
+                    </ModalDialog>
 
-            <ModalDialog isOpen={actions.isAddNewWorkstationModalOpen}
-                         setIsOpen={actions.setIsAddNewWorkstationModalOpen}
-                         triggerButtonText="Add New Workstation"
-                         disableTriggerButton={search.assignMode !== "none"}
-                         modalTitle="Add New Workstation">
-                <WorkstationForm onSuccess={actions.onAddNewWorkstationSuccess}
-                                 onError={actions.onAddNewWorkstationError}
-                                 onClose={() => actions.setIsAddNewWorkstationModalOpen(false)}>
-                </WorkstationForm>
-            </ModalDialog>
+                    <ModalDialog isOpen={actions.isAddNewWorkstationModalOpen}
+                                 setIsOpen={actions.setIsAddNewWorkstationModalOpen}
+                                 triggerButtonText="Add New Workstation"
+                                 modalTitle="Add New Workstation">
+                        <WorkstationForm onSuccess={actions.onAddNewWorkstationSuccess}
+                                         onError={actions.onAddNewWorkstationError}
+                                         onClose={() => actions.setIsAddNewWorkstationModalOpen(false)}>
+                        </WorkstationForm>
+                    </ModalDialog>
+                </>
+            }
 
             {alerts.alert &&
                 <InlineAlert title={alerts.alert.title}

@@ -4,7 +4,6 @@ interface ModalDialogProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     triggerButtonText?: string;
-    disableTriggerButton?: boolean;
     modalTitle: string;
     children: React.ReactNode;
 }
@@ -13,7 +12,6 @@ export function ModalDialog({
                                 isOpen,
                                 setIsOpen,
                                 triggerButtonText,
-                                disableTriggerButton,
                                 modalTitle,
                                 children
                             }: ModalDialogProps) {
@@ -21,7 +19,7 @@ export function ModalDialog({
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
             {triggerButtonText &&
-                <Button variant="secondary" isDisabled={disableTriggerButton}>{triggerButtonText}</Button>}
+                <Button size="large" variant="secondary">{triggerButtonText}</Button>}
             <Modal>
                 <Dialog>
                     <div style={{"padding": "1rem"}}>

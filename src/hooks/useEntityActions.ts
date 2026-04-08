@@ -48,6 +48,14 @@ export function useEntityActions({
         setIsEditModalOpen(true);
     }
 
+    const openCloseAddNewEmployeeModal = useCallback((openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
+        setIsAddNewEmployeeModalOpen(openModal)
+
+        if (!openModal && clearDraftEditsOnClose) {
+            setDraftNewEmployee(undefined)
+        }
+    }, [])
+
     /** This function is called when the user clicks on "Assign Workspace/Office" in the add new employee modal or the
      *  "Update Workspace/Office" button in the add new employee modal or the edit employee modal.
      * @param mode
@@ -140,6 +148,27 @@ export function useEntityActions({
         }
     }
 
+    const cancelAssignModeHandler = useCallback(() =>{
+        setAssignMode("none")
+
+        // Clear any workspace-assignment office constraint when leaving assign mode.
+        // This mainly matters for workspace assignment and is harmless for office assignment.
+        setAssignOfficeNumber(undefined)
+
+        if (draftNewEmployee) {
+            openCloseAddNewEmployeeModal(true)
+        }
+        else {
+            if (selectedSearchResult?.type === "employee") {
+                setIsEditModalOpen(true)
+            }
+        }
+    }, [
+        draftNewEmployee,
+        selectedSearchResult,
+        openCloseAddNewEmployeeModal
+    ])
+
     const assignWorkspaceClickHandler = (assignedWorkspaceNumber: string) => {
         setAssignMode("none")
         setAssignOfficeNumber(undefined)
@@ -219,14 +248,6 @@ export function useEntityActions({
         }
     }
 
-    const openCloseAddNewEmployeeModal = useCallback((openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
-        setIsAddNewEmployeeModalOpen(openModal)
-
-        if (!openModal && clearDraftEditsOnClose) {
-            setDraftNewEmployee(undefined)
-        }
-    }, [])
-
     const onAddNewEmployeeSuccess = useCallback(() => {
 
         refreshSearchResults()
@@ -294,6 +315,7 @@ export function useEntityActions({
         draftNewEmployee,
         openSearchResultEditModal,
         activateAssignMode,
+        cancelAssignModeHandler,
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
         removeWorkspaceClickHandler,

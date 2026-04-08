@@ -6,10 +6,11 @@ export default function Updates() {
 
     const changelog = [
         {
-            version: "v0.0.256",
+            version: "v0.0.26",
             notes: [
                 "Added the long awaited scroll wheel to the employee modal",
-                "Delete button on the empoyee modal now lives on the same line as the save and cancel buttons"
+                "Delete button on the empoyee modal now lives on the same line as the save and cancel buttons",
+                "Added a 'Go Back' button in Workspace/Office Assignment page to cancel and exit midway"
             ]
         },
         {

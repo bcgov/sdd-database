@@ -15,6 +15,7 @@ interface SearchProps {
     setSelectedFilterTags: (selectedFilterTags: Selection) => void
     visibleSearchResults: Entity[]
     assignMode: AssignMode
+    cancelAssignModeHandler: () => void
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
     assignWorkspaceClickHandler: (assignedWorkspaceNumber: string) => void
     userHasSearchedOnce: () => boolean
@@ -28,6 +29,7 @@ export function Search({
                            setSelectedFilterTags,
                            visibleSearchResults,
                            assignMode,
+                           cancelAssignModeHandler,
                            assignOfficeClickHandler,
                            assignWorkspaceClickHandler,
                            searchResultsAreEmpty,
@@ -57,8 +59,12 @@ export function Search({
 
     const renderSearchBar = () => (
         <Form action={handleSearch} style={{margin: "1rem", display: "flex", gap: "1rem"}}>
-            <TextField aria-label="Search" type="search" name="search" iconLeft={<SearchOutlinedIcon/>}/>
-            <Button type="submit" variant={assignMode !== "none" ? "secondary" : "primary"}>Search</Button>
+            <TextField aria-label="Search"
+                       type="search"
+                       name="search"
+                       iconLeft={<SearchOutlinedIcon/>}>
+            </TextField>
+            <Button type="submit" size="large" variant={assignMode !== "none" ? "secondary" : "primary"}>Search</Button>
         </Form>
     )
 
@@ -122,6 +128,14 @@ export function Search({
                     {renderResultsOrEmpty()}
                 </>
             )}
+
+            {assignMode !== "none" &&
+                <Button size="large"
+                        variant={searchResultsAreEmpty ? "primary" : "secondary"}
+                        onPress={cancelAssignModeHandler}
+                        style={{margin: "1rem"}}>
+                    Go Back
+                </Button>}
         </>
     )
 }
