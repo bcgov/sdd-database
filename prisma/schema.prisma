@@ -106,6 +106,8 @@ model Workspace {
   // Also, this references employee's internal id not employee_id
   employee_id Int? @unique
 
+  is_on_hold Boolean @default(false)
+
   category          WorkspaceCategory @relation(fields: [category_id], references: [id])
   assigned_office   Office            @relation(fields: [office_number], references: [office_number])
   assigned_employee Employee?         @relation(fields: [employee_id], references: [id])

@@ -10,7 +10,9 @@ export default function Updates() {
             notes: [
                 "Added the long awaited scroll wheel to the employee modal",
                 "Delete button on the empoyee modal now lives on the same line as the save and cancel buttons",
-                "Added a 'Go Back' button in Workspace/Office Assignment page to cancel and exit midway"
+                "Added a 'Go Back' button in Workspace/Office Assignment page to cancel and exit midway",
+                "Display workspace status: Available, On Hold or Occupied",
+                "Workspace Assignment now no longer shows workspaces currently on hold"
             ]
         },
         {

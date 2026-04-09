@@ -3,7 +3,9 @@ import {
     AccordionGroup,
     Select,
     TextArea,
-    TextField
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup
 } from "@bcgov/design-system-react-components";
 
 import {WorkspaceSearchResult} from "@/types";
@@ -15,6 +17,13 @@ interface WorkspaceFieldsProps {
 
 export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
     const hasAssignedEmployee = !!workspace.assigned_employee
+
+    const workspaceStatus = hasAssignedEmployee
+        ? "occupied"
+        : workspace.is_on_hold
+            ? "onHold"
+            : "available"
+
     const hasNotes = !!workspace.notes
 
     return (
@@ -50,6 +59,24 @@ export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
                             isDisabled
                             defaultValue={workspace.category_id}>
                     </Select>
+
+                    <div style={{display: "inline-block"}}>
+                        <ToggleButtonGroup label="Status"
+                                           isDisabled
+                                           defaultSelectedKeys={[workspaceStatus]}>
+                            <ToggleButton id="available">
+                                Available
+                            </ToggleButton>
+
+                            <ToggleButton id="onHold">
+                                On Hold
+                            </ToggleButton>
+
+                            <ToggleButton id="occupied">
+                                Occupied
+                            </ToggleButton>
+                        </ToggleButtonGroup>
+                    </div>
 
                     {hasNotes &&
                         <TextArea label="Notes"

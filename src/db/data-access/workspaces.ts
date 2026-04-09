@@ -36,6 +36,7 @@ export async function getAssignableWorkspacesByFilter(officeNumber: string, quer
         where: {
             office_number: officeNumber,
             employee_id: null,
+            is_on_hold: false,
             ...searchFilter
         },
         orderBy: {

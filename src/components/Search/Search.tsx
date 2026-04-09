@@ -47,7 +47,7 @@ export function Search({
                 }
             case "workspace":
                 return {
-                    title: "Available Empty Workspaces in Employee's Office",
+                    title: "Eligible Empty Workspaces in Employee's Office",
                     description: "Use the search box to find a workspace in the selected office, then click Assign next to the correct result"
                 }
             default:

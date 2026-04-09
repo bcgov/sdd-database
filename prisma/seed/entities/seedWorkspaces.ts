@@ -24,6 +24,8 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "IDIR",
     "Assigned To",
     "Workspace Number",
+    "Workspace Type",
+    "OfficeFloor",
     "Workspace Category",
 ] as const
 
@@ -37,7 +39,6 @@ const NON_WORKSPACE_VALUES = new Set<string>([
 const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "Free Address",
     "Vacant",
-    "HOLD",
     "REDEPLOY"
 ])
 
@@ -46,6 +47,7 @@ type ParsedWorkspaceRow = {
     workspace_number: string
     category_id: number
     employee_id: number | null
+    is_on_hold: boolean
 }
 
 export async function seedWorkspaces(prismaClient: PrismaClient) {
@@ -79,9 +81,9 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
-        if (isIncompleteWorkspaceRow(row, headerToCol)) continue
-
         if (ignoreForNow(row, headerToCol)) continue
+
+        if (!isAWorkspace(row, headerToCol)) continue
 
         const workspaceData = parseWorkspaceRow(
             row,
@@ -114,23 +116,40 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
     await prismaClient.workspace.createMany({data: finalWorkspaceRows})
 }
 
-function isIncompleteWorkspaceRow(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
-) {
-    const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
-    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
-
-    return !rawOfficeNumber || !rawWorkspaceNumber
-}
-
 function ignoreForNow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
 ) {
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+    const rawCategory = getCellString(row, headerToCol, "Workspace Category")
+    const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
+    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
 
-    return NON_WORKSPACE_VALUES.has(rawWorkspaceNumber)
+    const isPublicJobBankKiosk =
+        rawAssignedTo === "PUBLIC JobBank Kiosk" ||
+        rawWorkspaceType === "Kiosk" ||
+        rawCategory === "Waiting Room"
+
+    return NON_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
+}
+
+function isAWorkspace(
+    row: ExcelJS.Row,
+    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
+) {
+    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+    const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
+    const rawOfficeFloor = getCellString(row, headerToCol, "OfficeFloor")
+    const rawCategory = getCellString(row, headerToCol, "Workspace Category")
+
+    return (
+        !!rawWorkspaceNumber ||
+        rawAssignedTo === "HOLD" ||
+        !!rawWorkspaceType ||
+        !!rawOfficeFloor ||
+        !!rawCategory
+    )
 }
 
 /**
@@ -197,15 +216,50 @@ function parseWorkspaceRow(
     // category
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const category = normalizeCategoryName(rawCategory)
-    const categoryId = assertLookupValue(category, "Category",rowNumber, categoryLookup)
+    const categoryId = assertLookupValue(category, "Category", rowNumber, categoryLookup)
 
-    if(!categoryId) {
-        throw new Error(
-            `No Workspace Category found for "${rawCategory}" at row ${rowNumber}`
-        )
+    // is_on_hold
+    const assignedTo = getCellString(row, headerToCol, "Assigned To")
+    const isOnHold = assignedTo === "HOLD"
+
+    // internal employee id i.e. primary key
+    const employeeId = resolveAssignedEmployeeId(
+        row,
+        rowNumber,
+        headerToCol,
+        rawWorkspaceNumber,
+        rawOfficeNumber,
+        assignedTo,
+        isOnHold,
+        employeeIdByIdir,
+        employeeIdByOfficeAndNameLookup,
+    )
+
+    return {
+        office_number: rawOfficeNumber,
+        workspace_number: rawWorkspaceNumber,
+        category_id: categoryId,
+        employee_id: employeeId,
+        is_on_hold: isOnHold
+    }
+}
+
+function resolveAssignedEmployeeId(
+    row: ExcelJS.Row,
+    rowNumber: number,
+    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>,
+    rawWorkspaceNumber: string,
+    rawOfficeNumber: string,
+    assignedTo: string,
+    isOnHold: boolean,
+    employeeIdByIdir: Map<string, number>,
+    employeeIdByOfficeAndNameLookup: Map<string, number>,
+) {
+
+    if (isOnHold) {
+        return null
     }
 
-    // Assigned Employee
     const rawIdir = getCellString(row, headerToCol, "IDIR")
     const idir = rawIdir && rawIdir !== "IDIR" ? rawIdir : null
     if (idir) {
@@ -217,9 +271,6 @@ function parseWorkspaceRow(
 
     // if idir is not available to fetch employee internal id then we rely on Assigned To and Office Number field
     if (!employeeId) {
-
-        const assignedTo = getCellString(row, headerToCol, "Assigned To")
-
         if (!NON_EMPLOYEE_ASSIGNED_TO_VALUES.has(assignedTo)) {
             const parsedAssignedTo = parseAssignedTo(assignedTo, rowNumber)
 
@@ -247,11 +298,5 @@ function parseWorkspaceRow(
             }
         }
     }
-
-    return {
-        office_number: rawOfficeNumber,
-        workspace_number: rawWorkspaceNumber,
-        category_id: categoryId,
-        employee_id: employeeId
-    }
+    return employeeId
 }
