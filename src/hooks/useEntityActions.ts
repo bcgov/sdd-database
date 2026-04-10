@@ -6,6 +6,7 @@ import {AssignMode, EmployeeFormValues, Entity, SearchOptions} from "@/types";
 import {deleteEmployeeAction} from "@/actions/entities/employees";
 
 import {getEmployeeFullName, parseEmployeeFormData} from "@/utils";
+import {holdAction, removeHoldAction} from "@/actions/entities/workspaces";
 
 
 interface UseEntityActionsProps {
@@ -148,7 +149,7 @@ export function useEntityActions({
         }
     }
 
-    const cancelAssignModeHandler = useCallback(() =>{
+    const cancelAssignModeHandler = useCallback(() => {
         setAssignMode("none")
 
         // Clear any workspace-assignment office constraint when leaving assign mode.
@@ -157,8 +158,7 @@ export function useEntityActions({
 
         if (draftNewEmployee) {
             openCloseAddNewEmployeeModal(true)
-        }
-        else {
+        } else {
             if (selectedSearchResult?.type === "employee") {
                 setIsEditModalOpen(true)
             }
@@ -248,6 +248,75 @@ export function useEntityActions({
         }
     }
 
+    const holdWorkspaceClickHandler = async () => {
+        if (selectedSearchResult?.type !== "workspace") {
+            addErrorAlert(
+                "Error: Something went wrong.",
+                "Please refresh the webpage"
+            );
+        } else {
+            const result = await holdAction(
+                selectedSearchResult.office_number,
+                selectedSearchResult.workspace_number
+            )
+
+            if (result.status === "error") {
+                addErrorAlert(
+                    `Error: Could not put workspace ${selectedSearchResult.workspace_number} on hold`,
+                    result.error
+                )
+            } else if (result.status === "ok") {
+
+                updateSelectedWorkspaceHoldState(true)
+
+                addSuccessAlert(`Workspace ${selectedSearchResult.workspace_number} marked on hold!`)
+
+                refreshSearchResults()
+            }
+        }
+    }
+
+    const removeHoldWorkspaceClickHandler = async () => {
+        if (selectedSearchResult?.type !== "workspace") {
+            addErrorAlert(
+                "Error: Something went wrong.",
+                "Please refresh the webpage"
+            );
+        } else {
+            const result = await removeHoldAction(
+                selectedSearchResult.office_number,
+                selectedSearchResult.workspace_number
+            )
+
+            if (result.status === "error") {
+                addErrorAlert(
+                    `Error: Could not remove workspace ${selectedSearchResult.workspace_number} from hold status`,
+                    result.error
+                )
+            } else if (result.status === "ok") {
+
+                updateSelectedWorkspaceHoldState(false)
+
+                addSuccessAlert(`Workspace ${selectedSearchResult.workspace_number} is no longer on hold!`)
+
+                refreshSearchResults()
+            }
+        }
+    }
+
+    const updateSelectedWorkspaceHoldState = (isOnHold: boolean) => {
+        setSelectedSearchResult(prev => {
+            if (!prev || prev.type !== "workspace") {
+                return prev
+            }
+
+            return {
+                ...prev,
+                is_on_hold: isOnHold,
+            }
+        })
+    }
+
     const onAddNewEmployeeSuccess = useCallback(() => {
 
         refreshSearchResults()
@@ -307,23 +376,31 @@ export function useEntityActions({
 
     return {
         selectedSearchResult,
+        draftNewEmployee,
+
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,
-        isAddNewEmployeeModalOpen,
-        isAddNewWorkstationModalOpen,
-        setIsAddNewWorkstationModalOpen,
-        draftNewEmployee,
-        openSearchResultEditModal,
+
         activateAssignMode,
         cancelAssignModeHandler,
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
         removeWorkspaceClickHandler,
+
+        holdWorkspaceClickHandler,
+        removeHoldWorkspaceClickHandler,
+
+        isAddNewEmployeeModalOpen,
+        isAddNewWorkstationModalOpen,
+        setIsAddNewWorkstationModalOpen,
+        openSearchResultEditModal,
         openCloseAddNewEmployeeModal,
+
         onAddNewEmployeeSuccess,
         onAddNewEmployeeError,
         onAddNewWorkstationSuccess,
         onAddNewWorkstationError,
+
         removeEmployeeById
     }
 }

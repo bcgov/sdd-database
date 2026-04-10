@@ -9,11 +9,14 @@ import {
     assertEmployeeId,
     assertName,
     assertIdir,
-    assertNotes,
     assertBranch,
     assertProgramArea, assertJobTitle
 } from "../validators/employees.validators";
-import {assertLookupValue, assertUnique} from "../validators/common.validators";
+import {
+    assertLookupValue,
+    assertUnique,
+    assertNotes,
+} from "../validators/common.validators";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
 import {parseAssignedTo} from "../shared/parsers";
@@ -439,10 +442,10 @@ function parseEmployeeRow(
         ? assertLookupValue(jobTitle, "Job Title", rowNumber, jobTitleLookup)
         : null
 
-    if(jobTitleId != null) {
+    if (jobTitleId != null) {
         const pairKey = `${programAreaId}::${jobTitleId}`
 
-        if(!allowedProgramAreaJobTitlePairs.has(pairKey)) {
+        if (!allowedProgramAreaJobTitlePairs.has(pairKey)) {
             throw new Error(`Job Title "${rawJobTitle}" is not allowed for Program Area "${programAreaName}" under Branch "${branchName}" at row ${rowNumber}`)
         }
     }

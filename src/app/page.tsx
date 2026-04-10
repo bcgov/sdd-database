@@ -46,6 +46,8 @@ export default function Home() {
                         item={actions.selectedSearchResult}
                         activateAssignMode={actions.activateAssignMode}
                         handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
+                        handleHoldWorkspace={actions.holdWorkspaceClickHandler}
+                        handleRemoveWorkspaceHold={actions.removeHoldWorkspaceClickHandler}
                         isOpen={uiState.isEditModalOpen}
                         setIsOpen={uiState.setIsEditModalOpen}
                         onSuccess={editHandlers.onEditSuccess}

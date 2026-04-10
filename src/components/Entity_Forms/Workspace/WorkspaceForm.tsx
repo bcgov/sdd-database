@@ -4,8 +4,18 @@ import {WorkspaceSearchResult} from "@/types";
 
 interface WorkspaceFormProps {
     workspace: WorkspaceSearchResult;
+    onHold: () => void
+    onRemoveHold: () => void
 }
 
-export function WorkspaceForm({workspace}: WorkspaceFormProps) {
-    return <WorkspaceFields workspace={workspace}/>;
+export function WorkspaceForm({
+                                  workspace,
+                                  onHold,
+                                  onRemoveHold,
+                              }: WorkspaceFormProps) {
+
+    return <WorkspaceFields workspace={workspace}
+                            onHold={onHold}
+                            onRemoveHold={onRemoveHold}>
+    </WorkspaceFields>
 }

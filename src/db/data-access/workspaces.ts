@@ -47,3 +47,79 @@ export async function getAssignableWorkspacesByFilter(officeNumber: string, quer
         ...workspaceWithAssignedEmployeeArgs
     })
 }
+
+export async function hold(
+    officeNumber: string,
+    workspaceNumber: string,
+) {
+    const workspace = await prisma.workspace.findUnique({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber
+            }
+        }
+    })
+
+    if (!workspace) {
+        throw new Error("Workspace not found");
+    }
+
+    if (workspace.employee_id !== null) {
+        throw new Error("Occupied workspaces cannot be placed on hold");
+    }
+
+    if (workspace.is_on_hold) {
+        throw new Error("Workspace is already on hold");
+    }
+
+    return prisma.workspace.update({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber
+            }
+        },
+        data: {
+            is_on_hold: true,
+        }
+    })
+}
+
+export async function removeHold(
+    officeNumber: string,
+    workspaceNumber: string,
+) {
+    const workspace = await prisma.workspace.findUnique({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber
+            }
+        }
+    })
+
+    if (!workspace) {
+        throw new Error("Workspace not found");
+    }
+
+    if (workspace.employee_id !== null) {
+        throw new Error("Occupied workspaces cannot be removed from hold");
+    }
+
+    if (!workspace.is_on_hold) {
+        throw new Error("Workspace is not currently on hold");
+    }
+
+    return prisma.workspace.update({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber
+            }
+        },
+        data: {
+            is_on_hold: false,
+        }
+    })
+}

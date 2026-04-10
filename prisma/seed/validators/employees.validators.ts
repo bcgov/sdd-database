@@ -36,10 +36,6 @@ export function assertName(name: string, label: string, rowNumber: number) {
     }
 }
 
-export function assertNotes(notes: string, rowNumber: number) {
-    assertMaxLength(notes, "Notes", rowNumber, 2000)
-}
-
 export function assertBranch(branch: string, rowNumber: number) {
     assertNonEmpty(branch, "Branch", rowNumber)
 }

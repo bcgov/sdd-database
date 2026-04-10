@@ -9,7 +9,7 @@ import {assertIdir, assertName} from "../validators/employees.validators";
 import {assertWorkspaceNumber} from "../validators/workspace.validators";
 import {parseAssignedTo} from "../shared/parsers";
 import {normalizeCategoryName} from "../normalizers/workspaces.normalizers";
-import {assertLookupValue} from "../validators/common.validators";
+import {assertLookupValue, assertNotes} from "../validators/common.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -23,11 +23,18 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "OfficeNum",
     "IDIR",
     "Assigned To",
+    "Status",
     "Workspace Number",
     "Workspace Type",
     "OfficeFloor",
     "Workspace Category",
 ] as const
+
+const WORKSPACE_ONLY_ASSIGNED_TO_VALUES = new Set<string>([
+    "HOLD",
+    "Vacant",
+    "Free Address"
+])
 
 const NON_WORKSPACE_VALUES = new Set<string>([
     "Float",
@@ -48,6 +55,7 @@ type ParsedWorkspaceRow = {
     category_id: number
     employee_id: number | null
     is_on_hold: boolean
+    notes: string | null
 }
 
 export async function seedWorkspaces(prismaClient: PrismaClient) {
@@ -235,12 +243,23 @@ function parseWorkspaceRow(
         employeeIdByOfficeAndNameLookup,
     )
 
+    // notes
+    const shouldSeedNotes = WORKSPACE_ONLY_ASSIGNED_TO_VALUES.has(assignedTo)
+
+    const rawNotes = getCellString(row, headerToCol, "Status")
+    assertNotes(rawNotes, rowNumber)
+
+    const notes = shouldSeedNotes
+        ? (rawNotes || null)   // making sure to store null instead of ""
+        : null
+
     return {
         office_number: rawOfficeNumber,
         workspace_number: rawWorkspaceNumber,
         category_id: categoryId,
         employee_id: employeeId,
-        is_on_hold: isOnHold
+        is_on_hold: isOnHold,
+        notes
     }
 }
 

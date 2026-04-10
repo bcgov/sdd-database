@@ -33,7 +33,9 @@ export function OfficeSection({
 
                 <Button variant="secondary"
                         onPress={handleAssignOffice}
-                >{hasOfficeAssignment ? "Update" : "Assign"} Office</Button>
+                >
+                    {hasOfficeAssignment ? "Update" : "Assign"} Office
+                </Button>
             </div>
         </Accordion>
     )

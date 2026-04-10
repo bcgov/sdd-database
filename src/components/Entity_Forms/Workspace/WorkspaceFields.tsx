@@ -1,6 +1,7 @@
 import {
     Accordion,
     AccordionGroup,
+    Button,
     Select,
     TextArea,
     TextField,
@@ -13,9 +14,15 @@ import {WorkspaceSearchResult} from "@/types";
 
 interface WorkspaceFieldsProps {
     workspace: WorkspaceSearchResult;
+    onHold: () => void;
+    onRemoveHold: () => void;
 }
 
-export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
+export function WorkspaceFields({
+                                    workspace,
+                                    onHold,
+                                    onRemoveHold,
+                                }: WorkspaceFieldsProps) {
     const hasAssignedEmployee = !!workspace.assigned_employee
 
     const workspaceStatus = hasAssignedEmployee
@@ -23,6 +30,9 @@ export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
         : workspace.is_on_hold
             ? "onHold"
             : "available"
+
+    const canHold = workspaceStatus === "available";
+    const canRemoveHold = workspaceStatus === "onHold"
 
     const hasNotes = !!workspace.notes
 
@@ -60,22 +70,33 @@ export function WorkspaceFields({workspace}: WorkspaceFieldsProps) {
                             defaultValue={workspace.category_id}>
                     </Select>
 
-                    <div style={{display: "inline-block"}}>
+                    <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
+
                         <ToggleButtonGroup label="Status"
                                            isDisabled
-                                           defaultSelectedKeys={[workspaceStatus]}>
-                            <ToggleButton id="available">
-                                Available
-                            </ToggleButton>
-
-                            <ToggleButton id="onHold">
-                                On Hold
-                            </ToggleButton>
-
-                            <ToggleButton id="occupied">
-                                Occupied
-                            </ToggleButton>
+                                           disallowEmptySelection
+                                           selectedKeys={[workspaceStatus]}
+                                           style={{width: "fit-content"}}
+                        >
+                            <ToggleButton id="available">Available</ToggleButton>
+                            <ToggleButton id="onHold">On Hold</ToggleButton>
+                            <ToggleButton id="occupied">Occupied</ToggleButton>
                         </ToggleButtonGroup>
+
+                            {canHold &&
+                                <Button onPress={onHold}
+                                        style={{marginTop: "0.5rem"}}
+                                >
+                                    Hold Workspace
+                                </Button>
+                            }
+
+                            {canRemoveHold &&
+                                <Button onPress={onRemoveHold}
+                                        style={{marginTop: "0.5rem"}}
+                                >
+                                    Remove Hold
+                                </Button>}
                     </div>
 
                     {hasNotes &&

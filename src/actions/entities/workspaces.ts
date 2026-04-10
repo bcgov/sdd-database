@@ -1,7 +1,12 @@
 "use server";
 
-import {getAssignableWorkspacesByFilter, getWorkspacesByFilter} from "@/db/data-access/workspaces";
-import {Entity} from "@/types";
+import {
+    getAssignableWorkspacesByFilter,
+    getWorkspacesByFilter,
+    hold,
+    removeHold
+} from "@/db/data-access/workspaces";
+import {Entity, EntityActionResult} from "@/types";
 
 
 export async function searchWorkspacesAction(query?: string) {
@@ -26,4 +31,41 @@ export async function searchAssignableWorkspacesAction(officeNumber: string, que
     }))
 
     return workspacesWithType
+}
+
+export async function holdAction(
+    officeNumber: string,
+    workspaceNumber: string,
+): Promise<EntityActionResult> {
+    try {
+        await hold(officeNumber, workspaceNumber)
+
+        return {status: "ok" }
+    }
+    catch (error) {
+        return {
+            status: "error",
+            error: error instanceof Error
+                ? error.message
+                : "Could not hold workspace"
+        }
+    }
+}
+
+export async function removeHoldAction(
+    officeNumber: string,
+    workspaceNumber: string,
+): Promise<EntityActionResult> {
+    try {
+    await removeHold(officeNumber, workspaceNumber)
+        return {status: "ok" }
+    }
+    catch (error) {
+        return {
+            status: "error",
+            error: error instanceof Error
+                ? error.message
+                : "Could not remove workspace hold"
+        }
+    }
 }

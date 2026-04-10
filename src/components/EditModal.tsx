@@ -16,6 +16,8 @@ interface EditModalProps {
     item: Entity
     activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
     handleRemoveWorkspace: () => void
+    handleHoldWorkspace: () => void
+    handleRemoveWorkspaceHold: () => void
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
     onSuccess: () => void
@@ -27,6 +29,8 @@ export function EditModal({
                               item,
                               activateAssignMode,
                               handleRemoveWorkspace,
+                              handleHoldWorkspace,
+                              handleRemoveWorkspaceHold,
                               isOpen,
                               setIsOpen,
                               onSuccess,
@@ -62,14 +66,18 @@ export function EditModal({
                 break
 
             case "workspace":
-                bodyComponent = <WorkspaceForm workspace={item}/>
+                bodyComponent = <WorkspaceForm workspace={item}
+                                               onHold={handleHoldWorkspace}
+                                               onRemoveHold={handleRemoveWorkspaceHold}>
+                </WorkspaceForm>
                 break
 
             case "workstation":
                 bodyComponent = <WorkstationForm onSuccess={onSuccess}
                                                  onError={onError}
                                                  workstation={item}
-                                                 onClose={onClose}/>
+                                                 onClose={onClose}>
+                </WorkstationForm>
                 break
         }
 
