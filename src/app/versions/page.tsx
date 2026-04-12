@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.28",
+            notes: [
+                "Added desk type"
+            ]
+        },
+        {
             version: "v0.0.27",
             notes: [
                 "Added Employee OHS Accommodations"

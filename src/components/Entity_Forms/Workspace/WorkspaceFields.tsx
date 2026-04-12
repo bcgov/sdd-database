@@ -70,6 +70,17 @@ export function WorkspaceFields({
                             defaultValue={workspace.category_id}>
                     </Select>
 
+                    <Select label="Desk Type"
+                            items={[
+                                {
+                                    id: workspace.desk_type_id,
+                                    label: workspace.desk_type.name,
+                                }
+                            ]}
+                            isDisabled
+                            defaultValue={workspace.desk_type_id}>
+                    </Select>
+
                     <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
 
                         <ToggleButtonGroup label="Status"

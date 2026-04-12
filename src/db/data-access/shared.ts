@@ -17,6 +17,7 @@ export const workspaceWithAssignedEmployeeArgs =
     {
         include: {
             category: true,
+            desk_type: true,
             assigned_employee: {
                 select: {
                     idir: true,

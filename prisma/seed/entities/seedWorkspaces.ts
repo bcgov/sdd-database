@@ -6,7 +6,7 @@ import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../s
 import {assertNoDuplicates} from "../shared/assertions";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertWorkspaceNumber} from "../validators/workspace.validators";
-import {normalizeCategoryName} from "../normalizers/workspaces.normalizers";
+import {normalizeCategoryName, normalizeDeskTypeName} from "../normalizers/workspaces.normalizers";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
     buildEmployeeIdByIdirLookup,
@@ -29,8 +29,8 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "Status",
     "Workspace Number",
     "Workspace Type",
-    "OfficeFloor",
     "Workspace Category",
+    "DeskType"
 ] as const
 
 const WORKSPACE_ONLY_ASSIGNED_TO_VALUES = new Set<string>([
@@ -50,6 +50,7 @@ type ParsedWorkspaceRow = {
     office_number: string
     workspace_number: string
     category_id: number
+    desk_type_id: number
     employee_id: number | null
     is_on_hold: boolean
     notes: string | null
@@ -77,8 +78,13 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
         })
     )
 
-    const employeeIdByIdir = buildEmployeeIdByIdirLookup(employeeRows)
+    const deskTypeLookup = buildIdLookupByName(
+        await prismaClient.deskType.findMany({
+            select: idNameSelect
+        })
+    )
 
+    const employeeIdByIdir = buildEmployeeIdByIdirLookup(employeeRows)
     const employeeIdByOfficeAndName = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
 
     const finalWorkspaceRows: ParsedWorkspaceRow[] = []
@@ -88,13 +94,14 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
 
         if (ignoreForNow(row, headerToCol)) continue
 
-        if (!isAWorkspace(row, headerToCol)) continue
+        if (isNotAWorkspaceRow(row, headerToCol)) continue
 
         const workspaceData = parseWorkspaceRow(
             row,
             r,
             headerToCol,
             categoryLookup,
+            deskTypeLookup,
             employeeIdByIdir,
             employeeIdByOfficeAndName,
         )
@@ -138,22 +145,22 @@ function ignoreForNow(
     return NON_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
 }
 
-function isAWorkspace(
+function isNotAWorkspaceRow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
 ) {
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
     const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
-    const rawOfficeFloor = getCellString(row, headerToCol, "OfficeFloor")
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
+    const rawDeskType = getCellString(row, headerToCol, "DeskType")
 
     return (
-        !!rawWorkspaceNumber ||
-        rawAssignedTo === "HOLD" ||
-        !!rawWorkspaceType ||
-        !!rawOfficeFloor ||
-        !!rawCategory
+        !rawWorkspaceNumber &&
+        !rawWorkspaceType &&
+        !rawCategory &&
+        !rawDeskType &&
+        rawAssignedTo !== "HOLD"
     )
 }
 
@@ -162,6 +169,7 @@ function parseWorkspaceRow(
     rowNumber: number,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>,
     categoryLookup: Map<string, number>,
+    deskTypeLookup: Map<string, number>,
     employeeIdByIdirLookup: Map<string, number>,
     employeeIdByOfficeAndNameLookup: Map<string, number>,
 ): ParsedWorkspaceRow {
@@ -178,6 +186,12 @@ function parseWorkspaceRow(
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const category = normalizeCategoryName(rawCategory)
     const categoryId = assertLookupValue(category, "Category", rowNumber, categoryLookup)
+
+    // desk type
+    const rawDeskType = getCellString(row, headerToCol, "DeskType")
+    const deskType = normalizeDeskTypeName(rawDeskType)
+    const deskTypeId = assertLookupValue(deskType, "Desk Type", rowNumber, deskTypeLookup)
+
 
     // is_on_hold
     const assignedToHeader = "Assigned To"
@@ -212,6 +226,7 @@ function parseWorkspaceRow(
         office_number: rawOfficeNumber,
         workspace_number: rawWorkspaceNumber,
         category_id: categoryId,
+        desk_type_id: deskTypeId,
         employee_id: employeeId,
         is_on_hold: isOnHold,
         notes

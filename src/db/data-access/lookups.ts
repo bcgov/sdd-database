@@ -6,13 +6,25 @@ const lookupOptionSelect = {
     name: true
 } as const
 
-export async function getBranches() {
-    return prisma.branch.findMany({
+async function getLookupOptions(
+    model: {
+        // Is the thing you passed me compatible with a Prisma delegate that can do this kind of lookup query?
+        findMany: (args: {
+            select: typeof lookupOptionSelect
+            orderBy: { name: "asc" }
+        }) => Promise<Array<{id: number, name: string}>>
+    }
+) {
+    return model.findMany({
         select: lookupOptionSelect,
         orderBy: {
             name: "asc"
         }
     })
+}
+
+export async function getBranches() {
+    return getLookupOptions(prisma.branch)
 }
 
 export async function getProgramAreasByBranch(branch_id: number) {
@@ -61,29 +73,14 @@ export async function getJobTitlesByProgramArea(program_area_id: number) {
     }))
 }
 
+export async function getOhsAccommodationTypes() {
+    return getLookupOptions(prisma.ohsAccommodationType)
+}
+
 export async function getOfficeTypes() {
-    return prisma.officeType.findMany({
-        select: lookupOptionSelect,
-        orderBy: {
-            name: "asc"
-        }
-    })
+    return getLookupOptions(prisma.officeType)
 }
 
 export async function getTypesOfClientServices() {
-    return prisma.typeOfClientService.findMany({
-        select: lookupOptionSelect,
-        orderBy: {
-            name: "asc"
-        }
-    })
-}
-
-export async function getOhsAccommodationTypes() {
-    return prisma.ohsAccommodationType.findMany({
-        select: lookupOptionSelect,
-        orderBy: {
-            name: "asc"
-        }
-    })
+    return getLookupOptions(prisma.typeOfClientService)
 }
