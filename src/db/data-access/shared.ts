@@ -1,6 +1,18 @@
 import {Prisma} from "@/generated/prisma/client";
 
 
+export const employeeWithRelationsArgs = {
+    include: {
+        program_area: true,
+        workspace: true,
+        ohs_accommodations: {
+            include: {
+                ohs_accommodation_type: true,
+            }
+        }
+    }
+} satisfies Prisma.EmployeeDefaultArgs
+
 export const workspaceWithAssignedEmployeeArgs =
     {
         include: {

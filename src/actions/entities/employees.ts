@@ -75,7 +75,7 @@ function getDriverAdapterError(meta: Record<string, unknown> | undefined) {
     return dae && typeof dae === "object" ? (dae as DriverAdapterErrorMeta) : undefined;
 }
 
-function getReadablePrismaError(error: unknown, employee: EmployeeFormValues) {
+function getReadablePrismaError(error: unknown, employee?: EmployeeFormValues) {
 
     const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
 
@@ -100,10 +100,10 @@ function getReadablePrismaError(error: unknown, employee: EmployeeFormValues) {
                 const dae = getDriverAdapterError(meta);
                 const errorFieldName = dae?.cause?.constraint?.fields?.[0];
 
-                if (errorFieldName === "employee_id") {
+                if (errorFieldName === "employee_id"  && employee?.employee_id) {
                     errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
                 } else {
-                    if (errorFieldName === "idir") {
+                    if (errorFieldName === "idir" && employee?.idir) {
                         errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
                     } else {
                         // fallback if we can't determine the exact field
@@ -185,6 +185,15 @@ export async function searchEmployeesAction(query?: string): Promise<Entity[]> {
     return employeesWithType
 }
 
-export async function deleteEmployeeAction(id: number) {
-    await deleteEmployee(id);
+export async function deleteEmployeeAction(id: number):Promise<EntityActionResult> {
+    try {
+        await deleteEmployee(id);
+
+        return {status: "ok"}
+    } catch (error) {
+        return {
+            status: "error",
+            error: getReadablePrismaError(error)
+        }
+    }
 }

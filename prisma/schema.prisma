@@ -25,6 +25,8 @@ model Employee {
   job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
 
   workspace Workspace?
+
+  ohs_accommodations EmployeeOhsAccommodation[]
 }
 
 model Branch {
@@ -64,6 +66,23 @@ model ProgramAreaJobTitle {
   job_title    JobTitle    @relation(fields: [job_title_id], references: [id])
 
   @@id([program_area_id, job_title_id])
+}
+
+model OhsAccommodationType {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  employee_ohs_accommodations EmployeeOhsAccommodation[]
+}
+
+model EmployeeOhsAccommodation {
+  employee_id               Int
+  ohs_accommodation_type_id Int
+
+  employee               Employee             @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+  ohs_accommodation_type OhsAccommodationType @relation(fields: [ohs_accommodation_type_id], references: [id])
+
+  @@id([employee_id, ohs_accommodation_type_id])
 }
 
 model Office {

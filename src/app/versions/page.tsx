@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.27",
+            notes: [
+                "Added Employee OHS Accommodations"
+            ]
+        },
+        {
             version: "v0.0.26",
             notes: [
                 "Added the long awaited scroll wheel to the employee modal",

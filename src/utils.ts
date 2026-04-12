@@ -13,6 +13,9 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     const officeNumber = formData.get("officeNumber") as string;
     const jobTitleId = formData.get("jobTitle");
     const workspaceNumber = formData.get("workspaceNumber") as string;
+    const ohsAccommodationTypeIds = formData
+        .getAll("ohsAccommodationTypeIds")
+        .map(value => Number(value));
     
     return {
         id: formData.get("id") ? Number(formData.get("id")) : undefined,
@@ -26,6 +29,7 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
         job_title_id: jobTitleId ? Number(jobTitleId) : null,
         notes: formData.get("notes") as string || null,
         ui_workspace_number: workspaceNumber !== "Unassigned" ? workspaceNumber : undefined,
+        ohs_accommodation_type_ids: ohsAccommodationTypeIds
     }
 }
 

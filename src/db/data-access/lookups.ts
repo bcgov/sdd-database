@@ -78,3 +78,12 @@ export async function getTypesOfClientServices() {
         }
     })
 }
+
+export async function getOhsAccommodationTypes() {
+    return prisma.ohsAccommodationType.findMany({
+        select: lookupOptionSelect,
+        orderBy: {
+            name: "asc"
+        }
+    })
+}
