@@ -1,4 +1,7 @@
-export function parseAssignedTo(assignedTo: string, rowNumber: number) {
+import {assertName} from "../validators/employees.validators";
+
+
+function parseAssignedTo(assignedTo: string, rowNumber: number) {
     const parts = assignedTo.split(",").map(part => part.trim())
 
     if (parts.length !== 2) {
@@ -37,4 +40,19 @@ export function parseAssignedTo(assignedTo: string, rowNumber: number) {
         alternateName: null,
         lastName,
     }
+}
+
+export function parseAndAssertAssignedTo(assignedTo: string, rowNumber: number) {
+
+    const parsedAssignedTo = parseAssignedTo(assignedTo, rowNumber)
+
+    assertName(parsedAssignedTo.firstName, "First Name", rowNumber)
+
+    assertName(parsedAssignedTo.lastName, "Last Name", rowNumber)
+
+    if (parsedAssignedTo.alternateName) {
+        assertName(parsedAssignedTo.alternateName, "Alternate Name", rowNumber)
+    }
+
+    return parsedAssignedTo
 }

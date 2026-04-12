@@ -1,5 +1,6 @@
 import {prisma} from "@/db/client";
 import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
+import {employeeWithRelationsArgs} from "@/db/data-access/shared";
 
 
 async function addNewEmployee(employee: EmployeeFormValues) {
@@ -8,6 +9,7 @@ async function addNewEmployee(employee: EmployeeFormValues) {
         id,
         ui_branch_id,
         ui_workspace_number,
+        ohs_accommodation_type_ids,
         ...employeeDbFields
     } = employee
 
@@ -25,17 +27,19 @@ export async function addNewEmployeeWithWorkspace(employee: EmployeeFormValues) 
         employee.ui_workspace_number
     )
 
+    await syncEmployeeOhsAccommodations(
+        createdEmployee.id,
+        employee.ohs_accommodation_type_ids
+    )
+
     return createdEmployee
 }
 
 export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
     if (!query)
         return prisma.employee.findMany({
-            include: {
-                program_area: true,
-                workspace: true
-            }
-        })    // hydrate ProgramArea
+            ...employeeWithRelationsArgs
+        })
 
     return prisma.employee.findMany({
         where: {
@@ -52,12 +56,18 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                 {program_area: {name: {contains: query, mode: 'insensitive'}}},
                 {job_title: {name: {contains: query, mode: 'insensitive'}}},
                 {notes: {contains: query, mode: 'insensitive'}},
+                {
+                    ohs_accommodations: {
+                        some: {
+                            ohs_accommodation_type: {
+                                name: {contains: query, mode: 'insensitive'}
+                            }
+                        }
+                    }
+                }
             ]
         },
-        include: {
-            program_area: true,
-            workspace: true
-        }
+        ...employeeWithRelationsArgs
     })
 }
 
@@ -87,9 +97,10 @@ async function updateEmployee(employee: EmployeeFormValues) {
         id,
         employee_id,
         idir,
-        // we extract ui_branch_id and ui_workspace_number to ignore them
+        // we extract the following to ignore them
         ui_branch_id,
         ui_workspace_number,
+        ohs_accommodation_type_ids,
         ...rest
     } = employee
 
@@ -113,6 +124,11 @@ export async function updateEmployeeWithWorkspace(employee: EmployeeFormValues) 
         updatedEmployee.id,
         employee.office_number,
         employee.ui_workspace_number
+    )
+
+    await syncEmployeeOhsAccommodations(
+        updatedEmployee.id,
+        employee.ohs_accommodation_type_ids
     )
 
     return updatedEmployee
@@ -148,6 +164,35 @@ async function syncEmployeeWorkspace(
                 }
             })
         }
+    })
+}
+
+/**
+ * Replace all OHS accommodation join rows for the given employee with the currently selected accommodation type ids.
+ * @param employeeId
+ * @param ohsAccommodationTypeIds
+ */
+async function syncEmployeeOhsAccommodations(
+    employeeId: number,
+    ohsAccommodationTypeIds: number[],
+) {
+
+    // This removes all existing OHS rows for that employee.
+    await prisma.employeeOhsAccommodation.deleteMany({
+        where: {
+            employee_id: employeeId,
+        }
+    })
+
+    // if user selected nothing, stop
+    if (ohsAccommodationTypeIds.length === 0) return
+
+    // recreate selected rows
+    await prisma.employeeOhsAccommodation.createMany({
+        data: ohsAccommodationTypeIds.map(ohsAccommodationTypeId => ({
+            employee_id: employeeId,
+            ohs_accommodation_type_id: ohsAccommodationTypeId,
+        }))
     })
 }
 

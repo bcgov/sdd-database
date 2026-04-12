@@ -1,42 +1,22 @@
-import {useEffect, useState} from "react";
+import {useCallback} from "react";
 
-import {fetchProgramAreasByBranch} from "@/actions/lookups/programAreas";
+import {fetchProgramAreasByBranchAction} from "@/actions/lookups/programAreas";
 
-import {LookupOption} from "@/types";
+import {useDependentLookup} from "@/hooks/lookups/useDependentLookup";
 
 
 export function useProgramAreas(branchId?: number) {
 
-    const [programAreas, setProgramAreas] = useState<LookupOption[] | null>(null);
+    const fetcher = useCallback(
+        (id: number) => fetchProgramAreasByBranchAction(id),
+        []
+    )
 
-    useEffect(() => {
+    const {data} = useDependentLookup(
+        branchId,
+        fetcher,
+        "program areas"
+    )
 
-        let isAlive = true;
-
-        (async () => {
-            // No branch selected yet -> clear options
-            if (branchId == null) { // loose inequality to cover both undefined as well as null
-                if(isAlive) setProgramAreas(null);
-                return;
-            }
-
-            try {
-                const data = await fetchProgramAreasByBranch(branchId);
-
-                if (!isAlive) return;
-
-                setProgramAreas(data);
-            } catch (e) {
-                console.error("Failed to fetch programAreas: ", e);
-                if (isAlive) setProgramAreas(null);
-            }
-        })()
-
-        return () => {
-            isAlive = false;
-        }
-
-    }, [branchId]);
-
-    return { programAreas };
+    return { programAreas: data };
 }

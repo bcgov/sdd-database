@@ -1,5 +1,5 @@
 import type {Prisma, Office, Workstation} from "@/generated/prisma/client";
-import {workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
+import {employeeWithRelationsArgs, workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
 
 
 export type LookupOption = {
@@ -25,15 +25,12 @@ export type EmployeeFormValues = {
 
     // UI-only workspace draft state
     ui_workspace_number?: string;
+
+    ohs_accommodation_type_ids: number[];
 }
 
-// employee returned from DB search results with hydrated program area and workspace
-export type EmployeeSearchResult = Prisma.EmployeeGetPayload<{
-    include: {
-        program_area: true,
-        workspace: true
-    }
-}>
+// employee returned from DB search results with hydrated program area, workspace and ohs accommodations
+export type EmployeeSearchResult = Prisma.EmployeeGetPayload<typeof employeeWithRelationsArgs>
 
 export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceWithAssignedEmployeeArgs>
 

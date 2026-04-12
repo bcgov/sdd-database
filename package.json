@@ -1,6 +1,6 @@
 {
   "name": "sdd-database",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -23,17 +23,17 @@
     "generate:test": "npx dotenv -e .env.test.local -- npx prisma generate"
   },
   "dependencies": {
-    "@bcgov/design-system-react-components": "^0.6.1",
+    "@bcgov/design-system-react-components": "^0.7.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.0.0",
     "@mui/material": "^9.0.0",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
-    "next": "16.2.2",
+    "next": "16.2.3",
     "pg": "^8.20.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
@@ -44,7 +44,7 @@
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
     "eslint": "^10",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "16.2.3",
     "exceljs": "^4.4.0",
     "postcss": "^8",
     "prisma": "^7.7.0",

@@ -361,13 +361,26 @@ export function useEntityActions({
         setIsDeleteAlertDialogOpen(false)
         setIsEditModalOpen(false)
 
-        if (selectedSearchResult?.type === "employee") {
-            addSuccessAlert(`Employee '${getEmployeeFullName(selectedSearchResult)}' deleted!`)
-        }
+        const employeeName = selectedSearchResult?.type === "employee"
+            ? getEmployeeFullName(selectedSearchResult)
+            : undefined
 
-        // Server mutation
         try {
-            await deleteEmployeeAction(id);
+            const result = await deleteEmployeeAction(id)
+
+            if (result.status === "ok") {
+                addSuccessAlert(employeeName
+                    ? `Employee '${employeeName}' deleted!`
+                    : `Employee deleted!`
+                )
+            } else {
+                if (result.status === "error") {
+                    addErrorAlert(
+                        "Error: Could not delete employee",
+                        result.error,
+                    )
+                }
+            }
         } finally {
             // always re-sync with DB
             refreshSearchResults()

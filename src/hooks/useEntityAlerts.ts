@@ -12,7 +12,7 @@ export function useEntityAlerts() {
 
     const addSuccessAlert = useCallback((description: string) => {
 
-        const ALERT_TIMEOUT = 6500;
+        const ALERT_TIMEOUT = 8500;
 
         setAlert({
             variant: "success",

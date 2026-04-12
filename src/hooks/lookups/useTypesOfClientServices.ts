@@ -1,36 +1,15 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 
-import {fetchTypesOfClientServices} from "@/actions/lookups/typesOfClientServices";
+import {fetchTypesOfClientServicesAction} from "@/actions/lookups/typesOfClientServices";
 
-import {LookupOption} from "@/types";
+import {useLookup} from "@/hooks/lookups/useLookup";
 
 
 export function useTypesOfClientServices() {
 
-    const [typesOfClientServices, setTypesOfClientServices] = useState<LookupOption[] | null>(null);
+    const fetcher = useCallback(() => fetchTypesOfClientServicesAction(), []);
 
-    useEffect(() => {
+    const {data} = useLookup(fetcher, "types of client services")
 
-        let isAlive = true; // to check if component is mounted
-
-        (async () => {
-            
-            try {
-                const data = await fetchTypesOfClientServices();
-
-                if (!isAlive) return;   // do not modify state if component is unmounted
-
-                setTypesOfClientServices(data);
-            } catch (e) {
-                console.error("Failed to fetch office types: ", e);
-            }
-        })()
-
-        return () => {
-            isAlive = false;
-        }
-
-    }, []);
-
-    return { typesOfClientServices }
+    return { typesOfClientServices: data }
 }

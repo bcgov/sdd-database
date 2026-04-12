@@ -5,6 +5,6 @@ import {getBranches} from "@/db/data-access/lookups";
 import {LookupOption} from "@/types";
 
 
-export async function fetchBranches(): Promise<LookupOption[]> {
+export async function fetchBranchesAction(): Promise<LookupOption[]> {
     return getBranches();
 }

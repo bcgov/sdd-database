@@ -1,15 +1,17 @@
 import {pool, prisma} from "@/db/prisma"
 
 import {seedOffices} from "./entities/seedOffices"
-import {seedBranches} from "./entities/seedBranches"
-import {seedProgramAreas} from "./entities/seedProgramAreas";
-import {seedOfficeTypes} from "./entities/seedOfficeTypes";
-import {seedTypesOfClientServices} from "./entities/seedTypesOfClientServices";
+import {seedBranches} from "./lookups/seedBranches"
+import {seedProgramAreas} from "./lookups/seedProgramAreas";
+import {seedOfficeTypes} from "./lookups/seedOfficeTypes";
+import {seedTypesOfClientServices} from "./lookups/seedTypesOfClientServices";
 import {seedEmployees} from "./entities/seedEmployees";
 import {seedWorkspaces} from "./entities/seedWorkspaces";
-import {seedJobTitles} from "./entities/seedJobTitles";
-import {seedProgramAreaJobTitles} from "./entities/seedProgramAreaJobTitles";
-import {seedWorkspaceCategories} from "./entities/seedWorkspaceCategories";
+import {seedJobTitles} from "./lookups/seedJobTitles";
+import {seedProgramAreaJobTitles} from "./lookups/seedProgramAreaJobTitles";
+import {seedWorkspaceCategories} from "./lookups/seedWorkspaceCategories";
+import {seedOhsAccommodationTypes} from "./lookups/seedOhsAccommodationTypes";
+import {seedEmployeeOhsAccommodations} from "./entities/seedEmployeeOhsAccommodations";
 
 
 async function clearSeedTables() {
@@ -17,7 +19,9 @@ async function clearSeedTables() {
 
     await prisma.workspace.deleteMany()
     await prisma.workspaceCategory.deleteMany()
+    await prisma.employeeOhsAccommodation.deleteMany()
     await prisma.employee.deleteMany()
+    await prisma.ohsAccommodationType.deleteMany()
     await prisma.programAreaJobTitle.deleteMany()
     await prisma.jobTitle.deleteMany()
     await prisma.programArea.deleteMany()
@@ -49,8 +53,14 @@ async function seedTables() {
     console.log("➡️ Seeding program area job titles...");
     await seedProgramAreaJobTitles(prisma);
 
+    console.log("➡️ Seeding OHS accommodation types...");
+    await seedOhsAccommodationTypes(prisma);
+
     console.log("➡️ Seeding employees...");
     await seedEmployees(prisma);
+
+    console.log("➡️ Seeding employee OHS accommodations...");
+    await seedEmployeeOhsAccommodations(prisma);
 
     console.log("➡️ Seeding workspace categories...");
     await seedWorkspaceCategories(prisma);

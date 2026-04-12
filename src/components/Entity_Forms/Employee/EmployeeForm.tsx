@@ -17,6 +17,7 @@ import {WorkspaceSection} from "@/components/Entity_Forms/Employee/WorkspaceSect
 import {OfficeSection} from "@/components/Entity_Forms/Employee/OfficeSection";
 import {EmployeeSection} from "@/components/Entity_Forms/Employee/EmployeeSection";
 import {useEmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
+import {OhsAccommodationsSection} from "@/components/Entity_Forms/Employee/OhsAccommodationsSection";
 
 
 interface EmployeeFormProps {
@@ -136,6 +137,10 @@ export function EmployeeForm({
                         handleAssignWorkspace={(e) => handleAssign("workspace", e)}
                         handleRemoveWorkspace={handleRemoveWorkspace}>
                     </WorkspaceSection>
+
+                    <OhsAccommodationsSection ohsAccommodationTypes={employeeLookupState.ohsAccommodationTypes}
+                                              selectedOhsAccommodationTypeIds={employeeLookupState.selectedOhsAccommodationTypeIds}>
+                    </OhsAccommodationsSection>
                 </AccordionGroup>
             </div>
 

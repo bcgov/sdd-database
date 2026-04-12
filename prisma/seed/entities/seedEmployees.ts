@@ -7,7 +7,6 @@ import ExcelJS from "exceljs";
 import {getCellString, getRequiredHeaderToCol, getRowValues, loadWorksheetFromFile} from "../shared/excel";
 import {
     assertEmployeeId,
-    assertName,
     assertIdir,
     assertBranch,
     assertProgramArea, assertJobTitle
@@ -19,9 +18,10 @@ import {
 } from "../validators/common.validators";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
-import {parseAssignedTo} from "../shared/parsers";
+import {parseAndAssertAssignedTo} from "../shared/parsers";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {normalizeJobTitleName, normalizeProgramAreaName} from "../normalizers/employees.normalizers";
+import {isNotAnEmployeeRow} from "../shared/employees";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -59,14 +59,6 @@ const EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS = [
     "EMPLID",
     "IDIR",
 ] as const
-
-const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
-    "Free Address",
-    "HOLD",
-    "PUBLIC JobBank Kiosk",
-    "REDEPLOY",
-    "Vacant",
-] as const)
 
 type ParsedEmployeeRow = {
     office_number: string
@@ -144,10 +136,10 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
         // skip rows that are effectively empty for employee seeding
-        if (isEffectivelyEmptyEmployeeRow(row, computersAndLaptopsHeaderToCol)) continue
+        if (isEffectivelyEmptyRow(row, computersAndLaptopsHeaderToCol)) continue
 
         // skip non employee rows
-        if (isNotAnEmployee(row, computersAndLaptopsHeaderToCol)) continue
+        if (isNotAnEmployeeRow(row, computersAndLaptopsHeaderToCol, "Assigned To")) continue
 
         const rawIdir = getCellString(row, computersAndLaptopsHeaderToCol, "IDIR")
 
@@ -245,7 +237,7 @@ function buildRowsByRealIdir(
 
         if (!row.hasValues) continue
 
-        if (isNotAnEmployee(row, headerToCol)) continue
+        if (isNotAnEmployeeRow(row, headerToCol, "Assigned To")) continue
 
         const rawIdir = getCellString(row, headerToCol, "IDIR")
 
@@ -339,7 +331,7 @@ function buildAllowedProgramAreaJobTitlePairs(
     return lookup
 }
 
-function isEffectivelyEmptyEmployeeRow(
+function isEffectivelyEmptyRow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
 ) {
@@ -351,7 +343,7 @@ function isEffectivelyEmptyEmployeeRow(
     const rawProgramArea = getCellString(row, headerToCol, "Program Area")
     const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
 
-    return (
+    const isEmpty =
         !rawOfficeNumber &&
         !rawAssignedTo &&
         !rawStatus &&
@@ -359,16 +351,12 @@ function isEffectivelyEmptyEmployeeRow(
         !rawProgramArea &&
         !rawJobTitle &&
         !rawIdir
-    )
-}
 
-function isNotAnEmployee(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>) {
+    if (isEmpty) {
+        console.error(`Empty row found at row ${row.number}`)
+    }
 
-    const assignedTo = getCellString(row, headerToCol, "Assigned To")
-
-    return NON_EMPLOYEE_ASSIGNED_TO_VALUES.has(assignedTo)
+    return isEmpty
 }
 
 function parseEmployeeRow(
@@ -405,14 +393,7 @@ function parseEmployeeRow(
 
     // first name, last name
     const assignedTo = getCellString(row, headerToCol, "Assigned To")
-    const parsedAssignedTo = parseAssignedTo(assignedTo, rowNumber)
-
-    assertName(parsedAssignedTo.firstName, "First Name", rowNumber)
-    assertName(parsedAssignedTo.lastName, "Last Name", rowNumber)
-
-    if (parsedAssignedTo.alternateName) {
-        assertName(parsedAssignedTo.alternateName, "Alternate Name", rowNumber)
-    }
+    const fullName = parseAndAssertAssignedTo(assignedTo, rowNumber)
 
     // program area
     const branchName = getCellString(row, headerToCol, "Branch")
@@ -453,9 +434,9 @@ function parseEmployeeRow(
     return {
         office_number: officeNumber,
         idir,
-        first_name: parsedAssignedTo.firstName,
-        alternate_name: parsedAssignedTo.alternateName,
-        last_name: parsedAssignedTo.lastName,
+        first_name: fullName.firstName,
+        alternate_name: fullName.alternateName,
+        last_name: fullName.lastName,
         employee_id: employeeId,
         program_area_id: programAreaId,
         job_title_id: jobTitleId,
