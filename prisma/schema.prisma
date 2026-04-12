@@ -119,6 +119,7 @@ model Workspace {
   office_number    String  @db.VarChar(3)
   workspace_number String  @db.VarChar(4)
   category_id      Int
+  desk_type_id     Int
   notes            String? @db.VarChar(2000)
 
   // makes non-null employee IDs unique to ensure one employee cannot occupy multiple workspaces
@@ -128,6 +129,7 @@ model Workspace {
   is_on_hold Boolean @default(false)
 
   category          WorkspaceCategory @relation(fields: [category_id], references: [id])
+  desk_type         DeskType          @relation(fields: [desk_type_id], references: [id])
   assigned_office   Office            @relation(fields: [office_number], references: [office_number])
   assigned_employee Employee?         @relation(fields: [employee_id], references: [id])
 
@@ -135,6 +137,13 @@ model Workspace {
 }
 
 model WorkspaceCategory {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  workspaces Workspace[]
+}
+
+model DeskType {
   id   Int    @id @default(autoincrement())
   name String @unique @db.Citext
 

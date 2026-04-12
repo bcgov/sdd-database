@@ -12,12 +12,14 @@ import {seedProgramAreaJobTitles} from "./lookups/seedProgramAreaJobTitles";
 import {seedWorkspaceCategories} from "./lookups/seedWorkspaceCategories";
 import {seedOhsAccommodationTypes} from "./lookups/seedOhsAccommodationTypes";
 import {seedEmployeeOhsAccommodations} from "./entities/seedEmployeeOhsAccommodations";
+import {seedDeskTypes} from "./lookups/seedDeskTypes";
 
 
 async function clearSeedTables() {
     console.log("🧹 Clearing existing seed data...");
 
     await prisma.workspace.deleteMany()
+    await prisma.deskType.deleteMany()
     await prisma.workspaceCategory.deleteMany()
     await prisma.employeeOhsAccommodation.deleteMany()
     await prisma.employee.deleteMany()
@@ -64,6 +66,9 @@ async function seedTables() {
 
     console.log("➡️ Seeding workspace categories...");
     await seedWorkspaceCategories(prisma);
+
+    console.log("➡️ Seeding desk types...");
+    await seedDeskTypes(prisma);
 
     console.log("➡️ Seeding workspaces...")
     await seedWorkspaces(prisma);
