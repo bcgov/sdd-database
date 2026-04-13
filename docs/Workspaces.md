@@ -137,6 +137,21 @@ CIS employees could be working out of a society or centre.
 
 ---
 
+### Office Floor
+
+Note the workspace number is related to the office floor. The workspace number starts with the floor in which the workspace is
+
+Many offices are ground level which equates to 100, 101 etc.
+
+Office Floors range from first to eighth, eighteen and nineteen.
+If there is no office floor listed, the ministry only occupies one floor in the building.
+
+JJ updated the Database drop down to now include Floors 1 thru 20th. This will accommodate all buildings we have in the Database for the offices, including OFF 200 Vancouver. 
+The drop down includes 20 floors as this will accommodate any potential future moves or changes.
+
+The only exception is OFF 350 as the 4th Floor has workspaces that exceed 100. Workspaces 500 to 530 still populate as the 4th Floor.
+
+
 ### Workspace Category
 
 **POC**

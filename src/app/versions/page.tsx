@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.28",
             notes: [
-                "Added desk type"
+                "Added Desk Type",
+                "Added Office Floor"
             ]
         },
         {
