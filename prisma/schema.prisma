@@ -120,6 +120,7 @@ model Workspace {
   workspace_number String  @db.VarChar(4)
   category_id      Int
   desk_type_id     Int
+  office_floor     Int
   notes            String? @db.VarChar(2000)
 
   // makes non-null employee IDs unique to ensure one employee cannot occupy multiple workspaces

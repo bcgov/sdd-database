@@ -5,7 +5,11 @@ import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 import {assertNoDuplicates} from "../shared/assertions";
 import {assertOfficeNumber} from "../validators/offices.validators";
-import {assertWorkspaceNumber} from "../validators/workspace.validators";
+import {
+    assertWorkspaceNumber,
+    assertWorkspaceNumberMatchesOfficeFloor,
+    parseAndAssertOfficeFloor
+} from "../validators/workspace.validators";
 import {normalizeCategoryName, normalizeDeskTypeName} from "../normalizers/workspaces.normalizers";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
@@ -29,6 +33,7 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "Status",
     "Workspace Number",
     "Workspace Type",
+    "OfficeFloor",
     "Workspace Category",
     "DeskType"
 ] as const
@@ -51,6 +56,7 @@ type ParsedWorkspaceRow = {
     workspace_number: string
     category_id: number
     desk_type_id: number
+    office_floor: number
     employee_id: number | null
     is_on_hold: boolean
     notes: string | null
@@ -152,12 +158,14 @@ function isNotAWorkspaceRow(
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
     const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
+    const rawOfficeFloor = getCellString(row, headerToCol, "OfficeFloor")
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawDeskType = getCellString(row, headerToCol, "DeskType")
 
     return (
         !rawWorkspaceNumber &&
         !rawWorkspaceType &&
+        !rawOfficeFloor &&
         !rawCategory &&
         !rawDeskType &&
         rawAssignedTo !== "HOLD"
@@ -192,6 +200,15 @@ function parseWorkspaceRow(
     const deskType = normalizeDeskTypeName(rawDeskType)
     const deskTypeId = assertLookupValue(deskType, "Desk Type", rowNumber, deskTypeLookup)
 
+    // office floor
+    const rawOfficeFloor = getCellString(row, headerToCol, "OfficeFloor")
+    const officeFloor = parseAndAssertOfficeFloor(rawOfficeFloor, rowNumber)
+    assertWorkspaceNumberMatchesOfficeFloor(
+        rawWorkspaceNumber,
+        officeFloor,
+        rawOfficeNumber,
+        rowNumber,
+    )
 
     // is_on_hold
     const assignedToHeader = "Assigned To"
@@ -227,6 +244,7 @@ function parseWorkspaceRow(
         workspace_number: rawWorkspaceNumber,
         category_id: categoryId,
         desk_type_id: deskTypeId,
+        office_floor: officeFloor,
         employee_id: employeeId,
         is_on_hold: isOnHold,
         notes

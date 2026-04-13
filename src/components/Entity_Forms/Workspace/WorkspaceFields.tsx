@@ -18,6 +18,17 @@ interface WorkspaceFieldsProps {
     onRemoveHold: () => void;
 }
 
+function formatOfficeFloor(officeFloor: number) {
+    const mod10 = officeFloor % 10
+    const mod100 = officeFloor % 100
+
+    if (mod10 === 1 && mod100 !== 11) return `${officeFloor}st Floor`
+    if (mod10 === 2 && mod100 !== 22) return `${officeFloor}nd Floor`
+    if (mod10 === 3 && mod100 !== 33) return `${officeFloor}rd Floor`
+
+    return `${officeFloor}th Floor`
+}
+
 export function WorkspaceFields({
                                     workspace,
                                     onHold,
@@ -59,6 +70,11 @@ export function WorkspaceFields({
                                defaultValue={workspace.office_number}>
                     </TextField>
 
+                    <TextField label="Office Floor"
+                               isReadOnly
+                               defaultValue={formatOfficeFloor(workspace.office_floor)}>
+                    </TextField>
+
                     <Select label="Category"
                             items={[
                                 {
@@ -94,20 +110,20 @@ export function WorkspaceFields({
                             <ToggleButton id="occupied">Occupied</ToggleButton>
                         </ToggleButtonGroup>
 
-                            {canHold &&
-                                <Button onPress={onHold}
-                                        style={{marginTop: "0.5rem"}}
-                                >
-                                    Hold Workspace
-                                </Button>
-                            }
+                        {canHold &&
+                            <Button onPress={onHold}
+                                    style={{marginTop: "0.5rem"}}
+                            >
+                                Hold Workspace
+                            </Button>
+                        }
 
-                            {canRemoveHold &&
-                                <Button onPress={onRemoveHold}
-                                        style={{marginTop: "0.5rem"}}
-                                >
-                                    Remove Hold
-                                </Button>}
+                        {canRemoveHold &&
+                            <Button onPress={onRemoveHold}
+                                    style={{marginTop: "0.5rem"}}
+                            >
+                                Remove Hold
+                            </Button>}
                     </div>
 
                     {hasNotes &&
