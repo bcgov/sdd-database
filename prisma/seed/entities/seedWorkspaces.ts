@@ -44,7 +44,7 @@ const WORKSPACE_ONLY_ASSIGNED_TO_VALUES = new Set<string>([
     "Free Address"
 ])
 
-const NON_WORKSPACE_VALUES = new Set<string>([
+const IGNORE_WORKSPACE_VALUES = new Set<string>([
     "Float",
     "Mobile",
     "Offsite",
@@ -148,7 +148,7 @@ function ignoreForNow(
         rawWorkspaceType === "Kiosk" ||
         rawCategory === "Waiting Room"
 
-    return NON_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
+    return IGNORE_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
 }
 
 function isNotAWorkspaceRow(
