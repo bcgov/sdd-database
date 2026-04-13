@@ -4,17 +4,28 @@ export function assertNoDuplicates<T, K extends string | number>(
         getKey: (row: T) => K
         label: string
         shouldSkip?: (row: T) => boolean
+        caseInsensitive?: boolean
     }
 ) {
-    const {getKey, label, shouldSkip} = options
+    const {
+        getKey,
+        label,
+        shouldSkip,
+        caseInsensitive = false
+    } = options
 
-    const seen = new Map<K, T>()
+    const seen = new Map<string | number, T>()
     const duplicates: T[] = []
 
     for (const row of rows) {
         if (shouldSkip?.(row)) continue
 
-        const key = getKey(row)
+        const rawKey = getKey(row)
+
+        const key =
+            typeof rawKey === 'string' && caseInsensitive
+        ? rawKey.toLowerCase()
+                : rawKey
 
         if(seen.has(key)) {
             duplicates.push(row)

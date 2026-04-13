@@ -10,7 +10,8 @@ export async function getWorkspacesByFilter(query?: string) {
             OR: [
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {workspace_number: {contains: query, mode: 'insensitive'}},
-                {category: {name: {contains: query, mode: 'insensitive'}}}
+                {category: {name: {contains: query, mode: 'insensitive'}}},
+                {desk_type: {name: {contains: query, mode: 'insensitive'}}}
             ]
         }
         : {}

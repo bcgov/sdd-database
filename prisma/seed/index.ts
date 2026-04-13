@@ -13,11 +13,13 @@ import {seedWorkspaceCategories} from "./lookups/seedWorkspaceCategories";
 import {seedOhsAccommodationTypes} from "./lookups/seedOhsAccommodationTypes";
 import {seedEmployeeOhsAccommodations} from "./entities/seedEmployeeOhsAccommodations";
 import {seedDeskTypes} from "./lookups/seedDeskTypes";
+import {seedWorkstations} from "./entities/seedWorkstations";
 
 
 async function clearSeedTables() {
     console.log("🧹 Clearing existing seed data...");
 
+    await prisma.workstation.deleteMany();
     await prisma.workspace.deleteMany()
     await prisma.deskType.deleteMany()
     await prisma.workspaceCategory.deleteMany()
@@ -72,6 +74,9 @@ async function seedTables() {
 
     console.log("➡️ Seeding workspaces...")
     await seedWorkspaces(prisma);
+
+    console.log("➡️ Seeding workstations...");
+    await seedWorkstations(prisma);
 }
 
 async function main() {
