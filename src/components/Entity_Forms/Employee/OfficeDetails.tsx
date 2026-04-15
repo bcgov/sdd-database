@@ -1,19 +1,19 @@
 import {PressEvent} from "@react-types/shared";
 import {Accordion, Button, Callout, TextField} from "@bcgov/design-system-react-components";
 
-interface OfficeSectionProps {
+interface OfficeDetailsProps {
     officeNumber: string | undefined
     hasOfficeAssignment: boolean
     isEditMode: boolean
     handleAssignOffice: (e: PressEvent) => Promise<void>
 }
 
-export function OfficeSection({
+export function OfficeDetails({
     officeNumber,
     hasOfficeAssignment,
     isEditMode,
     handleAssignOffice
-}: OfficeSectionProps) {
+}: OfficeDetailsProps) {
     return (
         <Accordion label="Office Details" id="officeDetails">
             <div>
