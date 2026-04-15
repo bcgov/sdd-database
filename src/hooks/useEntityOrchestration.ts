@@ -21,9 +21,12 @@ export function useEntityOrchestration() {
     const {
         selectedFilterTags,
         setSelectedFilterTags,
+
         assignMode,
         setAssignMode,
-        setAssignOfficeNumber,
+        setAssignEmployeeOfficeNumber,
+        setAssignEmployeeProgramAreaId,
+
         optimisticSearchResults,
         setOptimisticSearchResults,
         userHasSearchedOnce,
@@ -53,7 +56,8 @@ export function useEntityOrchestration() {
         setSelectedFilterTags,
 
         setAssignMode,
-        setAssignOfficeNumber,
+        setAssignEmployeeOfficeNumber,
+        setAssignEmployeeProgramAreaId,
 
         setOptimisticSearchResults,
         runSearch,

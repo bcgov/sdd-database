@@ -98,7 +98,7 @@ export function EmployeeSection({
                         ))}
                         selectedKey={selectedBranchId}
                         onSelectionChange={(key) =>
-                            handleBranchSelectionChange(key == null ? undefined : Number(key))
+                            handleBranchSelectionChange(key == null ? null : Number(key))
                         }
                         placeholder="Select a Branch"
                 >
@@ -116,7 +116,7 @@ export function EmployeeSection({
                         ))}
                         selectedKey={selectedProgramAreaId}
                         onSelectionChange={(key) =>
-                            handleProgramAreaSelectionChange(key == null ? undefined : Number(key))}
+                            handleProgramAreaSelectionChange(key == null ? null : Number(key))}
                         placeholder="Select a Program Area"
                 >
                 </Select>
@@ -133,7 +133,7 @@ export function EmployeeSection({
                         ))}
                         selectedKey={selectedJobTitleId}
                         onSelectionChange={(key) =>
-                            setSelectedJobTitleId(key == null ? undefined : Number(key))}
+                            setSelectedJobTitleId(key == null ? null : Number(key))}
                         placeholder="Select a Job Title">
                 </Select>
 

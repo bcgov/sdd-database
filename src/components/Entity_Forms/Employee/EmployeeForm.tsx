@@ -1,4 +1,4 @@
-import {useActionState, useEffect, useState} from "react";
+import {useActionState, useEffect, useRef} from "react";
 
 import {PressEvent} from "@react-types/shared";
 
@@ -51,6 +51,11 @@ export function EmployeeForm({
 
     const employeeLookupState = useEmployeeLookupState(employee);
 
+    const previousBranchIdRef = useRef<number | null>(employeeLookupState.selectedBranchId)
+    const previousProgramAreaIdRef = useRef<number | null>(employeeLookupState.selectedProgramAreaId)
+
+    const hasProgramAreaAssignment = !!employeeLookupState.selectedProgramAreaId
+
     const hasOfficeAssignment = !!employee?.office_number
     const officeNumber = employee?.office_number ?? "Unassigned"
 
@@ -65,6 +70,11 @@ export function EmployeeForm({
     const workspaceNumber = uiWorkspaceNumber ?? workspace?.workspace_number ?? "Unassigned"
 
     const hasWorkspaceAssignment = !!(uiWorkspaceNumber || workspace?.workspace_number)
+
+    const selectedWorkspaceRestrictedProgramAreaId =
+        employee && "ui_workspace_restricted_program_area_id" in employee
+            ? employee.ui_workspace_restricted_program_area_id
+            : workspace?.restricted_program_area_id
 
     useEffect(() => {
 
@@ -83,6 +93,44 @@ export function EmployeeForm({
         }
 
     }, [result, onError, onSuccess]);
+
+    useEffect(() => {
+        const previousBranchId = previousBranchIdRef.current
+        const previousProgramAreaId = previousProgramAreaIdRef.current
+
+        const currentBranchId = employeeLookupState.selectedBranchId
+        const currentProgramAreaId = employeeLookupState.selectedProgramAreaId
+
+        const branchChanged = previousBranchId !== currentBranchId
+        const programAreaChanged = previousProgramAreaId !== currentProgramAreaId
+
+        if (hasWorkspaceAssignment) {
+            if (branchChanged) {
+                handleRemoveWorkspace()
+            } else {
+                if (programAreaChanged) {
+                    const workspaceStillEligible =
+                        // workspace is unrestricted (matches both null and undefined)
+                        selectedWorkspaceRestrictedProgramAreaId == null ||
+                        // workspace is restricted, but to the employee’s new program area
+                        selectedWorkspaceRestrictedProgramAreaId === currentProgramAreaId
+
+                    if (!workspaceStillEligible) {
+                        handleRemoveWorkspace()
+                    }
+                }
+            }
+        }
+
+        previousBranchIdRef.current = currentBranchId;
+        previousProgramAreaIdRef.current = currentProgramAreaId;
+    }, [
+        employeeLookupState.selectedBranchId,
+        employeeLookupState.selectedProgramAreaId,
+        hasWorkspaceAssignment,
+        selectedWorkspaceRestrictedProgramAreaId,
+        handleRemoveWorkspace
+    ])
 
     const handleAssign = async (mode: AssignMode, e: PressEvent) => {
         const formElement = e.target.closest("form")
@@ -132,6 +180,7 @@ export function EmployeeForm({
 
                     <WorkspaceSection
                         workspaceNumber={workspaceNumber}
+                        hasProgramAreaAssignment={hasProgramAreaAssignment}
                         hasOfficeAssignment={hasOfficeAssignment}
                         hasWorkspaceAssignment={hasWorkspaceAssignment}
                         handleAssignWorkspace={(e) => handleAssign("workspace", e)}

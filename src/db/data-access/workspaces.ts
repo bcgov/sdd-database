@@ -22,7 +22,24 @@ export async function getWorkspacesByFilter(query?: string) {
     })
 }
 
-export async function getAssignableWorkspacesByFilter(officeNumber: string, query?: string) {
+export async function getWorkspaceByOfficeAndWorkspaceNumber(
+    officeNumber: string,
+    workspaceNumber: string,
+) {
+    return prisma.workspace.findUnique({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber,
+            }
+        }
+    })
+}
+
+export async function getAssignableWorkspacesByFilter(
+    employeeOfficeNumber: string,
+    employeeProgramAreaId: number,
+    query?: string) {
 
     const searchFilter: Prisma.WorkspaceWhereInput = query
         ? {
@@ -35,9 +52,13 @@ export async function getAssignableWorkspacesByFilter(officeNumber: string, quer
 
     return prisma.workspace.findMany({
         where: {
-            office_number: officeNumber,
+            office_number: employeeOfficeNumber,
             employee_id: null,
             is_on_hold: false,
+            OR: [
+                {restricted_program_area_id: null},
+                {restricted_program_area_id: employeeProgramAreaId},
+            ],
             ...searchFilter
         },
         orderBy: {
@@ -53,14 +74,10 @@ export async function hold(
     officeNumber: string,
     workspaceNumber: string,
 ) {
-    const workspace = await prisma.workspace.findUnique({
-        where: {
-            office_number_workspace_number: {
-                office_number: officeNumber,
-                workspace_number: workspaceNumber
-            }
-        }
-    })
+    const workspace = await getWorkspaceByOfficeAndWorkspaceNumber(
+        officeNumber,
+        workspaceNumber,
+    )
 
     if (!workspace) {
         throw new Error("Workspace not found");
@@ -91,14 +108,10 @@ export async function removeHold(
     officeNumber: string,
     workspaceNumber: string,
 ) {
-    const workspace = await prisma.workspace.findUnique({
-        where: {
-            office_number_workspace_number: {
-                office_number: officeNumber,
-                workspace_number: workspaceNumber
-            }
-        }
-    })
+    const workspace = await getWorkspaceByOfficeAndWorkspaceNumber(
+        officeNumber,
+        workspaceNumber,
+    )
 
     if (!workspace) {
         throw new Error("Workspace not found");

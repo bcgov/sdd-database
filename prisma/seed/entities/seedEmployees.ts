@@ -19,8 +19,9 @@ import {
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
 import {parseAndAssertAssignedTo} from "../shared/parsers";
-import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
-import {normalizeJobTitleName, normalizeProgramAreaName} from "../normalizers/employees.normalizers";
+import {buildIdLookupByName, buildProgramAreaLookup, idNameSelect} from "../shared/lookups";
+import {normalizeJobTitleName} from "../normalizers/employees.normalizers";
+import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
 import {isNotAnEmployeeRow} from "../shared/employees";
 
 
@@ -290,32 +291,6 @@ function buildEmployeeIdLookup(
     return lookup
 }
 
-/** Pulls all existing ProgramArea rows from DB and builds a lookup map like:
- * "Community Services::Area A Staff" -> 7
- *
- * That allows your Excel text fields:
- *  •	Branch
- *  •	Program Area
- *  to be converted into the foreign key:
- *  program_area_id
- */
-function buildProgramAreaLookup(
-    rows: Array<{
-        id: number
-        name: string
-        branch: { name: string }
-    }>
-) {
-    const lookup = new Map<string, number>()
-
-    for (const row of rows) {
-        const key = `${row.branch.name}::${row.name}`
-        lookup.set(key, row.id)
-    }
-
-    return lookup
-}
-
 function buildAllowedProgramAreaJobTitlePairs(
     rows: Array<{
         program_area_id: number
@@ -396,19 +371,10 @@ function parseEmployeeRow(
     const fullName = parseAndAssertAssignedTo(assignedTo, rowNumber)
 
     // program area
-    const branchName = getCellString(row, headerToCol, "Branch")
-    assertBranch(branchName, rowNumber)
-
-    const rawProgramAreaName = getCellString(row, headerToCol, "Program Area")
-    assertProgramArea(rawProgramAreaName, rowNumber)
-
-    const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
-
-    const programAreaKey = `${branchName}::${programAreaName}`
-    const programAreaId = assertLookupValue(
-        programAreaKey,
-        "Program Area",
+    const {branchName, programAreaName, programAreaId} = resolveProgramAreaId(
+        row,
         rowNumber,
+        headerToCol,
         programAreaLookup
     )
 
@@ -441,6 +407,35 @@ function parseEmployeeRow(
         program_area_id: programAreaId,
         job_title_id: jobTitleId,
         notes
+    }
+}
+
+function resolveProgramAreaId(
+    row: ExcelJS.Row,
+    rowNumber: number,
+    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>,
+    programAreaLookup: Map<string, number>
+) {
+    const rawBranchName = getCellString(row, headerToCol, "Branch")
+    assertBranch(rawBranchName, rowNumber)
+
+    const rawProgramAreaName = getCellString(row, headerToCol, "Program Area")
+    assertProgramArea(rawProgramAreaName, rowNumber)
+    const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
+
+    const programAreaKey = `${rawBranchName}::${programAreaName}`
+
+    const programAreaId = assertLookupValue(
+        programAreaKey,
+        'Program Area',
+        rowNumber,
+        programAreaLookup
+    )
+
+    return {
+        branchName: rawBranchName,
+        programAreaName,
+        programAreaId
     }
 }
 

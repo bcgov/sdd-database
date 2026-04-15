@@ -1,7 +1,7 @@
 import path from "path";
 import type {PrismaClient} from "@/generated/prisma/client";
 import ExcelJS from "exceljs";
-import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {buildIdLookupByName, buildProgramAreaLookup, idNameSelect} from "../shared/lookups";
 import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 import {assertNoDuplicates} from "../shared/assertions";
 import {assertOfficeNumber} from "../validators/offices.validators";
@@ -9,7 +9,7 @@ import {
     assertWorkspaceNumber,
     assertWorkspaceNumberMatchesOfficeFloor,
     parseAndAssertOfficeFloor
-} from "../validators/workspace.validators";
+} from "../validators/workspaces.validators";
 import {normalizeCategoryName, normalizeDeskTypeName} from "../normalizers/workspaces.normalizers";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
@@ -17,6 +17,8 @@ import {
     buildEmployeeIdByOfficeAndNameLookup,
     resolveEmployeeId
 } from "../shared/employees";
+import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
+import {assertBranch, assertProgramArea} from "../validators/employees.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -34,6 +36,8 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "Workspace Number",
     "Workspace Type",
     "OfficeFloor",
+    "Branch",
+    "Program Area",
     "Workspace Category",
     "DeskType"
 ] as const
@@ -51,15 +55,30 @@ const IGNORE_WORKSPACE_VALUES = new Set<string>([
     "Friendship Centre"
 ])
 
+const ALLOWED_WORKSPACE_TYPES = new Set<string>([
+    "Protected Community Services",
+    "Protected Criminal Investigations Unit",
+    "Protected File Hub",
+    "Resident",
+    "Free Address",
+] as const)
+
+const PROTECTED_WORKSPACE_TYPES = new Set<string>([
+    "Protected Community Services",
+    "Protected Criminal Investigations Unit",
+    "Protected File Hub",
+] as const)
+
 type ParsedWorkspaceRow = {
     office_number: string
     workspace_number: string
     category_id: number
     desk_type_id: number
     office_floor: number
+    notes: string | null
     employee_id: number | null
     is_on_hold: boolean
-    notes: string | null
+    restricted_program_area_id: number | null
 }
 
 export async function seedWorkspaces(prismaClient: PrismaClient) {
@@ -90,8 +109,23 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
         })
     )
 
-    const employeeIdByIdir = buildEmployeeIdByIdirLookup(employeeRows)
-    const employeeIdByOfficeAndName = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
+    const programAreaLookup = buildProgramAreaLookup(
+        await prismaClient.programArea.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    branch: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            }
+        )
+    )
+
+    const employeeIdByIdirLookup = buildEmployeeIdByIdirLookup(employeeRows)
+    const employeeIdByOfficeAndNameLookup = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
 
     const finalWorkspaceRows: ParsedWorkspaceRow[] = []
 
@@ -108,8 +142,9 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
             headerToCol,
             categoryLookup,
             deskTypeLookup,
-            employeeIdByIdir,
-            employeeIdByOfficeAndName,
+            programAreaLookup,
+            employeeIdByIdirLookup,
+            employeeIdByOfficeAndNameLookup,
         )
 
         finalWorkspaceRows.push(workspaceData)
@@ -178,6 +213,7 @@ function parseWorkspaceRow(
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>,
     categoryLookup: Map<string, number>,
     deskTypeLookup: Map<string, number>,
+    programAreaLookup: Map<string, number>,
     employeeIdByIdirLookup: Map<string, number>,
     employeeIdByOfficeAndNameLookup: Map<string, number>,
 ): ParsedWorkspaceRow {
@@ -239,14 +275,59 @@ function parseWorkspaceRow(
         ? (rawNotes || null)   // making sure to store null instead of ""
         : null
 
+    // restricted program area
+    const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
+    assertAllowedWorkspaceType(rawWorkspaceType, rowNumber)
+
+    const restrictedProgramAreaId = PROTECTED_WORKSPACE_TYPES.has(rawWorkspaceType)
+        ? resolveRestrictedProgramAreaId(
+            row,
+            rowNumber,
+            headerToCol,
+            programAreaLookup,
+        )
+        : null
+
     return {
         office_number: rawOfficeNumber,
         workspace_number: rawWorkspaceNumber,
         category_id: categoryId,
         desk_type_id: deskTypeId,
         office_floor: officeFloor,
+        restricted_program_area_id: restrictedProgramAreaId,
         employee_id: employeeId,
         is_on_hold: isOnHold,
         notes
     }
+}
+
+function assertAllowedWorkspaceType(workspaceType: string, rowNumber: number) {
+    if (!ALLOWED_WORKSPACE_TYPES.has(workspaceType)) {
+        throw new Error(
+            `Workspace type "${workspaceType}" at row ${rowNumber} is not a valid option.`
+        )
+    }
+}
+
+function resolveRestrictedProgramAreaId(
+    row: ExcelJS.Row,
+    rowNumber: number,
+    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>,
+    programAreaLookup: Map<string, number>
+) {
+    const rawBranchName = getCellString(row, headerToCol, "Branch")
+    assertBranch(rawBranchName, rowNumber)
+
+    const rawProgramAreaName = getCellString(row, headerToCol, "Program Area")
+    assertProgramArea(rawProgramAreaName, rowNumber)
+    const programAreaName = normalizeProgramAreaName(rawProgramAreaName)
+
+    const programAreaKey = `${rawBranchName}::${programAreaName}`
+
+    return assertLookupValue(
+        programAreaKey,
+        'Restricted Program Area',
+        rowNumber,
+        programAreaLookup
+    )
 }

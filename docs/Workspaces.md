@@ -44,14 +44,15 @@ Delete when employee leaves
 
 **Protected Community Service**
 Restriction Branch: Community Service
-Restriction Program Area?: Area A, B or C
+Restriction Program Area: Area A, B or C
 
 **Protected File Hub**
 Restriction Branch: Operations Support
+Restriction Program Area: Finance, Contracts and Records Management
 
 **Protected Criminal Investigations Unit**
 Restriction Branch: Prevention and Loss Management Services
-Restriction Program Area?: Criminal Investigation Unit and surprisingly PLMS Operations as well?
+Restriction Program Area: Criminal Investigation Unit
 
 ---
 

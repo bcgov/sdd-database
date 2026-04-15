@@ -14,12 +14,12 @@ export interface EmployeeLookupState {
     jobTitles: LookupOption[]
     ohsAccommodationTypes: LookupOption[]
 
-    selectedBranchId: number | undefined
-    handleBranchSelectionChange: (branchId: number | undefined) => void
-    selectedProgramAreaId: number | undefined
-    handleProgramAreaSelectionChange: (programAreaId: number | undefined) => void
-    selectedJobTitleId: number | undefined
-    setSelectedJobTitleId: Dispatch<SetStateAction<number | undefined>>
+    selectedBranchId: number | null
+    handleBranchSelectionChange: (branchId: number | null) => void
+    selectedProgramAreaId: number | null
+    handleProgramAreaSelectionChange: (programAreaId: number | null) => void
+    selectedJobTitleId: number | null
+    setSelectedJobTitleId: Dispatch<SetStateAction<number | null>>
     selectedOhsAccommodationTypeIds: number[]
 
     isJobTitleRequired: boolean
@@ -37,34 +37,34 @@ export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupSt
         ? employee.program_area?.branch_id
         : undefined
 
-    const initialSelectedBranchId = uiBranchId ?? hydratedBranchId
-    const [selectedBranchId, setSelectedBranchId] = useState<number | undefined>(initialSelectedBranchId);
+    const initialSelectedBranchId = uiBranchId ?? hydratedBranchId ?? null
+    const [selectedBranchId, setSelectedBranchId] = useState<number | null>(initialSelectedBranchId);
 
     // programAreas
-    const {programAreas} = useProgramAreas(selectedBranchId);
+    const {programAreas} = useProgramAreas(selectedBranchId ?? undefined);
 
-    const initialSelectedProgramAreaId = employee?.program_area_id
-    const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<number | undefined>(initialSelectedProgramAreaId)
+    const initialSelectedProgramAreaId = employee?.program_area_id ?? null
+    const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<number | null>(initialSelectedProgramAreaId)
 
-    const initialSelectedJobTitleId = employee?.job_title_id ?? undefined
-    const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | undefined>(initialSelectedJobTitleId)
+    const initialSelectedJobTitleId = employee?.job_title_id ?? null
+    const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(initialSelectedJobTitleId)
 
     // job titles
-    const {jobTitles} = useJobTitles(selectedProgramAreaId)
+    const {jobTitles} = useJobTitles(selectedProgramAreaId ?? undefined)
 
     const selectedBranch = (branches ?? []).find(branch => branch.id === selectedBranchId)
     const isNonSddBranch = selectedBranch?.name === "Non SDD"
     const isJobTitleRequired = !isNonSddBranch
 
-    const handleBranchSelectionChange = (branchId: number | undefined) => {
+    const handleBranchSelectionChange = (branchId: number | null) => {
         setSelectedBranchId(branchId)
-        setSelectedProgramAreaId(undefined)
-        setSelectedJobTitleId(undefined)
+        setSelectedProgramAreaId(null)
+        setSelectedJobTitleId(null)
     }
 
-    const handleProgramAreaSelectionChange = (programAreaId: number | undefined)=> {
+    const handleProgramAreaSelectionChange = (programAreaId: number | null)=> {
         setSelectedProgramAreaId(programAreaId)
-        setSelectedJobTitleId(undefined)
+        setSelectedJobTitleId(null)
     }
 
     // OHS Accommodations

@@ -21,8 +21,16 @@ export async function searchWorkspacesAction(query?: string) {
     return workspacesWithType
 }
 
-export async function searchAssignableWorkspacesAction(officeNumber: string, query?: string, ) {
-    const workspaceSearchResults = await getAssignableWorkspacesByFilter(officeNumber, query)
+export async function searchAssignableWorkspacesAction(
+    employeeOfficeNumber: string,
+    employeeProgramAreaId: number,
+    query?: string
+) {
+    const workspaceSearchResults = await getAssignableWorkspacesByFilter(
+        employeeOfficeNumber,
+        employeeProgramAreaId,
+        query
+    )
 
     // Attaching discriminant 'type'
     const workspacesWithType: Entity[] = workspaceSearchResults.map(workspace => ({
