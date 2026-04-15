@@ -8,7 +8,7 @@ import {
 
 import {PressEvent} from "@react-types/shared";
 
-interface WorkspaceSectionProps {
+interface WorkspaceDetailsProps {
     workspaceNumber: string
     hasProgramAreaAssignment: boolean
     hasOfficeAssignment: boolean
@@ -17,14 +17,14 @@ interface WorkspaceSectionProps {
     handleRemoveWorkspace: () => void
 }
 
-export function WorkspaceSection({
+export function WorkspaceDetails({
                                      workspaceNumber,
                                      hasProgramAreaAssignment,
                                      hasOfficeAssignment,
                                      hasWorkspaceAssignment,
                                      handleAssignWorkspace,
                                      handleRemoveWorkspace,
-                                 }: WorkspaceSectionProps) {
+                                 }: WorkspaceDetailsProps) {
 
     const workspaceAssignmentBlockedReason = !hasOfficeAssignment && !hasProgramAreaAssignment
         ? "Select a Program Area and assign an Office first to enable Workspace assignment"

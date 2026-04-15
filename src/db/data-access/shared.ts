@@ -18,6 +18,11 @@ export const workspaceWithAssignedEmployeeArgs =
         include: {
             category: true,
             desk_type: true,
+            restricted_program_area: {
+                include: {
+                    branch: true,
+                }
+            },
             assigned_employee: {
                 select: {
                     idir: true,

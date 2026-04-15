@@ -13,11 +13,11 @@ import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/emp
 
 import {AssignMode, EmployeeFormValues, EmployeeSearchResult, EntityActionResult} from "@/types";
 
-import {WorkspaceSection} from "@/components/Entity_Forms/Employee/WorkspaceSection";
-import {OfficeSection} from "@/components/Entity_Forms/Employee/OfficeSection";
-import {EmployeeSection} from "@/components/Entity_Forms/Employee/EmployeeSection";
+import {WorkspaceDetails} from "@/components/Entity_Forms/Employee/WorkspaceDetails";
+import {OfficeDetails} from "@/components/Entity_Forms/Employee/OfficeDetails";
 import {useEmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
-import {OhsAccommodationsSection} from "@/components/Entity_Forms/Employee/OhsAccommodationsSection";
+import {OhsAccommodations} from "@/components/Entity_Forms/Employee/OhsAccommodations";
+import {EmployeeDetails} from "@/components/Entity_Forms/Employee/EmployeeDetails";
 
 
 interface EmployeeFormProps {
@@ -165,31 +165,31 @@ export function EmployeeForm({
                     marginBottom: "1rem",
                 }}>
 
-                    <EmployeeSection
+                    <EmployeeDetails
                         employee={employee}
                         lookupState={employeeLookupState}
                         isEditMode={isEditMode}>
-                    </EmployeeSection>
+                    </EmployeeDetails>
 
-                    <OfficeSection
+                    <OfficeDetails
                         officeNumber={officeNumber}
                         hasOfficeAssignment={hasOfficeAssignment}
                         isEditMode={isEditMode}
                         handleAssignOffice={(e) => handleAssign("office", e)}>
-                    </OfficeSection>
+                    </OfficeDetails>
 
-                    <WorkspaceSection
+                    <WorkspaceDetails
                         workspaceNumber={workspaceNumber}
                         hasProgramAreaAssignment={hasProgramAreaAssignment}
                         hasOfficeAssignment={hasOfficeAssignment}
                         hasWorkspaceAssignment={hasWorkspaceAssignment}
                         handleAssignWorkspace={(e) => handleAssign("workspace", e)}
                         handleRemoveWorkspace={handleRemoveWorkspace}>
-                    </WorkspaceSection>
+                    </WorkspaceDetails>
 
-                    <OhsAccommodationsSection ohsAccommodationTypes={employeeLookupState.ohsAccommodationTypes}
-                                              selectedOhsAccommodationTypeIds={employeeLookupState.selectedOhsAccommodationTypeIds}>
-                    </OhsAccommodationsSection>
+                    <OhsAccommodations ohsAccommodationTypes={employeeLookupState.ohsAccommodationTypes}
+                                       selectedOhsAccommodationTypeIds={employeeLookupState.selectedOhsAccommodationTypeIds}>
+                    </OhsAccommodations>
                 </AccordionGroup>
             </div>
 

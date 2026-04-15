@@ -2,15 +2,15 @@ import {Accordion, Checkbox, CheckboxGroup} from "@bcgov/design-system-react-com
 import {LookupOption} from "@/types";
 
 
-interface OhsAccommodationsSectionProps {
+interface OhsAccommodationsProps {
     ohsAccommodationTypes: LookupOption[]
     selectedOhsAccommodationTypeIds: number[]
 }
 
-export function OhsAccommodationsSection({
+export function OhsAccommodations({
                                              ohsAccommodationTypes,
                                              selectedOhsAccommodationTypeIds,
-                                         }: OhsAccommodationsSectionProps
+                                         }: OhsAccommodationsProps
 ) {
     return (
         <Accordion label="Occupational Health and Safety Accommodations" id="ohsAccommodations">

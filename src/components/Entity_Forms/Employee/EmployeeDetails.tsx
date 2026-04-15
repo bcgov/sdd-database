@@ -9,17 +9,17 @@ import {
 import {EmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
 
 
-interface EmployeeSectionProps {
+interface EmployeeDetailsProps {
     employee: EmployeeFormValues | EmployeeSearchResult | undefined
     lookupState: EmployeeLookupState
     isEditMode: boolean
 }
 
-export function EmployeeSection({
+export function EmployeeDetails({
                                     employee,
                                     lookupState,
                                     isEditMode
-                                }: EmployeeSectionProps) {
+                                }: EmployeeDetailsProps) {
 
     const {
         branches,
