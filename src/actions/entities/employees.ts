@@ -25,6 +25,7 @@ import {
 
 import {createEntityActions} from "@/actions/createEntityActions";
 import {getBranchNameByProgramAreaId} from "@/db/data-access/lookups";
+import {getWorkspaceByOfficeAndWorkspaceNumber} from "@/db/data-access/workspaces";
 
 
 async function validateEmployeeData(employee: EmployeeFormValues) {
@@ -56,7 +57,46 @@ async function validateEmployeeData(employee: EmployeeFormValues) {
     }
 
     if(branchName !== "Non SDD") {
-        return validateEmployeeJobTitleField(employee.job_title_id, "Job Title")
+        const jobValidationError = validateEmployeeJobTitleField(employee.job_title_id, "Job Title")
+
+        if (jobValidationError) {
+            return jobValidationError
+        }
+    }
+
+    const workspaceValidationError = await validateAssignedWorkspace(employee)
+    if (workspaceValidationError) {
+        return workspaceValidationError
+    }
+}
+
+async function validateAssignedWorkspace(employee: EmployeeFormValues) {
+    const workspaceNumber = employee.ui_workspace_number
+
+    if (!workspaceNumber) {
+        return
+    }
+
+    const workspace = await getWorkspaceByOfficeAndWorkspaceNumber(
+        employee.office_number,
+        workspaceNumber,
+    )
+
+    if (!workspace) {
+        return `The selected workspace no longer exists for Office ${employee.office_number}. Please reassign a workspace and try again.`
+    }
+
+    if (workspace.is_on_hold) {
+        return `Workspace ${workspaceNumber} is currently on hold and cannot be assigned. Please choose another workspace.`
+    }
+
+    if (workspace.employee_id !=null && workspace.employee_id !== employee.id) {
+        return `Workspace ${workspaceNumber} is already assigned to another employee. Please choose another workspace.`
+    }
+
+    if (workspace.restricted_program_area_id != null &&
+    workspace.restricted_program_area_id !== employee.program_area_id) {
+        return `Workspace ${workspaceNumber} is restricted to a different Program Area. Please choose another workspace.`
     }
 }
 

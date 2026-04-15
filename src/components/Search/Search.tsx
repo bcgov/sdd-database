@@ -4,7 +4,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 
 import {Button, Callout, Form, TextField} from "@bcgov/design-system-react-components";
 
-import {AssignMode, Entity} from "@/types";
+import {AssignMode, Entity, SelectedWorkspaceAssignment} from "@/types";
 
 import {FilterTags} from "@/components/Search/FilterTags";
 import {SearchResultsList} from "@/components/Search/SearchResultsList";
@@ -13,11 +13,13 @@ import {SearchResultsList} from "@/components/Search/SearchResultsList";
 interface SearchProps {
     selectedFilterTags: Selection
     setSelectedFilterTags: (selectedFilterTags: Selection) => void
+
     visibleSearchResults: Entity[]
+
     assignMode: AssignMode
     cancelAssignModeHandler: () => void
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
-    assignWorkspaceClickHandler: (assignedWorkspaceNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
     userHasSearchedOnce: () => boolean
     searchResultsAreEmpty: boolean
     searchResultClickHandler: (item: Entity) => void

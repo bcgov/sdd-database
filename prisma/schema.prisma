@@ -45,6 +45,7 @@ model ProgramArea {
 
   employees               Employee[]
   program_area_job_titles ProgramAreaJobTitle[]
+  workspaces              Workspace[]
 
   // Names are unique WITHIN a branch (same program area name can exist under different branches)
   @@unique([branch_id, name])
@@ -127,12 +128,15 @@ model Workspace {
   // Also, this references employee's internal id not employee_id
   employee_id Int? @unique
 
+  restricted_program_area_id Int?
+
   is_on_hold Boolean @default(false)
 
-  category          WorkspaceCategory @relation(fields: [category_id], references: [id])
-  desk_type         DeskType          @relation(fields: [desk_type_id], references: [id])
-  assigned_office   Office            @relation(fields: [office_number], references: [office_number])
-  assigned_employee Employee?         @relation(fields: [employee_id], references: [id])
+  category                WorkspaceCategory @relation(fields: [category_id], references: [id])
+  desk_type               DeskType          @relation(fields: [desk_type_id], references: [id])
+  assigned_office         Office            @relation(fields: [office_number], references: [office_number])
+  assigned_employee       Employee?         @relation(fields: [employee_id], references: [id])
+  restricted_program_area ProgramArea?      @relation(fields: [restricted_program_area_id], references: [id])
 
   @@id([office_number, workspace_number]) // composite primary key
 }

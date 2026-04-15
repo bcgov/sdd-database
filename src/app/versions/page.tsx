@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.29",
+            notes: [
+                "Added Workspace Protections"
+            ]
+        },
+        {
             version: "v0.0.28",
             notes: [
                 "Added Desk Type",

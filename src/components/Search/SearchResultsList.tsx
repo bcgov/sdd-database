@@ -1,5 +1,5 @@
 import {SearchResultItem} from "@/components/Search/SearchResultItem";
-import {AssignMode, Entity} from "@/types";
+import {AssignMode, Entity, SelectedWorkspaceAssignment} from "@/types";
 import {getEmployeeFullName} from "@/utils";
 
 interface SearchResultsListProps {
@@ -7,7 +7,10 @@ interface SearchResultsListProps {
     searchResultClickHandler: (item: Entity) => void
     assignMode: AssignMode
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
-    assignWorkspaceClickHandler: (assignedWorkspaceNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspace: {
+        workspace_number: string
+        restricted_program_area_id: number | null
+    }) => void
 }
 
 const getSearchResultKey = (item: Entity) => {
@@ -60,14 +63,17 @@ const getAssignClickHandler = (
     item: Entity,
     assignMode: AssignMode,
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void,
-    assignWorkspaceClickHandler: (workspaceNumber: string) => void
-) => {
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void) =>
+{
     if (item.type === "office" && assignMode === "office") {
         return () => assignOfficeClickHandler(item.office_number)
     }
 
     if (item.type === "workspace" && assignMode === "workspace") {
-        return () => assignWorkspaceClickHandler(item.workspace_number)
+        return () => assignWorkspaceClickHandler({
+            workspace_number: item.workspace_number,
+            restricted_program_area_id: item.restricted_program_area_id,
+        })
     }
 
     return undefined;

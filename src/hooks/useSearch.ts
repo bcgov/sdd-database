@@ -5,7 +5,7 @@ import {AssignMode, Entity, SearchOptions} from "@/types";
 
 import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
-import {searchAssignableWorkspacesAction, searchWorkspacesAction} from "@/actions/entities/workspaces";
+import {searchAssignableWorkspacesAction} from "@/actions/entities/workspaces";
 
 
 export function useSearch() {
@@ -15,7 +15,8 @@ export function useSearch() {
     const [searchResults, setSearchResults] = useState<Entity[]>([]);
 
     const [assignMode, setAssignMode] = useState<AssignMode>("none");
-    const [assignOfficeNumber, setAssignOfficeNumber] = useState<string>();
+    const [assignEmployeeOfficeNumber, setAssignEmployeeOfficeNumber] = useState<string>();
+    const [assignEmployeeProgramAreaId, setAssignEmployeeProgramAreaId] = useState<number>();
 
     const filteredSearchResults = searchResults.filter((item) => {
 
@@ -51,7 +52,8 @@ export function useSearch() {
     const runSearch = useCallback(async (query?: string, options?: SearchOptions) => {
 
         const effectiveMode = options?.modeOverride ?? assignMode
-        const effectiveOfficeNumber = options?.officeNumber ?? assignOfficeNumber;
+        const effectiveEmployeeOfficeNumber = options?.employeeOfficeNumber ?? assignEmployeeOfficeNumber;
+        const effectiveEmployeeProgramAreaId = options?.employeeProgramAreaId ?? assignEmployeeProgramAreaId;
 
         let results: Entity[] = [];
 
@@ -62,11 +64,15 @@ export function useSearch() {
                 break;
 
             case "workspace":
-                if (!effectiveOfficeNumber) {
-                    console.warn("Workspace search requested without officeNumber")
+                if (!effectiveEmployeeOfficeNumber || effectiveEmployeeProgramAreaId == null) {
+                    console.warn("Workspace search requested without employee office number or employee program area id")
                     results = []
                 } else {
-                    results = await searchAssignableWorkspacesAction(effectiveOfficeNumber, query);
+                    results = await searchAssignableWorkspacesAction(
+                        effectiveEmployeeOfficeNumber,
+                        effectiveEmployeeProgramAreaId,
+                        query
+                    );
                 }
                 break;
 
@@ -76,16 +82,19 @@ export function useSearch() {
         }
 
         setSearchResults(results);
-    }, [assignMode, assignOfficeNumber]);
+    }, [assignMode, assignEmployeeOfficeNumber, assignEmployeeProgramAreaId]);
 
     const refreshSearchResults = useCallback(() => runSearch(searchPhrase), [runSearch, searchPhrase])
 
     return {
         selectedFilterTags,
         setSelectedFilterTags,
+
         assignMode,
         setAssignMode,
-        setAssignOfficeNumber,
+        setAssignEmployeeOfficeNumber,
+        setAssignEmployeeProgramAreaId,
+
         optimisticSearchResults,
         setOptimisticSearchResults,
         userHasSearchedOnce,
