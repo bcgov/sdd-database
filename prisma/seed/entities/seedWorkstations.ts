@@ -71,12 +71,10 @@ function ignoreForNow(
     headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>
 ) {
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
-    const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
 
     const isPublicJobBankKiosk =
         rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawWorkspaceType === "Kiosk" ||
         rawCategory === "Waiting Room"
 
     return isPublicJobBankKiosk

@@ -7,7 +7,6 @@ const workspaceCategories = [
     "Non-Interactive",
     "Non-Interactive Office",
     "LWS Mobile",
-    "Privacy Room",
 ] as const
 
 export async function seedWorkspaceCategories(prismaClient: PrismaClient) {
