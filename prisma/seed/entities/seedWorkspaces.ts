@@ -175,12 +175,10 @@ function ignoreForNow(
 ) {
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
-    const rawWorkspaceType = getCellString(row, headerToCol, "Workspace Type")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
 
     const isPublicJobBankKiosk =
         rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawWorkspaceType === "Kiosk" ||
         rawCategory === "Waiting Room"
 
     return IGNORE_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk

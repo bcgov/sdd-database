@@ -110,13 +110,19 @@ modal that has assigned employee accordian automatically counts as resident work
 The following feel more like a condition of the employee than the condition of the workspace
 i.e. these feel like an employee attribute than a specific workspace attribute
 
+**Employee Type:** Mobile, float
+**Employee's Work Location:** Offsite, Friendship Center, Workspace with its workspace Number
 
 **Mobile**
 
-For employees with a Telework Agreement and work from home 3 days per week or more.
+- Employees that work from home (WFH) 3 or more days per week (i.e. employees with a Telework Agreement) are designated Mobile.
+- Used when an employee is not assigned a workspace.
+- All CISB Specialists are designated Mobile.
 
 What is the opposite of mobile? Resident?
 I think this is true - an employee can either be mobile or resident.
+
+So, this field is linked to an employee
 
 ---
 
@@ -124,11 +130,19 @@ I think this is true - an employee can either be mobile or resident.
 
 for Auxillary employees that do not require an assigned workspace.
 
+Seems to be linked to an Employee
+
 ---
 
 **Friendship Center**
 
-For CIS that are headquartered to an office, but attached to the FC so not to affect the threshold count for the office.
+For Community Integration Specialists that are headquartered to an office, but attached to the Friendship Centres so 
+not to affect 
+the threshold count for the office.
+
+- Job Title = "Community Integration Specialist"
+
+- These employees are attached to a friendship centre with notes instead of a dedicated workspace in an office
 
 ---
 
