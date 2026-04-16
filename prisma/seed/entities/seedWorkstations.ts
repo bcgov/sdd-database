@@ -4,6 +4,11 @@ import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../s
 import ExcelJS from "exceljs";
 import {assertAssetTag} from "../validators/workstations.validators";
 import {assertNoDuplicates} from "../shared/assertions";
+import {
+    buildEmployeeResolutionContext,
+    EmployeeResolutionContext,
+    resolveEmployeeId
+} from "../shared/employees";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -14,14 +19,16 @@ const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
 )
 
 const WORKSTATION_REQUIRED_HEADERS = [
+    "OfficeNum",
     "Computer Number",
+    "IDIR",
     "Assigned To",
-    "Workspace Type",
     "Workspace Category"
 ] as const
 
 type ParsedWorkstationRow = {
     asset_tag: string
+    employee_id: number | null
 }
 
 export async function seedWorkstations(prismaClient: PrismaClient) {
@@ -32,10 +39,11 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
         WORKSTATION_REQUIRED_HEADERS
     )
 
+    const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
+
     const finalWorkstationRows: ParsedWorkstationRow[] = []
 
-    for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++)
-    {
+    for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
         const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
@@ -48,18 +56,31 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
             row,
             r,
             headerToCol,
+            employeeResolutionContext,
         )
 
         finalWorkstationRows.push(workstationData)
     }
 
-    assertNoDuplicates(finalWorkstationRows, {
-        getKey: row => row.asset_tag,
-        label: "workstation asset_tag",
-        caseInsensitive: true,
-    })
+    assertNoDuplicates(
+        finalWorkstationRows,
+        {
+            getKey: row => row.asset_tag,
+            label: "workstation asset_tag",
+            caseInsensitive: true,
+        })
 
-    console.log(`Prepared ${finalWorkstationRows.length} workstation rows for insert`)
+    assertNoDuplicates(
+        finalWorkstationRows,
+        {
+            getKey: row => row.employee_id!,
+            label: "workstation employee_id",
+            shouldSkip: row => row.employee_id == null
+        }
+    )
+
+    const assignedCount = finalWorkstationRows.filter(row => row.employee_id != null).length
+    console.log(`Prepared ${finalWorkstationRows.length} workstation rows for insert, ${assignedCount} assigned to employees`)
 
     await prismaClient.workstation.createMany({
         data: finalWorkstationRows
@@ -83,13 +104,28 @@ function ignoreForNow(
 function parseWorkstationRow(
     row: ExcelJS.Row,
     rowNumber: number,
-    headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>
-) {
+    headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>,
+    employeeResolutionContext: EmployeeResolutionContext
+): ParsedWorkstationRow {
     // asset tag
     const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
     assertAssetTag(rawAssetTag, rowNumber)
 
+    // internal employee id i.e. primary key
+    const employeeId = resolveEmployeeId(
+        row,
+        rowNumber,
+        headerToCol,
+        {
+            assignedToHeader: "Assigned To",
+            idirHeader: "IDIR",
+            officeNumberHeader: "OfficeNum",
+            employeeResolutionContext
+        }
+    )
+
     return {
         asset_tag: rawAssetTag,
+        employee_id: employeeId,
     }
 }
