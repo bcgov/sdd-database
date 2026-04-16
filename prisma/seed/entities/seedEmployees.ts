@@ -194,13 +194,24 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         finalEmployeeRows.push(employeeData)
     }
 
-    console.log(`Prepared ${finalEmployeeRows.length} employee rows for insert`)
+    assertNoDuplicates(
+        finalEmployeeRows,
+        {
+            getKey: row => row.idir!,
+            label: "idir",
+            shouldSkip: row => !row.idir,
+            caseInsensitive: true,
+        })
 
-    assertNoDuplicates(finalEmployeeRows, {
-        getKey: row => row.employee_id!,
-        label: "employee_id",
-        shouldSkip: row => !row.employee_id
-    })
+    assertNoDuplicates(
+        finalEmployeeRows,
+        {
+            getKey: row => row.employee_id!,
+            label: "employee_id",
+            shouldSkip: row => !row.employee_id
+        })
+
+    console.log(`Prepared ${finalEmployeeRows.length} employee rows for insert`)
 
     await prismaClient.employee.createMany({data: finalEmployeeRows})
 
@@ -283,7 +294,12 @@ function buildEmployeeIdLookup(
             assertEmployeeId(employeeId, r)
         }
 
-        assertUnique(seenLookupIdirs, idir, r, "IDIR in Employee ID Lookup")
+        assertUnique(
+            seenLookupIdirs,
+            idir,
+            r,
+            "IDIR in Employee ID Lookup"
+        )
 
         lookup.set(idir, employeeId)
     }

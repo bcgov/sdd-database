@@ -5,8 +5,7 @@ import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {assertLookupValue, assertUnique} from "../validators/common.validators";
 import {assertNoDuplicates} from "../shared/assertions";
 import {
-    buildEmployeeIdByIdirLookup,
-    buildEmployeeIdByOfficeAndNameLookup,
+    buildEmployeeResolutionContext,
     resolveEmployeeId
 } from "../shared/employees";
 import {normalizeCategoryName} from "../normalizers/workspaces.normalizers";
@@ -42,19 +41,7 @@ export async function seedEmployeeOhsAccommodations(prismaClient: PrismaClient) 
         })
     )
 
-    const employeeRows = await prismaClient.employee.findMany({
-        select: {
-            id: true,
-            idir: true,
-            office_number: true,
-            first_name: true,
-            alternate_name: true,
-            last_name: true,
-        }
-    })
-
-    const employeeIdByIdirLookup = buildEmployeeIdByIdirLookup(employeeRows)
-    const employeeIdByOfficeAndNameLookup = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
+    const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
 
     const finalRowsToInsert: ParsedEmployeeOhsAccommodationRow[] = []
 
@@ -72,8 +59,7 @@ export async function seedEmployeeOhsAccommodations(prismaClient: PrismaClient) 
                 assignedToHeader: "Assigned To",
                 idirHeader: "IDIR",
                 officeNumberHeader: "OfficeNum",
-                employeeIdByIdirLookup,
-                employeeIdByOfficeAndNameLookup
+                employeeResolutionContext
             })
 
         if (employeeId === null) {

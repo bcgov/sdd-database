@@ -13,8 +13,8 @@ import {
 import {normalizeCategoryName, normalizeDeskTypeName} from "../normalizers/workspaces.normalizers";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
-    buildEmployeeIdByIdirLookup,
-    buildEmployeeIdByOfficeAndNameLookup,
+    buildEmployeeResolutionContext,
+    EmployeeResolutionContext,
     resolveEmployeeId
 } from "../shared/employees";
 import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
@@ -86,17 +86,6 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
 
     const headerToCol = getRequiredHeaderToCol(computersAndLaptopsWorksheet, WORKSPACE_REQUIRED_HEADERS)
 
-    const employeeRows = await prismaClient.employee.findMany({
-        select: {
-            id: true,
-            idir: true,
-            office_number: true,
-            first_name: true,
-            alternate_name: true,
-            last_name: true,
-        }
-    })
-
     const categoryLookup = buildIdLookupByName(
         await prismaClient.workspaceCategory.findMany({
             select: idNameSelect
@@ -124,8 +113,7 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
         )
     )
 
-    const employeeIdByIdirLookup = buildEmployeeIdByIdirLookup(employeeRows)
-    const employeeIdByOfficeAndNameLookup = buildEmployeeIdByOfficeAndNameLookup(employeeRows)
+    const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
 
     const finalWorkspaceRows: ParsedWorkspaceRow[] = []
 
@@ -143,8 +131,7 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
             categoryLookup,
             deskTypeLookup,
             programAreaLookup,
-            employeeIdByIdirLookup,
-            employeeIdByOfficeAndNameLookup,
+            employeeResolutionContext
         )
 
         finalWorkspaceRows.push(workspaceData)
@@ -155,15 +142,15 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
         label: "workspace pair",
     })
 
+    assertNoDuplicates(finalWorkspaceRows, {
+        getKey: row => row.employee_id!,
+        label: "workspace employee_id",
+        shouldSkip: row => row.employee_id == null,
+    })
+
     const assignedWorkspaceRows = finalWorkspaceRows.filter(row => row.employee_id !== null)
 
     console.log(`Prepared ${assignedWorkspaceRows.length} workspace rows with employee assignment`)
-
-    assertNoDuplicates(assignedWorkspaceRows, {
-        getKey: row => row.employee_id!,
-        label: "workspace employee_id",
-    })
-
     console.log(`Prepared ${finalWorkspaceRows.length} workspace rows for insert`)
 
     await prismaClient.workspace.createMany({data: finalWorkspaceRows})
@@ -212,8 +199,7 @@ function parseWorkspaceRow(
     categoryLookup: Map<string, number>,
     deskTypeLookup: Map<string, number>,
     programAreaLookup: Map<string, number>,
-    employeeIdByIdirLookup: Map<string, number>,
-    employeeIdByOfficeAndNameLookup: Map<string, number>,
+    employeeResolutionContext: EmployeeResolutionContext
 ): ParsedWorkspaceRow {
     // office number
     const officeNumberHeader = "OfficeNum"
@@ -258,8 +244,7 @@ function parseWorkspaceRow(
             assignedToHeader,
             idirHeader: "IDIR",
             officeNumberHeader,
-            employeeIdByIdirLookup,
-            employeeIdByOfficeAndNameLookup
+            employeeResolutionContext
         }
     )
 

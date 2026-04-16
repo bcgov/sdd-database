@@ -3,6 +3,7 @@ import {getCellString} from "./excel";
 import {assertIdir} from "../validators/employees.validators";
 import {parseAndAssertAssignedTo} from "./parsers";
 import {assertOfficeNumber} from "../validators/offices.validators";
+import {PrismaClient} from "@/generated/prisma/client";
 
 
 const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
@@ -28,7 +29,7 @@ export function isNotAnEmployeeRow<THeader extends string>(
  * Map <idir, id>
  * @param rows
  */
-export function buildEmployeeIdByIdirLookup(
+function buildEmployeeIdByIdirLookup(
     rows: Array<{
         id: number
         idir: string | null
@@ -49,7 +50,7 @@ export function buildEmployeeIdByIdirLookup(
  * Map <officeNumber::last_name::first_name::alternate_name, id>
  * @param rows
  */
-export function buildEmployeeIdByOfficeAndNameLookup(
+function buildEmployeeIdByOfficeAndNameLookup(
     rows: Array<{
         id: number
         office_number: string
@@ -68,6 +69,37 @@ export function buildEmployeeIdByOfficeAndNameLookup(
     return lookup
 }
 
+export type EmployeeResolutionContext = {
+    employeeIdByIdirLookup: Map<string, number>
+    employeeIdByOfficeAndNameLookup: Map<string, number>
+}
+
+export async function buildEmployeeResolutionContext(prismaClient: PrismaClient): Promise<EmployeeResolutionContext> {
+    const employeeRows = await prismaClient.employee.findMany({
+        select: {
+            id: true,
+            idir: true,
+            office_number: true,
+            first_name: true,
+            alternate_name: true,
+            last_name: true,
+        }
+    })
+
+    return {
+        employeeIdByIdirLookup: buildEmployeeIdByIdirLookup(employeeRows),
+        employeeIdByOfficeAndNameLookup: buildEmployeeIdByOfficeAndNameLookup(employeeRows),
+    }
+}
+
+/**
+ * This function finds out the internal employee id (primary key) of an employee, given their idir, name (first,
+ * last and alternate) and office number.
+ * @param row
+ * @param rowNumber
+ * @param headerToCol
+ * @param options
+ */
 export function resolveEmployeeId<THeader extends string>(
     row: ExcelJS.Row,
     rowNumber: number,
@@ -76,8 +108,7 @@ export function resolveEmployeeId<THeader extends string>(
         assignedToHeader: THeader,
         idirHeader: THeader,
         officeNumberHeader: THeader,
-        employeeIdByIdirLookup: Map<string, number>,
-        employeeIdByOfficeAndNameLookup: Map<string, number>,
+        employeeResolutionContext: EmployeeResolutionContext,
     }
 ) {
 
@@ -85,9 +116,13 @@ export function resolveEmployeeId<THeader extends string>(
         assignedToHeader,
         idirHeader,
         officeNumberHeader,
+        employeeResolutionContext,
+    } = options
+
+    const {
         employeeIdByIdirLookup,
         employeeIdByOfficeAndNameLookup,
-    } = options
+    } = employeeResolutionContext
 
     if (isNotAnEmployeeRow(row, headerToCol, assignedToHeader)) {
         return null

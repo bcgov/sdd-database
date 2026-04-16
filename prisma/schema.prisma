@@ -24,7 +24,8 @@ model Employee {
   program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
   job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
 
-  workspace Workspace?
+  workspace   Workspace?
+  workstation Workstation?
 
   ohs_accommodations EmployeeOhsAccommodation[]
 }
@@ -158,4 +159,8 @@ model DeskType {
 model Workstation {
   asset_tag String  @id @db.Citext
   notes     String? @db.VarChar(2000)
+
+  employee_id Int? @unique
+
+  assigned_employee Employee? @relation(fields: [employee_id], references: [id])
 }
