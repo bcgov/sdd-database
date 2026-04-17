@@ -8,8 +8,14 @@ env:
   TOOLS_NS: a6d989-tools
   DEV_NS:   a6d989-dev
 
-  # BuildConfig and Deployment name
-  APP:      employee-information-database
+  # BuildConfig name
+  BUILD_APP:      employee-information-database-dev
+
+  # ImageStream name
+  IMAGE_APP: employee-information-database
+
+  # Deployment name
+  DEPLOY_APP: employee-information-database
 
   REGISTRY: ${{ secrets.REGISTRY }}
 
@@ -38,28 +44,28 @@ jobs:
       - name: Start OpenShift build in the tools namespace
         run: |
           # --wait flag tells the client to stream the build log and block until the build completes. It exits with a non-zero status if the build fails.
-          oc start-build $APP --wait -n $TOOLS_NS
+          oc start-build $BUILD_APP --wait -n $TOOLS_NS
 
       - name: Add custom tag to the newly created image in the tools namespace
         run: |
           # dev-<first7charsOfCommit>
           TAG=dev-${GITHUB_SHA::7}
           
-          # latest -> dev-<sha>-tools
-          oc -n $TOOLS_NS tag $APP:latest $APP:${TAG}-tools
+          # dev-latest -> dev-<sha>-tools
+          oc -n $TOOLS_NS tag $IMAGE_APP:dev-latest $IMAGE_APP:${TAG}-tools
           
           # save for later steps
           echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
 
       - name: Import this image in the dev namespace and update the tag
         run: |
-          oc -n $DEV_NS tag $TOOLS_NS/$APP:${IMAGE_TAG}-tools $DEV_NS/$APP:${IMAGE_TAG}-dev
+          oc -n $DEV_NS tag $TOOLS_NS/$IMAGE_APP:${IMAGE_TAG}-tools $DEV_NS/$IMAGE_APP:${IMAGE_TAG}-dev
 
       - name: Update the deployment to use this new image
         run: |
-          IMAGE=${REGISTRY}/${DEV_NS}/${APP}:${IMAGE_TAG}-dev
-          oc -n $DEV_NS set image deployment/$APP $APP=$IMAGE
+          IMAGE=${REGISTRY}/${DEV_NS}/${IMAGE_APP}:${IMAGE_TAG}-dev
+          oc -n $DEV_NS set image deployment/$DEPLOY_APP $DEPLOY_APP=$IMAGE
 
       - name: Wait for deployment to complete
         run: |
-          oc -n $DEV_NS rollout status deployment/$APP
+          oc -n $DEV_NS rollout status deployment/$DEPLOY_APP
