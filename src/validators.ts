@@ -129,23 +129,3 @@ export function validateEmployeeJobTitleField(value: number | null, label: strin
         return requiredError;
     }
 }
-
-export function validateAssetTagField(value: string, label: string = "Asset Tag") {
-    const requiredError = validateRequiredField(value, label);
-
-    if (requiredError) {
-        return requiredError;
-    }
-
-    const invalidCharacterError= validateOnlyLettersAndNumbers(value, label);
-
-    if (invalidCharacterError) {
-        return invalidCharacterError;
-    }
-
-    const validLengths = [8, 10, 14];
-
-    if (!validLengths.includes(value.length)) {
-        return `${label} must be exactly 8, 10, or 14 characters long.`;
-    }
-}

@@ -111,6 +111,7 @@ The following feel more like a condition of the employee than the condition of t
 i.e. these feel like an employee attribute than a specific workspace attribute
 
 **Employee Type:** Mobile, float
+
 **Employee's Work Location:** Offsite, Friendship Center, Workspace with its workspace Number
 
 **Mobile**
@@ -149,6 +150,8 @@ the threshold count for the office.
 **Offsite**
 
 CIS employees could be working out of a society or centre.
+However, we just found out that there are exceptions wherein employees with Job Title not equal to "Community 
+Integration Specialist" can also have Workspace Number as "Offsite"
 
 ---
 

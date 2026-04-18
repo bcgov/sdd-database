@@ -1,10 +1,13 @@
-import {WorkspaceSearchResult} from "@/types";
 import {Accordion, TextField} from "@bcgov/design-system-react-components";
 
 
 interface AssignedEmployeeDetailsProps {
-    // only accepts a real assigned employee and WorkspaceForm guarantees that
-    assignedEmployee: NonNullable<WorkspaceSearchResult["assigned_employee"]>
+    assignedEmployee: {
+        idir: string | null
+        first_name: string
+        alternate_name: string | null
+        last_name: string
+    }
 }
 
 export function AssignedEmployeeDetails({

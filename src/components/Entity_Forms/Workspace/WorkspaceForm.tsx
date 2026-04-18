@@ -2,7 +2,7 @@ import {WorkspaceSearchResult} from "@/types";
 import {AccordionGroup} from "@bcgov/design-system-react-components";
 import {WorkspaceDetails} from "@/components/Entity_Forms/Workspace/WorkspaceDetails";
 import {WorkspaceProtections} from "@/components/Entity_Forms/Workspace/WorkspaceProtections";
-import {AssignedEmployeeDetails} from "@/components/Entity_Forms/Workspace/AssignedEmployeeDetails";
+import {AssignedEmployeeDetails} from "@/components/Entity_Forms/Shared/AssignedEmployeeDetails";
 
 
 interface WorkspaceFormProps {
@@ -62,7 +62,7 @@ export function WorkspaceForm({
                 )}
 
                 {workspace.assigned_employee &&
-                    (<AssignedEmployeeDetails assignedEmployee={workspace.assigned_employee}></AssignedEmployeeDetails>)}
+                    (<AssignedEmployeeDetails assignedEmployee={workspace.assigned_employee}/>)}
             </AccordionGroup>
         </div>
     )

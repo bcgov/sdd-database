@@ -70,15 +70,6 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
             caseInsensitive: true,
         })
 
-    assertNoDuplicates(
-        finalWorkstationRows,
-        {
-            getKey: row => row.employee_id!,
-            label: "workstation employee_id",
-            shouldSkip: row => row.employee_id == null
-        }
-    )
-
     const assignedCount = finalWorkstationRows.filter(row => row.employee_id != null).length
     console.log(`Prepared ${finalWorkstationRows.length} workstation rows for insert, ${assignedCount} assigned to employees`)
 

@@ -33,3 +33,16 @@ export const workspaceWithAssignedEmployeeArgs =
             }
         }
     } satisfies Prisma.WorkspaceDefaultArgs
+
+export const workstationWithAssignedEmployeeArgs = {
+    include: {
+        assigned_employee: {
+            select: {
+                idir: true,
+                first_name: true,
+                alternate_name: true,
+                last_name: true,
+            }
+        }
+    }
+} satisfies Prisma.WorkstationDefaultArgs
