@@ -40,7 +40,6 @@ export function useEntityActions({
                                      refreshSearchResults
                                  }: UseEntityActionsProps) {
 
-    const [isAddNewWorkstationModalOpen, setIsAddNewWorkstationModalOpen] = useState(false);
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
 
     const {
@@ -248,20 +247,6 @@ export function useEntityActions({
 
     }, [openCloseAddNewEmployeeModal, addErrorAlert])
 
-    const onAddNewWorkstationSuccess = useCallback(() => {
-        refreshSearchResults()
-
-        setIsAddNewWorkstationModalOpen(false)
-
-        addSuccessAlert(`New workstation added!`);
-    }, [refreshSearchResults, addSuccessAlert])
-
-    const onAddNewWorkstationError = useCallback((error: string) => {
-        setIsAddNewWorkstationModalOpen(false)
-
-        addErrorAlert("Error: Could not add new workstation", error)
-    }, [addErrorAlert])
-
     const removeEmployeeById = async (id: number) => {
         // Optimistic Overlay
         startTransition(() => {
@@ -317,15 +302,11 @@ export function useEntityActions({
         removeHoldWorkspaceClickHandler,
 
         isAddNewEmployeeModalOpen,
-        isAddNewWorkstationModalOpen,
-        setIsAddNewWorkstationModalOpen,
         openSearchResultEditModal,
         openCloseAddNewEmployeeModal,
 
         onAddNewEmployeeSuccess,
         onAddNewEmployeeError,
-        onAddNewWorkstationSuccess,
-        onAddNewWorkstationError,
 
         removeEmployeeById
     }

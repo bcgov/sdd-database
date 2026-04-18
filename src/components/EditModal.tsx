@@ -4,7 +4,7 @@ import {AssignMode, Entity} from "@/types";
 
 import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
 import {OfficeForm} from "@/components/Entity_Forms/Office/OfficeForm";
-import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
+import {WorkstationForm} from "@/components/Entity_Forms/Workstation/WorkstationForm";
 import {WorkspaceForm} from "@/components/Entity_Forms/Workspace/WorkspaceForm";
 
 import {ModalDialog} from "@/components/ModalDialog";
@@ -38,7 +38,7 @@ export function EditModal({
                               onDelete
                           }: EditModalProps) {
 
-    const isEditableEntity = item.type === "employee" || item.type === "workstation";
+    const isEditableEntity = item.type === "employee";
 
     const modalVerb = isEditableEntity ? "Edit" : "";
     const modalTitle = `${modalVerb} ${ENTITY_TYPE_NAME[item.type]}`
@@ -73,11 +73,7 @@ export function EditModal({
                 break
 
             case "workstation":
-                bodyComponent = <WorkstationForm onSuccess={onSuccess}
-                                                 onError={onError}
-                                                 workstation={item}
-                                                 onClose={onClose}>
-                </WorkstationForm>
+                bodyComponent = <WorkstationForm workstation={item}/>
                 break
         }
 

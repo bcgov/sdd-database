@@ -1,5 +1,9 @@
-import type {Prisma, Office, Workstation} from "@/generated/prisma/client";
-import {employeeWithRelationsArgs, workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
+import type {Prisma, Office} from "@/generated/prisma/client";
+import {
+    employeeWithRelationsArgs,
+    workspaceWithAssignedEmployeeArgs,
+    workstationWithAssignedEmployeeArgs
+} from "@/db/data-access/shared";
 
 
 export type LookupOption = {
@@ -44,6 +48,8 @@ export type EmployeeSearchResult = Prisma.EmployeeGetPayload<typeof employeeWith
 
 export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceWithAssignedEmployeeArgs>
 
+export type WorkstationSearchResult = Prisma.WorkstationGetPayload<typeof workstationWithAssignedEmployeeArgs>
+
 type EmployeeEntity = EmployeeSearchResult & {
     ui_branch_id?: number;
     ui_workspace_number?: string;
@@ -55,7 +61,7 @@ export type Entity =
     | (EmployeeEntity & { type: "employee" })
     | (Office & { type: "office" })
     | (WorkspaceSearchResult & { type: "workspace" })
-    | (Workstation & { type: "workstation" })
+    | (WorkstationSearchResult & { type: "workstation" })
 
 export type EntityActionResult =
     | { status: "idle" }                    // before the first submit i.e. initial state

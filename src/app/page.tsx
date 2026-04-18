@@ -13,7 +13,6 @@ import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
 
 import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
-import {WorkstationForm} from "@/components/Entity_Forms/WorkstationForm";
 
 import {useEntityOrchestration} from "@/hooks/useEntityOrchestration";
 
@@ -67,9 +66,8 @@ export default function Home() {
                 </>
             }
 
-            {/*Only show add new employee and add new workspace buttons outside assign mode*/}
+            {/*Only show add new employee button outside assign mode*/}
             {search.assignMode === "none" &&
-                <>
                     <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
                                  setIsOpen={actions.openCloseAddNewEmployeeModal}
                                  triggerButtonText="Add New Employee"
@@ -82,17 +80,6 @@ export default function Home() {
                                       onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
                         </EmployeeForm>
                     </ModalDialog>
-
-                    <ModalDialog isOpen={actions.isAddNewWorkstationModalOpen}
-                                 setIsOpen={actions.setIsAddNewWorkstationModalOpen}
-                                 triggerButtonText="Add New Workstation"
-                                 modalTitle="Add New Workstation">
-                        <WorkstationForm onSuccess={actions.onAddNewWorkstationSuccess}
-                                         onError={actions.onAddNewWorkstationError}
-                                         onClose={() => actions.setIsAddNewWorkstationModalOpen(false)}>
-                        </WorkstationForm>
-                    </ModalDialog>
-                </>
             }
 
             {alerts.alert &&
