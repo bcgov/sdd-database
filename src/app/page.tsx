@@ -25,42 +25,48 @@ export default function Home() {
         <>
             <Header title="Employee Information"></Header>
 
-            <Search
-                selectedFilterTags={search.selectedFilterTags}
-                setSelectedFilterTags={search.setSelectedFilterTags}
-                handleSearch={search.handleSearch}
-                userHasSearchedOnce={search.userHasSearchedOnce}
-                searchResultsAreEmpty={search.searchResultsAreEmpty}
-                visibleSearchResults={search.optimisticSearchResults}
-                searchResultClickHandler={actions.openSearchResultEditModal}
-                assignMode={search.assignMode}
-                cancelAssignModeHandler={actions.cancelAssignModeHandler}
-                assignOfficeClickHandler={actions.assignOfficeClickHandler}
-                assignWorkspaceClickHandler={actions.assignWorkspaceClickHandler}>
+            <Search selectedFilterTags={search.selectedFilterTags}
+                    setSelectedFilterTags={search.setSelectedFilterTags}
+
+                    visibleSearchResults={search.optimisticSearchResults}
+                    searchResultsAreEmpty={search.searchResultsAreEmpty}
+                    userHasSearchedOnce={search.userHasSearchedOnce}
+                    searchResultClickHandler={actions.openSearchResultEditModal}
+                    handleSearch={search.handleSearch}
+
+                    assignMode={search.assignMode}
+                    assignOfficeClickHandler={actions.assignOfficeClickHandler}
+                    assignWorkspaceClickHandler={actions.assignWorkspaceClickHandler}
+                    assignWorkstationClickHandler={actions.assignWorkstationClickHandler}
+                    cancelAssignModeHandler={actions.cancelAssignModeHandler}>
             </Search>
 
             {actions.selectedSearchResult &&
                 <>
-                    <EditModal
-                        item={actions.selectedSearchResult}
-                        activateAssignMode={actions.activateAssignMode}
-                        handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
-                        handleHoldWorkspace={actions.holdWorkspaceClickHandler}
-                        handleRemoveWorkspaceHold={actions.removeHoldWorkspaceClickHandler}
-                        isOpen={uiState.isEditModalOpen}
-                        setIsOpen={uiState.setIsEditModalOpen}
-                        onSuccess={editHandlers.onEditSuccess}
-                        onError={editHandlers.onEditError}
-                        onDelete={() => actions.setIsDeleteAlertDialogOpen(true)}>
+                    <EditModal item={actions.selectedSearchResult}
+
+                               activateAssignMode={actions.activateAssignMode}
+
+                               handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
+                               handleRemoveWorkstation={actions.removeWorkstationClickHandler}
+
+                               handleHoldWorkspace={actions.holdWorkspaceClickHandler}
+                               handleRemoveWorkspaceHold={actions.removeHoldWorkspaceClickHandler}
+
+                               isOpen={uiState.isEditModalOpen}
+                               setIsOpen={uiState.setIsEditModalOpen}
+
+                               onSuccess={editHandlers.onEditSuccess}
+                               onError={editHandlers.onEditError}
+                               onDelete={() => actions.setIsDeleteAlertDialogOpen(true)}>
                     </EditModal>
 
                     {
                         actions.selectedSearchResult.type === "employee" &&
-                        <DeleteAlertDialog
-                            employee={actions.selectedSearchResult}
-                            isOpen={actions.isDeleteAlertDialogOpen}
-                            setIsOpen={actions.setIsDeleteAlertDialogOpen}
-                            onDelete={actions.removeEmployeeById}>
+                        <DeleteAlertDialog employee={actions.selectedSearchResult}
+                                           isOpen={actions.isDeleteAlertDialogOpen}
+                                           setIsOpen={actions.setIsDeleteAlertDialogOpen}
+                                           onDelete={actions.removeEmployeeById}>
                         </DeleteAlertDialog>
                     }
                 </>
@@ -68,18 +74,19 @@ export default function Home() {
 
             {/*Only show add new employee button outside assign mode*/}
             {search.assignMode === "none" &&
-                    <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
-                                 setIsOpen={actions.openCloseAddNewEmployeeModal}
-                                 triggerButtonText="Add New Employee"
-                                 modalTitle="Add New Employee">
-                        <EmployeeForm employee={actions.draftNewEmployee}
-                                      activateAssignMode={actions.activateAssignMode}
-                                      handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
-                                      onSuccess={actions.onAddNewEmployeeSuccess}
-                                      onError={actions.onAddNewEmployeeError}
-                                      onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
-                        </EmployeeForm>
-                    </ModalDialog>
+                <ModalDialog isOpen={actions.isAddNewEmployeeModalOpen}
+                             setIsOpen={actions.openCloseAddNewEmployeeModal}
+                             triggerButtonText="Add New Employee"
+                             modalTitle="Add New Employee">
+                    <EmployeeForm employee={actions.draftNewEmployee}
+                                  activateAssignMode={actions.activateAssignMode}
+                                  handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
+                                  handleRemoveWorkstation={actions.removeWorkstationClickHandler}
+                                  onSuccess={actions.onAddNewEmployeeSuccess}
+                                  onError={actions.onAddNewEmployeeError}
+                                  onClose={() => actions.openCloseAddNewEmployeeModal(false)}>
+                    </EmployeeForm>
+                </ModalDialog>
             }
 
             {alerts.alert &&

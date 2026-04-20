@@ -29,7 +29,7 @@ export function OfficeDetails({
                            name="officeNumber"
                            isRequired
                            isReadOnly
-                           defaultValue={officeNumber}/>
+                           value={officeNumber}/>
 
                 <Button variant="secondary"
                         onPress={handleAssignOffice}

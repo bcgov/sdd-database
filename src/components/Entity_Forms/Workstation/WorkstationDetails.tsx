@@ -9,6 +9,9 @@ interface WorkstationDetailsProps {
 export function WorkstationDetails({
                                        workstation,
                                    }: WorkstationDetailsProps) {
+
+    const hasNotes = !!workstation.notes
+
     return (
         <Accordion label="Workstation Details" id="workstationDetails">
             <TextField label="Asset Tag"
@@ -17,11 +20,12 @@ export function WorkstationDetails({
                        defaultValue={workstation.asset_tag}>
             </TextField>
 
-            <TextArea label="Notes"
+            {hasNotes && <TextArea label="Notes"
                       name="notes"
                       maxLength={2000}
                       isReadOnly
-                      defaultValue={workstation.notes ?? undefined}/>
+                      defaultValue={workstation.notes ?? undefined}>
+            </TextArea>}
         </Accordion>
     )
 }

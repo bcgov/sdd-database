@@ -1,12 +1,11 @@
-import {EmployeeFormValues, EmployeeSearchResult, LookupOption} from "@/types";
+import {LookupOption} from "@/types";
 import {useBranches} from "@/hooks/lookups/useBranches";
 import {Dispatch, SetStateAction, useState} from "react";
 import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
 import {useJobTitles} from "@/hooks/lookups/useJobTitles";
 import {useOhsAccommodationTypes} from "@/hooks/lookups/useOhsAccommodationTypes";
+import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
 
-
-type EmployeeLike = EmployeeFormValues | EmployeeSearchResult | undefined
 
 export interface EmployeeLookupState {
     branches: LookupOption[]

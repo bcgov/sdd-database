@@ -3,11 +3,10 @@ import type {Selection} from "@react-types/shared";
 
 import {AssignMode, SearchOptions} from "@/types";
 
-import {deleteEmployeeAction} from "@/actions/entities/employees";
-
 import {getEmployeeFullName} from "@/utils";
 import {holdAction, removeHoldAction} from "@/actions/entities/workspaces";
 import {useEmployeeEditorState} from "@/hooks/useEmployeeEditorState";
+import {deleteEmployeeAction} from "@/actions/entities/employee/actions";
 
 
 interface UseEntityActionsProps {
@@ -21,6 +20,7 @@ interface UseEntityActionsProps {
     setAssignMode: (assignMode: AssignMode) => void;
     setAssignEmployeeOfficeNumber: (officeNumber: string | undefined) => void;
     setAssignEmployeeProgramAreaId: (programAreaId: number | undefined) => void;
+    setAssignEmployeeWorkstationAssetTags: (assetTags: string[]) => void;
 
     setOptimisticSearchResults: (id: number) => void;
     runSearch: (query?: string, options?: SearchOptions) => Promise<void>;
@@ -29,15 +29,21 @@ interface UseEntityActionsProps {
 
 export function useEntityActions({
                                      setIsEditModalOpen,
+
                                      addSuccessAlert,
                                      addErrorAlert,
+
                                      setSelectedFilterTags,
+
                                      setAssignMode,
                                      setAssignEmployeeOfficeNumber,
                                      setAssignEmployeeProgramAreaId,
+                                     setAssignEmployeeWorkstationAssetTags,
+
                                      setOptimisticSearchResults,
                                      runSearch,
                                      refreshSearchResults
+
                                  }: UseEntityActionsProps) {
 
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
@@ -54,23 +60,27 @@ export function useEntityActions({
         saveEmployeeFormData,
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
-        removeWorkspaceClickHandler
+        assignWorkstationClickHandler,
+        removeWorkspaceClickHandler,
+        removeWorkstationClickHandler,
 
     } = useEmployeeEditorState({
         setIsEditModalOpen,
         addErrorAlert,
-
         setAssignMode,
-        setAssignEmployeeOfficeNumber,
-        setAssignEmployeeProgramAreaId,
     })
 
-    /** This function is called when the user clicks on "Assign Workspace/Office" in the add new employee modal or the
-     *  "Update Workspace/Office" button in the add new employee modal or the edit employee modal.
+    /** This function is called when the user clicks on "Assign Office/Workspace/Workstation" in the add new employee
+     *  modal or the
+     *  "Update Office/Workspace/Workstation" button in the add new employee modal or the edit employee modal.
      * @param mode
      * @param formData
      */
     const activateAssignMode = async (mode: AssignMode, formData: FormData) => {
+
+        if (mode === "office") {
+            await enterAssignMode(mode, formData)
+        }
 
         if (mode === "workspace") {
             const employeeOfficeNumber = formData.get("officeNumber") as string;
@@ -96,13 +106,30 @@ export function useEntityActions({
             setAssignEmployeeOfficeNumber(employeeOfficeNumber)
             setAssignEmployeeProgramAreaId(employeeProgramAreaId)
 
-            await enterAssignMode(mode, formData, employeeOfficeNumber, employeeProgramAreaId)
+            await enterAssignMode(
+                mode,
+                formData,
+                employeeOfficeNumber,
+                employeeProgramAreaId
+            )
         }
 
-        if (mode === "office") {
-            await enterAssignMode(mode, formData)
-        }
+        if (mode === "workstation") {
 
+            const employeeWorkstationAssetTags = formData
+                .getAll("workstationAssetTags")
+                .map(value => String(value))
+
+            setAssignEmployeeWorkstationAssetTags(employeeWorkstationAssetTags)
+
+            await enterAssignMode(
+                mode,
+                formData,
+                undefined,
+                undefined,
+                employeeWorkstationAssetTags
+            )
+        }
     }
 
     /**
@@ -119,7 +146,8 @@ export function useEntityActions({
         mode: AssignMode,
         formData: FormData,
         employeeOfficeNumber?: string,
-        employeeProgramAreaId?: number
+        employeeProgramAreaId?: number,
+        employeeWorkstationAssetTags?: string[]
     ) => {
 
         setAssignMode(mode);
@@ -130,7 +158,8 @@ export function useEntityActions({
             {
                 modeOverride: mode,
                 employeeOfficeNumber,
-                employeeProgramAreaId
+                employeeProgramAreaId,
+                employeeWorkstationAssetTags
             }
         )
 
@@ -141,11 +170,6 @@ export function useEntityActions({
 
     const cancelAssignModeHandler = useCallback(() => {
         setAssignMode("none")
-
-        // Clear any workspace-assignment office constraint and program area id constraint when leaving assign mode.
-        // This mainly matters for workspace assignment and is harmless for office assignment.
-        setAssignEmployeeOfficeNumber(undefined)
-        setAssignEmployeeProgramAreaId(undefined)
 
         if (draftNewEmployee) {
             openCloseAddNewEmployeeModal(true)
@@ -296,7 +320,9 @@ export function useEntityActions({
         cancelAssignModeHandler,
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
+        assignWorkstationClickHandler,
         removeWorkspaceClickHandler,
+        removeWorkstationClickHandler,
 
         holdWorkspaceClickHandler,
         removeHoldWorkspaceClickHandler,

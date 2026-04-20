@@ -1,26 +1,7 @@
 import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
-import {workspaceWithAssignedEmployeeArgs} from "@/db/data-access/shared";
+import {workspaceSearchResultArgs} from "@/db/data-access/shared";
 
-
-export async function getWorkspacesByFilter(query?: string) {
-
-    const searchFilter: Prisma.WorkspaceWhereInput = query
-        ? {
-            OR: [
-                {office_number: {contains: query, mode: 'insensitive'}},
-                {workspace_number: {contains: query, mode: 'insensitive'}},
-                {category: {name: {contains: query, mode: 'insensitive'}}},
-                {desk_type: {name: {contains: query, mode: 'insensitive'}}}
-            ]
-        }
-        : {}
-
-    return prisma.workspace.findMany({
-        where: searchFilter,
-        ...workspaceWithAssignedEmployeeArgs
-    })
-}
 
 export async function getWorkspaceByOfficeAndWorkspaceNumber(
     officeNumber: string,
@@ -36,6 +17,39 @@ export async function getWorkspaceByOfficeAndWorkspaceNumber(
     })
 }
 
+export async function getWorkspacesByFilter(query?: string) {
+
+    const searchFilter: Prisma.WorkspaceWhereInput = query
+        ? {
+            OR: [
+                {office_number: {contains: query, mode: 'insensitive'}},
+                {workspace_number: {contains: query, mode: 'insensitive'}},
+                {category: {name: {contains: query, mode: 'insensitive'}}},
+                {desk_type: {name: {contains: query, mode: 'insensitive'}}},
+                {
+                    // find workspaces whose assigned employee exists and matches at least one of these
+                    // employee-field filters
+                    assigned_employee: {
+                        is: {
+                            OR: [
+                                {idir: {contains: query, mode: 'insensitive'}},
+                                {first_name: {contains: query, mode: 'insensitive'}},
+                                {alternate_name: {contains: query, mode: 'insensitive'}},
+                                {last_name: {contains: query, mode: 'insensitive'}},
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+        : {}
+
+    return prisma.workspace.findMany({
+        where: searchFilter,
+        ...workspaceSearchResultArgs
+    })
+}
+
 export async function getAssignableWorkspacesByFilter(
     employeeOfficeNumber: string,
     employeeProgramAreaId: number,
@@ -46,6 +60,7 @@ export async function getAssignableWorkspacesByFilter(
             OR: [
                 {workspace_number: {contains: query, mode: 'insensitive'}},
                 {category: {name: {contains: query, mode: 'insensitive'}}},
+                {desk_type: {name: {contains: query, mode: 'insensitive'}}},
             ],
         }
         : {}
@@ -64,9 +79,12 @@ export async function getAssignableWorkspacesByFilter(
         orderBy: {
             workspace_number: "asc"
         },
-        // this should be null
-        // However, adding this to align with type Entity
-        ...workspaceWithAssignedEmployeeArgs
+        /**
+         * assigned_employee should be null
+         * Other included relations like category, desk_type and restrictions are still needed for display and to
+         * align with the WorkspaceSearchResult / Entity shape
+         */
+        ...workspaceSearchResultArgs
     })
 }
 

@@ -9,21 +9,27 @@ import {
     Form,
 } from "@bcgov/design-system-react-components";
 
-import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employees";
-
-import {AssignMode, EmployeeFormValues, EmployeeSearchResult, EntityActionResult} from "@/types";
+import {AssignMode, EntityActionResult} from "@/types";
 
 import {WorkspaceDetails} from "@/components/Entity_Forms/Employee/WorkspaceDetails";
 import {OfficeDetails} from "@/components/Entity_Forms/Employee/OfficeDetails";
 import {useEmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
 import {OhsAccommodations} from "@/components/Entity_Forms/Employee/OhsAccommodations";
 import {EmployeeDetails} from "@/components/Entity_Forms/Employee/EmployeeDetails";
+import {WorkstationDetails} from "@/components/Entity_Forms/Employee/WorkstationDetails";
+import {getEmployeeAssignmentState} from "@/components/Entity_Forms/Employee/getEmployeeAssignmentState";
+import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employee/actions";
 
 
 interface EmployeeFormProps {
-    employee: EmployeeFormValues | EmployeeSearchResult | undefined
+    employee: EmployeeLike
+
     activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
+
     handleRemoveWorkspace: () => void
+    handleRemoveWorkstation: (assetTag: string) => void
+
     onSuccess: () => void
     onError: (error: string) => void
     // optional prop only passed in edit mode
@@ -33,8 +39,12 @@ interface EmployeeFormProps {
 
 export function EmployeeForm({
                                  employee,
+
                                  activateAssignMode,
+
                                  handleRemoveWorkspace,
+                                 handleRemoveWorkstation,
+
                                  onSuccess,
                                  onError,
                                  onDelete,
@@ -56,25 +66,16 @@ export function EmployeeForm({
 
     const hasProgramAreaAssignment = !!employeeLookupState.selectedProgramAreaId
 
-    const hasOfficeAssignment = !!employee?.office_number
-    const officeNumber = employee?.office_number ?? "Unassigned"
+    const {
+        hasOfficeAssignment,
+        officeNumber,
 
-    const uiWorkspaceNumber = employee && "ui_workspace_number" in employee
-        ? employee.ui_workspace_number
-        : undefined
+        hasWorkspaceAssignment,
+        workspaceNumber,
+        selectedWorkspaceRestrictedProgramAreaId,
 
-    const workspace = employee && "workspace" in employee
-        ? employee.workspace
-        : null
-
-    const workspaceNumber = uiWorkspaceNumber ?? workspace?.workspace_number ?? "Unassigned"
-
-    const hasWorkspaceAssignment = !!(uiWorkspaceNumber || workspace?.workspace_number)
-
-    const selectedWorkspaceRestrictedProgramAreaId =
-        employee && "ui_workspace_restricted_program_area_id" in employee
-            ? employee.ui_workspace_restricted_program_area_id
-            : workspace?.restricted_program_area_id
+        workstationAssetTags
+    } = getEmployeeAssignmentState(employee)
 
     useEffect(() => {
 
@@ -165,27 +166,29 @@ export function EmployeeForm({
                     marginBottom: "1rem",
                 }}>
 
-                    <EmployeeDetails
-                        employee={employee}
-                        lookupState={employeeLookupState}
-                        isEditMode={isEditMode}>
+                    <EmployeeDetails employee={employee}
+                                     lookupState={employeeLookupState}
+                                     isEditMode={isEditMode}>
                     </EmployeeDetails>
 
-                    <OfficeDetails
-                        officeNumber={officeNumber}
-                        hasOfficeAssignment={hasOfficeAssignment}
-                        isEditMode={isEditMode}
-                        handleAssignOffice={(e) => handleAssign("office", e)}>
+                    <OfficeDetails officeNumber={officeNumber}
+                                   hasOfficeAssignment={hasOfficeAssignment}
+                                   isEditMode={isEditMode}
+                                   handleAssignOffice={(e) => handleAssign("office", e)}>
                     </OfficeDetails>
 
-                    <WorkspaceDetails
-                        workspaceNumber={workspaceNumber}
-                        hasProgramAreaAssignment={hasProgramAreaAssignment}
-                        hasOfficeAssignment={hasOfficeAssignment}
-                        hasWorkspaceAssignment={hasWorkspaceAssignment}
-                        handleAssignWorkspace={(e) => handleAssign("workspace", e)}
-                        handleRemoveWorkspace={handleRemoveWorkspace}>
+                    <WorkspaceDetails workspaceNumber={workspaceNumber}
+                                      hasProgramAreaAssignment={hasProgramAreaAssignment}
+                                      hasOfficeAssignment={hasOfficeAssignment}
+                                      hasWorkspaceAssignment={hasWorkspaceAssignment}
+                                      handleAssignWorkspace={(e) => handleAssign("workspace", e)}
+                                      handleRemoveWorkspace={handleRemoveWorkspace}>
                     </WorkspaceDetails>
+
+                    <WorkstationDetails workstationAssetTags={workstationAssetTags}
+                                        handleAssignWorkstation={(e) => handleAssign("workstation", e)}
+                                        handleRemoveWorkstation={handleRemoveWorkstation}>
+                    </WorkstationDetails>
 
                     <OhsAccommodations ohsAccommodationTypes={employeeLookupState.ohsAccommodationTypes}
                                        selectedOhsAccommodationTypeIds={employeeLookupState.selectedOhsAccommodationTypeIds}>

@@ -47,11 +47,10 @@ export function WorkspaceDetails({
                     </div>
                 }
 
-                <TextField
-                    label="Workspace Number"
-                    name="workspaceNumber"
-                    isReadOnly
-                    value={workspaceNumber}
+                <TextField label="Workspace Number"
+                           name="workspaceNumber"
+                           isReadOnly
+                           value={workspaceNumber}
                 >
                 </TextField>
 

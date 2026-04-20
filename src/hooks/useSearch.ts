@@ -6,6 +6,7 @@ import {AssignMode, Entity, SearchOptions} from "@/types";
 import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
 import {searchAssignableWorkspacesAction} from "@/actions/entities/workspaces";
+import {searchAssignableWorkstationsAction} from "@/actions/entities/workstations";
 
 
 export function useSearch() {
@@ -17,6 +18,7 @@ export function useSearch() {
     const [assignMode, setAssignMode] = useState<AssignMode>("none");
     const [assignEmployeeOfficeNumber, setAssignEmployeeOfficeNumber] = useState<string>();
     const [assignEmployeeProgramAreaId, setAssignEmployeeProgramAreaId] = useState<number>();
+    const [assignEmployeeWorkstationAssetTags, setAssignEmployeeWorkstationAssetTags] = useState<string[]>([])
 
     const filteredSearchResults = searchResults.filter((item) => {
 
@@ -52,8 +54,9 @@ export function useSearch() {
     const runSearch = useCallback(async (query?: string, options?: SearchOptions) => {
 
         const effectiveMode = options?.modeOverride ?? assignMode
-        const effectiveEmployeeOfficeNumber = options?.employeeOfficeNumber ?? assignEmployeeOfficeNumber;
-        const effectiveEmployeeProgramAreaId = options?.employeeProgramAreaId ?? assignEmployeeProgramAreaId;
+        const effectiveEmployeeOfficeNumber = options?.employeeOfficeNumber ?? assignEmployeeOfficeNumber
+        const effectiveEmployeeProgramAreaId = options?.employeeProgramAreaId ?? assignEmployeeProgramAreaId
+        const effectiveEmployeeWorkstationAssetTags = options?.employeeWorkstationAssetTags ?? assignEmployeeWorkstationAssetTags
 
         let results: Entity[] = [];
 
@@ -76,13 +79,28 @@ export function useSearch() {
                 }
                 break;
 
+            case "workstation":
+                const workstationResults = await searchAssignableWorkstationsAction(query);
+
+                results = workstationResults.filter(item =>
+                    item.type !== "workstation" ||
+                    !effectiveEmployeeWorkstationAssetTags.includes(item.asset_tag)
+                )
+
+                break;
+
             case "none":
                 results = await searchAllAction(query);
                 break;
         }
 
         setSearchResults(results);
-    }, [assignMode, assignEmployeeOfficeNumber, assignEmployeeProgramAreaId]);
+    }, [
+        assignMode,
+        assignEmployeeOfficeNumber,
+        assignEmployeeProgramAreaId,
+        assignEmployeeWorkstationAssetTags,
+    ]);
 
     const refreshSearchResults = useCallback(() => runSearch(searchPhrase), [runSearch, searchPhrase])
 
@@ -94,6 +112,7 @@ export function useSearch() {
         setAssignMode,
         setAssignEmployeeOfficeNumber,
         setAssignEmployeeProgramAreaId,
+        setAssignEmployeeWorkstationAssetTags,
 
         optimisticSearchResults,
         setOptimisticSearchResults,

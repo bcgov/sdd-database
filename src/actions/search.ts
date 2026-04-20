@@ -2,7 +2,7 @@
 
 import {Entity} from "@/types";
 
-import {searchEmployeesAction} from "@/actions/entities/employees";
+import {searchEmployeesAction} from "@/actions/entities/employee/actions";
 import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchWorkspacesAction} from "@/actions/entities/workspaces";
 import {searchWorkstationsAction} from "@/actions/entities/workstations";

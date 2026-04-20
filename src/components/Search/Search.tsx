@@ -15,29 +15,34 @@ interface SearchProps {
     setSelectedFilterTags: (selectedFilterTags: Selection) => void
 
     visibleSearchResults: Entity[]
-
-    assignMode: AssignMode
-    cancelAssignModeHandler: () => void
-    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
-    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
-    userHasSearchedOnce: () => boolean
     searchResultsAreEmpty: boolean
+    userHasSearchedOnce: () => boolean
     searchResultClickHandler: (item: Entity) => void
     handleSearch: (formData: FormData) => Promise<void>
+
+    assignMode: AssignMode
+    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
+    assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void
+    cancelAssignModeHandler: () => void
 }
 
 export function Search({
                            selectedFilterTags,
                            setSelectedFilterTags,
+
                            visibleSearchResults,
-                           assignMode,
-                           cancelAssignModeHandler,
-                           assignOfficeClickHandler,
-                           assignWorkspaceClickHandler,
                            searchResultsAreEmpty,
                            userHasSearchedOnce,
                            searchResultClickHandler,
-                           handleSearch
+                           handleSearch,
+
+                           assignMode,
+                           assignOfficeClickHandler,
+                           assignWorkspaceClickHandler,
+                           assignWorkstationClickHandler,
+                           cancelAssignModeHandler,
+
                        }: SearchProps) {
 
     const getAssignModeCallout = () => {
@@ -51,6 +56,11 @@ export function Search({
                 return {
                     title: "Eligible Empty Workspaces in Employee's Office",
                     description: "Use the search box to find a workspace in the selected office, then click Assign next to the correct result"
+                }
+            case "workstation":
+                return {
+                    title: "Available Workstations",
+                    description: "Use the search box to find a workstation, then click Assign next to the correct result"
                 }
             default:
                 return null
@@ -85,7 +95,9 @@ export function Search({
                                searchResultClickHandler={searchResultClickHandler}
                                assignMode={assignMode}
                                assignOfficeClickHandler={assignOfficeClickHandler}
-                               assignWorkspaceClickHandler={assignWorkspaceClickHandler}>
+                               assignWorkspaceClickHandler={assignWorkspaceClickHandler}
+                               assignWorkstationClickHandler={assignWorkstationClickHandler}
+            >
             </SearchResultsList>
         )
     }
