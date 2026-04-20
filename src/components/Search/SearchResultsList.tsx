@@ -7,10 +7,8 @@ interface SearchResultsListProps {
     searchResultClickHandler: (item: Entity) => void
     assignMode: AssignMode
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
-    assignWorkspaceClickHandler: (assignedWorkspace: {
-        workspace_number: string
-        restricted_program_area_id: number | null
-    }) => void
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
+    assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void
 }
 
 const getSearchResultKey = (item: Entity) => {
@@ -63,8 +61,9 @@ const getAssignClickHandler = (
     item: Entity,
     assignMode: AssignMode,
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void,
-    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void) =>
-{
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void,
+    assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void,
+) => {
     if (item.type === "office" && assignMode === "office") {
         return () => assignOfficeClickHandler(item.office_number)
     }
@@ -76,6 +75,10 @@ const getAssignClickHandler = (
         })
     }
 
+    if (item.type === "workstation" && assignMode === "workstation") {
+        return () => assignWorkstationClickHandler(item.asset_tag)
+    }
+
     return undefined;
 }
 
@@ -84,7 +87,8 @@ export function SearchResultsList({
                                       searchResultClickHandler,
                                       assignMode,
                                       assignOfficeClickHandler,
-                                      assignWorkspaceClickHandler
+                                      assignWorkspaceClickHandler,
+                                      assignWorkstationClickHandler,
                                   }: SearchResultsListProps) {
     return (
         <>
@@ -97,7 +101,8 @@ export function SearchResultsList({
                                           item,
                                           assignMode,
                                           assignOfficeClickHandler,
-                                          assignWorkspaceClickHandler
+                                          assignWorkspaceClickHandler,
+                                          assignWorkstationClickHandler
                                       )
                                   }
                 >

@@ -14,12 +14,18 @@ import {ENTITY_TYPE_NAME} from "@/utils";
 
 interface EditModalProps {
     item: Entity
+
     activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
+
     handleRemoveWorkspace: () => void
+    handleRemoveWorkstation: (assetTag: string) => void
+
     handleHoldWorkspace: () => void
     handleRemoveWorkspaceHold: () => void
+
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
+
     onSuccess: () => void
     onError: (error: string) => void
     onDelete: () => void
@@ -27,12 +33,18 @@ interface EditModalProps {
 
 export function EditModal({
                               item,
+
                               activateAssignMode,
+
                               handleRemoveWorkspace,
+                              handleRemoveWorkstation,
+
                               handleHoldWorkspace,
                               handleRemoveWorkspaceHold,
+
                               isOpen,
                               setIsOpen,
+
                               onSuccess,
                               onError,
                               onDelete
@@ -40,8 +52,11 @@ export function EditModal({
 
     const isEditableEntity = item.type === "employee";
 
-    const modalVerb = isEditableEntity ? "Edit" : "";
-    const modalTitle = `${modalVerb} ${ENTITY_TYPE_NAME[item.type]}`
+    const entityTypeName = ENTITY_TYPE_NAME[item.type]
+
+    const modalTitle = isEditableEntity
+        ? `Edit ${entityTypeName}`
+        : entityTypeName
 
     const getModalBody = () => {
         let bodyComponent = null;
@@ -54,6 +69,7 @@ export function EditModal({
                     <EmployeeForm employee={item}
                                   activateAssignMode={activateAssignMode}
                                   handleRemoveWorkspace={handleRemoveWorkspace}
+                                  handleRemoveWorkstation={handleRemoveWorkstation}
                                   onSuccess={onSuccess}
                                   onError={onError}
                                   onDelete={onDelete}

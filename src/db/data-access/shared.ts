@@ -1,10 +1,11 @@
 import {Prisma} from "@/generated/prisma/client";
 
 
-export const employeeWithRelationsArgs = {
+export const employeeSearchResultArgs = {
     include: {
         program_area: true,
         workspace: true,
+        workstations: true,
         ohs_accommodations: {
             include: {
                 ohs_accommodation_type: true,
@@ -13,7 +14,7 @@ export const employeeWithRelationsArgs = {
     }
 } satisfies Prisma.EmployeeDefaultArgs
 
-export const workspaceWithAssignedEmployeeArgs =
+export const workspaceSearchResultArgs =
     {
         include: {
             category: true,
@@ -34,7 +35,7 @@ export const workspaceWithAssignedEmployeeArgs =
         }
     } satisfies Prisma.WorkspaceDefaultArgs
 
-export const workstationWithAssignedEmployeeArgs = {
+export const workstationSearchResultArgs = {
     include: {
         assigned_employee: {
             select: {

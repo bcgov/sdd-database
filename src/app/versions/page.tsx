@@ -6,6 +6,16 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.30",
+            notes: [
+                "Employees can now assign Workstations",
+                "You can now search for workstations using the assigned employee details and not just workstation" +
+                " details",
+                "Similarly, you can now search for workspaces using the assigned employee details and not just" +
+                " workspace details"
+            ]
+        },
+        {
             version: "v0.0.29",
             notes: [
                 "Added Workspace Protections"

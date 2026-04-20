@@ -6,18 +6,13 @@ import {parseEmployeeFormData} from "@/utils";
 interface UseEmployeeEditorStateProps {
     setIsEditModalOpen: (isOpen: boolean) => void;
     addErrorAlert: (title: string, description: string) => void;
-
     setAssignMode: (assignMode: AssignMode) => void;
-    setAssignEmployeeOfficeNumber: (officeNumber: string | undefined) => void;
-    setAssignEmployeeProgramAreaId: (programAreaId: number | undefined) => void;
 }
 
 export function useEmployeeEditorState({
                                            setIsEditModalOpen,
                                            addErrorAlert,
                                            setAssignMode,
-                                           setAssignEmployeeOfficeNumber,
-                                           setAssignEmployeeProgramAreaId,
                                        }: UseEmployeeEditorStateProps) {
     const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormValues>();
     const [selectedSearchResult, setSelectedSearchResult] = useState<Entity>();
@@ -63,7 +58,6 @@ export function useEmployeeEditorState({
 
         const employeeSnapshot: EmployeeFormValues = {
             ...parseEmployeeFormData(formData),
-            ui_branch_id: Number(formData.get("branch")),
             ...existingWorkspaceRestrictionUIState
         }
 
@@ -90,34 +84,6 @@ export function useEmployeeEditorState({
             })
 
             setIsEditModalOpen(false);
-        }
-    }
-
-    const assignWorkspaceClickHandler = (assignedWorkspace: SelectedWorkspaceAssignment) => {
-        setAssignMode("none")
-        setAssignEmployeeOfficeNumber(undefined)
-        setAssignEmployeeProgramAreaId(undefined)
-
-        if (draftNewEmployee) {
-            // We are in add new employee modal
-            setDraftNewEmployee({
-                ...draftNewEmployee,
-                ui_workspace_number: assignedWorkspace.workspace_number,
-                ui_workspace_restricted_program_area_id: assignedWorkspace.restricted_program_area_id
-            })
-            openCloseAddNewEmployeeModal(true)
-        } else {
-            if (selectedSearchResult?.type === "employee") {
-
-                // We are in edit employee modal
-                setSelectedSearchResult({
-                    ...selectedSearchResult,
-                    ui_workspace_number: assignedWorkspace.workspace_number,
-                    ui_workspace_restricted_program_area_id: assignedWorkspace.restricted_program_area_id
-                })
-
-                setIsEditModalOpen(true)
-            }
         }
     }
 
@@ -164,6 +130,71 @@ export function useEmployeeEditorState({
         }
     }
 
+    const assignWorkspaceClickHandler = (assignedWorkspace: SelectedWorkspaceAssignment) => {
+        setAssignMode("none")
+
+        if (draftNewEmployee) {
+            // We are in add new employee modal
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_workspace_number: assignedWorkspace.workspace_number,
+                ui_workspace_restricted_program_area_id: assignedWorkspace.restricted_program_area_id
+            })
+            openCloseAddNewEmployeeModal(true)
+        } else {
+            if (selectedSearchResult?.type === "employee") {
+
+                // We are in edit employee modal
+                setSelectedSearchResult({
+                    ...selectedSearchResult,
+                    ui_workspace_number: assignedWorkspace.workspace_number,
+                    ui_workspace_restricted_program_area_id: assignedWorkspace.restricted_program_area_id
+                })
+
+                setIsEditModalOpen(true)
+            }
+        }
+    }
+
+    const assignWorkstationClickHandler = (assignedWorkstationAssetTag: string) => {
+        setAssignMode("none")
+
+        if (draftNewEmployee) {
+
+            const currentAssetTags = draftNewEmployee.ui_workstation_asset_tags ?? []
+
+            const nextAssetTags = Array.from(
+                new Set([...currentAssetTags, assignedWorkstationAssetTag])
+            )
+
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_workstation_asset_tags: nextAssetTags
+            })
+
+            openCloseAddNewEmployeeModal(true)
+        } else {
+            if (selectedSearchResult?.type === "employee") {
+
+                const currentAssetTags = selectedSearchResult.ui_workstation_asset_tags ??
+                    selectedSearchResult.workstations.map(
+                        workstation => workstation.asset_tag
+                    )
+
+                const nextAssetTags = Array.from(
+                    new Set([...currentAssetTags, assignedWorkstationAssetTag])
+                )
+
+                setSelectedSearchResult({
+                    ...selectedSearchResult,
+                    ui_workstation_asset_tags: nextAssetTags
+                })
+
+                setIsEditModalOpen(true)
+            }
+        }
+    }
+
     const removeWorkspaceClickHandler = () => {
         if (draftNewEmployee) {
             setDraftNewEmployee({
@@ -183,6 +214,35 @@ export function useEmployeeEditorState({
         }
     }
 
+    const removeWorkstationClickHandler = (assetTag: string) => {
+        if (draftNewEmployee) {
+
+            const currentAssetTags = draftNewEmployee.ui_workstation_asset_tags ?? []
+
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_workstation_asset_tags: currentAssetTags.filter(
+                    currentAssetTag => currentAssetTag !== assetTag
+                )
+            })
+        } else {
+            if (selectedSearchResult?.type === "employee") {
+
+                const currentAssetTags = selectedSearchResult.ui_workstation_asset_tags ??
+                    selectedSearchResult.workstations.map(
+                        workstation => workstation.asset_tag
+                    )
+
+                setSelectedSearchResult({
+                    ...selectedSearchResult,
+                    ui_workstation_asset_tags: currentAssetTags.filter(
+                        currentAssetTag => currentAssetTag !== assetTag
+                    )
+                })
+            }
+        }
+    }
+
     return {
         draftNewEmployee,
         selectedSearchResult,
@@ -196,5 +256,7 @@ export function useEmployeeEditorState({
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
         removeWorkspaceClickHandler,
+        assignWorkstationClickHandler,
+        removeWorkstationClickHandler
     }
 }

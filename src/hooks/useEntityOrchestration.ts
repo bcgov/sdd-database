@@ -26,6 +26,7 @@ export function useEntityOrchestration() {
         setAssignMode,
         setAssignEmployeeOfficeNumber,
         setAssignEmployeeProgramAreaId,
+        setAssignEmployeeWorkstationAssetTags,
 
         optimisticSearchResults,
         setOptimisticSearchResults,
@@ -58,6 +59,7 @@ export function useEntityOrchestration() {
         setAssignMode,
         setAssignEmployeeOfficeNumber,
         setAssignEmployeeProgramAreaId,
+        setAssignEmployeeWorkstationAssetTags,
 
         setOptimisticSearchResults,
         runSearch,

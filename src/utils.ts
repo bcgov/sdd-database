@@ -12,13 +12,20 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
 
     const officeNumber = formData.get("officeNumber") as string;
     const jobTitleId = formData.get("jobTitle");
+
+    const id = formData.get("id");
+    const branchId = formData.get("branch");
     const workspaceNumber = formData.get("workspaceNumber") as string;
+
+    const workstationAssetTags = formData
+        .getAll("workstationAssetTags")
+        .map(value => String(value));
+
     const ohsAccommodationTypeIds = formData
         .getAll("ohsAccommodationTypeIds")
         .map(value => Number(value));
     
     return {
-        id: formData.get("id") ? Number(formData.get("id")) : undefined,
         office_number: officeNumber !== "Unassigned" ? officeNumber : "",
         idir: (formData.get("idir") as string).toUpperCase() || null,   // normalizing to maintain consistency in the DB
         first_name: formData.get("firstName") as string,
@@ -28,7 +35,11 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
         program_area_id: Number(formData.get("programArea")),
         job_title_id: jobTitleId ? Number(jobTitleId) : null,
         notes: formData.get("notes") as string || null,
+
+        id: id ? Number(id) : undefined,
+        ui_branch_id: branchId ? Number(branchId) : undefined,
         ui_workspace_number: workspaceNumber !== "Unassigned" ? workspaceNumber : undefined,
+        ui_workstation_asset_tags: workstationAssetTags,
         ohs_accommodation_type_ids: ohsAccommodationTypeIds
     }
 }

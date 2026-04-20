@@ -1,44 +1,59 @@
+import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
 import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
-import {employeeWithRelationsArgs} from "@/db/data-access/shared";
+import {employeeSearchResultArgs} from "@/db/data-access/shared";
 
 
-async function addNewEmployee(employee: EmployeeFormValues) {
+type DbClient = Prisma.TransactionClient
+
+async function addNewEmployee(db: DbClient, employee: EmployeeFormValues) {
 
     const {
         id,
         ui_branch_id,
         ui_workspace_number,
+        ui_workstation_asset_tags,
         ohs_accommodation_type_ids,
         ...employeeDbFields
     } = employee
 
-    return prisma.employee.create({
+    return db.employee.create({
         data: employeeDbFields
     })
 }
 
-export async function addNewEmployeeWithWorkspace(employee: EmployeeFormValues) {
-    const createdEmployee = await addNewEmployee(employee);
+export async function addNewEmployeeWithAssignments(employee: EmployeeFormValues) {
 
-    await syncEmployeeWorkspace(
-        createdEmployee.id,
-        employee.office_number,
-        employee.ui_workspace_number
-    )
+    return prisma.$transaction(async (db) => {
+        const createdEmployee = await addNewEmployee(db, employee);
 
-    await syncEmployeeOhsAccommodations(
-        createdEmployee.id,
-        employee.ohs_accommodation_type_ids
-    )
+        await syncEmployeeWorkspace(
+            db,
+            createdEmployee.id,
+            employee.office_number,
+            employee.ui_workspace_number
+        )
 
-    return createdEmployee
+        await syncEmployeeWorkstations(
+            db,
+            createdEmployee.id,
+            employee.ui_workstation_asset_tags ?? []
+        )
+
+        await syncEmployeeOhsAccommodations(
+            db,
+            createdEmployee.id,
+            employee.ohs_accommodation_type_ids
+        )
+
+        return createdEmployee
+    })
 }
 
 export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
     if (!query)
         return prisma.employee.findMany({
-            ...employeeWithRelationsArgs
+            ...employeeSearchResultArgs
         })
 
     return prisma.employee.findMany({
@@ -67,17 +82,17 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                 }
             ]
         },
-        ...employeeWithRelationsArgs
+        ...employeeSearchResultArgs
     })
 }
 
-async function updateEmployee(employee: EmployeeFormValues) {
+async function updateEmployee(db: DbClient, employee: EmployeeFormValues) {
 
     if (employee.id === undefined) {
         throw new Error("Didn't find the employee primary key id. Can't update employee")
     }
 
-    const existingEmployee = await prisma.employee.findUnique({
+    const existingEmployee = await db.employee.findUnique({
         where: {
             id: employee.id,
         },
@@ -100,6 +115,7 @@ async function updateEmployee(employee: EmployeeFormValues) {
         // we extract the following to ignore them
         ui_branch_id,
         ui_workspace_number,
+        ui_workstation_asset_tags,
         ohs_accommodation_type_ids,
         ...rest
     } = employee
@@ -111,58 +127,101 @@ async function updateEmployee(employee: EmployeeFormValues) {
         ...(existingEmployee.idir ? {} : {idir}),
     }
 
-    return prisma.employee.update({
+    return db.employee.update({
         where: {id},
         data,
     })
 }
 
-export async function updateEmployeeWithWorkspace(employee: EmployeeFormValues) {
-    const updatedEmployee = await updateEmployee(employee)
+export async function updateEmployeeWithAssignments(employee: EmployeeFormValues) {
 
-    await syncEmployeeWorkspace(
-        updatedEmployee.id,
-        employee.office_number,
-        employee.ui_workspace_number
-    )
+    return prisma.$transaction(async (db) => {
+        const updatedEmployee = await updateEmployee(db, employee)
 
-    await syncEmployeeOhsAccommodations(
-        updatedEmployee.id,
-        employee.ohs_accommodation_type_ids
-    )
+        await syncEmployeeWorkspace(
+            db,
+            updatedEmployee.id,
+            employee.office_number,
+            employee.ui_workspace_number
+        )
 
-    return updatedEmployee
+        await syncEmployeeWorkstations(
+            db,
+            updatedEmployee.id,
+            employee.ui_workstation_asset_tags ?? []
+        )
+
+        await syncEmployeeOhsAccommodations(
+            db,
+            updatedEmployee.id,
+            employee.ohs_accommodation_type_ids
+        )
+
+        return updatedEmployee
+    })
 }
 
 async function syncEmployeeWorkspace(
+    db: DbClient,
     employeeId: number,
     officeNumber: string,
     workspaceNumber?: string
 ) {
-    await prisma.$transaction(async (tx) => {
-        // Clear any existing workspace currently assigned to this employee
-        await tx.workspace.updateMany({
+
+    // Clear any existing workspace currently assigned to this employee
+    await db.workspace.updateMany({
+        where: {
+            employee_id: employeeId,
+        },
+        data: {
+            employee_id: null,
+        }
+    })
+
+    // Assign the requested workspace, if one was selected
+    if (workspaceNumber) {
+        await db.workspace.update({
             where: {
-                employee_id: employeeId,
+                office_number_workspace_number: {
+                    office_number: officeNumber,
+                    workspace_number: workspaceNumber,
+                }
             },
             data: {
-                employee_id: null,
+                employee_id: employeeId,
             }
         })
+    }
+}
 
-        // Assign the requested workspace, if one was selected
-        if (workspaceNumber) {
-            await tx.workspace.update({
-                where: {
-                    office_number_workspace_number: {
-                        office_number: officeNumber,
-                        workspace_number: workspaceNumber,
-                    }
-                },
-                data: {
-                    employee_id: employeeId,
-                }
-            })
+async function syncEmployeeWorkstations(
+    db: DbClient,
+    employeeId: number,
+    workstationAssetTags: string[],
+) {
+    // Clear all workstation assignments currently linked to this employee
+    await db.workstation.updateMany({
+        where: {
+            employee_id: employeeId
+        },
+        data: {
+            employee_id: null,
+        }
+    })
+
+    // if user assigned no workstations, stop
+    if (workstationAssetTags.length === 0) return
+
+    // Assign the selected workstations to this employee
+    // find all workstation rows whose asset_tag is one of the selected asset tags, and set their employee_id to this employee.
+    await db.workstation.updateMany({
+        where: {
+            asset_tag: {
+                in: workstationAssetTags
+            }
+        },
+        data: {
+            employee_id: employeeId,
         }
     })
 }
@@ -173,12 +232,13 @@ async function syncEmployeeWorkspace(
  * @param ohsAccommodationTypeIds
  */
 async function syncEmployeeOhsAccommodations(
+    db: DbClient,
     employeeId: number,
     ohsAccommodationTypeIds: number[],
 ) {
 
     // This removes all existing OHS rows for that employee.
-    await prisma.employeeOhsAccommodation.deleteMany({
+    await db.employeeOhsAccommodation.deleteMany({
         where: {
             employee_id: employeeId,
         }
@@ -188,7 +248,7 @@ async function syncEmployeeOhsAccommodations(
     if (ohsAccommodationTypeIds.length === 0) return
 
     // recreate selected rows
-    await prisma.employeeOhsAccommodation.createMany({
+    await db.employeeOhsAccommodation.createMany({
         data: ohsAccommodationTypeIds.map(ohsAccommodationTypeId => ({
             employee_id: employeeId,
             ohs_accommodation_type_id: ohsAccommodationTypeId,
