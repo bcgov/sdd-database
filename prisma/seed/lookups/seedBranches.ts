@@ -1,7 +1,7 @@
 import {PrismaClient} from "@/generated/prisma/client"
 
 
-const BRANCH_NAMES = [
+const BRANCHES = [
     "Community Integration Services",
     "Prevention and Loss Management Services",
     "Community Services",
@@ -15,6 +15,6 @@ const BRANCH_NAMES = [
 export async function seedBranches(prismaClient: PrismaClient) {
 
     await prismaClient.branch.createMany({
-        data: BRANCH_NAMES.map(name => ({name}))
+        data: BRANCHES.map(name => ({name}))
     })
 }

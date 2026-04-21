@@ -2,7 +2,7 @@ import {PrismaClient} from "@/generated/prisma/client";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 
 
-const jobTitlesByProgramAreaByBranch: Record<string, Record<string, string[]>> = {
+const JOB_TITLES_BY_PROGRAM_AREA_BY_BRANCH: Record<string, Record<string, string[]>> = {
     "Community Integration Services": {
         "Executive Director": [
             "Branch Coordinator",
@@ -294,7 +294,7 @@ export async function seedProgramAreaJobTitles(prismaClient: PrismaClient) {
         job_title_id: number
     }> = []
 
-    for (const [branchName, jobTitlesByProgramArea] of Object.entries(jobTitlesByProgramAreaByBranch)) {
+    for (const [branchName, jobTitlesByProgramArea] of Object.entries(JOB_TITLES_BY_PROGRAM_AREA_BY_BRANCH)) {
         for (const [programAreaName, allowedJobTitles] of Object.entries(jobTitlesByProgramArea)) {
 
             const programAreaKey = `${branchName}::${programAreaName}`

@@ -24,9 +24,9 @@ model Employee {
   program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
   job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
 
-  workspace   Workspace?
+  workspace Workspace?
 
-  workstations Workstation[]
+  workstations       Workstation[]
   ohs_accommodations EmployeeOhsAccommodation[]
 }
 
@@ -160,7 +160,16 @@ model Workstation {
   asset_tag String  @id @db.Citext
   notes     String? @db.VarChar(2000)
 
+  model_id    Int
   employee_id Int?
 
-  assigned_employee Employee? @relation(fields: [employee_id], references: [id])
+  workstation_model WorkstationModel @relation(fields: [model_id], references: [id])
+  assigned_employee Employee?        @relation(fields: [employee_id], references: [id])
+}
+
+model WorkstationModel {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  workstations Workstation[]
 }

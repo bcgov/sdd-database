@@ -1,7 +1,7 @@
 import {PrismaClient} from "@/generated/prisma/client";
 
 
-const jobTitles = [
+const JOB_TITLES = [
     "Administrative and Asset Administrator",
     "Administrative Assistant",
     "Adjudicator",
@@ -119,6 +119,6 @@ const jobTitles = [
 export async function seedJobTitles(prismaClient: PrismaClient) {
 
     await prismaClient.jobTitle.createMany({
-        data: jobTitles.map(name => ({name}))
+        data: JOB_TITLES.map(name => ({name}))
     })
 }

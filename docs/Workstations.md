@@ -39,3 +39,34 @@ These are the values in the Access DB Lookup List:
 - Surface Pro 8 (5 records)
 - Surface Pro 11 (199 records)
 - Kiosk - Thinkcentre M80Q (67 records)
+
+Need to think of which categories do these belong to
+- Lenovo ThinkPad T15 (Archived/Retired)
+- Lenovo ThinkPad T580 (Archived/Retired)
+- Lenovo ThinkStation P360
+- Surface Pro 8 (Archived/Retired)
+
+My List
+
+- Standard Tier Devices
+  - Lenovo ThinkPad T14 
+  - Lenovo ThinkPad T16
+- Premium Tier Devices
+  - Microsoft Surface Pro 11
+- High Performance Tier Devices
+  - Lenovo ThinkPad P16
+  - MacBook M4 Pro 16"
+
+All modal types
+
+- Lenovo ThinkPad T14 
+- Lenovo ThinkPad T15
+- Lenovo ThinkPad T16
+- Lenovo ThinkPad T580
+- Lenovo ThinkStation P360
+
+- Microsoft Surface Pro 8
+- Microsoft Surface Pro 11
+
+- Lenovo ThinkPad P16
+- Apple MacBook Pro

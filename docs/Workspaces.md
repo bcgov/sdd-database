@@ -1,3 +1,53 @@
+### Workspace Number
+
+The following feel more like a condition of the employee than the condition of the workspace
+i.e. these feel like an employee attribute than a specific workspace attribute
+
+**Employee Type:** Mobile, float
+
+**Employee's Work Location:** Offsite, Friendship Center, Workspace with its workspace Number
+
+**Mobile**
+
+- Employees that work from home (WFH) 3 or more days per week (i.e. employees with a Telework Agreement) are designated Mobile.
+- Used when an employee is not assigned a workspace.
+- All CISB Specialists are designated Mobile.
+
+What is the opposite of mobile? Resident?
+I think this is true - an employee can either be mobile or resident.
+
+So, this field is linked to an employee
+
+---
+
+**Float**
+
+for Auxillary employees that do not require an assigned workspace.
+
+Seems to be linked to an Employee
+
+---
+
+**Friendship Center**
+
+For Community Integration Specialists that are headquartered to an office, but attached to the Friendship Centres so
+not to affect
+the threshold count for the office.
+
+- Job Title = "Community Integration Specialist"
+
+- These employees are attached to a friendship centre with notes instead of a dedicated workspace in an office
+
+---
+
+**Offsite**
+
+CIS employees could be working out of a society or centre.
+However, we just found out that there are exceptions wherein employees with Job Title not equal to "Community
+Integration Specialist" can also have Workspace Number as "Offsite"
+
+---
+
 ### Desk Type
 
 Indicates what type of desk is at the workstation
@@ -104,54 +154,6 @@ Free address workspaces are converted to resident workspaces for employees that 
 
 Same thing for resident workspaces - like we don't need to explicitly mark workspaces as resident since workspace
 modal that has assigned employee accordian automatically counts as resident workspace right?
-
-### Workspace Number
-
-The following feel more like a condition of the employee than the condition of the workspace
-i.e. these feel like an employee attribute than a specific workspace attribute
-
-**Employee Type:** Mobile, float
-
-**Employee's Work Location:** Offsite, Friendship Center, Workspace with its workspace Number
-
-**Mobile**
-
-- Employees that work from home (WFH) 3 or more days per week (i.e. employees with a Telework Agreement) are designated Mobile.
-- Used when an employee is not assigned a workspace.
-- All CISB Specialists are designated Mobile.
-
-What is the opposite of mobile? Resident?
-I think this is true - an employee can either be mobile or resident.
-
-So, this field is linked to an employee
-
----
-
-**Float**
-
-for Auxillary employees that do not require an assigned workspace.
-
-Seems to be linked to an Employee
-
----
-
-**Friendship Center**
-
-For Community Integration Specialists that are headquartered to an office, but attached to the Friendship Centres so 
-not to affect 
-the threshold count for the office.
-
-- Job Title = "Community Integration Specialist"
-
-- These employees are attached to a friendship centre with notes instead of a dedicated workspace in an office
-
----
-
-**Offsite**
-
-CIS employees could be working out of a society or centre.
-However, we just found out that there are exceptions wherein employees with Job Title not equal to "Community 
-Integration Specialist" can also have Workspace Number as "Offsite"
 
 ---
 

@@ -1,7 +1,7 @@
-import {PrismaClient} from "@prisma/client/extension";
+import {PrismaClient} from "@/generated/prisma/client";
 
 
-const workspaceCategories = [
+const WORKSPACE_CATEGORIES = [
     "Point of Contact (POC)",
     "Interactive",
     "Non-Interactive",
@@ -11,6 +11,6 @@ const workspaceCategories = [
 
 export async function seedWorkspaceCategories(prismaClient: PrismaClient) {
     await prismaClient.workspaceCategory.createMany({
-        data: workspaceCategories.map(name => ({name}))
+        data: WORKSPACE_CATEGORIES.map(name => ({name}))
     })
 }
