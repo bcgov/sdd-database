@@ -9,6 +9,9 @@ import {
     EmployeeResolutionContext,
     resolveEmployeeId
 } from "../shared/employees";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {assertLookupValue} from "../validators/common.validators";
+import {normalizeModelName} from "../normalizers/workstations.normalizers";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -23,11 +26,13 @@ const WORKSTATION_REQUIRED_HEADERS = [
     "Computer Number",
     "IDIR",
     "Assigned To",
+    "Hardware",
     "Workspace Category"
 ] as const
 
 type ParsedWorkstationRow = {
     asset_tag: string
+    model_id: number
     employee_id: number | null
 }
 
@@ -39,6 +44,12 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
         WORKSTATION_REQUIRED_HEADERS
     )
 
+    const modelLookup = buildIdLookupByName(
+        await prismaClient.workstationModel.findMany({
+            select: idNameSelect
+        })
+    )
+
     const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
 
     const finalWorkstationRows: ParsedWorkstationRow[] = []
@@ -46,16 +57,15 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
-        const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
-
-        if (!rawAssetTag) continue
-
         if (ignoreForNow(row, headerToCol)) continue
+
+        if (isNotAWorkstationRow(row, headerToCol)) continue
 
         const workstationData = parseWorkstationRow(
             row,
             r,
             headerToCol,
+            modelLookup,
             employeeResolutionContext,
         )
 
@@ -78,6 +88,16 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
     })
 }
 
+function isNotAWorkstationRow(
+    row: ExcelJS.Row,
+    headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>
+) {
+    const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
+    const rawHardware = getCellString(row, headerToCol, "Hardware")
+
+    return !rawAssetTag && !rawHardware
+}
+
 function ignoreForNow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>
@@ -96,11 +116,18 @@ function parseWorkstationRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>,
+    modelLookup: Map<string, number>,
     employeeResolutionContext: EmployeeResolutionContext
 ): ParsedWorkstationRow {
     // asset tag
     const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
     assertAssetTag(rawAssetTag, rowNumber)
+
+    // model
+    const rawHardware = getCellString(row, headerToCol, "Hardware")
+    const hardware = normalizeModelName(rawHardware)
+    const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
+
 
     // internal employee id i.e. primary key
     const employeeId = resolveEmployeeId(
@@ -117,6 +144,7 @@ function parseWorkstationRow(
 
     return {
         asset_tag: rawAssetTag,
+        model_id: modelId,
         employee_id: employeeId,
     }
 }

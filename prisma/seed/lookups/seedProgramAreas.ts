@@ -2,7 +2,7 @@ import {PrismaClient} from "@/generated/prisma/client"
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 
 
-const programsByBranch: Record<string, string[]> = {
+const PROGRAM_AREAS_BY_BRANCH: Record<string, string[]> = {
     "Community Integration Services": [
         "Executive Director",
         "Practice and Performance",
@@ -81,7 +81,7 @@ export async function seedProgramAreas(prismaClient: PrismaClient) {
         branch_id: number
     }> = []
 
-    for (const [branchName, programAreas] of Object.entries(programsByBranch)) {
+    for (const [branchName, programAreas] of Object.entries(PROGRAM_AREAS_BY_BRANCH)) {
 
         const branchId = branchLookup.get(branchName)
 

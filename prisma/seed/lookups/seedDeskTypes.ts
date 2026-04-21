@@ -1,6 +1,6 @@
-import {PrismaClient} from "@prisma/client/extension";
+import {PrismaClient} from "@/generated/prisma/client";
 
-const deskTypes = [
+const DESK_TYPES = [
     "Height Adjustable",
     "Non-Height Adjustable",
     "Height Adjustable Accommodation",
@@ -8,6 +8,6 @@ const deskTypes = [
 
 export async function seedDeskTypes(prismaClient: PrismaClient) {
     await prismaClient.deskType.createMany({
-        data: deskTypes.map(name => ({name}))
+        data: DESK_TYPES.map(name => ({name}))
     })
 }

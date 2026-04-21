@@ -1,7 +1,7 @@
 import {PrismaClient} from "@/generated/prisma/client";
 
 
-const officeTypes = [
+const OFFICE_TYPES = [
     "Community Services",
     "Contact Centre",
     "Executive Office",
@@ -21,6 +21,6 @@ const officeTypes = [
 
 export async function seedOfficeTypes(prismaClient: PrismaClient) {
     await prismaClient.officeType.createMany({
-        data: officeTypes.map(name => ({name}))
+        data: OFFICE_TYPES.map(name => ({name}))
     })
 }

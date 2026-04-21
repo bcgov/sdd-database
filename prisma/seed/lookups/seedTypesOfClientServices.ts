@@ -1,7 +1,7 @@
 import {PrismaClient} from "@/generated/prisma/client";
 
 
-const typesOfClientServices = [
+const TYPES_OF_CLIENT_SERVICES = [
     "Public Facing",
     "Public Facing and Contact Centre",
     "Non-Public Facing",
@@ -13,6 +13,6 @@ const typesOfClientServices = [
 
 export async function seedTypesOfClientServices(prismaClient: PrismaClient) {
     await prismaClient.typeOfClientService.createMany({
-        data: typesOfClientServices.map(name => ({name}))
+        data: TYPES_OF_CLIENT_SERVICES.map(name => ({name}))
     })
 }
