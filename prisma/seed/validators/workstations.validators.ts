@@ -25,6 +25,13 @@ export function assertAssetTag(
             `${label} "${assetTag}" at row ${rowNumber} must be exactly ${expectedLength} characters long for ${modelName}`
         )
     }
+
+    assertAssetTagPrefix(
+        assetTag,
+        modelName,
+        rowNumber,
+        label
+    )
 }
 
 function getExpectedLength(modelName: string) {
@@ -37,5 +44,21 @@ function getExpectedLength(modelName: string) {
 
         default:
             return 8
+    }
+}
+
+function assertAssetTagPrefix(
+    assetTag: string,
+    modelName: string,
+    rowNumber: number,
+    label: string,
+) {
+    switch (modelName) {
+        case "Microsoft Surface Pro 11":
+            if (!assetTag.startsWith("B")) {
+                throw new Error(
+                    `${label} "${assetTag}" at row ${rowNumber} must start with "B" for ${modelName}`
+                )
+            }
     }
 }
