@@ -33,6 +33,7 @@ const WORKSPACE_REQUIRED_HEADERS = [
     "IDIR",
     "Assigned To",
     "Status",
+    "Hardware",
     "Workspace Number",
     "Workspace Type",
     "OfficeFloor",
@@ -163,10 +164,12 @@ function ignoreForNow(
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+    const rawHardware = getCellString(row, headerToCol, "Hardware")
 
     const isPublicJobBankKiosk =
         rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawCategory === "Waiting Room"
+        rawCategory === "Waiting Room" ||
+        rawHardware === "Kiosk - Thinkcentre M80Q"
 
     return IGNORE_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
 }
