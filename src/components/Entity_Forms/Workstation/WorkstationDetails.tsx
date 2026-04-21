@@ -1,4 +1,4 @@
-import {Accordion, TextArea, TextField} from "@bcgov/design-system-react-components";
+import {Accordion, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {WorkstationSearchResult} from "@/types";
 
 
@@ -20,12 +20,24 @@ export function WorkstationDetails({
                        defaultValue={workstation.asset_tag}>
             </TextField>
 
-            {hasNotes && <TextArea label="Notes"
-                      name="notes"
-                      maxLength={2000}
-                      isReadOnly
-                      defaultValue={workstation.notes ?? undefined}>
-            </TextArea>}
+            <Select label="Model"
+                    items={[
+                        {
+                            id: workstation.model_id,
+                            label: workstation.workstation_model.name
+                        }
+                    ]}
+                    isDisabled
+                    defaultValue={workstation.model_id}>
+            </Select>
+
+            {hasNotes &&
+                <TextArea label="Notes"
+                          name="notes"
+                          maxLength={2000}
+                          isReadOnly
+                          defaultValue={workstation.notes ?? undefined}>
+                </TextArea>}
         </Accordion>
     )
 }

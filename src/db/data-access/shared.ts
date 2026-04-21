@@ -37,6 +37,7 @@ export const workspaceSearchResultArgs =
 
 export const workstationSearchResultArgs = {
     include: {
+        workstation_model: true,
         assigned_employee: {
             select: {
                 idir: true,

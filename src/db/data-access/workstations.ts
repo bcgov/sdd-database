@@ -21,6 +21,7 @@ export async function getWorkstationsByFilter(query?: string) {
         ? {
             OR: [
                 {asset_tag: {contains: query, mode: 'insensitive'}},
+                {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
                 {notes: {contains: query, mode: 'insensitive'}},
                 {
                     // find workstations whose assigned employee exists and matches at least one of these
