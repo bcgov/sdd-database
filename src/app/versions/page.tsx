@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.31",
+            notes: [
+                "Add Hardware Column"
+            ]
+        },
+        {
             version: "v0.0.30",
             notes: [
                 "Employees can now assign Workstations",

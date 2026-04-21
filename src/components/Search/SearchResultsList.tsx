@@ -50,7 +50,7 @@ const getSearchResultTitle = (item: Entity) => {
             title = `Workspace ${item.workspace_number} (Office ${item.office_number})`;
             break;
         case "workstation":
-            title = `Workstation (${item.asset_tag})`
+            title = `${item.workstation_model.name} - ${item.asset_tag}`
             break;
     }
 
