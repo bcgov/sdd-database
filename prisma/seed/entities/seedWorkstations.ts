@@ -104,10 +104,12 @@ function ignoreForNow(
 ) {
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+    const rawHardware = getCellString(row, headerToCol, "Hardware")
 
     const isPublicJobBankKiosk =
         rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawCategory === "Waiting Room"
+        rawCategory === "Waiting Room" ||
+        rawHardware === "Kiosk - Thinkcentre M80Q"
 
     return isPublicJobBankKiosk
 }
@@ -119,13 +121,15 @@ function parseWorkstationRow(
     modelLookup: Map<string, number>,
     employeeResolutionContext: EmployeeResolutionContext
 ): ParsedWorkstationRow {
-    // asset tag
-    const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
-    assertAssetTag(rawAssetTag, rowNumber)
 
-    // model
     const rawHardware = getCellString(row, headerToCol, "Hardware")
     const hardware = normalizeModelName(rawHardware)
+
+    // asset tag
+    const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
+    assertAssetTag(rawAssetTag, hardware, rowNumber)
+
+    // model
     const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
 
