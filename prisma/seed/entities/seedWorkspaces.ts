@@ -44,9 +44,9 @@ const WORKSPACE_REQUIRED_HEADERS = [
 ] as const
 
 const WORKSPACE_ONLY_ASSIGNED_TO_VALUES = new Set<string>([
+    "Free Address",
     "HOLD",
     "Vacant",
-    "Free Address"
 ])
 
 const IGNORE_WORKSPACE_VALUES = new Set<string>([

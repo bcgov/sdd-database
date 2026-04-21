@@ -14,30 +14,32 @@ export function WorkstationDetails({
 
     return (
         <Accordion label="Workstation Details" id="workstationDetails">
-            <TextField label="Asset Tag"
-                       name="assetTag"
-                       isReadOnly
-                       defaultValue={workstation.asset_tag}>
-            </TextField>
+            <div>
+                <TextField label="Asset Tag"
+                           name="assetTag"
+                           isReadOnly
+                           defaultValue={workstation.asset_tag}>
+                </TextField>
 
-            <Select label="Model"
-                    items={[
-                        {
-                            id: workstation.model_id,
-                            label: workstation.workstation_model.name
-                        }
-                    ]}
-                    isDisabled
-                    defaultValue={workstation.model_id}>
-            </Select>
+                <Select label="Model"
+                        items={[
+                            {
+                                id: workstation.model_id,
+                                label: workstation.workstation_model.name
+                            }
+                        ]}
+                        isDisabled
+                        defaultValue={workstation.model_id}>
+                </Select>
 
-            {hasNotes &&
-                <TextArea label="Notes"
-                          name="notes"
-                          maxLength={2000}
-                          isReadOnly
-                          defaultValue={workstation.notes ?? undefined}>
-                </TextArea>}
+                {hasNotes &&
+                    <TextArea label="Notes"
+                              name="notes"
+                              maxLength={2000}
+                              isReadOnly
+                              defaultValue={workstation.notes ?? undefined}>
+                    </TextArea>}
+            </div>
         </Accordion>
     )
 }

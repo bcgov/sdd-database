@@ -10,7 +10,7 @@ import {
     resolveEmployeeId
 } from "../shared/employees";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
-import {assertLookupValue} from "../validators/common.validators";
+import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {normalizeModelName} from "../normalizers/workstations.normalizers";
 
 
@@ -26,6 +26,7 @@ const WORKSTATION_REQUIRED_HEADERS = [
     "Computer Number",
     "IDIR",
     "Assigned To",
+    "Status",
     "Hardware",
     "Workspace Category"
 ] as const
@@ -34,6 +35,7 @@ type ParsedWorkstationRow = {
     asset_tag: string
     model_id: number
     employee_id: number | null
+    notes: string | null
 }
 
 export async function seedWorkstations(prismaClient: PrismaClient) {
@@ -146,9 +148,21 @@ function parseWorkstationRow(
         }
     )
 
+    // notes
+    const assignedTo = getCellString(row, headerToCol, "Assigned To")
+    const shouldSeedNotes = assignedTo === "REDEPLOY"
+
+    const rawNotes = getCellString(row, headerToCol, "Status")
+    assertNotes(rawNotes, rowNumber)
+
+    const notes = shouldSeedNotes
+        ? (rawNotes || null)   // making sure to store null instead of ""
+        : null
+
     return {
         asset_tag: rawAssetTag,
         model_id: modelId,
         employee_id: employeeId,
+        notes
     }
 }
