@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.31",
             notes: [
-                "Add Hardware Column"
+                "Add Hardware Column",
+                "Only the search results are scrollable now and not the whole page"
             ]
         },
         {
