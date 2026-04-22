@@ -51,7 +51,11 @@ export async function getAssignableWorkstationsByFilter(query?: string) {
 
     const searchFilter: Prisma.WorkstationWhereInput = query
         ? {
-            asset_tag: {contains: query, mode: 'insensitive'},
+            OR: [
+                {asset_tag: {contains: query, mode: 'insensitive'}},
+                {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
+                {notes: {contains: query, mode: 'insensitive'}},
+            ]
         }
         : {}
 
