@@ -110,7 +110,17 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
 
     const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
 
+    const rowsByWorkspacePair = buildRowsByWorkspacePair(
+        computersAndLaptopsWorksheet,
+        headerToCol
+    )
+
     const finalWorkspaceRows: ParsedWorkspaceRow[] = []
+
+    // This prevents handling the same duplicate-workspace group multiple times.
+    // If one workspace appears in 2 source rows because of multiple assets,
+    // only process that grouped set once.
+    const processedWorkspacePairs = new Set<string>()
 
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
@@ -119,17 +129,58 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
 
         if (isNotAWorkspaceRow(row, headerToCol)) continue
 
-        const workspaceData = parseWorkspaceRow(
-            row,
-            r,
-            headerToCol,
-            categoryLookup,
-            deskTypeLookup,
-            programAreaLookup,
-            employeeResolutionContext
-        )
+        const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
+        const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+        const workspacePairKey = `${rawOfficeNumber}::${rawWorkspaceNumber}`
 
-        finalWorkspaceRows.push(workspaceData)
+        if ((rowsByWorkspacePair.get(workspacePairKey)?.length ?? 0) > 1) {
+
+            if (processedWorkspacePairs.has(workspacePairKey)) continue
+
+            processedWorkspacePairs.add(workspacePairKey)
+
+            const groupedRows = rowsByWorkspacePair.get(workspacePairKey) ?? []
+
+            const parsedRows = groupedRows.map(groupedRow =>
+                parseWorkspaceRow(
+                    groupedRow,
+                    groupedRow.number,
+                    headerToCol,
+                    categoryLookup,
+                    deskTypeLookup,
+                    programAreaLookup,
+                    employeeResolutionContext,
+                )
+            )
+
+            if (!areWorkspaceRowsConsistent(parsedRows)) {
+
+                console.error(`Conflicting duplicate workspace pair found: ${workspacePairKey}`, {
+                    sourceRows: groupedRows.map(groupedRow => groupedRow.number),
+                    parsedRows,
+                })
+
+                throw new Error(
+                    `Conflicting duplicate workspace pair "${workspacePairKey}" found at source rows ${groupedRows.map(groupedRow => groupedRow.number).join(", ")}.`
+                )
+            }
+
+            const mergedWorkspaceData = mergeWorkspaceRows(parsedRows)
+            finalWorkspaceRows.push(mergedWorkspaceData)
+
+        } else {
+            const workspaceData = parseWorkspaceRow(
+                row,
+                r,
+                headerToCol,
+                categoryLookup,
+                deskTypeLookup,
+                programAreaLookup,
+                employeeResolutionContext
+            )
+
+            finalWorkspaceRows.push(workspaceData)
+        }
     }
 
     assertNoDuplicates(finalWorkspaceRows, {
@@ -190,6 +241,66 @@ function isNotAWorkspaceRow(
         !rawDeskType
 
     return isEffectivelyEmptyWorkspaceRow
+}
+
+function buildRowsByWorkspacePair(
+    worksheet: ExcelJS.Worksheet,
+    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
+) {
+    const rowsByWorkspacePair = new Map<string, ExcelJS.Row[]>()
+
+    for (let r = 2; r <= worksheet.rowCount; r++) {
+        const row = worksheet.getRow(r)
+
+        if (!row.hasValues) continue
+        if (ignoreForNow(row, headerToCol)) continue
+        if (isNotAWorkspaceRow(row, headerToCol)) continue
+
+        const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
+        const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+
+        const key = `${rawOfficeNumber}::${rawWorkspaceNumber}`
+
+        const group = rowsByWorkspacePair.get(key) ?? []
+        group.push(row)
+        rowsByWorkspacePair.set(key, group)
+    }
+
+    return rowsByWorkspacePair
+}
+
+function areWorkspaceRowsConsistent(rows: ParsedWorkspaceRow[]) {
+    if (rows.length <= 1) return true
+
+    const firstRow = rows[0]
+
+    return rows.every(row =>
+        row.office_number === firstRow.office_number &&
+        row.workspace_number === firstRow.workspace_number &&
+        row.category_id === firstRow.category_id &&
+        row.desk_type_id === firstRow.desk_type_id &&
+        row.office_floor === firstRow.office_floor &&
+        row.employee_id === firstRow.employee_id &&
+        row.is_on_hold === firstRow.is_on_hold &&
+        row.restricted_program_area_id === firstRow.restricted_program_area_id
+    )
+}
+
+function mergeWorkspaceRows(rows: ParsedWorkspaceRow[]): ParsedWorkspaceRow {
+    const firstRow = rows[0]
+
+    const mergedNotes = Array.from(
+        new Set(
+            rows
+                .map(row => row.notes?.trim())
+                .filter((note): note is string => !!note)   // remove empty notes, and after doing that, treat every remaining note as a string.
+        )
+    ).join("\n")
+
+    return {
+        ...firstRow,
+        notes: mergedNotes || null,
+    }
 }
 
 function parseWorkspaceRow(

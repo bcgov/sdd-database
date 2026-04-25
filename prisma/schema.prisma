@@ -20,12 +20,12 @@ model Employee {
   job_title_id    Int?
   notes           String? @db.VarChar(2000)
 
-  workspace_assignment_type_id Int
+  workspace_assignment_type_id Int?
 
-  assigned_office           Office                  @relation(fields: [office_number], references: [office_number])
-  program_area              ProgramArea             @relation(fields: [program_area_id], references: [id])
-  job_title                 JobTitle?               @relation(fields: [job_title_id], references: [id])
-  workspace_assignment_type WorkspaceAssignmentType @relation(fields: [workspace_assignment_type_id], references: [id])
+  assigned_office           Office                   @relation(fields: [office_number], references: [office_number])
+  program_area              ProgramArea              @relation(fields: [program_area_id], references: [id])
+  job_title                 JobTitle?                @relation(fields: [job_title_id], references: [id])
+  workspace_assignment_type WorkspaceAssignmentType? @relation(fields: [workspace_assignment_type_id], references: [id])
 
   workspace Workspace?
 

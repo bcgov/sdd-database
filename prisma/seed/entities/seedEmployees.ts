@@ -76,7 +76,7 @@ type ParsedEmployeeRow = {
     program_area_id: number
     job_title_id: number | null
     notes: string | null
-    workspace_assignment_type_id: number
+    workspace_assignment_type_id: number | null
 }
 
 export async function seedEmployees(prismaClient: PrismaClient) {
@@ -149,7 +149,7 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
         // skip rows that are effectively empty for employee seeding
-        // if (isEffectivelyEmptyRow(row, computersAndLaptopsHeaderToCol)) continue
+        if (isEffectivelyEmptyRow(row, computersAndLaptopsHeaderToCol)) continue
 
         // skip non employee rows
         if (isNotAnEmployeeRow(row, computersAndLaptopsHeaderToCol, "Assigned To")) continue
@@ -159,15 +159,13 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         // if row has a real IDIR and that IDIR occurs in more than one row in the source sheet
         if (rawIdir && rawIdir !== "IDIR" && (rowsByRealIdir.get(rawIdir)?.length ?? 0) > 1) {
 
-            if (processedRealIdirs.has(rawIdir)) {
-                continue
-            }
+            if (processedRealIdirs.has(rawIdir)) continue
 
             processedRealIdirs.add(rawIdir)
 
             const groupedRows = rowsByRealIdir.get(rawIdir) ?? []
 
-            const parsedRows = groupedRows.map((groupedRow) =>
+            const parsedRows = groupedRows.map(groupedRow =>
                 parseEmployeeRow(
                     groupedRow,
                     groupedRow.number,
@@ -190,22 +188,21 @@ export async function seedEmployees(prismaClient: PrismaClient) {
                     )
                 }
             }
-            // This skips the normal single-row flow for that row, because duplicate group has already been handled.
-            continue
         }
+        else {
+            const employeeData = parseEmployeeRow(
+                row,
+                r,
+                computersAndLaptopsHeaderToCol,
+                employeeIdLookup,
+                workspaceAssignmentTypeLookup,
+                programAreaLookup,
+                jobTitleLookup,
+                allowedProgramAreaJobTitlePairs
+            )
 
-        const employeeData = parseEmployeeRow(
-            row,
-            r,
-            computersAndLaptopsHeaderToCol,
-            employeeIdLookup,
-            workspaceAssignmentTypeLookup,
-            programAreaLookup,
-            jobTitleLookup,
-            allowedProgramAreaJobTitlePairs
-        )
-
-        finalEmployeeRows.push(employeeData)
+            finalEmployeeRows.push(employeeData)
+        }
     }
 
     assertNoDuplicates(
@@ -336,35 +333,35 @@ function buildAllowedProgramAreaJobTitlePairs(
     return lookup
 }
 
-// function isEffectivelyEmptyRow(
-//     row: ExcelJS.Row,
-//     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
-// ) {
-//     const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
-//     const rawIdir = getCellString(row, headerToCol, "IDIR")
-//     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
-//     const rawStatus = getCellString(row, headerToCol, "Status")
-//     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
-//     const rawBranch = getCellString(row, headerToCol, "Branch")
-//     const rawProgramArea = getCellString(row, headerToCol, "Program Area")
-//     const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
-//
-//     const isEmpty =
-//         !rawOfficeNumber &&
-//         !rawAssignedTo &&
-//         !rawStatus &&
-//         !rawWorkspaceNumber &&
-//         !rawBranch &&
-//         !rawProgramArea &&
-//         !rawJobTitle &&
-//         !rawIdir
-//
-//     if (isEmpty) {
-//         console.error(`Empty row found at row ${row.number}`)
-//     }
-//
-//     return isEmpty
-// }
+function isEffectivelyEmptyRow(
+    row: ExcelJS.Row,
+    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
+) {
+    const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
+    const rawIdir = getCellString(row, headerToCol, "IDIR")
+    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+    const rawStatus = getCellString(row, headerToCol, "Status")
+    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+    const rawBranch = getCellString(row, headerToCol, "Branch")
+    const rawProgramArea = getCellString(row, headerToCol, "Program Area")
+    const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
+
+    const isEmpty =
+        !rawOfficeNumber &&
+        !rawAssignedTo &&
+        !rawStatus &&
+        !rawWorkspaceNumber &&
+        !rawBranch &&
+        !rawProgramArea &&
+        !rawJobTitle &&
+        !rawIdir
+
+    if (isEmpty) {
+        console.error(`Empty row found at row ${row.number}`)
+    }
+
+    return isEmpty
+}
 
 function parseEmployeeRow(
     row: ExcelJS.Row,
@@ -410,12 +407,14 @@ function parseEmployeeRow(
         rowNumber
     )
 
-    const workspaceAssignmentTypeId = assertLookupValue(
-        workspaceAssignmentTypeName,
-        "Workspace Assignment Type",
-        rowNumber,
-        workspaceAssignmentTypeLookup
-    )
+    const workspaceAssignmentTypeId = workspaceAssignmentTypeName
+        ? assertLookupValue(
+            workspaceAssignmentTypeName,
+            "Workspace Assignment Type",
+            rowNumber,
+            workspaceAssignmentTypeLookup
+        )
+        : null
 
     // program area
     const {branchName, programAreaName, programAreaId} = resolveProgramAreaId(
@@ -462,6 +461,10 @@ function resolveWorkspaceAssignmentTypeName(
     rawWorkspaceNumber: string,
     rowNumber: number
 ) {
+    if (!rawWorkspaceNumber) {
+        return null
+    }
+
     if (isNonResidentWorkspaceAssignmentType(rawWorkspaceNumber)) {
         return rawWorkspaceNumber
     }
@@ -500,9 +503,7 @@ function resolveProgramAreaId(
 }
 
 function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
-    if (rows.length <= 1) {
-        return true
-    }
+    if (rows.length <= 1) return true
 
     const firstRow = rows[0]
 
@@ -513,9 +514,9 @@ function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
         row.alternate_name === firstRow.alternate_name &&
         row.last_name === firstRow.last_name &&
         row.employee_id === firstRow.employee_id &&
-        row.workspace_assignment_type_id === firstRow.workspace_assignment_type_id &&
         row.program_area_id === firstRow.program_area_id &&
-        row.job_title_id === firstRow.job_title_id
+        row.job_title_id === firstRow.job_title_id &&
+        row.workspace_assignment_type_id === firstRow.workspace_assignment_type_id
     )
 }
 

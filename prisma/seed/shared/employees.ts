@@ -22,9 +22,7 @@ const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
 ] as const)
 
 export function isNonResidentWorkspaceAssignmentType(value: string) {
-
     return NON_RESIDENT_WORKSPACE_ASSIGNMENT_TYPES.has(value)
-
 }
 
 export function isNotAnEmployeeRow<THeader extends string>(

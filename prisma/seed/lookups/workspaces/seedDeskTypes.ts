@@ -4,6 +4,7 @@ const DESK_TYPES = [
     "Height Adjustable",
     "Non-Height Adjustable",
     "Height Adjustable Accommodation",
+    "To Be Determined"
 ] as const
 
 export async function seedDeskTypes(prismaClient: PrismaClient) {
