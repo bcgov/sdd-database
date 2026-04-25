@@ -15,6 +15,7 @@ import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
     buildEmployeeResolutionContext,
     EmployeeResolutionContext,
+    isNonResidentWorkspaceAssignmentType,
     resolveEmployeeId
 } from "../shared/employees";
 import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
@@ -47,13 +48,6 @@ const WORKSPACE_ONLY_ASSIGNED_TO_VALUES = new Set<string>([
     "Free Address",
     "HOLD",
     "Vacant",
-])
-
-const IGNORE_WORKSPACE_VALUES = new Set<string>([
-    "Float",
-    "Mobile",
-    "Offsite",
-    "Friendship Centre"
 ])
 
 const ALLOWED_WORKSPACE_TYPES = new Set<string>([
@@ -161,7 +155,6 @@ function ignoreForNow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
 ) {
-    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
     const rawHardware = getCellString(row, headerToCol, "Hardware")
@@ -171,7 +164,7 @@ function ignoreForNow(
         rawCategory === "Waiting Room" ||
         rawHardware === "Kiosk - Thinkcentre M80Q"
 
-    return IGNORE_WORKSPACE_VALUES.has(rawWorkspaceNumber) || isPublicJobBankKiosk
+    return isPublicJobBankKiosk
 }
 
 function isNotAWorkspaceRow(
@@ -185,14 +178,18 @@ function isNotAWorkspaceRow(
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawDeskType = getCellString(row, headerToCol, "DeskType")
 
-    return (
+    if (isNonResidentWorkspaceAssignmentType(rawWorkspaceNumber)) return true
+
+    if (rawAssignedTo === "HOLD") return false
+
+    const isEffectivelyEmptyWorkspaceRow =
         !rawWorkspaceNumber &&
         !rawWorkspaceType &&
         !rawOfficeFloor &&
         !rawCategory &&
-        !rawDeskType &&
-        rawAssignedTo !== "HOLD"
-    )
+        !rawDeskType
+
+    return isEffectivelyEmptyWorkspaceRow
 }
 
 function parseWorkspaceRow(

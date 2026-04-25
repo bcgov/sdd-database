@@ -1,5 +1,5 @@
 import {PrismaClient} from "@/generated/prisma/client"
-import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {buildIdLookupByName, idNameSelect} from "../../shared/lookups";
 
 
 const PROGRAM_AREAS_BY_BRANCH: Record<string, string[]> = {

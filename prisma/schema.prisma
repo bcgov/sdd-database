@@ -20,9 +20,12 @@ model Employee {
   job_title_id    Int?
   notes           String? @db.VarChar(2000)
 
-  assigned_office Office      @relation(fields: [office_number], references: [office_number])
-  program_area    ProgramArea @relation(fields: [program_area_id], references: [id])
-  job_title       JobTitle?   @relation(fields: [job_title_id], references: [id])
+  workspace_assignment_type_id Int
+
+  assigned_office           Office                  @relation(fields: [office_number], references: [office_number])
+  program_area              ProgramArea             @relation(fields: [program_area_id], references: [id])
+  job_title                 JobTitle?               @relation(fields: [job_title_id], references: [id])
+  workspace_assignment_type WorkspaceAssignmentType @relation(fields: [workspace_assignment_type_id], references: [id])
 
   workspace Workspace?
 
@@ -68,6 +71,13 @@ model ProgramAreaJobTitle {
   job_title    JobTitle    @relation(fields: [job_title_id], references: [id])
 
   @@id([program_area_id, job_title_id])
+}
+
+model WorkspaceAssignmentType {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  employees Employee[]
 }
 
 model OhsAccommodationType {

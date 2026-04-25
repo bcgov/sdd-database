@@ -134,7 +134,6 @@ function parseWorkstationRow(
     // model
     const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
-
     // internal employee id i.e. primary key
     const employeeId = resolveEmployeeId(
         row,
