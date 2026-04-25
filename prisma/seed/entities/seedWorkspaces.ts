@@ -20,6 +20,7 @@ import {
 } from "../shared/employees";
 import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
 import {assertBranch, assertProgramArea} from "../validators/employees.validators";
+import {isPublicJobBankKiosk} from "../shared/sourceRows";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -125,7 +126,7 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
-        if (ignoreForNow(row, headerToCol)) continue
+        if (isPublicJobBankKiosk(row, headerToCol)) continue
 
         if (isNotAWorkspaceRow(row, headerToCol)) continue
 
@@ -202,22 +203,6 @@ export async function seedWorkspaces(prismaClient: PrismaClient) {
     await prismaClient.workspace.createMany({data: finalWorkspaceRows})
 }
 
-function ignoreForNow(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
-) {
-    const rawCategory = getCellString(row, headerToCol, "Workspace Category")
-    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
-    const rawHardware = getCellString(row, headerToCol, "Hardware")
-
-    const isPublicJobBankKiosk =
-        rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawCategory === "Waiting Room" ||
-        rawHardware === "Kiosk - Thinkcentre M80Q"
-
-    return isPublicJobBankKiosk
-}
-
 function isNotAWorkspaceRow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof WORKSPACE_REQUIRED_HEADERS)[number], number>
@@ -253,7 +238,7 @@ function buildRowsByWorkspacePair(
         const row = worksheet.getRow(r)
 
         if (!row.hasValues) continue
-        if (ignoreForNow(row, headerToCol)) continue
+        if (isPublicJobBankKiosk(row, headerToCol)) continue
         if (isNotAWorkspaceRow(row, headerToCol)) continue
 
         const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
