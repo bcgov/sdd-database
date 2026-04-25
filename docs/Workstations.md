@@ -109,6 +109,22 @@ Office Code is not updated until received at shipping hub.
 Ideally, everytime, a workstation becomes in REDEPLOY state, it is recalled to one of the inventory hubs. Sometimes 
 though it isn't and remains in the office (e.g. a new hire quits in a week and the elist person accepts the role)
 
+Let's say a workstation is assigned to an employee and that employee leaves.
+
+- When the employee leaves, the 
+workstation in unlinked/unassigned from the employee but it doesn't directly become available for reassignment for 
+any one. In the access database the employee record is deleted and another record is created for this workstation.
+
+- First, it is recalled or can be represented by in transit. You shall see the Status section with recall written and 
+the office number it is being recalled to.
+
+- Then it is received in an inventory hub i.e. some branch coordinator gets it in their hands, marks received. 
+  Recall notes are removed from the record but IDIR is REASSIGN. Still not available for reassignment.
+
+- Finally, once branch coordinator have enough workstations. They take all those workstations with IDIR=REASSIGN and 
+  create IST tickets updating workstation owner from ex employee (that left) to themselves. That is when IDIR 
+  changes to branch coordinators IDIR and that's when workstation finally is avaialble for reassignment
+
 # Inventory Hub
 
 These are just offices that have coordinators from the facilities and assets team like GAULAKH and CSQUIRE who track 
@@ -193,12 +209,10 @@ Others (brand new employees to govt) are randomly given a workstation from the l
 
 Here's what should happen when the refresh button is clicked on a device,
 
-1. The device details are saved/captured for the employee (will have to figure out where logically to save it in the DB)
-2. The workstation is deleted 
+1. The asset tag and model id of the current workstation are saved
+2. The current workstation is deleted 
 3. Show options for selecting new device 
 4. Activate assign mode but for devices (from employees)
-
-Need to store information about one previous device held by any employee
 
 In Status Field: "Refreshed NE08####" - this is the legacy asset number prior to it being refreshed. This note is 
 put in the field when an asset gets refreshed and is later removed from the status field when our team completes an office update. An office update is essentially our team exporting all records for a certain office code, in excel format, and providing them to our office contacts requesting they confirm the information is accurate. ISD has a completed list of refreshed laptops.  We could create a separate field for these but the need to follow up is rare
@@ -209,9 +223,15 @@ This assign mode should now show a list of workstations, one of which can be sel
 Below along with the go back button, should be the add new workstation button. This would allow the end user to 
 create a new workstation in the system and then select that as the refreshed workstation.
 
+Note that any workstation can be refreshed, not just those that are currently assigned to an employee
+
 # Workstation History
 
 For each employee, keep a note of previous workstation. Here are the specific fields,
 - Asset Tag
 - Harwdare/Model
+
+Erin said currently this should only be for refresh but for any other reason like GILR, loaner, or just the employee requested a higher tier workstation
+like high performance? i.e. This field is Previous Workstation that is now refreshed with a new workstation and not 
+Previous workstation
 

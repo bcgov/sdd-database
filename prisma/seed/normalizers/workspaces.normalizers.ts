@@ -11,6 +11,7 @@ export function normalizeDeskTypeName(rawDeskTypeName: string) {
         "H/A": "Height Adjustable",
         "H/A Accommodation": "Height Adjustable Accommodation",
         "Non H/A": "Non-Height Adjustable",
+        "TBD": "To Be Determined",
     };
 
     return remappedDeskTypeNames[rawDeskTypeName] ?? rawDeskTypeName;

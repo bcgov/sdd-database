@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.32",
+            notes: [
+                "Add new Desk Type 'To Be Determined'"
+            ]
+        },
+        {
             version: "v0.0.31",
             notes: [
                 "Add Hardware Column",
