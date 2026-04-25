@@ -12,6 +12,7 @@ import {
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {normalizeModelName} from "../normalizers/workstations.normalizers";
+import {isPublicJobBankKiosk} from "../shared/sourceRows";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -59,7 +60,7 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
-        if (ignoreForNow(row, headerToCol)) continue
+        if (isPublicJobBankKiosk(row, headerToCol)) continue
 
         if (isNotAWorkstationRow(row, headerToCol)) continue
 
@@ -98,22 +99,6 @@ function isNotAWorkstationRow(
     const rawHardware = getCellString(row, headerToCol, "Hardware")
 
     return !rawAssetTag && !rawHardware
-}
-
-function ignoreForNow(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof WORKSTATION_REQUIRED_HEADERS)[number], number>
-) {
-    const rawCategory = getCellString(row, headerToCol, "Workspace Category")
-    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
-    const rawHardware = getCellString(row, headerToCol, "Hardware")
-
-    const isPublicJobBankKiosk =
-        rawAssignedTo === "PUBLIC JobBank Kiosk" ||
-        rawCategory === "Waiting Room" ||
-        rawHardware === "Kiosk - Thinkcentre M80Q"
-
-    return isPublicJobBankKiosk
 }
 
 function parseWorkstationRow(
