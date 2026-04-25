@@ -22,7 +22,11 @@ import {parseAndAssertAssignedTo} from "../shared/parsers";
 import {buildIdLookupByName, buildProgramAreaLookup, idNameSelect} from "../shared/lookups";
 import {normalizeJobTitleName} from "../normalizers/employees.normalizers";
 import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
-import {isNotAnEmployeeRow} from "../shared/employees";
+import {
+    isNonResidentWorkspaceAssignmentType,
+    isNotAnEmployeeRow,
+} from "../shared/employees";
+import {assertWorkspaceNumber} from "../validators/workspaces.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -51,6 +55,7 @@ const COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS = [
     "IDIR",
     "Assigned To",
     "Status",
+    "Workspace Number",
     "Branch",
     "Program Area",
     "JobTitle"
@@ -71,6 +76,7 @@ type ParsedEmployeeRow = {
     program_area_id: number
     job_title_id: number | null
     notes: string | null
+    workspace_assignment_type_id: number
 }
 
 export async function seedEmployees(prismaClient: PrismaClient) {
@@ -82,6 +88,12 @@ export async function seedEmployees(prismaClient: PrismaClient) {
     const employeeIdLookupHeaderToCol = getRequiredHeaderToCol(employeeIdLookupWorksheet, EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS)
 
     const employeeIdLookup = buildEmployeeIdLookup(employeeIdLookupWorksheet, employeeIdLookupHeaderToCol)
+
+    const workspaceAssignmentTypeLookup = buildIdLookupByName(
+        await prismaClient.workspaceAssignmentType.findMany({
+            select: idNameSelect,
+        })
+    )
 
     const programAreaLookup = buildProgramAreaLookup(
         await prismaClient.programArea.findMany({
@@ -137,7 +149,7 @@ export async function seedEmployees(prismaClient: PrismaClient) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
         // skip rows that are effectively empty for employee seeding
-        if (isEffectivelyEmptyRow(row, computersAndLaptopsHeaderToCol)) continue
+        // if (isEffectivelyEmptyRow(row, computersAndLaptopsHeaderToCol)) continue
 
         // skip non employee rows
         if (isNotAnEmployeeRow(row, computersAndLaptopsHeaderToCol, "Assigned To")) continue
@@ -161,6 +173,7 @@ export async function seedEmployees(prismaClient: PrismaClient) {
                     groupedRow.number,
                     computersAndLaptopsHeaderToCol,
                     employeeIdLookup,
+                    workspaceAssignmentTypeLookup,
                     programAreaLookup,
                     jobTitleLookup,
                     allowedProgramAreaJobTitlePairs
@@ -186,6 +199,7 @@ export async function seedEmployees(prismaClient: PrismaClient) {
             r,
             computersAndLaptopsHeaderToCol,
             employeeIdLookup,
+            workspaceAssignmentTypeLookup,
             programAreaLookup,
             jobTitleLookup,
             allowedProgramAreaJobTitlePairs
@@ -322,39 +336,42 @@ function buildAllowedProgramAreaJobTitlePairs(
     return lookup
 }
 
-function isEffectivelyEmptyRow(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
-) {
-    const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
-    const rawIdir = getCellString(row, headerToCol, "IDIR")
-    const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
-    const rawStatus = getCellString(row, headerToCol, "Status")
-    const rawBranch = getCellString(row, headerToCol, "Branch")
-    const rawProgramArea = getCellString(row, headerToCol, "Program Area")
-    const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
-
-    const isEmpty =
-        !rawOfficeNumber &&
-        !rawAssignedTo &&
-        !rawStatus &&
-        !rawBranch &&
-        !rawProgramArea &&
-        !rawJobTitle &&
-        !rawIdir
-
-    if (isEmpty) {
-        console.error(`Empty row found at row ${row.number}`)
-    }
-
-    return isEmpty
-}
+// function isEffectivelyEmptyRow(
+//     row: ExcelJS.Row,
+//     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>
+// ) {
+//     const rawOfficeNumber = getCellString(row, headerToCol, "OfficeNum")
+//     const rawIdir = getCellString(row, headerToCol, "IDIR")
+//     const rawAssignedTo = getCellString(row, headerToCol, "Assigned To")
+//     const rawStatus = getCellString(row, headerToCol, "Status")
+//     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+//     const rawBranch = getCellString(row, headerToCol, "Branch")
+//     const rawProgramArea = getCellString(row, headerToCol, "Program Area")
+//     const rawJobTitle = getCellString(row, headerToCol, "JobTitle")
+//
+//     const isEmpty =
+//         !rawOfficeNumber &&
+//         !rawAssignedTo &&
+//         !rawStatus &&
+//         !rawWorkspaceNumber &&
+//         !rawBranch &&
+//         !rawProgramArea &&
+//         !rawJobTitle &&
+//         !rawIdir
+//
+//     if (isEmpty) {
+//         console.error(`Empty row found at row ${row.number}`)
+//     }
+//
+//     return isEmpty
+// }
 
 function parseEmployeeRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_REQUIRED_HEADERS)[number], number>,
     employeeIdLookup: Map<string, string | null>,
+    workspaceAssignmentTypeLookup: Map<string, number>,
     programAreaLookup: Map<string, number>,
     jobTitleLookup: Map<string, number>,
     allowedProgramAreaJobTitlePairs: Set<string>
@@ -385,6 +402,20 @@ function parseEmployeeRow(
     // first name, last name
     const assignedTo = getCellString(row, headerToCol, "Assigned To")
     const fullName = parseAndAssertAssignedTo(assignedTo, rowNumber)
+
+    // workspace_assignment_type
+    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+    const workspaceAssignmentTypeName = resolveWorkspaceAssignmentTypeName(
+        rawWorkspaceNumber,
+        rowNumber
+    )
+
+    const workspaceAssignmentTypeId = assertLookupValue(
+        workspaceAssignmentTypeName,
+        "Workspace Assignment Type",
+        rowNumber,
+        workspaceAssignmentTypeLookup
+    )
 
     // program area
     const {branchName, programAreaName, programAreaId} = resolveProgramAreaId(
@@ -422,8 +453,21 @@ function parseEmployeeRow(
         employee_id: employeeId,
         program_area_id: programAreaId,
         job_title_id: jobTitleId,
-        notes
+        notes,
+        workspace_assignment_type_id: workspaceAssignmentTypeId,
     }
+}
+
+function resolveWorkspaceAssignmentTypeName(
+    rawWorkspaceNumber: string,
+    rowNumber: number
+) {
+    if (isNonResidentWorkspaceAssignmentType(rawWorkspaceNumber)) {
+        return rawWorkspaceNumber
+    }
+
+    assertWorkspaceNumber(rawWorkspaceNumber, rowNumber)
+    return "Resident"
 }
 
 function resolveProgramAreaId(
@@ -469,6 +513,7 @@ function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
         row.alternate_name === firstRow.alternate_name &&
         row.last_name === firstRow.last_name &&
         row.employee_id === firstRow.employee_id &&
+        row.workspace_assignment_type_id === firstRow.workspace_assignment_type_id &&
         row.program_area_id === firstRow.program_area_id &&
         row.job_title_id === firstRow.job_title_id
     )

@@ -106,13 +106,20 @@ being held along with the date.
 
 Office Code is not updated until received at shipping hub.
 
+Ideally, everytime, a workstation becomes in REDEPLOY state, it is recalled to one of the inventory hubs. Sometimes 
+though it isn't and remains in the office (e.g. a new hire quits in a week and the elist person accepts the role)
+
 # Inventory Hub
 
-Some offices are inventory hubs like
-270
+These are just offices that have coordinators from the facilities and assets team like GAULAKH and CSQUIRE who track 
+these workstations.
+
+Currently, these offices are
 331
 350
 So, these will naturally have a lot of redeploy workstations
+This is not a fixed list and keeps on changing as per who in the team is performing these duties and which office do 
+they belong to
 
 I think another name for this is a shipping hub (not sure)
 
@@ -134,20 +141,6 @@ workstation is recalled to inventory. Assigned To becomes REDEPLOY
 So, essentially, recall is when a workstation is taken back from a departing/leaving employee and shipping is when a 
 workststion is assigned to a new hire employee
 
-# Refresh
-
-Here's what should happen when the refresh button is clicked on a device,
-
-1. The device details are saved/captured for the employee (will have to figure out where logically to save it in the DB)
-2. The workstation is deleted 
-3. Show options for selecting new device 
-4. Activate assign mode but for devices (from employees)
-
-Need to store information about one previous device held by any employee
-
-In Status Field: "Refreshed NE08####" - this is the legacy asset number prior to it being refreshed. This note is 
-put in the field when an asset gets refreshed and is later removed from the status field when our team completes an office update. An office update is essentially our team exporting all records for a certain office code, in excel format, and providing them to our office contacts requesting they confirm the information is accurate. ISD has a completed list of refreshed laptops.  We could create a separate field for these but the need to follow up is rare
-
 # Status
 
 Looking at all this
@@ -164,11 +157,11 @@ Assigned/Occupied
 
 Available | In Transit | Assigned
 
-Technically, if the above 3 are the 3 status options, unlike workspace, these aren't mutually exclusive i.e. 
+Technically, if the above 3 are the 3 status options, unlike workspace, these aren't mutually exclusive i.e.
 - a device can be in transit (recalled to inventory hub) and avaialble(redeploy state)
 - a device can be in transit (shipped to a new hire) and assigned
 
-So, maybe instead of a 3 way toggle button as we have on workspace, we can have the shipping/transit displayed with 
+So, maybe instead of a 3 way toggle button as we have on workspace, we can have the shipping/transit displayed with
 office number field
 
 So, call the field like Where's the workstation at / Workstation Location
@@ -184,6 +177,41 @@ Shipping/Recalling/In Transit (across offices)
 
 The Received button should move it back to available?
 
-My question is that when an asset is in transit stage - is it eligible for assignment? Or does it need to be first 
+My question is that when an asset is in transit stage - is it eligible for assignment? Or does it need to be first
 in the other 2 states i.e. assigned/unassigned
 I reckon it is
+
+# Workstation Matching Process
+
+Some people joining are from anothing ministry getting into our SDPR. They might have their own workstation with 
+them. So, a operator in JJ's team just creates a workstation record with this asset tag.
+
+Others (brand new employees to govt) are randomly given a workstation from the list of redeployed assets
+
+
+# Refresh
+
+Here's what should happen when the refresh button is clicked on a device,
+
+1. The device details are saved/captured for the employee (will have to figure out where logically to save it in the DB)
+2. The workstation is deleted 
+3. Show options for selecting new device 
+4. Activate assign mode but for devices (from employees)
+
+Need to store information about one previous device held by any employee
+
+In Status Field: "Refreshed NE08####" - this is the legacy asset number prior to it being refreshed. This note is 
+put in the field when an asset gets refreshed and is later removed from the status field when our team completes an office update. An office update is essentially our team exporting all records for a certain office code, in excel format, and providing them to our office contacts requesting they confirm the information is accurate. ISD has a completed list of refreshed laptops.  We could create a separate field for these but the need to follow up is rare
+
+I am thinking in the workstation view modal, there should be a refresh button. Clicking that should open assign mode.
+
+This assign mode should now show a list of workstations, one of which can be selected.
+Below along with the go back button, should be the add new workstation button. This would allow the end user to 
+create a new workstation in the system and then select that as the refreshed workstation.
+
+# Workstation History
+
+For each employee, keep a note of previous workstation. Here are the specific fields,
+- Asset Tag
+- Harwdare/Model
+

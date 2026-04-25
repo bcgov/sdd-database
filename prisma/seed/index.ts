@@ -1,20 +1,21 @@
 import {pool, prisma} from "@/db/prisma"
 
 import {seedOffices} from "./entities/seedOffices"
-import {seedBranches} from "./lookups/seedBranches"
-import {seedProgramAreas} from "./lookups/seedProgramAreas";
-import {seedOfficeTypes} from "./lookups/seedOfficeTypes";
-import {seedTypesOfClientServices} from "./lookups/seedTypesOfClientServices";
 import {seedEmployees} from "./entities/seedEmployees";
 import {seedWorkspaces} from "./entities/seedWorkspaces";
-import {seedJobTitles} from "./lookups/seedJobTitles";
-import {seedProgramAreaJobTitles} from "./lookups/seedProgramAreaJobTitles";
-import {seedWorkspaceCategories} from "./lookups/seedWorkspaceCategories";
-import {seedOhsAccommodationTypes} from "./lookups/seedOhsAccommodationTypes";
 import {seedEmployeeOhsAccommodations} from "./entities/seedEmployeeOhsAccommodations";
-import {seedDeskTypes} from "./lookups/seedDeskTypes";
 import {seedWorkstations} from "./entities/seedWorkstations";
-import {seedWorkstationModels} from "./lookups/seedWorkstationModels";
+import {seedOfficeTypes} from "./lookups/offices/seedOfficeTypes";
+import {seedTypesOfClientServices} from "./lookups/offices/seedTypesOfClientServices";
+import {seedBranches} from "./lookups/employees/seedBranches";
+import {seedProgramAreas} from "./lookups/employees/seedProgramAreas";
+import {seedJobTitles} from "./lookups/employees/seedJobTitles";
+import {seedProgramAreaJobTitles} from "./lookups/employees/seedProgramAreaJobTitles";
+import {seedOhsAccommodationTypes} from "./lookups/employees/seedOhsAccommodationTypes";
+import {seedWorkspaceCategories} from "./lookups/workspaces/seedWorkspaceCategories";
+import {seedDeskTypes} from "./lookups/workspaces/seedDeskTypes";
+import {seedWorkstationModels} from "./lookups/workstations/seedWorkstationModels";
+import {seedWorkspaceAssignmentTypes} from "./lookups/employees/seedWorkspaceAssignmentTypes";
 
 
 async function clearSeedTables() {
@@ -28,6 +29,7 @@ async function clearSeedTables() {
     await prisma.employeeOhsAccommodation.deleteMany()
     await prisma.employee.deleteMany()
     await prisma.ohsAccommodationType.deleteMany()
+    await prisma.workspaceAssignmentType.deleteMany()
     await prisma.programAreaJobTitle.deleteMany()
     await prisma.jobTitle.deleteMany()
     await prisma.programArea.deleteMany()
@@ -58,6 +60,9 @@ async function seedTables() {
 
     console.log("➡️ Seeding program area job titles...");
     await seedProgramAreaJobTitles(prisma);
+
+    console.log("➡️ Seeding workspace assignment types...");
+    await seedWorkspaceAssignmentTypes(prisma);
 
     console.log("➡️ Seeding OHS accommodation types...");
     await seedOhsAccommodationTypes(prisma);

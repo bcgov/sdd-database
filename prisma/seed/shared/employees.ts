@@ -6,6 +6,13 @@ import {assertOfficeNumber} from "../validators/offices.validators";
 import {PrismaClient} from "@/generated/prisma/client";
 
 
+const NON_RESIDENT_WORKSPACE_ASSIGNMENT_TYPES = new Set([
+    "Mobile",
+    "Offsite",
+    "Friendship Centre",
+    "Float"
+])
+
 const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "Free Address",
     "HOLD",
@@ -13,6 +20,12 @@ const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "REDEPLOY",
     "Vacant",
 ] as const)
+
+export function isNonResidentWorkspaceAssignmentType(value: string) {
+
+    return NON_RESIDENT_WORKSPACE_ASSIGNMENT_TYPES.has(value)
+
+}
 
 export function isNotAnEmployeeRow<THeader extends string>(
     row: ExcelJS.Row,
