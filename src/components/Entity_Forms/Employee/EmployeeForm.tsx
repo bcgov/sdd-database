@@ -177,7 +177,11 @@ export function EmployeeForm({
                                    handleAssignOffice={(e) => handleAssign("office", e)}>
                     </OfficeDetails>
 
-                    <WorkspaceDetails workspaceNumber={workspaceNumber}
+                    <WorkspaceDetails workspaceAssignmentTypes={employeeLookupState.workspaceAssignmentTypes}
+                                      selectedWorkspaceAssignmentTypeId={employeeLookupState.selectedWorkspaceAssignmentTypeId}
+                                      setSelectedWorkspaceAssignmentTypeId={employeeLookupState.setSelectedWorkspaceAssignmentTypeId}
+
+                                      workspaceNumber={workspaceNumber}
                                       hasProgramAreaAssignment={hasProgramAreaAssignment}
                                       hasOfficeAssignment={hasOfficeAssignment}
                                       hasWorkspaceAssignment={hasWorkspaceAssignment}

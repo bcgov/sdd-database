@@ -5,23 +5,29 @@ import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
 import {useJobTitles} from "@/hooks/lookups/useJobTitles";
 import {useOhsAccommodationTypes} from "@/hooks/lookups/useOhsAccommodationTypes";
 import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {useWorkspaceAssignmentTypes} from "@/hooks/lookups/useWorkspaceAssignmentTypes";
 
 
 export interface EmployeeLookupState {
     branches: LookupOption[]
-    programAreas: LookupOption[]
-    jobTitles: LookupOption[]
-    ohsAccommodationTypes: LookupOption[]
-
     selectedBranchId: number | null
     handleBranchSelectionChange: (branchId: number | null) => void
+
+    programAreas: LookupOption[]
     selectedProgramAreaId: number | null
     handleProgramAreaSelectionChange: (programAreaId: number | null) => void
+
+    jobTitles: LookupOption[]
     selectedJobTitleId: number | null
     setSelectedJobTitleId: Dispatch<SetStateAction<number | null>>
-    selectedOhsAccommodationTypeIds: number[]
-
     isJobTitleRequired: boolean
+
+    workspaceAssignmentTypes: LookupOption[]
+    selectedWorkspaceAssignmentTypeId: number | null
+    setSelectedWorkspaceAssignmentTypeId: Dispatch<SetStateAction<number | null>>
+
+    ohsAccommodationTypes: LookupOption[]
+    selectedOhsAccommodationTypeIds: number[]
 }
 
 export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupState {
@@ -45,11 +51,11 @@ export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupSt
     const initialSelectedProgramAreaId = employee?.program_area_id ?? null
     const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<number | null>(initialSelectedProgramAreaId)
 
-    const initialSelectedJobTitleId = employee?.job_title_id ?? null
-    const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(initialSelectedJobTitleId)
-
     // job titles
     const {jobTitles} = useJobTitles(selectedProgramAreaId ?? undefined)
+
+    const initialSelectedJobTitleId = employee?.job_title_id ?? null
+    const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(initialSelectedJobTitleId)
 
     const selectedBranch = (branches ?? []).find(branch => branch.id === selectedBranchId)
     const isNonSddBranch = selectedBranch?.name === "Non SDD"
@@ -65,6 +71,12 @@ export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupSt
         setSelectedProgramAreaId(programAreaId)
         setSelectedJobTitleId(null)
     }
+
+    // Workspace Assignment Types
+    const {workspaceAssignmentTypes} = useWorkspaceAssignmentTypes()
+
+    const initialSelectedWorkspaceAssignmentTypeId = employee?.workspace_assignment_type_id ?? null
+    const [selectedWorkspaceAssignmentTypeId, setSelectedWorkspaceAssignmentTypeId] = useState<number | null>(initialSelectedWorkspaceAssignmentTypeId)
 
     // OHS Accommodations
     const {ohsAccommodationTypes} = useOhsAccommodationTypes();
@@ -87,18 +99,23 @@ export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupSt
 
     return {
         branches: branches ?? [],
-        programAreas: programAreas ?? [],
-        jobTitles: jobTitles ?? [],
-        ohsAccommodationTypes: ohsAccommodationTypes ?? [],
-
         selectedBranchId,
         handleBranchSelectionChange,
+
+        programAreas: programAreas ?? [],
         selectedProgramAreaId,
         handleProgramAreaSelectionChange,
+
+        jobTitles: jobTitles ?? [],
         selectedJobTitleId,
         setSelectedJobTitleId,
-        selectedOhsAccommodationTypeIds: initialSelectedOhsAccommodationTypeIds,
+        isJobTitleRequired,
 
-        isJobTitleRequired
+        workspaceAssignmentTypes: workspaceAssignmentTypes ?? [],
+        selectedWorkspaceAssignmentTypeId,
+        setSelectedWorkspaceAssignmentTypeId,
+
+        ohsAccommodationTypes: ohsAccommodationTypes ?? [],
+        selectedOhsAccommodationTypeIds: initialSelectedOhsAccommodationTypeIds,
     }
 }

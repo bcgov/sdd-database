@@ -2,13 +2,19 @@ import {
     Accordion,
     Button,
     ButtonGroup,
-    Callout,
+    Callout, Select,
     TextField,
 } from "@bcgov/design-system-react-components";
 
 import {PressEvent} from "@react-types/shared";
+import {LookupOption} from "@/types";
+
 
 interface WorkspaceDetailsProps {
+    workspaceAssignmentTypes: LookupOption[]
+    selectedWorkspaceAssignmentTypeId: number | null
+    setSelectedWorkspaceAssignmentTypeId: (id: number | null) => void
+
     workspaceNumber: string
     hasProgramAreaAssignment: boolean
     hasOfficeAssignment: boolean
@@ -18,6 +24,10 @@ interface WorkspaceDetailsProps {
 }
 
 export function WorkspaceDetails({
+                                     workspaceAssignmentTypes,
+                                     selectedWorkspaceAssignmentTypeId,
+                                     setSelectedWorkspaceAssignmentTypeId,
+
                                      workspaceNumber,
                                      hasProgramAreaAssignment,
                                      hasOfficeAssignment,
@@ -25,6 +35,12 @@ export function WorkspaceDetails({
                                      handleAssignWorkspace,
                                      handleRemoveWorkspace,
                                  }: WorkspaceDetailsProps) {
+
+    const selectedWorkspaceAssignmentType = workspaceAssignmentTypes.find(
+        assignmentType => assignmentType.id === selectedWorkspaceAssignmentTypeId
+    )
+
+    const isResidentAssignmentType = selectedWorkspaceAssignmentType?.name === "Resident"
 
     const workspaceAssignmentBlockedReason = !hasOfficeAssignment && !hasProgramAreaAssignment
         ? "Select a Program Area and assign an Office first to enable Workspace assignment"
@@ -37,42 +53,62 @@ export function WorkspaceDetails({
     return (
         <Accordion label="Workspace Details" id="workspaceDetails">
             <div>
-                {workspaceAssignmentBlockedReason &&
-                    <div style={{
-                        marginBottom: "1rem",
-                    }}>
-                        <Callout
-                            description={workspaceAssignmentBlockedReason}>
-                        </Callout>
-                    </div>
-                }
+                <Select label="Assignment Type"
+                        name="workspaceAssignmentType"
+                        items={workspaceAssignmentTypes.map(workspaceAssignmentType => (
+                            {
+                                id: workspaceAssignmentType.id,
+                                label: workspaceAssignmentType.name,
+                            }
+                        ))}
+                        selectedKey={selectedWorkspaceAssignmentTypeId}
+                        onSelectionChange={(key) =>
+                            setSelectedWorkspaceAssignmentTypeId(key == null ? null : Number(key))}>
+                </Select>
 
-                <TextField label="Workspace Number"
-                           name="workspaceNumber"
-                           isReadOnly
-                           value={workspaceNumber}
-                >
-                </TextField>
+                {isResidentAssignmentType && (
+                    <>
+                        {
+                            workspaceAssignmentBlockedReason &&
+                            <div style={{
+                                marginTop: "1rem",
+                                marginBottom: "1rem",
+                            }}>
+                                <Callout
+                                    description={workspaceAssignmentBlockedReason}>
+                                </Callout>
+                            </div>
+                        }
 
-                <ButtonGroup>
-                    <Button
-                        variant="secondary"
-                        isDisabled={!hasOfficeAssignment || !hasProgramAreaAssignment}
-                        onPress={handleAssignWorkspace}
-                    >
-                        {hasWorkspaceAssignment ? "Update" : "Assign"} Workspace
-                    </Button>
-
-                    {hasWorkspaceAssignment && (
-                        <Button
-                            variant="secondary"
-                            danger
-                            onPress={handleRemoveWorkspace}
+                        <TextField label="Workspace Number"
+                                   name="workspaceNumber"
+                                   isRequired
+                                   isReadOnly
+                                   value={workspaceNumber}
                         >
-                            Remove Workspace
-                        </Button>
-                    )}
-                </ButtonGroup>
+                        </TextField>
+
+                        <ButtonGroup>
+                            <Button
+                                variant="secondary"
+                                isDisabled={!hasOfficeAssignment || !hasProgramAreaAssignment}
+                                onPress={handleAssignWorkspace}
+                            >
+                                {hasWorkspaceAssignment ? "Update" : "Assign"} Workspace
+                            </Button>
+
+                            {hasWorkspaceAssignment && (
+                                <Button
+                                    variant="secondary"
+                                    danger
+                                    onPress={handleRemoveWorkspace}
+                                >
+                                    Remove Workspace
+                                </Button>
+                            )}
+                        </ButtonGroup>
+                    </>
+                )}
             </div>
         </Accordion>
     )

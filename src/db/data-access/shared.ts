@@ -4,6 +4,7 @@ import {Prisma} from "@/generated/prisma/client";
 export const employeeSearchResultArgs = {
     include: {
         program_area: true,
+        workspace_assignment_type: true,
         workspace: true,
         workstations: true,
         ohs_accommodations: {

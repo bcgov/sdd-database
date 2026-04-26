@@ -17,15 +17,16 @@ export type SelectedWorkspaceAssignment = {
 }
 
 type EmployeePersistedFields = {
-    office_number: string;
-    idir: string | null;
-    first_name: string;
-    alternate_name: string | null;
-    last_name: string;
-    employee_id: string | null;
-    program_area_id: number;
-    job_title_id: number | null;
-    notes: string | null;
+    office_number: string
+    idir: string | null
+    first_name: string
+    alternate_name: string | null
+    last_name: string
+    employee_id: string | null
+    program_area_id: number
+    job_title_id: number | null
+    notes: string | null
+    workspace_assignment_type_id: number | null
 }
 
 type EmployeeFormExtraFields = {
