@@ -73,6 +73,23 @@ export async function getJobTitlesByProgramArea(program_area_id: number) {
     }))
 }
 
+export async function getWorkspaceAssignmentTypes() {
+    return getLookupOptions(prisma.workspaceAssignmentType)
+}
+
+export async function getWorkspaceAssignmentTypeNameById(id: number) {
+    const workspaceAssignmentType = await prisma.workspaceAssignmentType.findUnique({
+        where: {
+            id
+        },
+        select: {
+            name: true
+        }
+    })
+
+    return workspaceAssignmentType?.name ?? null
+}
+
 export async function getOhsAccommodationTypes() {
     return getLookupOptions(prisma.ohsAccommodationType)
 }

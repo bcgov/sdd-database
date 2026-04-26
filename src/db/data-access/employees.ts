@@ -71,6 +71,7 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                 {program_area: {name: {contains: query, mode: 'insensitive'}}},
                 {job_title: {name: {contains: query, mode: 'insensitive'}}},
                 {notes: {contains: query, mode: 'insensitive'}},
+                {workspace_assignment_type: {name: {contains: query, mode: 'insensitive'}}},
                 {
                     ohs_accommodations: {
                         some: {

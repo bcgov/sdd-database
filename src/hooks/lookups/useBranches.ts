@@ -11,5 +11,5 @@ export function useBranches() {
 
     const {data} = useLookup(fetcher, "branches")
 
-    return { branches: data}
+    return {branches: data}
 }

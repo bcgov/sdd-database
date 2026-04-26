@@ -10,7 +10,7 @@ import {
     validateEmployeeProgramAreaField,
     validateNotesField
 } from "@/validators";
-import {getBranchNameByProgramAreaId} from "@/db/data-access/lookups";
+import {getBranchNameByProgramAreaId, getWorkspaceAssignmentTypeNameById} from "@/db/data-access/lookups";
 
 
 export async function validateEmployeeData(employee: EmployeeFormValues) {
@@ -36,17 +36,20 @@ export async function validateEmployeeData(employee: EmployeeFormValues) {
     }
 
     const branchName = await getBranchNameByProgramAreaId(employee.program_area_id)
-
     if (!branchName) {
         return `The selected Program Area is invalid. Please reselect a Program Area and try again.`
     }
 
-    if(branchName !== "Non SDD") {
+    if (branchName !== "Non SDD") {
         const jobValidationError = validateEmployeeJobTitleField(employee.job_title_id, "Job Title")
-
         if (jobValidationError) {
             return jobValidationError
         }
+    }
+
+    const workspaceAssignmentTypeValidationError = await validateWorkspaceAssignmentTypeRules(employee)
+    if (workspaceAssignmentTypeValidationError) {
+        return workspaceAssignmentTypeValidationError
     }
 
     const workspaceValidationError = await validateAssignedWorkspace(employee)
@@ -57,6 +60,22 @@ export async function validateEmployeeData(employee: EmployeeFormValues) {
     const workstationValidationError = await validateAssignedWorkstations(employee)
     if (workstationValidationError) {
         return workstationValidationError
+    }
+}
+
+async function validateWorkspaceAssignmentTypeRules(employee: EmployeeFormValues) {
+    const workspaceAssignmentTypeId = employee.workspace_assignment_type_id
+
+    if (workspaceAssignmentTypeId == null) return
+
+    const workspaceAssignmentTypeName = await getWorkspaceAssignmentTypeNameById(workspaceAssignmentTypeId)
+
+    if (!workspaceAssignmentTypeName) {
+        return `The selected Workspace Assignment Type is invalid. Please reselect a Workspace Assignment Type and try again`
+    }
+
+    if (workspaceAssignmentTypeName === "Resident" && !employee.ui_workspace_number) {
+        return `No workspace assigned for resident employee. Please assign a workspace or change the Workspace Assignment Type and try again.`
     }
 }
 
@@ -78,7 +97,7 @@ async function validateAssignedWorkspace(employee: EmployeeFormValues) {
         return `Workspace ${workspaceNumber} is currently on hold and cannot be assigned. Please choose another workspace.`
     }
 
-    if (workspace.employee_id !=null && workspace.employee_id !== employee.id) {
+    if (workspace.employee_id != null && workspace.employee_id !== employee.id) {
         return `Workspace ${workspaceNumber} is already assigned to another employee. Please choose another workspace.`
     }
 
