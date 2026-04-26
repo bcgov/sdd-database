@@ -22,6 +22,7 @@ export async function getWorkstationsByFilter(query?: string) {
             OR: [
                 {asset_tag: {contains: query, mode: 'insensitive'}},
                 {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
+                {office_number: {contains: query}},
                 {notes: {contains: query, mode: 'insensitive'}},
                 {
                     // find workstations whose assigned employee exists and matches at least one of these
@@ -54,6 +55,7 @@ export async function getAssignableWorkstationsByFilter(query?: string) {
             OR: [
                 {asset_tag: {contains: query, mode: 'insensitive'}},
                 {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
+                {office_number: {contains: query}},
                 {notes: {contains: query, mode: 'insensitive'}},
             ]
         }

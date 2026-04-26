@@ -37,6 +37,7 @@ export async function addNewEmployeeWithAssignments(employee: EmployeeFormValues
         await syncEmployeeWorkstations(
             db,
             createdEmployee.id,
+            employee.office_number,
             employee.ui_workstation_asset_tags ?? []
         )
 
@@ -149,6 +150,7 @@ export async function updateEmployeeWithAssignments(employee: EmployeeFormValues
         await syncEmployeeWorkstations(
             db,
             updatedEmployee.id,
+            employee.office_number,
             employee.ui_workstation_asset_tags ?? []
         )
 
@@ -198,9 +200,11 @@ async function syncEmployeeWorkspace(
 async function syncEmployeeWorkstations(
     db: DbClient,
     employeeId: number,
+    employeeOfficeNumber: string,
     workstationAssetTags: string[],
 ) {
     // Clear all workstation assignments currently linked to this employee
+    // Do not change office_number here. Once unassigned, a workstation keeps its last known office.
     await db.workstation.updateMany({
         where: {
             employee_id: employeeId
@@ -213,7 +217,7 @@ async function syncEmployeeWorkstations(
     // if user assigned no workstations, stop
     if (workstationAssetTags.length === 0) return
 
-    // Assign the selected workstations to this employee
+    // Assign the selected workstations to this employee and move them to the employee's current office
     // find all workstation rows whose asset_tag is one of the selected asset tags, and set their employee_id to this employee.
     await db.workstation.updateMany({
         where: {
@@ -223,6 +227,7 @@ async function syncEmployeeWorkstations(
         },
         data: {
             employee_id: employeeId,
+            office_number: employeeOfficeNumber,
         }
     })
 }

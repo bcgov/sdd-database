@@ -6,6 +6,13 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.33",
+            notes: [
+                "Workstations are now searchable by their office number",
+                "Workstations now take on the employee's office number if they are assigned to that employee"
+            ]
+        },
+        {
             version: "v0.0.32",
             notes: [
                 "Add new Desk Type 'To Be Determined'",
