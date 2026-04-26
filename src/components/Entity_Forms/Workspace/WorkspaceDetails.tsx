@@ -45,14 +45,12 @@ export function WorkspaceDetails({
         <Accordion label="Workspace Details" id="workspaceDetails">
             <div>
                 <TextField label="Workspace Number"
-                           name="number"
                            isReadOnly
                            defaultValue={workspace.workspace_number}
                 >
                 </TextField>
 
                 <TextField label="Office Number"
-                           name="officeNumber"
                            isReadOnly
                            defaultValue={workspace.office_number}>
                 </TextField>
