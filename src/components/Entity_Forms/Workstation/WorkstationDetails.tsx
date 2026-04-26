@@ -29,8 +29,13 @@ export function WorkstationDetails({
                             }
                         ]}
                         isDisabled
-                        defaultValue={workstation.model_id}>
+                        selectedKey={workstation.model_id}>
                 </Select>
+
+                <TextField label="Currently at Office Number"
+                           isReadOnly
+                           defaultValue={workstation.office_number}>
+                </TextField>
 
                 {hasNotes &&
                     <TextArea label="Notes"

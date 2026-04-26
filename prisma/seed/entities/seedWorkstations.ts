@@ -13,6 +13,7 @@ import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {normalizeModelName} from "../normalizers/workstations.normalizers";
 import {isPublicJobBankKiosk} from "../shared/sourceRows";
+import {assertOfficeNumber} from "../validators/offices.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -35,6 +36,7 @@ const WORKSTATION_REQUIRED_HEADERS = [
 type ParsedWorkstationRow = {
     asset_tag: string
     model_id: number
+    office_number: string
     employee_id: number | null
     notes: string | null
 }
@@ -109,15 +111,19 @@ function parseWorkstationRow(
     employeeResolutionContext: EmployeeResolutionContext
 ): ParsedWorkstationRow {
 
+    // model
     const rawHardware = getCellString(row, headerToCol, "Hardware")
     const hardware = normalizeModelName(rawHardware)
+    const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
     // asset tag
     const rawAssetTag = getCellString(row, headerToCol, "Computer Number")
     assertAssetTag(rawAssetTag, hardware, rowNumber)
 
-    // model
-    const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
+    // office_number
+    const officeNumberHeader = "OfficeNum"
+    const officeNumber = getCellString(row, headerToCol, officeNumberHeader)
+    assertOfficeNumber(officeNumber, rowNumber)
 
     // internal employee id i.e. primary key
     const employeeId = resolveEmployeeId(
@@ -127,7 +133,7 @@ function parseWorkstationRow(
         {
             assignedToHeader: "Assigned To",
             idirHeader: "IDIR",
-            officeNumberHeader: "OfficeNum",
+            officeNumberHeader,
             employeeResolutionContext
         }
     )
@@ -146,6 +152,7 @@ function parseWorkstationRow(
     return {
         asset_tag: rawAssetTag,
         model_id: modelId,
+        office_number: officeNumber,
         employee_id: employeeId,
         notes
     }

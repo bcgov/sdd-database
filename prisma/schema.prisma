@@ -109,8 +109,9 @@ model Office {
   office_type         OfficeType          @relation(fields: [type_id], references: [id])
   client_service_type TypeOfClientService @relation(fields: [client_service_type_id], references: [id])
 
-  employees  Employee[]
-  workspaces Workspace[]
+  employees    Employee[]
+  workspaces   Workspace[]
+  workstations Workstation[]
 }
 
 model OfficeType {
@@ -170,10 +171,12 @@ model Workstation {
   asset_tag String  @id @db.Citext
   notes     String? @db.VarChar(2000)
 
-  model_id    Int
-  employee_id Int?
+  model_id      Int
+  office_number String @db.VarChar(3)
+  employee_id   Int?
 
   workstation_model WorkstationModel @relation(fields: [model_id], references: [id])
+  current_office    Office           @relation(fields: [office_number], references: [office_number])
   assigned_employee Employee?        @relation(fields: [employee_id], references: [id])
 }
 
