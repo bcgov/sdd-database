@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.32",
             notes: [
-                "Add new Desk Type 'To Be Determined'"
+                "Add new Desk Type 'To Be Determined'",
+                "Add Workspace Assignment Type field"
             ]
         },
         {
