@@ -49,15 +49,18 @@ export function useEntityActions({
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
 
     const {
+        viewedEntity,
+        setViewedEntity,
+
         draftNewEmployee,
-        selectedSearchResult,
-        setSelectedSearchResult,
+        draftEditEmployee,
 
         isAddNewEmployeeModalOpen,
         openCloseAddNewEmployeeModal,
         openSearchResultEditModal,
 
         saveEmployeeFormData,
+
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
         assignWorkstationClickHandler,
@@ -173,39 +176,51 @@ export function useEntityActions({
 
         if (draftNewEmployee) {
             openCloseAddNewEmployeeModal(true)
-        } else {
-            if (selectedSearchResult?.type === "employee") {
-                setIsEditModalOpen(true)
-            }
+            return
         }
+
+        if (draftEditEmployee?.type === "employee") {
+            setViewedEntity(draftEditEmployee)
+            setIsEditModalOpen(true)
+            return
+        }
+
+        // code should ideally never reach here
+        // if it does, then something is wrong
+        addErrorAlert(
+            "Error: Something went wrong.",
+            "Please refresh the webpage and try again"
+        )
+
     }, [
         draftNewEmployee,
-        selectedSearchResult,
+        draftEditEmployee,
+        viewedEntity,
         openCloseAddNewEmployeeModal
     ])
 
     const holdWorkspaceClickHandler = async () => {
-        if (selectedSearchResult?.type !== "workspace") {
+        if (viewedEntity?.type !== "workspace") {
             addErrorAlert(
                 "Error: Something went wrong.",
                 "Please refresh the webpage"
-            );
+            )
         } else {
             const result = await holdAction(
-                selectedSearchResult.office_number,
-                selectedSearchResult.workspace_number
+                viewedEntity.office_number,
+                viewedEntity.workspace_number
             )
 
             if (result.status === "error") {
                 addErrorAlert(
-                    `Error: Could not put workspace ${selectedSearchResult.workspace_number} on hold`,
+                    `Error: Could not put workspace ${viewedEntity.workspace_number} on hold`,
                     result.error
                 )
             } else if (result.status === "ok") {
 
                 updateSelectedWorkspaceHoldState(true)
 
-                addSuccessAlert(`Workspace ${selectedSearchResult.workspace_number} marked on hold!`)
+                addSuccessAlert(`Workspace ${viewedEntity.workspace_number} marked on hold!`)
 
                 refreshSearchResults()
             }
@@ -213,27 +228,27 @@ export function useEntityActions({
     }
 
     const removeHoldWorkspaceClickHandler = async () => {
-        if (selectedSearchResult?.type !== "workspace") {
+        if (viewedEntity?.type !== "workspace") {
             addErrorAlert(
                 "Error: Something went wrong.",
                 "Please refresh the webpage"
             );
         } else {
             const result = await removeHoldAction(
-                selectedSearchResult.office_number,
-                selectedSearchResult.workspace_number
+                viewedEntity.office_number,
+                viewedEntity.workspace_number
             )
 
             if (result.status === "error") {
                 addErrorAlert(
-                    `Error: Could not remove workspace ${selectedSearchResult.workspace_number} from hold status`,
+                    `Error: Could not remove workspace ${viewedEntity.workspace_number} from hold status`,
                     result.error
                 )
             } else if (result.status === "ok") {
 
                 updateSelectedWorkspaceHoldState(false)
 
-                addSuccessAlert(`Workspace ${selectedSearchResult.workspace_number} is no longer on hold!`)
+                addSuccessAlert(`Workspace ${viewedEntity.workspace_number} is no longer on hold!`)
 
                 refreshSearchResults()
             }
@@ -241,7 +256,7 @@ export function useEntityActions({
     }
 
     const updateSelectedWorkspaceHoldState = (isOnHold: boolean) => {
-        setSelectedSearchResult(prev => {
+        setViewedEntity(prev => {
             if (!prev || prev.type !== "workspace") {
                 return prev
             }
@@ -283,8 +298,8 @@ export function useEntityActions({
         setIsDeleteAlertDialogOpen(false)
         setIsEditModalOpen(false)
 
-        const employeeName = selectedSearchResult?.type === "employee"
-            ? getEmployeeFullName(selectedSearchResult)
+        const employeeName = viewedEntity?.type === "employee"
+            ? getEmployeeFullName(viewedEntity)
             : undefined
 
         try {
@@ -310,8 +325,9 @@ export function useEntityActions({
     }
 
     return {
-        selectedSearchResult,
+        viewedEntity,
         draftNewEmployee,
+        draftEditEmployee,
 
         isDeleteAlertDialogOpen,
         setIsDeleteAlertDialogOpen,

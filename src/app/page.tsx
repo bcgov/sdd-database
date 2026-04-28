@@ -6,7 +6,6 @@ import {
     InlineAlert,
 } from "@bcgov/design-system-react-components"
 
-import {EditModal} from "@/components/EditModal";
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
 
@@ -15,6 +14,7 @@ import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
 import {useEntityOrchestration} from "@/hooks/useEntityOrchestration";
 import {SearchControls} from "@/components/Search/SearchControls";
 import {SearchResultsPanel} from "@/components/Search/SearchResultsPanel";
+import {EntityModal} from "@/components/Entity_Modals/EntityModal";
 
 export default function Home() {
     const {uiState, alerts, search, actions, editHandlers} = useEntityOrchestration()
@@ -98,26 +98,32 @@ export default function Home() {
                 )}
             </div>
 
-            {actions.selectedSearchResult &&
+            {actions.viewedEntity &&
                 <>
-                    <EditModal
-                        item={actions.selectedSearchResult}
+                    <EntityModal
+                        viewedEntity={actions.viewedEntity}
+                        draftEditEmployee={actions.draftEditEmployee}
+
                         activateAssignMode={actions.activateAssignMode}
+
                         handleRemoveWorkspace={actions.removeWorkspaceClickHandler}
                         handleRemoveWorkstation={actions.removeWorkstationClickHandler}
+
                         handleHoldWorkspace={actions.holdWorkspaceClickHandler}
                         handleRemoveWorkspaceHold={actions.removeHoldWorkspaceClickHandler}
+
                         isOpen={uiState.isEditModalOpen}
                         setIsOpen={uiState.setIsEditModalOpen}
+
                         onSuccess={editHandlers.onEditSuccess}
                         onError={editHandlers.onEditError}
                         onDelete={() => actions.setIsDeleteAlertDialogOpen(true)}
                     >
-                    </EditModal>
+                    </EntityModal>
 
-                    {actions.selectedSearchResult.type === "employee" &&
+                    {actions.viewedEntity.type === "employee" &&
                         <DeleteAlertDialog
-                            employee={actions.selectedSearchResult}
+                            employee={actions.viewedEntity}
                             isOpen={actions.isDeleteAlertDialogOpen}
                             setIsOpen={actions.setIsDeleteAlertDialogOpen}
                             onDelete={actions.removeEmployeeById}

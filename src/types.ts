@@ -54,19 +54,35 @@ export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceS
 
 export type WorkstationSearchResult = Prisma.WorkstationGetPayload<typeof workstationSearchResultArgs>
 
-type EmployeeEntity = EmployeeSearchResult & {
+type EmployeeEntityFields = EmployeeSearchResult & {
     ui_branch_id?: number;
     ui_workspace_number?: string;
     ui_workspace_restricted_program_area_id?: number | null;
     ui_workstation_asset_tags?: string[]
 };
 
+export type EmployeeEntity = EmployeeEntityFields & {
+    type: "employee"
+}
+
+export type OfficeEntity = Office & {
+    type: "office"
+}
+
+export type WorkspaceEntity = WorkspaceSearchResult & {
+    type: "workspace"
+}
+
+export type WorkstationEntity = WorkstationSearchResult & {
+    type: "workstation"
+}
+
 // discriminated union
 export type Entity =
-    | (EmployeeEntity & { type: "employee" })
-    | (Office & { type: "office" })
-    | (WorkspaceSearchResult & { type: "workspace" })
-    | (WorkstationSearchResult & { type: "workstation" })
+    | EmployeeEntity
+    | OfficeEntity
+    | WorkspaceEntity
+    | WorkstationEntity
 
 export type EntityActionResult =
     | { status: "idle" }                    // before the first submit i.e. initial state

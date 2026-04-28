@@ -67,7 +67,7 @@ export function useEntityOrchestration() {
     })
 
     // derive the entity type from the selected item (or fallback)
-    const entityType = actions.selectedSearchResult?.type ?? "employee";
+    const entityType = actions.viewedEntity?.type ?? "employee";
 
     const editHandlers = useEntityEditCallbacks({
         entityType,
