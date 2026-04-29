@@ -6,14 +6,14 @@ import {
     hold,
     removeHold
 } from "@/db/data-access/workspaces";
-import {Entity, EntityActionResult} from "@/types";
+import {EntityActionResult, WorkspaceEntity} from "@/types";
 
 
-export async function searchWorkspacesAction(query?: string) {
+export async function searchWorkspacesAction(query?: string): Promise<WorkspaceEntity[]>  {
     const workspaceSearchResults = await getWorkspacesByFilter(query)
 
     // Attaching discriminant 'type'
-    const workspacesWithType: Entity[] = workspaceSearchResults.map(workspace => ({
+    const workspacesWithType: WorkspaceEntity[] = workspaceSearchResults.map(workspace => ({
         ...workspace,
         type: "workspace" as const,
     }))
@@ -25,7 +25,7 @@ export async function searchAssignableWorkspacesAction(
     employeeOfficeNumber: string,
     employeeProgramAreaId: number,
     query?: string
-) {
+): Promise<WorkspaceEntity[]> {
     const workspaceSearchResults = await getAssignableWorkspacesByFilter(
         employeeOfficeNumber,
         employeeProgramAreaId,
@@ -33,7 +33,7 @@ export async function searchAssignableWorkspacesAction(
     )
 
     // Attaching discriminant 'type'
-    const workspacesWithType: Entity[] = workspaceSearchResults.map(workspace => ({
+    const workspacesWithType: WorkspaceEntity[] = workspaceSearchResults.map(workspace => ({
         ...workspace,
         type: "workspace" as const,
     }))

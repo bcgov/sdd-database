@@ -2,14 +2,14 @@
 
 import {getOfficesByFilter} from "@/db/data-access/offices";
 
-import {Entity} from "@/types";
+import {OfficeEntity} from "@/types";
 
 
-export async function searchOfficesAction(query?: string) {
+export async function searchOfficesAction(query?: string): Promise<OfficeEntity[]> {
     const officeSearchResults = await getOfficesByFilter(query);
 
     // Attaching the discriminant 'type'
-    const officesWithType: Entity[] = officeSearchResults.map(office => ({
+    const officesWithType: OfficeEntity[] = officeSearchResults.map(office => ({
         ...office,
         type: "office" as const,
     }))

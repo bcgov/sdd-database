@@ -1,13 +1,13 @@
 import {AlertDialog, Button, DialogTrigger, Modal} from "@bcgov/design-system-react-components";
 
 import {getEmployeeFullName} from "@/utils";
-import {EmployeeSearchResult} from "@/types";
+import {EmployeeEntity} from "@/types";
 
 
 interface DeleteAlertDialogProps {
-    employee: EmployeeSearchResult;
-    isOpen: boolean;
-    setIsOpen: (isDeleteAlertDialogOpen: boolean) => void;
+    employee: EmployeeEntity
+    isOpen: boolean
+    setIsOpen: (isDeleteAlertDialogOpen: boolean) => void
     /**
      * Optimistic-aware callback coming from `useSearch / useEntityActions`.
      * It **first** updates local UI (useOptimistic) and **then** calls the

@@ -7,7 +7,7 @@ import {
     deleteEmployee
 } from "@/db/data-access/employees";
 
-import {EntityActionResult, Entity} from "@/types";
+import {EntityActionResult, EmployeeEntity} from "@/types";
 
 import {parseEmployeeFormData} from "@/utils";
 
@@ -33,11 +33,11 @@ export async function updateEmployeeAction(prevState: EntityActionResult, formDa
     return employeeActions.updateAction(prevState, formData);
 }
 
-export async function searchEmployeesAction(query?: string): Promise<Entity[]> {
+export async function searchEmployeesAction(query?: string): Promise<EmployeeEntity[]> {
     const employeeSearchResults = await getEmployeesByFilter(query);
 
     // Attaching the discriminant 'type'
-    const employeesWithType: Entity[] = employeeSearchResults.map(employee => ({
+    const employeesWithType: EmployeeEntity[] = employeeSearchResults.map(employee => ({
         ...employee,
         type: "employee" as const,
     }))

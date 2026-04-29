@@ -1,4 +1,3 @@
-import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
 import {Accordion, Callout, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {
     validateEmployeeIdField,
@@ -7,10 +6,11 @@ import {
     validateNotesField
 } from "@/validators";
 import {EmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
+import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
 
 
 interface EmployeeDetailsProps {
-    employee: EmployeeFormValues | EmployeeSearchResult | undefined
+    employee: EmployeeLike
     lookupState: EmployeeLookupState
     isEditMode: boolean
 }

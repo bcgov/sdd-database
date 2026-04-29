@@ -30,12 +30,9 @@ export function useEntityEditCallbacks({
             case "employee":
                 addSuccessAlert("Employee details updated.");
                 break;
-            case "office":
-                addSuccessAlert("Office details updated.");
-                break;
-            case "workstation":
-                addSuccessAlert("Workstation details updated.");
-                break;
+
+                default:
+                    break;
         }
 
     }, [refreshSearchResults, setIsEditModalOpen, entityType, addSuccessAlert]);
@@ -48,12 +45,11 @@ export function useEntityEditCallbacks({
             case "employee":
                 addErrorAlert("Error: Could not edit employee", error);
                 break;
-            case "office":
-                addErrorAlert("Error: Could not edit office", error);
-                break;
-            case "workstation":
-                addErrorAlert("Error: Could not edit workstation", error);
-                break;
+
+                default:
+                    addErrorAlert("Error: Could not update record", error);
+                    break;
+
         }
     }, [setIsEditModalOpen, entityType, addErrorAlert]);
 

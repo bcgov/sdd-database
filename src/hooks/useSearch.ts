@@ -82,9 +82,8 @@ export function useSearch() {
             case "workstation":
                 const workstationResults = await searchAssignableWorkstationsAction(query);
 
-                results = workstationResults.filter(item =>
-                    item.type !== "workstation" ||
-                    !effectiveEmployeeWorkstationAssetTags.includes(item.asset_tag)
+                results = workstationResults.filter(workstation =>
+                    !effectiveEmployeeWorkstationAssetTags.includes(workstation.asset_tag)
                 )
 
                 break;

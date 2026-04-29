@@ -5,14 +5,14 @@ import {
     getWorkstationsByFilter,
 } from "@/db/data-access/workstations";
 
-import {Entity} from "@/types";
+import {WorkstationEntity} from "@/types";
 
 
-export async function searchWorkstationsAction(query?: string) {
+export async function searchWorkstationsAction(query?: string): Promise<WorkstationEntity[]> {
     const workstationSearchResults = await getWorkstationsByFilter(query);
 
     // Attaching the discriminant 'type'
-    const workstationsWithType: Entity[] = workstationSearchResults.map(workstation => ({
+    const workstationsWithType: WorkstationEntity[] = workstationSearchResults.map(workstation => ({
         ...workstation,
         type: "workstation" as const,
     }))
@@ -20,11 +20,11 @@ export async function searchWorkstationsAction(query?: string) {
     return workstationsWithType
 }
 
-export async function searchAssignableWorkstationsAction(query?: string) {
+export async function searchAssignableWorkstationsAction(query?: string): Promise<WorkstationEntity[]> {
     const workstationSearchResults = await getAssignableWorkstationsByFilter(query);
 
     // Attaching the discriminant 'type'
-    const workstationsWithType: Entity[] = workstationSearchResults.map(workstation => ({
+    const workstationsWithType: WorkstationEntity[] = workstationSearchResults.map(workstation => ({
         ...workstation,
         type: "workstation" as const,
     }))

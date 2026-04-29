@@ -88,7 +88,7 @@ export function useEmployeeLookupState(employee: EmployeeLike): EmployeeLookupSt
         initialSelectedOhsAccommodationTypeIds = employee.ohs_accommodation_type_ids
     }
     else {
-        // if employee is of type EmployeeSearchResult
+        // if employee is of type EmployeeEntity
         if (employee && "ohs_accommodations" in employee) {
 
             initialSelectedOhsAccommodationTypeIds = employee.ohs_accommodations.map(

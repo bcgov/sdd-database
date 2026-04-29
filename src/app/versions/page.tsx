@@ -9,7 +9,8 @@ export default function Updates() {
             version: "v0.0.33",
             notes: [
                 "Workstations are now searchable by their office number",
-                "Workstations now take on the employee's office number if they are assigned to that employee"
+                "Workstations now take on the employee's office number if they are assigned to that employee",
+                "Fixed an assignment related bug"
             ]
         },
         {
