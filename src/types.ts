@@ -6,16 +6,9 @@ import {
 } from "@/db/data-access/shared";
 
 
-export type LookupOption = {
-    id: number;
-    name: string;
-};
-
-export type SelectedWorkspaceAssignment = {
-    workspace_number: string
-    restricted_program_area_id: number | null
-}
-
+/**
+ * Employee Types
+ */
 type EmployeePersistedFields = {
     office_number: string
     idir: string | null
@@ -50,10 +43,6 @@ export type EmployeeFormValues = EmployeePersistedFields & EmployeeFormExtraFiel
 // employee returned from DB search results with hydrated program area, workspace and ohs accommodations
 export type EmployeeSearchResult = Prisma.EmployeeGetPayload<typeof employeeSearchResultArgs>
 
-export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceSearchResultArgs>
-
-export type WorkstationSearchResult = Prisma.WorkstationGetPayload<typeof workstationSearchResultArgs>
-
 type EmployeeEntityFields = EmployeeSearchResult & {
     ui_branch_id?: number;
     ui_workspace_number?: string;
@@ -65,16 +54,53 @@ export type EmployeeEntity = EmployeeEntityFields & {
     type: "employee"
 }
 
+/**
+ * Office Types
+ */
 export type OfficeEntity = Office & {
     type: "office"
 }
+
+/**
+ * Workspace Types
+ */
+export type WorkspaceSearchResult = Prisma.WorkspaceGetPayload<typeof workspaceSearchResultArgs>
 
 export type WorkspaceEntity = WorkspaceSearchResult & {
     type: "workspace"
 }
 
+/**
+ * Workstation Types
+ */
+
+export type WorkstationFormValues = {
+    asset_tag: string
+    model_id: number
+    office_number: string
+    notes: string | null
+}
+
+export type WorkstationSearchResult = Prisma.WorkstationGetPayload<typeof workstationSearchResultArgs>
+
 export type WorkstationEntity = WorkstationSearchResult & {
     type: "workstation"
+}
+
+/**
+ * Common Types
+ */
+
+export type LookupOption = {
+    id: number;
+    name: string;
+};
+
+export type AssignMode = "none" | "office" | "workspace" | "workstation"
+
+export type SelectedWorkspaceAssignment = {
+    workspace_number: string
+    restricted_program_area_id: number | null
 }
 
 // discriminated union
@@ -84,12 +110,12 @@ export type Entity =
     | WorkspaceEntity
     | WorkstationEntity
 
+export type EntityType = Entity["type"]
+
 export type EntityActionResult =
     | { status: "idle" }                    // before the first submit i.e. initial state
     | { status: "ok" }                      // server-side validation passed and entity action is successful
     | { status: "error"; error: string };   // server-side validation failed or an error occurred while processing the action
-
-export type AssignMode = "none" | "office" | "workspace" | "workstation"
 
 export type SearchOptions = {
     modeOverride?: AssignMode

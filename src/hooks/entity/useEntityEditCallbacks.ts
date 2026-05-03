@@ -1,14 +1,14 @@
 import {useCallback} from "react";
 
-import {Entity} from "@/types";
+import {EntityType} from "@/types";
 
 
 interface UseEntityEditCallbacksProps {
-    entityType: Entity["type"];
-    refreshSearchResults: () => void;
-    setIsEditModalOpen: (isOpen: boolean) => void;
-    addSuccessAlert: (description: string) => void;
-    addErrorAlert: (title: string, description: string) => void;
+    entityType: EntityType
+    refreshSearchResults: () => void
+    setIsEditModalOpen: (isOpen: boolean) => void
+    addSuccessAlert: (description: string) => void
+    addErrorAlert: (title: string, description: string) => void
 
 }
 
@@ -31,8 +31,12 @@ export function useEntityEditCallbacks({
                 addSuccessAlert("Employee details updated.");
                 break;
 
-                default:
-                    break;
+            case "workstation":
+                addSuccessAlert("Workstation details updated.");
+                break;
+
+            default:
+                break;
         }
 
     }, [refreshSearchResults, setIsEditModalOpen, entityType, addSuccessAlert]);
@@ -46,9 +50,13 @@ export function useEntityEditCallbacks({
                 addErrorAlert("Error: Could not edit employee", error);
                 break;
 
-                default:
-                    addErrorAlert("Error: Could not update record", error);
-                    break;
+            case "workstation":
+                addErrorAlert("Error: Could not edit workstation", error);
+                break;
+
+            default:
+                addErrorAlert("Error: Could not update record", error);
+                break;
 
         }
     }, [setIsEditModalOpen, entityType, addErrorAlert]);

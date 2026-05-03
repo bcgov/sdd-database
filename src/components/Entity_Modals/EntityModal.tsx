@@ -84,7 +84,10 @@ export function EntityModal({
             return (
                 <WorkstationModal workstation={viewedEntity}
                                   isOpen={isOpen}
-                                  setIsOpen={setIsOpen}>
+                                  setIsOpen={setIsOpen}
+                                  onSuccess={onSuccess}
+                                  onError={onError}
+                >
                 </WorkstationModal>
             )
     }

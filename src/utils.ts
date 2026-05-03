@@ -1,7 +1,7 @@
-import {EmployeeFormValues, Entity} from "@/types";
+import {EmployeeFormValues, EntityType, WorkstationFormValues} from "@/types";
 
 
-export const ENTITY_TYPE_NAME: Record<Entity["type"], string> = {
+export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
     employee: "Employee",
     office: "Office",
     workspace: "Workspace",
@@ -89,6 +89,30 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
         ui_workspace_number: uiWorkspaceNumber,
         ui_workstation_asset_tags: uiWorkstationAssetTags,
         ohs_accommodation_type_ids: ohsAccommodationTypeIds
+    }
+}
+
+export const parseWorkstationFormData = (formData: FormData): WorkstationFormValues => {
+
+    // asset_tag
+    const assetTag = formData.get("assetTag") as string
+
+    // model_id
+    const rawModelId = formData.get("model")
+    const modelId = Number(rawModelId)
+
+    // office_number
+    const officeNumber = formData.get("officeNumber") as string
+
+    // notes
+    const rawNotes = formData.get("notes") as string
+    const notes = rawNotes || null
+
+    return {
+        asset_tag: assetTag,
+        model_id: modelId,
+        office_number: officeNumber,
+        notes
     }
 }
 

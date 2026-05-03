@@ -9,6 +9,9 @@ interface WorkstationModalProps {
 
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
+
+    onSuccess: () => void
+    onError: (error: string) => void
 }
 
 export function WorkstationModal({
@@ -16,13 +19,23 @@ export function WorkstationModal({
 
                                      isOpen,
                                      setIsOpen,
+
+                                     onSuccess,
+                                     onError,
                                  }: WorkstationModalProps) {
+
+    const onClose = () => setIsOpen(false);
+
     return (
         <ModalDialog isOpen={isOpen}
                      setIsOpen={setIsOpen}
                      modalTitle={ENTITY_TYPE_NAME.workstation}
         >
-            <WorkstationForm workstation={workstation}/>
+            <WorkstationForm workstation={workstation}
+                             onSuccess={onSuccess}
+                             onError={onError}
+                             onClose={onClose}>
+            </WorkstationForm>
         </ModalDialog>
     )
 }

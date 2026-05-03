@@ -19,9 +19,9 @@ function getDriverAdapterError(meta: Record<string, unknown> | undefined) {
 
 export function getReadablePrismaError(error: unknown, employee?: EmployeeFormValues) {
 
-    const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`;
+    const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`
 
-    let errorMessage = base;
+    let errorMessage = base
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
@@ -49,11 +49,11 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
                         errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
                     } else {
                         // fallback if we can't determine the exact field
-                        errorMessage = `A record already exists with the same unique value. Please verify Employee ID and IDIR and try again.`;
+                        errorMessage = `An employee already exists with the same unique value. Please verify Employee ID and IDIR and try again.`;
                     }
                 }
 
-                break;
+                break
             }
             case "P2003": {
 
@@ -73,14 +73,14 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
                         errorMessage = `It seems like a job title wasn't selected for this new employee. Please select a job title and try again.`
                         break
                 }
-                break;
+                break
             }
             case "P2025": {
                 const modelName = meta?.modelName ?? "record";
 
                 errorMessage = `You are trying to edit a ${modelName} that no longer exists. Please refresh the page to get the latest list of ${modelName}s.`;
 
-                break;
+                break
             }
             default: {
                 errorMessage += ` Error code: "${code}"`;

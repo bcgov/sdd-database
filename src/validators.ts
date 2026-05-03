@@ -16,6 +16,12 @@ function validateOnlyLettersAndNumbers(value: string, label: string) {
     }
 }
 
+function validateOnlyDigits(value: string, label: string) {
+    if (/\D/.test(value)) {
+        return `${label} can only contain digits (0–9)`;
+    }
+}
+
 export function validateEmployeeNameField(
     value: string,
     label: string,
@@ -74,8 +80,9 @@ export function validateEmployeeIdField(value: string, label: string = "Employee
         return `${label} must be exactly ${EMPLOYEE_ID_LENGTH} digits long`;
     }
 
-    if (/\D/.test(value)) {
-        return `${label} can only contain digits (0–9)`;
+    const invalidCharacterError = validateOnlyDigits(value, label)
+    if (invalidCharacterError) {
+        return invalidCharacterError
     }
 }
 
@@ -106,11 +113,21 @@ export function validateNotesField(value: string, label: string = "Notes") {
     }
 }
 
-export function validateEmployeeOfficeNumberField(value: string, label: string = "Office Number") {
+export function validateOfficeNumberField(value: string, label: string = "Office Number") {
     const requiredError = validateRequiredField(value, label);
-
     if (requiredError) {
         return requiredError;
+    }
+
+    const OFFICE_NUMBER_MAX_LENGTH = 3
+    const maxLengthError = validateMaxLength(value, OFFICE_NUMBER_MAX_LENGTH, label);
+    if (maxLengthError) {
+        return maxLengthError;
+    }
+
+    const invalidCharacterError = validateOnlyDigits(value, label)
+    if (invalidCharacterError) {
+        return invalidCharacterError
     }
 }
 
@@ -127,5 +144,17 @@ export function validateEmployeeJobTitleField(value: number | null, label: strin
 
     if (requiredError) {
         return requiredError;
+    }
+}
+
+export function validateAssetTagField(value: string, label: string = "Asset Tag") {
+    const requiredError = validateRequiredField(value, label);
+    if (requiredError) {
+        return requiredError;
+    }
+
+    const invalidCharacterError = validateOnlyLettersAndNumbers(value, label);
+    if (invalidCharacterError) {
+        return invalidCharacterError;
     }
 }

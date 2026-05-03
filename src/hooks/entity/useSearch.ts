@@ -6,7 +6,7 @@ import {AssignMode, Entity, SearchOptions} from "@/types";
 import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
 import {searchAssignableWorkspacesAction} from "@/actions/entities/workspaces";
-import {searchAssignableWorkstationsAction} from "@/actions/entities/workstations";
+import {searchAssignableWorkstationsAction} from "@/actions/entities/workstation/actions";
 
 
 export function useSearch() {

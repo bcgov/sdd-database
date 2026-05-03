@@ -1,4 +1,7 @@
 import {EmployeeEntity, EmployeeFormValues} from "@/types";
 
 
-export type EmployeeLike = EmployeeFormValues | EmployeeEntity | undefined
+export type EmployeeLike =
+    | EmployeeFormValues
+    | EmployeeEntity
+    | undefined

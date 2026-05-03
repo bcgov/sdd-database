@@ -1,10 +1,8 @@
 import {useOfficeTypes} from "@/hooks/lookups/useOfficeTypes";
 import {useTypesOfClientServices} from "@/hooks/lookups/useTypesOfClientServices";
 
-import type {Office} from "@/generated/prisma/client";
 
-
-export function useOfficeLookupProps(office: Office) {
+export function useOfficeLookupProps() {
     /**
      * LookupOption[] | null
      * i.e. [{ id, name }, {id, name}] or null on first render
@@ -13,7 +11,6 @@ export function useOfficeLookupProps(office: Office) {
     const { typesOfClientServices } = useTypesOfClientServices();
 
     return {
-        office,
         officeTypes: (officeTypes ?? []),
         typesOfClientServices: (typesOfClientServices ?? []),
     }

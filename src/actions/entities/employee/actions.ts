@@ -15,6 +15,19 @@ import {createEntityActions} from "@/actions/createEntityActions";
 import {getReadablePrismaError} from "@/actions/entities/employee/errors";
 import {validateEmployeeData} from "@/actions/entities/employee/rules";
 
+
+export async function searchEmployeesAction(query?: string): Promise<EmployeeEntity[]> {
+    const employeeSearchResults = await getEmployeesByFilter(query);
+
+    // Attaching the discriminant 'type'
+    const employeesWithType: EmployeeEntity[] = employeeSearchResults.map(employee => ({
+        ...employee,
+        type: "employee" as const,
+    }))
+
+    return employeesWithType
+}
+
 const employeeActions = createEntityActions({
     parse: parseEmployeeFormData,
     validate: validateEmployeeData,
@@ -31,18 +44,6 @@ export async function addNewEmployeeAction(prevState: EntityActionResult, formDa
 
 export async function updateEmployeeAction(prevState: EntityActionResult, formData: FormData) {
     return employeeActions.updateAction(prevState, formData);
-}
-
-export async function searchEmployeesAction(query?: string): Promise<EmployeeEntity[]> {
-    const employeeSearchResults = await getEmployeesByFilter(query);
-
-    // Attaching the discriminant 'type'
-    const employeesWithType: EmployeeEntity[] = employeeSearchResults.map(employee => ({
-        ...employee,
-        type: "employee" as const,
-    }))
-
-    return employeesWithType
 }
 
 export async function deleteEmployeeAction(id: number):Promise<EntityActionResult> {

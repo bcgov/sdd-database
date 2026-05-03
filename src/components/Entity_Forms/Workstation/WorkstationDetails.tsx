@@ -1,49 +1,76 @@
 import {Accordion, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
-import {WorkstationSearchResult} from "@/types";
+import {LookupOption, WorkstationSearchResult} from "@/types";
+import {validateAssetTagField, validateNotesField, validateOfficeNumberField} from "@/validators";
 
 
 interface WorkstationDetailsProps {
-    workstation: WorkstationSearchResult
+    workstation?: WorkstationSearchResult
+    workstationModels: LookupOption[]
+
+    isAssetTagReadOnly: boolean
+    isModelReadOnly: boolean
+    isOfficeNumberReadOnly: boolean
+    isNotesReadOnly: boolean
 }
 
 export function WorkstationDetails({
                                        workstation,
-                                   }: WorkstationDetailsProps) {
+                                       workstationModels,
 
-    const hasNotes = !!workstation.notes
+                                       isAssetTagReadOnly,
+                                       isModelReadOnly,
+                                       isOfficeNumberReadOnly,
+                                       isNotesReadOnly
+                                   }: WorkstationDetailsProps) {
 
     return (
         <Accordion label="Workstation Details" id="workstationDetails">
             <div>
                 <TextField label="Asset Tag"
                            name="assetTag"
-                           isReadOnly
-                           defaultValue={workstation.asset_tag}>
+                           isRequired
+                           isReadOnly={isAssetTagReadOnly}
+                           validate={validateAssetTagField}
+                           defaultValue={workstation?.asset_tag}>
                 </TextField>
 
                 <Select label="Model"
-                        items={[
+                        name="model"
+                        isRequired
+                        items={workstationModels.map(model => (
                             {
-                                id: workstation.model_id,
-                                label: workstation.workstation_model.name
+                                id: model.id,
+                                label: model.name
                             }
-                        ]}
-                        isDisabled
-                        selectedKey={workstation.model_id}>
+                        ))}
+                        isDisabled={isModelReadOnly}
+                        selectedKey={workstation?.model_id}>
                 </Select>
 
+                {/* Passing model id through a hidden field since disabled fields won't be included in form data */}
+                {isModelReadOnly && workstation && (
+                    <input type="hidden"
+                           name="model"
+                           value={workstation.model_id}
+                           >
+                    </input>
+                )}
+
                 <TextField label="Currently at Office Number"
-                           isReadOnly
-                           defaultValue={workstation.office_number}>
+                           name="officeNumber"
+                           isRequired
+                           isReadOnly={isOfficeNumberReadOnly}
+                           validate={validateOfficeNumberField}
+                           defaultValue={workstation?.office_number}>
                 </TextField>
 
-                {hasNotes &&
-                    <TextArea label="Notes"
-                              name="notes"
-                              maxLength={2000}
-                              isReadOnly
-                              defaultValue={workstation.notes ?? undefined}>
-                    </TextArea>}
+                <TextArea label="Notes"
+                          name="notes"
+                          maxLength={2000}
+                          isReadOnly={isNotesReadOnly}
+                          validate={validateNotesField}
+                          defaultValue={workstation?.notes ?? undefined}>
+                </TextArea>
             </div>
         </Accordion>
     )

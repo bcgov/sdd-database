@@ -53,13 +53,13 @@ export function EmployeeForm({
 
     const isEditMode = !!onDelete;
 
-    const initialState: EntityActionResult = {status: "idle"};
+    const initialState: EntityActionResult = {status: "idle"}
 
-    const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction;
+    const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction
 
     const [result, formAction, isPending] = useActionState(serverAction, initialState)
 
-    const employeeLookupState = useEmployeeLookupState(employee);
+    const employeeLookupState = useEmployeeLookupState(employee)
 
     const previousBranchIdRef = useRef<number | null>(employeeLookupState.selectedBranchId)
     const previousProgramAreaIdRef = useRef<number | null>(employeeLookupState.selectedProgramAreaId)

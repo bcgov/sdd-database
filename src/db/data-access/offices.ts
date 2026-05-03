@@ -1,6 +1,8 @@
 import {prisma} from "@/db/client";
+import type {Office} from "@/generated/prisma/client";
 
-export async function getOfficesByFilter(query?: string) {
+
+export async function getOfficesByFilter(query?: string): Promise<Office[]> {
     if (!query)
         return prisma.office.findMany()
 
@@ -17,4 +19,17 @@ export async function getOfficesByFilter(query?: string) {
             ]
         }
     })
+}
+
+export async function officeExistsByOfficeNumber(officeNumber: string) {
+    const office = await prisma.office.findUnique({
+        where: {
+            office_number: officeNumber
+        },
+        select: {
+            office_number: true
+        }
+    })
+
+    return office !== null
 }

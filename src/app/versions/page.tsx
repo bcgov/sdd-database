@@ -77,7 +77,7 @@ export default function Updates() {
         {
             version: "v0.0.24",
             notes: [
-                "Added Job Tile field",
+                "Added Job Title field",
             ]
         },
         {

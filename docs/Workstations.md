@@ -73,23 +73,34 @@ All modal types
 
 # Office Number
 
-My understanding
-Only workstations not assigned to an employee have their own office number
-For workstations assigned to an employee, the asset just takes the employee's office number
+**My understanding**
 
-So, by that thinking, I need to add an office number attribute to workstation right?
-Also, need to make it mandatory
+Only workstations not assigned to an employee have their own office number
+
+For workstations assigned to an employee, the asset just takes the employee's office number
 
 Also, while seeding, I can perhaps add an assertion that if device is assigned then employee office should be equal 
 to device office?
 
-Also, every time an employee's office number changes, I need to make sure that their assigned device's office number 
-is also updated. So will have to add another sync like function in db layer
 
 Also, let's employee E1 has workstation W1. Both will have office O1
 Now, if the workstation is unassigned, then the workstation's office code remains O1.
 There can be situations in which the workstation is recalled to another office O2. So, in that case, office code of 
 workstation becomes O2 only when a person at O2 confirms acknowledgement/receival of workstation in their hands
+
+# Inventory Hub
+
+These are just offices that have coordinators from the facilities and assets team like GAULAKH and CSQUIRE who track
+these workstations.
+
+Currently, these offices are
+331
+350
+So, these will naturally have a lot of redeploy workstations
+This is not a fixed list and keeps on changing as per who in the team is performing these duties and which office do
+they belong to
+
+I think another name for this is a shipping hub (not sure)
 
 # REDEPLOY
 
@@ -99,7 +110,7 @@ Laptop is in idle state or in simpler words, the asset is not currently assigned
 
 Indicate REDEPLOY for assets recalled to a shipping hub when an employee leaves a position.
 
-Note in the status field, where the asset was recalled to and on what date
+Note in the status field includes where the asset was recalled to and on what date
 
 or Note REDEPLOY if a laptop is to be held at an office and note in the Status Column the reason why the asset is 
 being held along with the date.
@@ -123,21 +134,7 @@ the office number it is being recalled to.
 
 - Finally, once branch coordinator have enough workstations. They take all those workstations with IDIR=REASSIGN and 
   create IST tickets updating workstation owner from ex employee (that left) to themselves. That is when IDIR 
-  changes to branch coordinators IDIR and that's when workstation finally is avaialble for reassignment
-
-# Inventory Hub
-
-These are just offices that have coordinators from the facilities and assets team like GAULAKH and CSQUIRE who track 
-these workstations.
-
-Currently, these offices are
-331
-350
-So, these will naturally have a lot of redeploy workstations
-This is not a fixed list and keeps on changing as per who in the team is performing these duties and which office do 
-they belong to
-
-I think another name for this is a shipping hub (not sure)
+  changes to branch coordinators IDIR and that's when workstation finally is available for reassignment
 
 # REASSIGN
 
@@ -157,6 +154,17 @@ workstation is recalled to inventory. Assigned To becomes REDEPLOY
 So, essentially, recall is when a workstation is taken back from a departing/leaving employee and shipping is when a 
 workststion is assigned to a new hire employee
 
+![img.png](img.png)
+
+Darshan: Status field says shipped to 472 and record already has 472 as office number
+Has the shipping been completed with the status field forgotten to be cleared? Or is this the case of same office shipping (from inventory room to branch coordinator's hands)?
+
+Erin: Comment isn't removed yet because there is a delay from the shipping to confirmation received by the office. Once we get an email the laptop has been received, we will remove the comment, but not till then. - EC April'29
+
+---
+
+Also, there is an email confirmation step from the office
+
 # Status
 
 Looking at all this
@@ -174,7 +182,7 @@ Assigned/Occupied
 Available | In Transit | Assigned
 
 Technically, if the above 3 are the 3 status options, unlike workspace, these aren't mutually exclusive i.e.
-- a device can be in transit (recalled to inventory hub) and avaialble(redeploy state)
+- a device can be in transit (recalled to inventory hub) and available(redeploy state)
 - a device can be in transit (shipped to a new hire) and assigned
 
 So, maybe instead of a 3 way toggle button as we have on workspace, we can have the shipping/transit displayed with

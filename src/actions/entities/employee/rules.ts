@@ -6,9 +6,9 @@ import {
     validateEmployeeIdirField,
     validateEmployeeJobTitleField,
     validateEmployeeNameField,
-    validateEmployeeOfficeNumberField,
     validateEmployeeProgramAreaField,
-    validateNotesField
+    validateNotesField,
+    validateOfficeNumberField
 } from "@/validators";
 import {getBranchNameByProgramAreaId, getWorkspaceAssignmentTypeNameById} from "@/db/data-access/lookups";
 
@@ -16,7 +16,7 @@ import {getBranchNameByProgramAreaId, getWorkspaceAssignmentTypeNameById} from "
 export async function validateEmployeeData(employee: EmployeeFormValues) {
 
     const fieldValidationError =
-        validateEmployeeOfficeNumberField(employee.office_number) ??
+        validateOfficeNumberField(employee.office_number) ??
         (employee.idir ? validateEmployeeIdirField(employee.idir) : undefined) ??
         validateEmployeeNameField(employee.first_name, "First Name") ??
         (employee.alternate_name ? validateEmployeeNameField(

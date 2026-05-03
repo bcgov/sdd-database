@@ -1,7 +1,9 @@
 import type {Office} from "@/generated/prisma/client";
 
-import {OfficeFields} from "@/components/Entity_Forms/Office/OfficeFields";
+import {OfficeDetails} from "@/components/Entity_Forms/Office/OfficeDetails";
 import {useOfficeLookupProps} from "@/components/Entity_Forms/Office/useOfficeLookupProps";
+import {Address} from "@/components/Entity_Forms/Office/Address";
+import {AccordionGroup} from "@bcgov/design-system-react-components";
 
 
 interface OfficeFormProps {
@@ -10,7 +12,22 @@ interface OfficeFormProps {
 
 export function OfficeForm({office}: OfficeFormProps) {
 
-    const officeLookupProps = useOfficeLookupProps(office);
+    const officeLookupProps = useOfficeLookupProps();
 
-    return <OfficeFields {...officeLookupProps} isReadOnly/>
+    return (
+        <AccordionGroup allowsMultipleExpanded defaultExpandedKeys={["officeDetails", "address"]} style={{
+            marginTop: "1rem",
+            marginBottom: "1rem",
+        }}>
+            <OfficeDetails office ={office}
+                           {...officeLookupProps}
+            >
+            </OfficeDetails>
+
+            <Address address={office.address}
+                     city={office.city}
+                     postalCode={office.postal_code}>
+            </Address>
+        </AccordionGroup>
+    )
 }

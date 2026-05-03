@@ -73,6 +73,14 @@ export async function getJobTitlesByProgramArea(program_area_id: number) {
     }))
 }
 
+export async function getOfficeTypes() {
+    return getLookupOptions(prisma.officeType)
+}
+
+export async function getTypesOfClientServices() {
+    return getLookupOptions(prisma.typeOfClientService)
+}
+
 export async function getWorkspaceAssignmentTypes() {
     return getLookupOptions(prisma.workspaceAssignmentType)
 }
@@ -90,14 +98,21 @@ export async function getWorkspaceAssignmentTypeNameById(id: number) {
     return workspaceAssignmentType?.name ?? null
 }
 
+export async function getWorkstationModels() {
+    return getLookupOptions(prisma.workstationModel)
+}
+
+export async function getWorkstationModelById(id: number) {
+    return prisma.workstationModel.findUnique({
+        where: {
+            id
+        },
+        select: {
+            name: true
+        }
+    })
+}
+
 export async function getOhsAccommodationTypes() {
     return getLookupOptions(prisma.ohsAccommodationType)
-}
-
-export async function getOfficeTypes() {
-    return getLookupOptions(prisma.officeType)
-}
-
-export async function getTypesOfClientServices() {
-    return getLookupOptions(prisma.typeOfClientService)
 }

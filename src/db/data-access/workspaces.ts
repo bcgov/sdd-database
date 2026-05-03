@@ -1,6 +1,7 @@
 import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
 import {workspaceSearchResultArgs} from "@/db/data-access/shared";
+import {WorkspaceSearchResult} from "@/types";
 
 
 export async function getWorkspaceByOfficeAndWorkspaceNumber(
@@ -17,7 +18,7 @@ export async function getWorkspaceByOfficeAndWorkspaceNumber(
     })
 }
 
-export async function getWorkspacesByFilter(query?: string) {
+export async function getWorkspacesByFilter(query?: string): Promise<WorkspaceSearchResult[]> {
 
     const searchFilter: Prisma.WorkspaceWhereInput = query
         ? {
@@ -53,7 +54,8 @@ export async function getWorkspacesByFilter(query?: string) {
 export async function getAssignableWorkspacesByFilter(
     employeeOfficeNumber: string,
     employeeProgramAreaId: number,
-    query?: string) {
+    query?: string
+): Promise<WorkspaceSearchResult[]> {
 
     const searchFilter: Prisma.WorkspaceWhereInput = query
         ? {

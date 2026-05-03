@@ -1,49 +1,70 @@
-import {AssignMode, EmployeeEntity, EmployeeFormValues, Entity, SelectedWorkspaceAssignment} from "@/types";
-import {useCallback, useState} from "react";
+import {
+    AssignMode,
+    EmployeeEntity,
+    EmployeeFormValues,
+    Entity, SearchOptions,
+    SelectedWorkspaceAssignment
+} from "@/types";
 import {parseEmployeeFormData} from "@/utils";
+import {Dispatch, SetStateAction, useCallback} from "react";
+import type {Selection} from "@react-types/shared";
 
 
-interface UseEmployeeEditorStateProps {
-    setIsEditModalOpen: (isOpen: boolean) => void;
-    addErrorAlert: (title: string, description: string) => void;
-    setAssignMode: (assignMode: AssignMode) => void;
+interface EmployeeAssignActionsProps {
+    viewedEntity: Entity | undefined
+    setViewedEntity: Dispatch<SetStateAction<Entity | undefined>>
+
+    draftNewEmployee: EmployeeFormValues | undefined
+    setDraftNewEmployee: Dispatch<SetStateAction<EmployeeFormValues | undefined>>
+
+    draftEditEmployee: EmployeeEntity | undefined
+    setDraftEditEmployee: Dispatch<SetStateAction<EmployeeEntity | undefined>>
+
+    isAddNewEmployeeModalOpen: boolean
+    openCloseAddNewEmployeeModal: (openModal: boolean, clearDraftEditsOnClose?: boolean) => void
+    setIsEditModalOpen: (isOpen: boolean) => void
+
+    setSelectedFilterTags: Dispatch<SetStateAction<Selection>>
+
+    setAssignMode: (assignMode: AssignMode) => void
+    setAssignEmployeeOfficeNumber: (officeNumber: string | undefined) => void
+    setAssignEmployeeProgramAreaId: (programAreaId: number | undefined) => void
+    setAssignEmployeeWorkstationAssetTags: (assetTags: string[]) => void
+
+    runSearch: (query?: string, options?: SearchOptions) => Promise<void>
+
+    addErrorAlert: (title: string, description: string) => void
 }
 
-export function useEmployeeEditorState({
-                                           setIsEditModalOpen,
-                                           addErrorAlert,
-                                           setAssignMode,
-                                       }: UseEmployeeEditorStateProps) {
+export function useEmployeeAssignActions({
+                                             viewedEntity,
+                                             setViewedEntity,
 
-    const [viewedEntity, setViewedEntity] = useState<Entity>(); // entity currently selected/opened
+                                             draftNewEmployee,
+                                             setDraftNewEmployee,
 
-    const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormValues>();
-    const [draftEditEmployee, setDraftEditEmployee] = useState<EmployeeEntity>();
+                                             draftEditEmployee,
+                                             setDraftEditEmployee,
 
-    const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);
+                                             isAddNewEmployeeModalOpen,
+                                             openCloseAddNewEmployeeModal,
+                                             setIsEditModalOpen,
 
-    const openSearchResultEditModal = (item: Entity) => {
-        setViewedEntity(item);
+                                             setSelectedFilterTags,
 
-        if (item.type === "employee") {
-            setDraftEditEmployee(undefined)
-        }
+                                             setAssignMode,
+                                             setAssignEmployeeOfficeNumber,
+                                             setAssignEmployeeProgramAreaId,
+                                             setAssignEmployeeWorkstationAssetTags,
 
-        setIsEditModalOpen(true);
-    }
+                                             runSearch,
 
-    const openCloseAddNewEmployeeModal = useCallback((openModal: boolean, clearDraftEditsOnClose: boolean = true) => {
-        setIsAddNewEmployeeModalOpen(openModal)
-
-        if (!openModal && clearDraftEditsOnClose) {
-            setDraftNewEmployee(undefined)
-        }
-    }, [])
-
+                                             addErrorAlert
+                                         }: EmployeeAssignActionsProps) {
     /**
      * Give me the employee currently being edited, whether it already has a draft or is still the originally viewed employee.
      */
-    const getCurrentEditEmployee = () => {
+    const getCurrentEditEmployee = useCallback(() => {
         if (draftEditEmployee) return draftEditEmployee
 
         // we need this fallback since draftEditEmployee is undefined at the start when you first click on a
@@ -53,7 +74,10 @@ export function useEmployeeEditorState({
 
         // defensive state
         return undefined
-    }
+    }, [
+        draftEditEmployee,
+        viewedEntity,
+    ])
 
     /**
      * This function takes a snapshot of employee form data before closing the modal.
@@ -62,7 +86,7 @@ export function useEmployeeEditorState({
      *
      * @param formData
      */
-    const saveEmployeeFormData = (formData: FormData) => {
+    const saveEmployeeFormData = useCallback((formData: FormData) => {
 
         // If we are NOT in Add New Employee mode, then we must be editing an existing employee.
         // So get the current edit employee draft.
@@ -117,9 +141,161 @@ export function useEmployeeEditorState({
         setDraftEditEmployee(nextEmployee)
 
         setIsEditModalOpen(false);
-    }
+    }, [
+        isAddNewEmployeeModalOpen,
+        getCurrentEditEmployee,
+        addErrorAlert,
+        draftNewEmployee,
+        setDraftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        setDraftEditEmployee,
+        setIsEditModalOpen,
+    ])
 
-    const assignOfficeClickHandler = (assignedOfficeNumber: string) => {
+    /**
+     * Function does 3 things:
+     * Setting the mode
+     * setting the matching filter tag
+     * running the right search
+     * @param mode
+     * @param formData
+     * @param employeeOfficeNumber
+     * @param employeeProgramAreaId
+     * @param employeeWorkstationAssetTags
+     */
+    const enterAssignMode = useCallback(async (
+        mode: AssignMode,
+        formData: FormData,
+        employeeOfficeNumber?: string,
+        employeeProgramAreaId?: number,
+        employeeWorkstationAssetTags?: string[]
+    ) => {
+
+        setAssignMode(mode);
+
+        // passing mode as a parameter since setStates are async
+        await runSearch(
+            undefined,
+            {
+                modeOverride: mode,
+                employeeOfficeNumber,
+                employeeProgramAreaId,
+                employeeWorkstationAssetTags
+            }
+        )
+
+        setSelectedFilterTags(new Set([mode]));
+
+        saveEmployeeFormData(formData);
+    }, [
+        setAssignMode,
+        runSearch,
+        setSelectedFilterTags,
+        saveEmployeeFormData
+    ])
+
+    /** This function is called when the user clicks on "Assign Office/Workspace/Workstation" in the add new employee
+     *  modal or the
+     *  "Update Office/Workspace/Workstation" button in the add new employee modal or the edit employee modal.
+     * @param mode
+     * @param formData
+     */
+    const activateAssignMode = useCallback(async (mode: AssignMode, formData: FormData) => {
+
+        if (mode === "office") {
+            await enterAssignMode(mode, formData)
+            return
+        }
+
+        if (mode === "workspace") {
+            const employeeOfficeNumber = formData.get("officeNumber") as string;
+            const rawEmployeeProgramAreaId = formData.get("programArea") as string;
+            const employeeProgramAreaId = rawEmployeeProgramAreaId ? Number(rawEmployeeProgramAreaId) : undefined;
+
+            if (!employeeOfficeNumber) {
+                addErrorAlert(
+                    "Error: Office required",
+                    "Please assign an office before assigning a workspace"
+                )
+                return
+            }
+
+            if (employeeProgramAreaId == null || Number.isNaN(employeeProgramAreaId)) {
+                addErrorAlert(
+                    "Error: Program Area required",
+                    "Please select a valid Program Area before assigning a workspace"
+                )
+                return
+            }
+
+            setAssignEmployeeOfficeNumber(employeeOfficeNumber)
+            setAssignEmployeeProgramAreaId(employeeProgramAreaId)
+
+            await enterAssignMode(
+                mode,
+                formData,
+                employeeOfficeNumber,
+                employeeProgramAreaId
+            )
+            return
+        }
+
+        if (mode === "workstation") {
+
+            const employeeWorkstationAssetTags = formData
+                .getAll("workstationAssetTags")
+                .map(value => String(value))
+
+            setAssignEmployeeWorkstationAssetTags(employeeWorkstationAssetTags)
+
+            await enterAssignMode(
+                mode,
+                formData,
+                undefined,
+                undefined,
+                employeeWorkstationAssetTags
+            )
+        }
+    }, [
+        enterAssignMode,
+        addErrorAlert,
+        setAssignEmployeeOfficeNumber,
+        setAssignEmployeeProgramAreaId,
+        setAssignEmployeeWorkstationAssetTags,
+    ])
+
+    const cancelAssignModeHandler = useCallback(() => {
+        setAssignMode("none")
+
+        if (draftNewEmployee) {
+            openCloseAddNewEmployeeModal(true)
+            return
+        }
+
+        if (draftEditEmployee?.type === "employee") {
+            setViewedEntity(draftEditEmployee)
+            setIsEditModalOpen(true)
+            return
+        }
+
+        // code should ideally never reach here
+        // if it does, then something is wrong
+        addErrorAlert(
+            "Error: Something went wrong.",
+            "Please refresh the webpage and try again"
+        )
+
+    }, [
+        setAssignMode,
+        draftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        draftEditEmployee,
+        setViewedEntity,
+        setIsEditModalOpen,
+        addErrorAlert,
+    ])
+
+    const assignOfficeClickHandler = useCallback((assignedOfficeNumber: string) => {
         setAssignMode("none")
 
         if (draftNewEmployee) {
@@ -164,9 +340,18 @@ export function useEmployeeEditorState({
                 setIsEditModalOpen(true)
             }
         }
-    }
+    }, [
+        setAssignMode,
+        draftNewEmployee,
+        setDraftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        getCurrentEditEmployee,
+        setDraftEditEmployee,
+        setViewedEntity,
+        setIsEditModalOpen
+    ])
 
-    const assignWorkspaceClickHandler = (assignedWorkspace: SelectedWorkspaceAssignment) => {
+    const assignWorkspaceClickHandler = useCallback((assignedWorkspace: SelectedWorkspaceAssignment) => {
         setAssignMode("none")
 
         if (draftNewEmployee) {
@@ -195,9 +380,18 @@ export function useEmployeeEditorState({
                 setIsEditModalOpen(true)
             }
         }
-    }
+    },[
+        setAssignMode,
+        draftNewEmployee,
+        setDraftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        getCurrentEditEmployee,
+        setDraftEditEmployee,
+        setViewedEntity,
+        setIsEditModalOpen
+    ])
 
-    const assignWorkstationClickHandler = (assignedWorkstationAssetTag: string) => {
+    const assignWorkstationClickHandler = useCallback((assignedWorkstationAssetTag: string) => {
         setAssignMode("none")
 
         if (draftNewEmployee) {
@@ -240,9 +434,18 @@ export function useEmployeeEditorState({
                 setIsEditModalOpen(true)
             }
         }
-    }
+    },[
+        setAssignMode,
+        draftNewEmployee,
+        setDraftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        getCurrentEditEmployee,
+        setDraftEditEmployee,
+        setViewedEntity,
+        setIsEditModalOpen
+    ])
 
-    const removeWorkspaceClickHandler = () => {
+    const removeWorkspaceClickHandler = useCallback(() => {
         if (draftNewEmployee) {
             setDraftNewEmployee({
                 ...draftNewEmployee,
@@ -265,9 +468,14 @@ export function useEmployeeEditorState({
                 setDraftEditEmployee(nextEmployee)
             }
         }
-    }
+    }, [
+        draftNewEmployee,
+        setDraftNewEmployee,
+        getCurrentEditEmployee,
+        setDraftEditEmployee
+    ])
 
-    const removeWorkstationClickHandler = (assetTag: string) => {
+    const removeWorkstationClickHandler = useCallback((assetTag: string) => {
         if (draftNewEmployee) {
 
             const currentAssetTags = draftNewEmployee.ui_workstation_asset_tags ?? []
@@ -299,24 +507,22 @@ export function useEmployeeEditorState({
                 setDraftEditEmployee(nextEmployee)
             }
         }
-    }
+    }, [
+        draftNewEmployee,
+        setDraftNewEmployee,
+        getCurrentEditEmployee,
+        setDraftEditEmployee
+    ])
 
     return {
-        draftNewEmployee,
-        draftEditEmployee,
-        viewedEntity,
-        setViewedEntity,
-
-        isAddNewEmployeeModalOpen,
-        openCloseAddNewEmployeeModal,
-        openSearchResultEditModal,
-
-        saveEmployeeFormData,
+        activateAssignMode,
+        cancelAssignModeHandler,
 
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
-        removeWorkspaceClickHandler,
         assignWorkstationClickHandler,
+
+        removeWorkspaceClickHandler,
         removeWorkstationClickHandler
     }
 }
