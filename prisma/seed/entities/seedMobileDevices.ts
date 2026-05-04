@@ -4,6 +4,7 @@ import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../s
 import ExcelJS from "exceljs";
 import {assertIMEI} from "../validators/mobileDevices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
+import {assertNotes} from "../validators/common.validators";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -14,25 +15,27 @@ const MOBILE_DEVICES_FILE_PATH = path.join(
 )
 
 const MOBILE_DEVICES_REQUIRED_HEADERS = [
-    "IMEI"
+    "IMEI",
+    "Notes"
 ] as const
 
 type ParsedMobileDeviceRow = {
     imei: string
+    notes: string | null
 }
 
 export async function seedMobileDevices(prismaClient: PrismaClient) {
-    const mobilePhonesWorksheet = await loadWorksheetFromFile(MOBILE_DEVICES_FILE_PATH)
+    const mobileDevicesWorksheet = await loadWorksheetFromFile(MOBILE_DEVICES_FILE_PATH)
 
     const headerToCol = getRequiredHeaderToCol(
-        mobilePhonesWorksheet,
+        mobileDevicesWorksheet,
         MOBILE_DEVICES_REQUIRED_HEADERS
     )
 
     const finalMobileDeviceRows: ParsedMobileDeviceRow[] = []
 
-    for (let r = 2; r <= mobilePhonesWorksheet.rowCount; r++) {
-        const row = mobilePhonesWorksheet.getRow(r)
+    for (let r = 2; r <= mobileDevicesWorksheet.rowCount; r++) {
+        const row = mobileDevicesWorksheet.getRow(r)
 
         if (ignoreForNow(row, headerToCol)) continue
 
@@ -79,7 +82,13 @@ function parseMobileDeviceRow(
     const imei = getCellString(row, headerToCol, "IMEI")
     assertIMEI(imei, rowNumber)
 
+    // notes
+    const rawNotes = getCellString(row, headerToCol, "Notes")
+    assertNotes(rawNotes, rowNumber)
+    const notes = rawNotes || null   // making sure to store null instead of ""
+
     return {
-        imei
+        imei,
+        notes
     }
 }

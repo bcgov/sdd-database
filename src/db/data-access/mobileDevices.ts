@@ -1,23 +1,20 @@
 import {MobileDeviceFormValues} from "@/types";
 import {prisma} from "@/db/client";
-import {MobileDevice} from "@/generated/prisma/client";
+import {MobileDevice, Prisma} from "@/generated/prisma/client";
 
 
 export async function getMobileDevicesByFilter(query?: string): Promise<MobileDevice[]> {
-    if (!query) {
-        return prisma.mobileDevice.findMany({
-            orderBy: {
-                imei: "asc"
-            }
-        })
-    }
+
+    const searchFilter: Prisma.MobileDeviceWhereInput = query
+        ? {
+            OR: [
+                {imei: {contains: query}},
+            ]
+        }
+        : {}
 
     return prisma.mobileDevice.findMany({
-        where: {
-            imei: {
-                contains: query
-            }
-        },
+        where: searchFilter,
         orderBy: {
             imei: "asc"
         }
@@ -35,9 +32,12 @@ export async function updateMobileDevice(mobileDevice: MobileDeviceFormValues) {
         throw new Error("Didn't find the IMEI. Can't update mobile device");
     }
 
-    return prisma.mobileDevice.findUniqueOrThrow({
+    return prisma.mobileDevice.update({
         where: {
             imei: mobileDevice.imei
+        },
+        data: {
+            notes: mobileDevice.notes
         }
     })
 }

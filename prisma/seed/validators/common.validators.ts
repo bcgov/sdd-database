@@ -43,7 +43,7 @@ export function assertMaxLength(
 }
 
 export function assertNotes(notes: string, rowNumber: number) {
-    assertMaxLength(notes, "Notes", rowNumber, 2000)
+    assertMaxLength(notes, "Notes", rowNumber, 200)
 }
 
 export function assertLookupValue(rawValue: string, label: string, rowNumber: number, lookup: Map<string, number>) {

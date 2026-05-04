@@ -46,6 +46,9 @@ export async function getWorkstationsByFilter(query?: string): Promise<Workstati
     return prisma.workstation.findMany({
         where: searchFilter,
         ...workstationSearchResultArgs,
+        orderBy: {
+            asset_tag: "asc"
+        }
     })
 }
 

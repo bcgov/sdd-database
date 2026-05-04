@@ -16,8 +16,9 @@ import {seedWorkspaceCategories} from "./lookups/workspaces/seedWorkspaceCategor
 import {seedDeskTypes} from "./lookups/workspaces/seedDeskTypes";
 import {seedWorkstationModels} from "./lookups/workstations/seedWorkstationModels";
 import {seedWorkspaceAssignmentTypes} from "./lookups/employees/seedWorkspaceAssignmentTypes";
-import {checkComputersAndLaptopsSourceIntegrity} from "./checkComputersAndLaptopsSourceIntegrity";
 import {seedMobileDevices} from "./entities/seedMobileDevices";
+import {checkComputersAndLaptops} from "./sourceIntegrity/checkComputersAndLaptops";
+import {checkMobileDevices} from "./sourceIntegrity/checkMobileDevices";
 
 
 async function clearSeedTables() {
@@ -100,7 +101,8 @@ async function main() {
     console.log("🌱 Starting seed...")
 
     console.log("🔎 Checking source file integrity...")
-    await checkComputersAndLaptopsSourceIntegrity()
+    await checkComputersAndLaptops()
+    await checkMobileDevices()
 
     await clearSeedTables()
     await seedTables()

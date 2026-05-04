@@ -93,6 +93,7 @@ export type WorkstationEntity = WorkstationSearchResult & {
 
 export type MobileDeviceFormValues = {
     imei: string
+    notes: string | null
 }
 
 export type MobileDeviceEntity = MobileDevice & {

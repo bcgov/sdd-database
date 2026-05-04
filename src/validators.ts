@@ -104,7 +104,7 @@ export function validateEmployeeIdirField(value: string, label: string = "IDIR")
 }
 
 export function validateNotesField(value: string, label: string = "Notes") {
-    const NOTES_MAX_LENGTH = 2000;
+    const NOTES_MAX_LENGTH = 200;
 
     const maxLengthError = validateMaxLength(value, NOTES_MAX_LENGTH, label);
 

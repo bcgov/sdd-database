@@ -1,10 +1,10 @@
-import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "./shared/excel";
 import path from "path";
 import ExcelJS from "exceljs";
-import {isNonResidentWorkspaceAssignmentType, isNotAnEmployeeRow} from "./shared/employees";
-import {assertWorkspaceNumber} from "./validators/workspaces.validators";
-import {isPublicJobBankKiosk} from "./shared/sourceRows";
-import {assertOfficeNumber} from "./validators/offices.validators";
+import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
+import {isPublicJobBankKiosk} from "../shared/sourceRows";
+import {assertOfficeNumber} from "../validators/offices.validators";
+import {isNonResidentWorkspaceAssignmentType, isNotAnEmployeeRow} from "../shared/employees";
+import {assertWorkspaceNumber} from "../validators/workspaces.validators";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -37,7 +37,7 @@ const OFFICE_INFORMATION_SOURCE_INTEGRITY_HEADERS = [
     "OfficeNum",
 ] as const;
 
-export async function checkComputersAndLaptopsSourceIntegrity() {
+export async function checkComputersAndLaptops() {
     const computersAndLaptopsWorksheet = await loadWorksheetFromFile(COMPUTERS_AND_LAPTOPS_FILE_PATH)
     const officeInformationWorksheet = await loadWorksheetFromFile(OFFICE_INFORMATION_FILE_PATH)
 

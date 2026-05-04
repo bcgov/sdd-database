@@ -7,13 +7,9 @@ import {employeeSearchResultArgs} from "@/db/data-access/shared";
 type DbClient = Prisma.TransactionClient
 
 export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
-    if (!query)
-        return prisma.employee.findMany({
-            ...employeeSearchResultArgs
-        })
 
-    return prisma.employee.findMany({
-        where: {
+    const searchFilter: Prisma.EmployeeWhereInput = query
+        ? {
             OR: [
                 {office_number: {contains: query}},
                 {idir: {contains: query, mode: 'insensitive'}},
@@ -38,8 +34,17 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
                     }
                 }
             ]
-        },
-        ...employeeSearchResultArgs
+        }
+        : {}
+
+    return prisma.employee.findMany({
+        where: searchFilter,
+        ...employeeSearchResultArgs,
+        orderBy: [
+            {first_name: "asc"},
+            {last_name: "asc"},
+            {alternate_name: "asc"},
+        ]
     })
 }
 

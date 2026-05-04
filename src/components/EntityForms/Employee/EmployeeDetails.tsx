@@ -140,7 +140,7 @@ export function EmployeeDetails({
 
                 <TextArea label="Notes"
                           name="notes"
-                          maxLength={2000}
+                          maxLength={200}
                           validate={validateNotesField}
                           defaultValue={employee?.notes ?? undefined}>
                 </TextArea>

@@ -1,13 +1,11 @@
 import {prisma} from "@/db/client";
-import type {Office} from "@/generated/prisma/client";
+import {Office, Prisma} from "@/generated/prisma/client";
 
 
 export async function getOfficesByFilter(query?: string): Promise<Office[]> {
-    if (!query)
-        return prisma.office.findMany()
 
-    return prisma.office.findMany({
-        where: {
+    const searchFilter: Prisma.OfficeWhereInput = query
+        ? {
             OR: [
                 {office_number: {contains: query, mode: 'insensitive'}},
                 {office_name: {contains: query, mode: 'insensitive'}},
@@ -18,6 +16,10 @@ export async function getOfficesByFilter(query?: string): Promise<Office[]> {
                 {postal_code: {contains: query, mode: 'insensitive'}},
             ]
         }
+        : {}
+
+    return prisma.office.findMany({
+        where: searchFilter
     })
 }
 

@@ -66,7 +66,7 @@ export function WorkstationDetails({
 
                 <TextArea label="Notes"
                           name="notes"
-                          maxLength={2000}
+                          maxLength={200}
                           isReadOnly={isNotesReadOnly}
                           validate={validateNotesField}
                           defaultValue={workstation?.notes ?? undefined}>

@@ -18,7 +18,7 @@ model Employee {
   employee_id     String? @unique @db.VarChar(6)
   program_area_id Int
   job_title_id    Int?
-  notes           String? @db.VarChar(2000)
+  notes           String? @db.VarChar(200)
 
   workspace_assignment_type_id Int?
 
@@ -134,7 +134,7 @@ model Workspace {
   category_id      Int
   desk_type_id     Int
   office_floor     Int
-  notes            String? @db.VarChar(2000)
+  notes            String? @db.VarChar(200)
 
   // makes non-null employee IDs unique to ensure one employee cannot occupy multiple workspaces
   // Also, this references employee's internal id not employee_id
@@ -169,7 +169,7 @@ model DeskType {
 
 model Workstation {
   asset_tag String  @id @db.Citext
-  notes     String? @db.VarChar(2000)
+  notes     String? @db.VarChar(200)
 
   model_id      Int
   office_number String @db.VarChar(3)
@@ -188,5 +188,6 @@ model WorkstationModel {
 }
 
 model MobileDevice {
-  imei String @id @db.VarChar(15)
+  imei  String  @id @db.VarChar(15)
+  notes String? @db.VarChar(200)
 }

@@ -115,7 +115,7 @@ export function WorkspaceDetails({
                     <TextArea label="Notes"
                               name="notes"
                               isReadOnly
-                              maxLength={2000}
+                              maxLength={200}
                               defaultValue={workspace.notes ?? undefined}>
                     </TextArea>}
             </div>
