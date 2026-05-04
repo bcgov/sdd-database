@@ -1,4 +1,4 @@
-import {useActionState, useEffect, useRef} from "react";
+import {useEffect, useRef} from "react";
 
 import {PressEvent} from "@react-types/shared";
 
@@ -11,15 +11,16 @@ import {
 
 import {AssignMode, EntityActionResult} from "@/types";
 
-import {WorkspaceDetails} from "@/components/Entity_Forms/Employee/WorkspaceDetails";
-import {OfficeDetails} from "@/components/Entity_Forms/Employee/OfficeDetails";
-import {useEmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
-import {OhsAccommodations} from "@/components/Entity_Forms/Employee/OhsAccommodations";
-import {EmployeeDetails} from "@/components/Entity_Forms/Employee/EmployeeDetails";
-import {WorkstationDetails} from "@/components/Entity_Forms/Employee/WorkstationDetails";
-import {getEmployeeAssignmentState} from "@/components/Entity_Forms/Employee/getEmployeeAssignmentState";
-import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {WorkspaceDetails} from "@/components/EntityForms/Employee/WorkspaceDetails";
+import {OfficeDetails} from "@/components/EntityForms/Employee/OfficeDetails";
+import {useEmployeeLookupState} from "@/components/EntityForms/Employee/useEmployeeLookupState";
+import {OhsAccommodations} from "@/components/EntityForms/Employee/OhsAccommodations";
+import {EmployeeDetails} from "@/components/EntityForms/Employee/EmployeeDetails";
+import {WorkstationDetails} from "@/components/EntityForms/Employee/WorkstationDetails";
+import {getEmployeeAssignmentState} from "@/components/EntityForms/Employee/getEmployeeAssignmentState";
+import {EmployeeLike} from "@/components/EntityForms/Employee/types";
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employee/actions";
+import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
 
 
 interface EmployeeFormProps {
@@ -53,11 +54,13 @@ export function EmployeeForm({
 
     const isEditMode = !!onDelete;
 
-    const initialState: EntityActionResult = {status: "idle"}
-
     const serverAction = isEditMode ? updateEmployeeAction : addNewEmployeeAction
 
-    const [result, formAction, isPending] = useActionState(serverAction, initialState)
+    const {formAction, isPending} = useEntityFormActionState({
+        serverAction,
+        onSuccess,
+        onError
+    })
 
     const employeeLookupState = useEmployeeLookupState(employee)
 
@@ -76,24 +79,6 @@ export function EmployeeForm({
 
         workstationAssetTags
     } = getEmployeeAssignmentState(employee)
-
-    useEffect(() => {
-
-        switch (result.status) {
-            case "idle":
-                // first render -> do nothing
-                return;
-
-            case "ok":
-                onSuccess();
-                break;
-
-            case "error":
-                onError(result.error);
-                break;
-        }
-
-    }, [result, onError, onSuccess]);
 
     useEffect(() => {
         const previousBranchId = previousBranchIdRef.current

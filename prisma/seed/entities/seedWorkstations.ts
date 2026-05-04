@@ -83,7 +83,8 @@ export async function seedWorkstations(prismaClient: PrismaClient) {
             getKey: row => row.asset_tag,
             label: "workstation asset_tag",
             caseInsensitive: true,
-        })
+        }
+    )
 
     const assignedCount = finalWorkstationRows.filter(row => row.employee_id != null).length
     console.log(`Prepared ${finalWorkstationRows.length} workstation rows for insert, ${assignedCount} assigned to employees`)

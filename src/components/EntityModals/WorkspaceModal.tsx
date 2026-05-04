@@ -1,6 +1,6 @@
 import {WorkspaceEntity} from "@/types";
 import {ModalDialog} from "@/components/ModalDialog";
-import {WorkspaceForm} from "@/components/Entity_Forms/Workspace/WorkspaceForm";
+import {WorkspaceForm} from "@/components/EntityForms/Workspace/WorkspaceForm";
 import {ENTITY_TYPE_NAME} from "@/utils";
 
 

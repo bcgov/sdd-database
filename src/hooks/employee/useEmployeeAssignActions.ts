@@ -22,7 +22,7 @@ interface EmployeeAssignActionsProps {
 
     isAddNewEmployeeModalOpen: boolean
     openCloseAddNewEmployeeModal: (openModal: boolean, clearDraftEditsOnClose?: boolean) => void
-    setIsEditModalOpen: (isOpen: boolean) => void
+    setIsEntityModalOpen: (isOpen: boolean) => void
 
     setSelectedFilterTags: Dispatch<SetStateAction<Selection>>
 
@@ -48,7 +48,7 @@ export function useEmployeeAssignActions({
 
                                              isAddNewEmployeeModalOpen,
                                              openCloseAddNewEmployeeModal,
-                                             setIsEditModalOpen,
+                                             setIsEntityModalOpen,
 
                                              setSelectedFilterTags,
 
@@ -140,7 +140,7 @@ export function useEmployeeAssignActions({
         // Preserve in-progress employee edits before leaving the modal for assign mode
         setDraftEditEmployee(nextEmployee)
 
-        setIsEditModalOpen(false);
+        setIsEntityModalOpen(false);
     }, [
         isAddNewEmployeeModalOpen,
         getCurrentEditEmployee,
@@ -149,7 +149,7 @@ export function useEmployeeAssignActions({
         setDraftNewEmployee,
         openCloseAddNewEmployeeModal,
         setDraftEditEmployee,
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
     ])
 
     /**
@@ -274,7 +274,7 @@ export function useEmployeeAssignActions({
 
         if (draftEditEmployee?.type === "employee") {
             setViewedEntity(draftEditEmployee)
-            setIsEditModalOpen(true)
+            setIsEntityModalOpen(true)
             return
         }
 
@@ -291,7 +291,7 @@ export function useEmployeeAssignActions({
         openCloseAddNewEmployeeModal,
         draftEditEmployee,
         setViewedEntity,
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
         addErrorAlert,
     ])
 
@@ -337,7 +337,7 @@ export function useEmployeeAssignActions({
                 setDraftEditEmployee(nextEmployee)
                 setViewedEntity(nextEmployee)
 
-                setIsEditModalOpen(true)
+                setIsEntityModalOpen(true)
             }
         }
     }, [
@@ -348,7 +348,7 @@ export function useEmployeeAssignActions({
         getCurrentEditEmployee,
         setDraftEditEmployee,
         setViewedEntity,
-        setIsEditModalOpen
+        setIsEntityModalOpen
     ])
 
     const assignWorkspaceClickHandler = useCallback((assignedWorkspace: SelectedWorkspaceAssignment) => {
@@ -377,7 +377,7 @@ export function useEmployeeAssignActions({
                 setDraftEditEmployee(nextEmployee)
                 setViewedEntity(nextEmployee)
 
-                setIsEditModalOpen(true)
+                setIsEntityModalOpen(true)
             }
         }
     },[
@@ -388,7 +388,7 @@ export function useEmployeeAssignActions({
         getCurrentEditEmployee,
         setDraftEditEmployee,
         setViewedEntity,
-        setIsEditModalOpen
+        setIsEntityModalOpen
     ])
 
     const assignWorkstationClickHandler = useCallback((assignedWorkstationAssetTag: string) => {
@@ -431,7 +431,7 @@ export function useEmployeeAssignActions({
                 setDraftEditEmployee(nextEmployee)
                 setViewedEntity(nextEmployee)
 
-                setIsEditModalOpen(true)
+                setIsEntityModalOpen(true)
             }
         }
     },[
@@ -442,7 +442,7 @@ export function useEmployeeAssignActions({
         getCurrentEditEmployee,
         setDraftEditEmployee,
         setViewedEntity,
-        setIsEditModalOpen
+        setIsEntityModalOpen
     ])
 
     const removeWorkspaceClickHandler = useCallback(() => {

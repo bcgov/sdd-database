@@ -12,30 +12,21 @@ import {parseWorkstationFormData} from "@/utils";
 import {validateWorkstationData} from "@/actions/entities/workstation/rules";
 import {createEntityActions} from "@/actions/createEntityActions";
 import {getReadablePrismaError} from "@/actions/entities/workstation/errors";
+import {attachEntityType} from "@/actions/attachEntityType";
 
 
 export async function searchWorkstationsAction(query?: string): Promise<WorkstationEntity[]> {
     const workstationSearchResults = await getWorkstationsByFilter(query);
 
     // Attaching the discriminant 'type'
-    const workstationsWithType: WorkstationEntity[] = workstationSearchResults.map(workstation => ({
-        ...workstation,
-        type: "workstation" as const,
-    }))
-
-    return workstationsWithType
+    return attachEntityType(workstationSearchResults, "workstation")
 }
 
 export async function searchAssignableWorkstationsAction(query?: string): Promise<WorkstationEntity[]> {
     const workstationSearchResults = await getAssignableWorkstationsByFilter(query);
 
     // Attaching the discriminant 'type'
-    const workstationsWithType: WorkstationEntity[] = workstationSearchResults.map(workstation => ({
-        ...workstation,
-        type: "workstation" as const,
-    }))
-
-    return workstationsWithType
+    return attachEntityType(workstationSearchResults, "workstation")
 }
 
 const workstationActions = createEntityActions({

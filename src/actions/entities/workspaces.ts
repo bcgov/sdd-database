@@ -7,18 +7,14 @@ import {
     removeHold
 } from "@/db/data-access/workspaces";
 import {EntityActionResult, WorkspaceEntity} from "@/types";
+import {attachEntityType} from "@/actions/attachEntityType";
 
 
 export async function searchWorkspacesAction(query?: string): Promise<WorkspaceEntity[]>  {
     const workspaceSearchResults = await getWorkspacesByFilter(query)
 
     // Attaching discriminant 'type'
-    const workspacesWithType: WorkspaceEntity[] = workspaceSearchResults.map(workspace => ({
-        ...workspace,
-        type: "workspace" as const,
-    }))
-
-    return workspacesWithType
+    return attachEntityType(workspaceSearchResults, "workspace")
 }
 
 export async function searchAssignableWorkspacesAction(
@@ -33,12 +29,7 @@ export async function searchAssignableWorkspacesAction(
     )
 
     // Attaching discriminant 'type'
-    const workspacesWithType: WorkspaceEntity[] = workspaceSearchResults.map(workspace => ({
-        ...workspace,
-        type: "workspace" as const,
-    }))
-
-    return workspacesWithType
+    return attachEntityType(workspaceSearchResults, "workspace")
 }
 
 export async function holdAction(

@@ -11,12 +11,20 @@ interface FilterTagsProps {
 
 export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFilterTags}: FilterTagsProps) {
 
+    const disabledKeys = [
+        "employee",
+        "office",
+        "workspace",
+        "workstation",
+        "mobileDevice"
+    ]
+
     return (
         <TagGroup aria-label="Search Tags"
                   selectionMode="multiple"
                   selectedKeys={selectedFilterTags}
                   onSelectionChange={setSelectedFilterTags}
-                  disabledKeys={disableFilterTags? ["employee", "office", "workspace", "workstation"] : []}
+                  disabledKeys={disableFilterTags? disabledKeys : []}
                   style={{margin: "1rem"}}
         >
             <TagList
@@ -26,13 +34,13 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                             id: "employee",
                             textValue: "Employees",
                             size: "medium",
-                            color: "green",
+                            color: "blue",
                         },
                         {
                             id: "office",
                             textValue: "Offices",
                             size: "medium",
-                            color: "red",
+                            color: "green",
                         },
                         {
                             id: "workspace",
@@ -44,8 +52,14 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                             id: "workstation",
                             textValue: "Workstations",
                             size: "medium",
-                            color: "blue",
+                            color: "red",
                         },
+                        {
+                            id: "mobileDevice",
+                            textValue: "Mobile Devices",
+                            size: "medium",
+                            color: "grey",
+                        }
                     ]}
             >
             </TagList>

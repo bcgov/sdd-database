@@ -1,8 +1,8 @@
 import type {Office} from "@/generated/prisma/client";
 
-import {OfficeDetails} from "@/components/Entity_Forms/Office/OfficeDetails";
-import {useOfficeLookupProps} from "@/components/Entity_Forms/Office/useOfficeLookupProps";
-import {Address} from "@/components/Entity_Forms/Office/Address";
+import {OfficeDetails} from "@/components/EntityForms/Office/OfficeDetails";
+import {useOfficeLookupProps} from "@/components/EntityForms/Office/useOfficeLookupProps";
+import {Address} from "@/components/EntityForms/Office/Address";
 import {AccordionGroup} from "@bcgov/design-system-react-components";
 
 

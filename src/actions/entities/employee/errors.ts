@@ -1,25 +1,15 @@
 import {Prisma} from "@/generated/prisma/client"
 import {EmployeeFormValues} from "@/types";
+import {
+    appendPrismaErrorCodeIfNeeded,
+    BASE_PRISMA_ERROR_MESSAGE,
+    getPrismaForeignKeyName, getPrismaUniqueFieldName
+} from "@/actions/prismaErrorHelpers";
 
-
-type DriverAdapterErrorMeta = {
-    cause?: {
-        constraint?: {
-            fields?: string[];
-            index?: string;
-        }
-    }
-}
-
-function getDriverAdapterError(meta: Record<string, unknown> | undefined) {
-    const dae = meta?.driverAdapterError;
-
-    return dae && typeof dae === "object" ? (dae as DriverAdapterErrorMeta) : undefined;
-}
 
 export function getReadablePrismaError(error: unknown, employee?: EmployeeFormValues) {
 
-    const base = `An unexpected error occurred. Please refresh the page and try again. If the problem persists, please contact support with the error code shown at the end and a screenshot of the entire page.`
+    const base = BASE_PRISMA_ERROR_MESSAGE
 
     let errorMessage = base
 
@@ -39,8 +29,7 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
             }
             case "P2002": {
 
-                const dae = getDriverAdapterError(meta);
-                const errorFieldName = dae?.cause?.constraint?.fields?.[0];
+                const errorFieldName = getPrismaUniqueFieldName(meta)
 
                 if (errorFieldName === "employee_id"  && employee?.employee_id) {
                     errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
@@ -57,8 +46,7 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
             }
             case "P2003": {
 
-                const dae = getDriverAdapterError(meta);
-                const foreignKey = dae?.cause?.constraint?.index
+                const foreignKey = getPrismaForeignKeyName(meta)
 
                 switch(foreignKey) {
                     case "Employee_office_number_fkey":
@@ -87,9 +75,7 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
             }
         }
         // If we didn’t set a specific message in the matched case, append the code as a safety net.
-        if (errorMessage === base) {
-            errorMessage += ` Error code: "${code}"`;
-        }
+        errorMessage = appendPrismaErrorCodeIfNeeded(errorMessage, base, code)
     }
 
     console.error(error);

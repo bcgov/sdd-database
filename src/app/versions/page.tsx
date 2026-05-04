@@ -6,6 +6,15 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.34",
+            notes: [
+                "Added new entity: Mobile Devices",
+                "Mobile Devices modal now has IMEI field",
+                "Employee Search Results now display the alternate name if available",
+                "Workspace Search Results now display the workspace category name",
+            ]
+        },
+        {
             version: "v0.0.33",
             notes: [
                 "Workstations are now searchable by their office number",

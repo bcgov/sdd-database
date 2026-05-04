@@ -1,6 +1,6 @@
 import {ModalDialog} from "@/components/ModalDialog";
 import {Callout} from "@bcgov/design-system-react-components";
-import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
+import {EmployeeForm} from "@/components/EntityForms/Employee/EmployeeForm";
 import {AssignMode, EmployeeEntity} from "@/types";
 import {ENTITY_TYPE_NAME} from "@/utils";
 

@@ -158,3 +158,20 @@ export function validateAssetTagField(value: string, label: string = "Asset Tag"
         return invalidCharacterError;
     }
 }
+
+export function validateImeiField(value: string, label: string = "IMEI") {
+    const requiredError = validateRequiredField(value, label)
+    if (requiredError) {
+        return requiredError
+    }
+
+    const IMEI_LENGTH = 15
+    if (value.length !== IMEI_LENGTH) {
+        return `${label} must be exactly ${IMEI_LENGTH} digits long`
+    }
+
+    const invalidCharacterError = validateOnlyDigits(value, label)
+    if (invalidCharacterError) {
+        return invalidCharacterError
+    }
+}

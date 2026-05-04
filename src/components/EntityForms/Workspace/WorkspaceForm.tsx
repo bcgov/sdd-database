@@ -1,8 +1,8 @@
 import {WorkspaceSearchResult} from "@/types";
 import {AccordionGroup} from "@bcgov/design-system-react-components";
-import {WorkspaceDetails} from "@/components/Entity_Forms/Workspace/WorkspaceDetails";
-import {WorkspaceProtections} from "@/components/Entity_Forms/Workspace/WorkspaceProtections";
-import {AssignedEmployeeDetails} from "@/components/Entity_Forms/Shared/AssignedEmployeeDetails";
+import {WorkspaceDetails} from "@/components/EntityForms/Workspace/WorkspaceDetails";
+import {WorkspaceProtections} from "@/components/EntityForms/Workspace/WorkspaceProtections";
+import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
 
 
 interface WorkspaceFormProps {

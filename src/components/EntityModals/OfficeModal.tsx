@@ -1,6 +1,6 @@
 import {OfficeEntity} from "@/types";
 import {ModalDialog} from "@/components/ModalDialog";
-import {OfficeForm} from "@/components/Entity_Forms/Office/OfficeForm";
+import {OfficeForm} from "@/components/EntityForms/Office/OfficeForm";
 import {ENTITY_TYPE_NAME} from "@/utils";
 
 
@@ -21,7 +21,7 @@ export function OfficeModal({
         <ModalDialog isOpen={isOpen}
                      setIsOpen={setIsOpen}
                      modalTitle={ENTITY_TYPE_NAME.office}
-                     >
+        >
             <OfficeForm office={office}/>
         </ModalDialog>
     )

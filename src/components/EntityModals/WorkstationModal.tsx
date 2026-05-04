@@ -1,5 +1,5 @@
 import {ModalDialog} from "@/components/ModalDialog";
-import {WorkstationForm} from "@/components/Entity_Forms/Workstation/WorkstationForm";
+import {WorkstationForm} from "@/components/EntityForms/Workstation/WorkstationForm";
 import {WorkstationEntity} from "@/types";
 import {ENTITY_TYPE_NAME} from "@/utils";
 
@@ -24,17 +24,18 @@ export function WorkstationModal({
                                      onError,
                                  }: WorkstationModalProps) {
 
-    const onClose = () => setIsOpen(false);
+    const onClose = () => setIsOpen(false)
 
     return (
         <ModalDialog isOpen={isOpen}
                      setIsOpen={setIsOpen}
-                     modalTitle={ENTITY_TYPE_NAME.workstation}
+                     modalTitle={`Edit ${ENTITY_TYPE_NAME.workstation}`}
         >
             <WorkstationForm workstation={workstation}
                              onSuccess={onSuccess}
                              onError={onError}
-                             onClose={onClose}>
+                             onClose={onClose}
+            >
             </WorkstationForm>
         </ModalDialog>
     )

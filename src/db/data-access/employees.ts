@@ -6,6 +6,43 @@ import {employeeSearchResultArgs} from "@/db/data-access/shared";
 
 type DbClient = Prisma.TransactionClient
 
+export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
+    if (!query)
+        return prisma.employee.findMany({
+            ...employeeSearchResultArgs
+        })
+
+    return prisma.employee.findMany({
+        where: {
+            OR: [
+                {office_number: {contains: query}},
+                {idir: {contains: query, mode: 'insensitive'}},
+                {first_name: {contains: query, mode: 'insensitive'}},
+                {alternate_name: {contains: query, mode: 'insensitive'}},
+                {last_name: {contains: query, mode: 'insensitive'}},
+                {employee_id: {contains: query, mode: 'insensitive'}},
+                // 🔎 match by Branch name via ProgramArea -> Branch using a relation filter
+                {program_area: {branch: {name: {contains: query, mode: 'insensitive'}}}},
+                // 🔎 match by Program Area name
+                {program_area: {name: {contains: query, mode: 'insensitive'}}},
+                {job_title: {name: {contains: query, mode: 'insensitive'}}},
+                {notes: {contains: query, mode: 'insensitive'}},
+                {workspace_assignment_type: {name: {contains: query, mode: 'insensitive'}}},
+                {
+                    ohs_accommodations: {
+                        some: {
+                            ohs_accommodation_type: {
+                                name: {contains: query, mode: 'insensitive'}
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        ...employeeSearchResultArgs
+    })
+}
+
 async function addNewEmployee(db: DbClient, employee: EmployeeFormValues) {
 
     const {
@@ -48,43 +85,6 @@ export async function addNewEmployeeWithAssignments(employee: EmployeeFormValues
         )
 
         return createdEmployee
-    })
-}
-
-export async function getEmployeesByFilter(query?: string): Promise<EmployeeSearchResult[]> {
-    if (!query)
-        return prisma.employee.findMany({
-            ...employeeSearchResultArgs
-        })
-
-    return prisma.employee.findMany({
-        where: {
-            OR: [
-                {office_number: {contains: query}},
-                {idir: {contains: query, mode: 'insensitive'}},
-                {first_name: {contains: query, mode: 'insensitive'}},
-                {alternate_name: {contains: query, mode: 'insensitive'}},
-                {last_name: {contains: query, mode: 'insensitive'}},
-                {employee_id: {contains: query, mode: 'insensitive'}},
-                // 🔎 match by Branch name via ProgramArea -> Branch using a relation filter
-                {program_area: {branch: {name: {contains: query, mode: 'insensitive'}}}},
-                // 🔎 match by Program Area name
-                {program_area: {name: {contains: query, mode: 'insensitive'}}},
-                {job_title: {name: {contains: query, mode: 'insensitive'}}},
-                {notes: {contains: query, mode: 'insensitive'}},
-                {workspace_assignment_type: {name: {contains: query, mode: 'insensitive'}}},
-                {
-                    ohs_accommodations: {
-                        some: {
-                            ohs_accommodation_type: {
-                                name: {contains: query, mode: 'insensitive'}
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        ...employeeSearchResultArgs
     })
 }
 

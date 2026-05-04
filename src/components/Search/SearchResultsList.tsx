@@ -17,17 +17,20 @@ const getSearchResultKey = (item: Entity) => {
 
     switch (item.type) {
         case "employee":
-            key = `employee-${item.id}`;
-            break;
+            key = `employee-${item.id}`
+            break
         case "office":
-            key = `office-${item.office_number}`;
-            break;
+            key = `office-${item.office_number}`
+            break
         case "workspace":
-            key = `workspace-${item.office_number}-${item.workspace_number}`;
-            break;
+            key = `workspace-${item.office_number}-${item.workspace_number}`
+            break
         case "workstation":
-            key = `workstation-${item.asset_tag}`;
-            break;
+            key = `workstation-${item.asset_tag}`
+            break
+        case "mobileDevice":
+            key = `mobile-device-${item.imei}`
+            break
     }
 
     return key
@@ -40,18 +43,21 @@ const getSearchResultTitle = (item: Entity) => {
     switch (item.type) {
         case "employee":
             title = item.idir
-                ? `${getEmployeeFullName(item)} (${item.idir})`
+                ? `${getEmployeeFullName(item)} - ${item.idir}`
                 : getEmployeeFullName(item)
-            break;
+            break
         case "office":
-            title = `${item.office_name} (${item.office_number})`
-            break;
+            title = `${item.office_name} - ${item.office_number}`
+            break
         case "workspace":
-            title = `Workspace ${item.workspace_number} (Office ${item.office_number})`;
-            break;
+            title = `Workspace ${item.workspace_number} - Office ${item.office_number} - ${item.category.name}`;
+            break
         case "workstation":
             title = `${item.workstation_model.name} - ${item.asset_tag}`
-            break;
+            break
+        case "mobileDevice":
+            title = `Mobile Device - ${item.imei}`
+            break
     }
 
     return title

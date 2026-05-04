@@ -3,12 +3,12 @@ import {
     Form,
 } from "@bcgov/design-system-react-components";
 
-import {WorkstationDetails} from "@/components/Entity_Forms/Workstation/WorkstationDetails";
-import {EntityActionResult, WorkstationSearchResult} from "@/types";
-import {AssignedEmployeeDetails} from "@/components/Entity_Forms/Shared/AssignedEmployeeDetails";
-import {useWorkstationLookupProps} from "@/components/Entity_Forms/Workstation/useWorkstationLookupProps";
+import {WorkstationDetails} from "@/components/EntityForms/Workstation/WorkstationDetails";
+import {WorkstationSearchResult} from "@/types";
+import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
+import {useWorkstationLookupProps} from "@/components/EntityForms/Workstation/useWorkstationLookupProps";
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/entities/workstation/actions";
-import {useActionState, useEffect} from "react";
+import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
 
 
 interface WorkstationFormProps {
@@ -31,31 +31,15 @@ export function WorkstationForm({
 
     const isEditMode = !!workstation
 
-    const initialState: EntityActionResult = {status: "idle"}
-
     const serverAction = isEditMode ? updateWorkstationAction : addNewWorkstationAction
 
-    const [result, formAction, isPending] = useActionState(serverAction, initialState)
+    const {formAction, isPending} = useEntityFormActionState({
+        serverAction,
+        onSuccess,
+        onError
+    })
 
     const workstationLookupProps = useWorkstationLookupProps()
-
-    useEffect(() => {
-
-        switch (result.status) {
-            case "idle":
-                // first render -> do nothing
-                return;
-
-            case "ok":
-                onSuccess();
-                break;
-
-            case "error":
-                onError(result.error);
-                break;
-        }
-
-    }, [result, onError, onSuccess]);
 
     const hasAssignedEmployee = !!workstation?.assigned_employee
 

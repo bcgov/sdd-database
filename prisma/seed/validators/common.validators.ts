@@ -19,7 +19,23 @@ export function assertUnique(
     seenList.set(keyToCheck, rowNumber)
 }
 
-export function assertMaxLength(value: string, label: string, rowNumber: number, maxLength: number) {
+export function assertExactLength(
+    value: string,
+    label: string,
+    rowNumber: number,
+    expectedLength: number
+) {
+    if (value.length !== expectedLength) {
+        throw new Error(`${label} must be exactly ${expectedLength} characters long (got ${value.length} chars at ${rowNumber})`)
+    }
+}
+
+export function assertMaxLength(
+    value: string,
+    label: string,
+    rowNumber: number,
+    maxLength: number
+) {
 
     if (value.length > maxLength) {
         throw new Error(`${label} too long (${value.length} chars) at row ${rowNumber}. Max is ${maxLength} chars. Value: "${value}"`)

@@ -1,4 +1,4 @@
-import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {EmployeeLike} from "@/components/EntityForms/Employee/types";
 
 
 type EmployeeAssignmentState = {

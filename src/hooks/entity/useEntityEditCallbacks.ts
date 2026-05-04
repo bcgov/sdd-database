@@ -6,7 +6,7 @@ import {EntityType} from "@/types";
 interface UseEntityEditCallbacksProps {
     entityType: EntityType
     refreshSearchResults: () => void
-    setIsEditModalOpen: (isOpen: boolean) => void
+    setIsEntityModalOpen: (isOpen: boolean) => void
     addSuccessAlert: (description: string) => void
     addErrorAlert: (title: string, description: string) => void
 
@@ -15,7 +15,7 @@ interface UseEntityEditCallbacksProps {
 export function useEntityEditCallbacks({
                                            entityType,
                                            refreshSearchResults,
-                                           setIsEditModalOpen,
+                                           setIsEntityModalOpen,
                                            addSuccessAlert,
                                            addErrorAlert
                                        }: UseEntityEditCallbacksProps) {
@@ -24,42 +24,50 @@ export function useEntityEditCallbacks({
 
         refreshSearchResults();
 
-        setIsEditModalOpen(false);
+        setIsEntityModalOpen(false);
 
         switch (entityType) {
             case "employee":
-                addSuccessAlert("Employee details updated.");
-                break;
+                addSuccessAlert("Employee details updated.")
+                break
 
             case "workstation":
-                addSuccessAlert("Workstation details updated.");
-                break;
+                addSuccessAlert("Workstation details updated.")
+                break
+
+            case "mobileDevice":
+                addSuccessAlert("Mobile Device details updated.")
+                break
 
             default:
-                break;
+                break
         }
 
-    }, [refreshSearchResults, setIsEditModalOpen, entityType, addSuccessAlert]);
+    }, [refreshSearchResults, setIsEntityModalOpen, entityType, addSuccessAlert]);
 
     const onEditError = useCallback((error: string) => {
 
-        setIsEditModalOpen(false);
+        setIsEntityModalOpen(false);
 
         switch (entityType) {
             case "employee":
-                addErrorAlert("Error: Could not edit employee", error);
-                break;
+                addErrorAlert("Error: Could not edit employee", error)
+                break
 
             case "workstation":
-                addErrorAlert("Error: Could not edit workstation", error);
-                break;
+                addErrorAlert("Error: Could not edit workstation", error)
+                break
+
+            case "mobileDevice":
+                addErrorAlert("Error: Could not edit mobile device", error)
+                break
 
             default:
-                addErrorAlert("Error: Could not update record", error);
-                break;
+                addErrorAlert("Error: Could not update record", error)
+                break
 
         }
-    }, [setIsEditModalOpen, entityType, addErrorAlert]);
+    }, [setIsEntityModalOpen, entityType, addErrorAlert]);
 
     return {
         onEditSuccess,

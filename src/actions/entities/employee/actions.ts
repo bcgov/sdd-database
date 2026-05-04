@@ -14,18 +14,14 @@ import {parseEmployeeFormData} from "@/utils";
 import {createEntityActions} from "@/actions/createEntityActions";
 import {getReadablePrismaError} from "@/actions/entities/employee/errors";
 import {validateEmployeeData} from "@/actions/entities/employee/rules";
+import {attachEntityType} from "@/actions/attachEntityType";
 
 
 export async function searchEmployeesAction(query?: string): Promise<EmployeeEntity[]> {
     const employeeSearchResults = await getEmployeesByFilter(query);
 
     // Attaching the discriminant 'type'
-    const employeesWithType: EmployeeEntity[] = employeeSearchResults.map(employee => ({
-        ...employee,
-        type: "employee" as const,
-    }))
-
-    return employeesWithType
+    return attachEntityType(employeeSearchResults, "employee")
 }
 
 const employeeActions = createEntityActions({

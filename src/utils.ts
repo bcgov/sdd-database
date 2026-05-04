@@ -1,11 +1,12 @@
-import {EmployeeFormValues, EntityType, WorkstationFormValues} from "@/types";
+import {EmployeeFormValues, EntityType, MobileDeviceFormValues, WorkstationFormValues} from "@/types";
 
 
 export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
     employee: "Employee",
     office: "Office",
     workspace: "Workspace",
-    workstation: "Workstation"
+    workstation: "Workstation",
+    mobileDevice: "Mobile Device"
 } as const;
 
 export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues => {
@@ -71,7 +72,7 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     // ohs_accommodation_type_ids
     const rawOhsAccommodationTypeIds = formData.getAll("ohsAccommodationTypeIds")
     const ohsAccommodationTypeIds = rawOhsAccommodationTypeIds.map(value => Number(value))
-    
+
     return {
         office_number: officeNumber,
         idir,
@@ -116,13 +117,30 @@ export const parseWorkstationFormData = (formData: FormData): WorkstationFormVal
     }
 }
 
-export const getEmployeeFullName = (employee: { first_name: string; last_name: string } | undefined) => {
+export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormValues => {
+    // imei
+    const imei = formData.get("imei") as string
+
+    return {
+        imei
+    }
+}
+
+export const getEmployeeFullName = (
+    employee: {
+        first_name: string
+        alternate_name?: string | null
+        last_name: string
+    } | undefined
+) => {
 
     let fullName = "";
 
     if (employee) {
 
-        fullName = `${employee.first_name} ${employee.last_name}`;
+        fullName = employee.alternate_name
+            ? `${employee.first_name} (${employee.alternate_name}) ${employee.last_name}`
+            : `${employee.first_name} ${employee.last_name}`
     }
 
     return fullName;

@@ -1,8 +1,9 @@
 import {AssignMode, EmployeeEntity, Entity} from "@/types";
-import {EmployeeModal} from "@/components/Entity_Modals/EmployeeModal";
-import {OfficeModal} from "@/components/Entity_Modals/OfficeModal";
-import {WorkspaceModal} from "@/components/Entity_Modals/WorkspaceModal";
-import {WorkstationModal} from "@/components/Entity_Modals/WorkstationModal";
+import {EmployeeModal} from "@/components/EntityModals/EmployeeModal";
+import {OfficeModal} from "@/components/EntityModals/OfficeModal";
+import {WorkspaceModal} from "@/components/EntityModals/WorkspaceModal";
+import {WorkstationModal} from "@/components/EntityModals/WorkstationModal";
+import {MobileDeviceModal} from "@/components/EntityModals/MobileDeviceModal";
 
 
 interface EntityModalProps {
@@ -89,6 +90,16 @@ export function EntityModal({
                                   onError={onError}
                 >
                 </WorkstationModal>
+            )
+        case "mobileDevice":
+            return (
+                <MobileDeviceModal mobileDevice={viewedEntity}
+                                   isOpen={isOpen}
+                                   setIsOpen={setIsOpen}
+                                   onSuccess={onSuccess}
+                                   onError={onError}
+                >
+                </MobileDeviceModal>
             )
     }
 }

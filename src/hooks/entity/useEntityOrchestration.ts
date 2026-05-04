@@ -4,18 +4,19 @@ import {useSearch} from "@/hooks/entity/useSearch";
 import {useEmployeeEditorState} from "@/hooks/employee/useEmployeeEditorState";
 import {useEntitySelectionState} from "@/hooks/entity/useEntitySelectionState";
 import {useEmployeeAssignActions} from "@/hooks/employee/useEmployeeAssignActions";
-import {useEmployeeCreateCallbacks} from "@/hooks/employee/useEmployeeCreateCallbacks";
 import {useEntityEditCallbacks} from "@/hooks/entity/useEntityEditCallbacks";
 import {useWorkspaceActions} from "@/hooks/workspace/useWorkspaceActions";
 import {useWorkstationCreateState} from "@/hooks/workstation/useWorkstationCreateState";
-import {useWorkstationCreateCallbacks} from "@/hooks/workstation/useWorkstationCreateCallbacks";
 import {useEmployeeDeleteState} from "@/hooks/employee/useEmployeeDeleteState";
+import {useEntityCreateCallbacks} from "@/hooks/entity/useEntityCreateCallbacks";
+import {useMobileDeviceCreateState} from "@/hooks/mobile-device/useMobileDeviceCreateState";
+import {useCallback} from "react";
 
 
 export function useEntityOrchestration() {
 
     const uiState = useEntityUIState()
-    const {setIsEditModalOpen} = uiState
+    const {setIsEntityModalOpen} = uiState
 
     const alertsAll = useEntityAlerts()
     const {alert, setAlert, addSuccessAlert, addErrorAlert} = alertsAll
@@ -79,7 +80,7 @@ export function useEntityOrchestration() {
 
     // generic viewed entity state
     const selectionAll = useEntitySelectionState({
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
         clearDraftEditEmployee
     })
 
@@ -87,14 +88,26 @@ export function useEntityOrchestration() {
         viewedEntity,
         setViewedEntity,
 
-        openSearchResultEditModal
+        openSearchResultEntityModal
     } = selectionAll
 
     // viewed entity state
     const selection = {
         viewedEntity,
-        openSearchResultEditModal,
+        openSearchResultEntityModal,
     }
+
+    // derive the entity type from the selected item (or fallback)
+    const entityType = viewedEntity?.type ?? "employee";
+
+    // edit success/error callbacks
+    const editHandlers = useEntityEditCallbacks({
+        entityType,
+        refreshSearchResults,
+        setIsEntityModalOpen,
+        addSuccessAlert,
+        addErrorAlert
+    })
 
     // employee assignment workflow
     const employeeAssign = useEmployeeAssignActions({
@@ -109,7 +122,7 @@ export function useEntityOrchestration() {
 
         isAddNewEmployeeModalOpen,
         openCloseAddNewEmployeeModal,
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
 
         setSelectedFilterTags,
 
@@ -123,24 +136,36 @@ export function useEntityOrchestration() {
         addErrorAlert
     })
 
+    const closeEmployeeCreateModal = useCallback(() => {
+        openCloseAddNewEmployeeModal(false)
+    }, [openCloseAddNewEmployeeModal])
+
+    const closeEmployeeCreateModalOnError = useCallback(() => {
+        openCloseAddNewEmployeeModal(false, false)
+    }, [openCloseAddNewEmployeeModal])
+
     // add employee success/error callbacks
-    const employeeCreateHandlers = useEmployeeCreateCallbacks({
+    const employeeCreateHandlers = useEntityCreateCallbacks({
+        entityType: "employee",
+
         refreshSearchResults,
 
-        openCloseAddNewEmployeeModal,
+        closeCreateModal: closeEmployeeCreateModal,
+        closeCreateModalOnError: closeEmployeeCreateModalOnError,
 
         addSuccessAlert,
         addErrorAlert
     })
 
-    // derive the entity type from the selected item (or fallback)
-    const entityType = viewedEntity?.type ?? "employee";
+    // employee delete state/action
+    const employeeDelete = useEmployeeDeleteState({
+        viewedEntity,
 
-    // edit success/error callbacks
-    const editHandlers = useEntityEditCallbacks({
-        entityType,
+        setIsEntityModalOpen,
+
+        setOptimisticSearchResults,
         refreshSearchResults,
-        setIsEditModalOpen,
+
         addSuccessAlert,
         addErrorAlert
     })
@@ -160,24 +185,37 @@ export function useEntityOrchestration() {
     const workstationCreate = useWorkstationCreateState()
     const {openCloseAddNewWorkstationModal} = workstationCreate
 
+    const closeWorkstationCreateModal = useCallback(() => {
+        openCloseAddNewWorkstationModal(false)
+    }, [openCloseAddNewWorkstationModal])
+
     // add workstation success/error callbacks
-    const workstationCreateHandlers = useWorkstationCreateCallbacks({
+    const workstationCreateHandlers = useEntityCreateCallbacks({
+        entityType: "workstation",
+
         refreshSearchResults,
 
-        openCloseAddNewWorkstationModal,
+        closeCreateModal: closeWorkstationCreateModal,
 
         addSuccessAlert,
         addErrorAlert
     })
 
-    // employee delete state/action
-    const employeeDelete = useEmployeeDeleteState({
-        viewedEntity,
+    // mobile device add modal state
+    const mobileDeviceCreate = useMobileDeviceCreateState()
+    const {openCloseAddNewMobileDeviceModal} = mobileDeviceCreate
 
-        setIsEditModalOpen,
+    const closeMobileDeviceCreateModal = useCallback(() => {
+        openCloseAddNewMobileDeviceModal(false)
+    }, [openCloseAddNewMobileDeviceModal])
 
-        setOptimisticSearchResults,
+    // add mobile device success/error callbacks
+    const mobileDeviceCreateHandlers = useEntityCreateCallbacks({
+        entityType: "mobileDevice",
+
         refreshSearchResults,
+
+        closeCreateModal: closeMobileDeviceCreateModal,
 
         addSuccessAlert,
         addErrorAlert
@@ -200,6 +238,9 @@ export function useEntityOrchestration() {
 
         workstationCreate,
         workstationCreateHandlers,
+
+        mobileDeviceCreate,
+        mobileDeviceCreateHandlers,
 
         alerts
     }

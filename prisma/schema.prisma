@@ -186,3 +186,7 @@ model WorkstationModel {
 
   workstations Workstation[]
 }
+
+model MobileDevice {
+  imei String @id @db.VarChar(15)
+}

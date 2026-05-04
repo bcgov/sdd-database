@@ -9,7 +9,7 @@ import {deleteEmployeeAction} from "@/actions/entities/employee/actions";
 interface useEmployeeDeleteStateProps {
     viewedEntity: Entity | undefined
 
-    setIsEditModalOpen: (isOpen: boolean) => void
+    setIsEntityModalOpen: (isOpen: boolean) => void
 
     setOptimisticSearchResults: (id: number) => void
     refreshSearchResults: () => void
@@ -19,16 +19,16 @@ interface useEmployeeDeleteStateProps {
 }
 
 export function useEmployeeDeleteState({
-                                     viewedEntity,
+                                           viewedEntity,
 
-                                     setIsEditModalOpen,
+                                           setIsEntityModalOpen,
 
-                                     setOptimisticSearchResults,
-                                     refreshSearchResults,
+                                           setOptimisticSearchResults,
+                                           refreshSearchResults,
 
-                                     addSuccessAlert,
-                                     addErrorAlert,
-                                 }: useEmployeeDeleteStateProps) {
+                                           addSuccessAlert,
+                                           addErrorAlert,
+                                       }: useEmployeeDeleteStateProps) {
 
     const [isDeleteAlertDialogOpen, setIsDeleteAlertDialogOpen] = useState(false);
 
@@ -42,7 +42,7 @@ export function useEmployeeDeleteState({
 
         // close dialogs + toast
         setIsDeleteAlertDialogOpen(false)
-        setIsEditModalOpen(false)
+        setIsEntityModalOpen(false)
 
         const employeeName = viewedEntity?.type === "employee"
             ? getEmployeeFullName(viewedEntity)
@@ -70,7 +70,7 @@ export function useEmployeeDeleteState({
         }
     }, [
         setOptimisticSearchResults,
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
         viewedEntity,
         addSuccessAlert,
         addErrorAlert,

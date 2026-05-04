@@ -5,8 +5,8 @@ import {
     validateEmployeeNameField,
     validateNotesField
 } from "@/validators";
-import {EmployeeLookupState} from "@/components/Entity_Forms/Employee/useEmployeeLookupState";
-import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {EmployeeLookupState} from "@/components/EntityForms/Employee/useEmployeeLookupState";
+import {EmployeeLike} from "@/components/EntityForms/Employee/types";
 
 
 interface EmployeeDetailsProps {

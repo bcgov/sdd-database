@@ -1,4 +1,4 @@
-import type {Prisma, Office} from "@/generated/prisma/client";
+import type {Prisma, Office, MobileDevice} from "@/generated/prisma/client";
 import {
     employeeSearchResultArgs,
     workspaceSearchResultArgs,
@@ -88,6 +88,18 @@ export type WorkstationEntity = WorkstationSearchResult & {
 }
 
 /**
+ * Mobile Device Types
+ */
+
+export type MobileDeviceFormValues = {
+    imei: string
+}
+
+export type MobileDeviceEntity = MobileDevice & {
+    type: "mobileDevice"
+}
+
+/**
  * Common Types
  */
 
@@ -109,6 +121,7 @@ export type Entity =
     | OfficeEntity
     | WorkspaceEntity
     | WorkstationEntity
+    | MobileDeviceEntity
 
 export type EntityType = Entity["type"]
 

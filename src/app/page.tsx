@@ -9,13 +9,14 @@ import {
 import {DeleteAlertDialog} from "@/components/DeleteAlertDialog";
 import {ModalDialog} from "@/components/ModalDialog";
 
-import {EmployeeForm} from "@/components/Entity_Forms/Employee/EmployeeForm";
+import {EmployeeForm} from "@/components/EntityForms/Employee/EmployeeForm";
 
 import {SearchControls} from "@/components/Search/SearchControls";
 import {SearchResultsPanel} from "@/components/Search/SearchResultsPanel";
-import {EntityModal} from "@/components/Entity_Modals/EntityModal";
-import {WorkstationForm} from "@/components/Entity_Forms/Workstation/WorkstationForm";
+import {EntityModal} from "@/components/EntityModals/EntityModal";
+import {WorkstationForm} from "@/components/EntityForms/Workstation/WorkstationForm";
 import {useEntityOrchestration} from "@/hooks/entity/useEntityOrchestration";
+import {MobileDeviceForm} from "@/components/EntityForms/MobileDevice/MobileDeviceForm";
 
 export default function Home() {
     const {
@@ -35,6 +36,9 @@ export default function Home() {
 
         workstationCreate,
         workstationCreateHandlers,
+
+        mobileDeviceCreate,
+        mobileDeviceCreateHandlers,
 
         alerts
     } = useEntityOrchestration()
@@ -79,7 +83,7 @@ export default function Home() {
                     visibleSearchResults={search.optimisticSearchResults}
                     searchResultsAreEmpty={search.searchResultsAreEmpty}
                     userHasSearchedOnce={search.userHasSearchedOnce}
-                    searchResultClickHandler={selection.openSearchResultEditModal}
+                    searchResultClickHandler={selection.openSearchResultEntityModal}
                     assignMode={search.assignMode}
                     assignOfficeClickHandler={employeeAssign.assignOfficeClickHandler}
                     assignWorkspaceClickHandler={employeeAssign.assignWorkspaceClickHandler}
@@ -107,8 +111,8 @@ export default function Home() {
                                           activateAssignMode={employeeAssign.activateAssignMode}
                                           handleRemoveWorkspace={employeeAssign.removeWorkspaceClickHandler}
                                           handleRemoveWorkstation={employeeAssign.removeWorkstationClickHandler}
-                                          onSuccess={employeeCreateHandlers.onAddNewEmployeeSuccess}
-                                          onError={employeeCreateHandlers.onAddNewEmployeeError}
+                                          onSuccess={employeeCreateHandlers.onCreateSuccess}
+                                          onError={employeeCreateHandlers.onCreateError}
                                           onClose={() => employeeEditor.openCloseAddNewEmployeeModal(false)}
                             >
                             </EmployeeForm>
@@ -119,10 +123,23 @@ export default function Home() {
                                      triggerButtonText="Add New Workstation"
                                      modalTitle="Add New Workstation"
                         >
-                            <WorkstationForm onSuccess={workstationCreateHandlers.onAddNewWorkstationSuccess}
-                                                   onError={workstationCreateHandlers.onAddNewWorkstationError}
-                                                   onClose={() => workstationCreate.openCloseAddNewWorkstationModal(false)}>
+                            <WorkstationForm onSuccess={workstationCreateHandlers.onCreateSuccess}
+                                             onError={workstationCreateHandlers.onCreateError}
+                                             onClose={() => workstationCreate.openCloseAddNewWorkstationModal(false)}
+                            >
                             </WorkstationForm>
+                        </ModalDialog>
+
+                        <ModalDialog isOpen={mobileDeviceCreate.isAddNewMobileDeviceModalOpen}
+                                     setIsOpen={mobileDeviceCreate.openCloseAddNewMobileDeviceModal}
+                                     triggerButtonText="Add New Mobile Device"
+                                     modalTitle="Add New Mobile Device"
+                        >
+                            <MobileDeviceForm onSuccess={mobileDeviceCreateHandlers.onCreateSuccess}
+                                              onError={mobileDeviceCreateHandlers.onCreateError}
+                                              onClose={() => mobileDeviceCreate.openCloseAddNewMobileDeviceModal(false)}
+                            >
+                            </MobileDeviceForm>
                         </ModalDialog>
                     </ButtonGroup>
                 )}
@@ -142,8 +159,8 @@ export default function Home() {
                         handleHoldWorkspace={workspaceActions.holdWorkspaceClickHandler}
                         handleRemoveWorkspaceHold={workspaceActions.removeHoldWorkspaceClickHandler}
 
-                        isOpen={uiState.isEditModalOpen}
-                        setIsOpen={uiState.setIsEditModalOpen}
+                        isOpen={uiState.isEntityModalOpen}
+                        setIsOpen={uiState.setIsEntityModalOpen}
 
                         onSuccess={editHandlers.onEditSuccess}
                         onError={editHandlers.onEditError}

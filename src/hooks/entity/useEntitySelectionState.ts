@@ -3,34 +3,34 @@ import {Entity} from "@/types";
 
 
 interface UseEntitySelectionStateProps {
-    setIsEditModalOpen: (isOpen: boolean) => void
+    setIsEntityModalOpen: (isOpen: boolean) => void
     clearDraftEditEmployee: () => void
 }
 
 export function useEntitySelectionState({
-                                            setIsEditModalOpen,
+                                            setIsEntityModalOpen,
                                             clearDraftEditEmployee,
                                         }: UseEntitySelectionStateProps) {
     
     const [viewedEntity, setViewedEntity] = useState<Entity>(); // entity currently selected/opened
 
-    const openSearchResultEditModal = useCallback((item: Entity) => {
+    const openSearchResultEntityModal = useCallback((item: Entity) => {
         setViewedEntity(item);
 
         if (item.type === "employee") {
             clearDraftEditEmployee()
         }
 
-        setIsEditModalOpen(true)
+        setIsEntityModalOpen(true)
     }, [
         clearDraftEditEmployee,
-        setIsEditModalOpen,
+        setIsEntityModalOpen,
     ])
 
     return {
         viewedEntity,
         setViewedEntity,
 
-        openSearchResultEditModal,
+        openSearchResultEntityModal,
     }
 }

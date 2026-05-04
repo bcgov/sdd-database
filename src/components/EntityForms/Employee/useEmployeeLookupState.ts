@@ -4,7 +4,7 @@ import {Dispatch, SetStateAction, useState} from "react";
 import {useProgramAreas} from "@/hooks/lookups/useProgramAreas";
 import {useJobTitles} from "@/hooks/lookups/useJobTitles";
 import {useOhsAccommodationTypes} from "@/hooks/lookups/useOhsAccommodationTypes";
-import {EmployeeLike} from "@/components/Entity_Forms/Employee/types";
+import {EmployeeLike} from "@/components/EntityForms/Employee/types";
 import {useWorkspaceAssignmentTypes} from "@/hooks/lookups/useWorkspaceAssignmentTypes";
 
 

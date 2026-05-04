@@ -1,4 +1,4 @@
-import {assertMaxLength, assertNonEmpty} from "./common.validators";
+import {assertExactLength, assertMaxLength, assertNonEmpty} from "./common.validators";
 
 
 export function assertIdir(idir: string, rowNumber: number) {
@@ -14,9 +14,12 @@ export function assertIdir(idir: string, rowNumber: number) {
 export function assertEmployeeId(employeeId: string, rowNumber: number) {
     const label = "Employee ID"
 
-    if(employeeId.length !== 6) {
-        throw new Error(`${label} must be exactly 6 digits (got (${employeeId.length} chars)  at row ${rowNumber})`)
-    }
+    assertExactLength(
+        employeeId,
+        label,
+        rowNumber,
+        6
+    )
 
     if (/\D/.test(employeeId)) {
         throw new Error(`${label} can only contain digits (0–9) (got "${employeeId}" at row ${rowNumber})`)
