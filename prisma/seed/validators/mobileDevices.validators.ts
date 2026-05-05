@@ -1,7 +1,7 @@
 import {assertExactLength, assertNonEmpty} from "./common.validators";
 
 
-export function assertIMEI(imei: string, rowNumber: number) {
+export function assertImei(imei: string, rowNumber: number) {
     const label = "IMEI"
 
     assertNonEmpty(imei, label, rowNumber)

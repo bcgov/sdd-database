@@ -23,7 +23,7 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
 
             case "P2000": {
 
-                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Employee ID must be exactly 6 digits long, IDIR can be upto 8 characters long, the Names (First Name, Last Name, Alternate Name) can be up to 30 characters long and Notes can be upto 2000 characters long.`;
+                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Employee ID must be exactly 6 digits long, IDIR can be upto 8 characters long, the Names (First Name, Last Name, Alternate Name) can be up to 30 characters long and Notes can be up to 200 characters long.`;
 
                 break;
             }

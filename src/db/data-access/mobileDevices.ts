@@ -9,6 +9,7 @@ export async function getMobileDevicesByFilter(query?: string): Promise<MobileDe
         ? {
             OR: [
                 {imei: {contains: query}},
+                {office_number: {contains: query}},
             ]
         }
         : {}
@@ -37,7 +38,8 @@ export async function updateMobileDevice(mobileDevice: MobileDeviceFormValues) {
             imei: mobileDevice.imei
         },
         data: {
-            notes: mobileDevice.notes
+            notes: mobileDevice.notes,
+            office_number: mobileDevice.office_number
         }
     })
 }

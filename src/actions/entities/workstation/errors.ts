@@ -23,7 +23,7 @@ export function getReadablePrismaError(error: unknown, workstation?: Workstation
 
             case "P2000": {
 
-                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Asset Tag has a model-specific length (8, 10 or 14), Office Number can be up to 3 digits long, and Notes can be upto 2000 characters long.`;
+                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: Asset Tag has a model-specific length (8, 10 or 14), Office Number can be up to 3 digits long, and Notes can be up to 200 characters long.`;
 
                 break
             }

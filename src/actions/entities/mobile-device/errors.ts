@@ -1,7 +1,7 @@
 import {MobileDeviceFormValues} from "@/types";
 import {
     appendPrismaErrorCodeIfNeeded,
-    BASE_PRISMA_ERROR_MESSAGE,
+    BASE_PRISMA_ERROR_MESSAGE, getPrismaForeignKeyName,
     getPrismaUniqueFieldName
 } from "@/actions/prismaErrorHelpers";
 import {Prisma} from "@/generated/prisma/client";
@@ -22,10 +22,9 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
 
             case "P2000": {
 
-                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: IMEI must be exactly 15 digits long.`
+                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: IMEI must be exactly 15 digits long, Office Number can be up to 3 digits long, and Notes can be up to 200 characters long.`
 
                 break
-
             }
 
             case "P2002": {
@@ -38,6 +37,19 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
 
                     // fallback if we can't determine the exact field
                     errorMessage = `A mobile device already exists with the same unique value. Please verify IMEI and try again.`
+                }
+
+                break
+            }
+
+            case "P2003": {
+
+                const foreignKey = getPrismaForeignKeyName(meta)
+
+                switch (foreignKey) {
+                    case "MobileDevice_office_number_fkey":
+                        errorMessage = `The selected Office Number is invalid. Please enter a valid Office Number and try again.`
+                        break
                 }
 
                 break

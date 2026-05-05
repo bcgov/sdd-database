@@ -1,6 +1,6 @@
 import {Accordion, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {MobileDeviceFormValues} from "@/types";
-import {validateImeiField, validateNotesField} from "@/validators";
+import {validateImeiField, validateNotesField, validateOfficeNumberField} from "@/validators";
 
 
 interface MobileDeviceDetailsProps {
@@ -25,6 +25,13 @@ export function MobileDeviceDetails({
                            validate={validateImeiField}
                            defaultValue={mobileDevice?.imei}
                 >
+                </TextField>
+
+                <TextField label="Currently at Office Number"
+                           name="officeNumber"
+                           isRequired
+                           validate={validateOfficeNumberField}
+                           defaultValue={mobileDevice?.office_number}>
                 </TextField>
 
                 <TextArea label="Notes"

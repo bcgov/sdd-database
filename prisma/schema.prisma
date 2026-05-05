@@ -109,9 +109,10 @@ model Office {
   office_type         OfficeType          @relation(fields: [type_id], references: [id])
   client_service_type TypeOfClientService @relation(fields: [client_service_type_id], references: [id])
 
-  employees    Employee[]
-  workspaces   Workspace[]
-  workstations Workstation[]
+  employees      Employee[]
+  workspaces     Workspace[]
+  workstations   Workstation[]
+  mobile_devices MobileDevice[]
 }
 
 model OfficeType {
@@ -190,4 +191,8 @@ model WorkstationModel {
 model MobileDevice {
   imei  String  @id @db.VarChar(15)
   notes String? @db.VarChar(200)
+
+  office_number String @db.VarChar(3)
+
+  current_office Office @relation(fields: [office_number], references: [office_number])
 }

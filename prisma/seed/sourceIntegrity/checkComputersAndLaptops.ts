@@ -2,9 +2,9 @@ import path from "path";
 import ExcelJS from "exceljs";
 import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 import {isPublicJobBankKiosk} from "../shared/sourceRows";
-import {assertOfficeNumber} from "../validators/offices.validators";
 import {isNonResidentWorkspaceAssignmentType, isNotAnEmployeeRow} from "../shared/employees";
 import {assertWorkspaceNumber} from "../validators/workspaces.validators";
+import {assertOfficeNumberExistsInOfficeInformation, buildValidOfficeNumbersFromOfficeInformation} from "./shared";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
@@ -13,13 +13,6 @@ const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
     "data",
     "Computers and Laptops.xlsx"
 );
-
-const OFFICE_INFORMATION_FILE_PATH = path.join(
-    process.cwd(),
-    "prisma",
-    "data",
-    "Office Information.xlsx"
-)
 
 const COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS = [
     "OfficeNum",
@@ -33,38 +26,27 @@ const COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS = [
     "DeskType"
 ] as const
 
-const OFFICE_INFORMATION_SOURCE_INTEGRITY_HEADERS = [
-    "OfficeNum",
-] as const;
-
 export async function checkComputersAndLaptops() {
     const computersAndLaptopsWorksheet = await loadWorksheetFromFile(COMPUTERS_AND_LAPTOPS_FILE_PATH)
-    const officeInformationWorksheet = await loadWorksheetFromFile(OFFICE_INFORMATION_FILE_PATH)
 
     const computersAndLaptopsHeaderToCol = getRequiredHeaderToCol(
         computersAndLaptopsWorksheet,
         COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS
     )
 
-    const officeInformationHeaderToCol = getRequiredHeaderToCol(
-        officeInformationWorksheet,
-        OFFICE_INFORMATION_SOURCE_INTEGRITY_HEADERS
-    )
-
-    const validOfficeNumbers = buildOfficeNumberSetFromOfficeInformation(
-        officeInformationWorksheet,
-        officeInformationHeaderToCol
-    )
+    const validOfficeNumbers = await buildValidOfficeNumbersFromOfficeInformation()
 
     for (let r = 2; r <= computersAndLaptopsWorksheet.rowCount; r++) {
         const row = computersAndLaptopsWorksheet.getRow(r)
 
         if (!row.hasValues) continue
 
+        const officeNumber = getCellString(row, computersAndLaptopsHeaderToCol, "OfficeNum")
+
         assertOfficeNumberExistsInOfficeInformation(
-            row,
+            officeNumber,
             r,
-            computersAndLaptopsHeaderToCol,
+            "Computers and Laptops.xlsx",
             validOfficeNumbers
         )
 
@@ -80,40 +62,6 @@ export async function checkComputersAndLaptops() {
             row,
             r,
             computersAndLaptopsHeaderToCol
-        )
-    }
-}
-
-function buildOfficeNumberSetFromOfficeInformation(
-    worksheet: ExcelJS.Worksheet,
-    headerToCol: Record<(typeof OFFICE_INFORMATION_SOURCE_INTEGRITY_HEADERS)[number], number>
-) {
-    const officeNumbers = new Set<string>()
-
-    for (let r = 2; r <= worksheet.rowCount; r++) {
-        const row = worksheet.getRow(r)
-
-        const officeNumber = getCellString(row, headerToCol, "OfficeNum")
-        assertOfficeNumber(officeNumber, r)
-
-        officeNumbers.add(officeNumber)
-    }
-
-    return officeNumbers
-}
-
-function assertOfficeNumberExistsInOfficeInformation(
-    row: ExcelJS.Row,
-    rowNumber: number,
-    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS)[number], number>,
-    validOfficeNumbers: Set<string>
-) {
-    const officeNumber = getCellString(row, headerToCol, "OfficeNum")
-    assertOfficeNumber(officeNumber, rowNumber)
-
-    if (!validOfficeNumbers.has(officeNumber)) {
-        throw new Error(
-            `OfficeNum "${officeNumber}" at row ${rowNumber} in Computers and Laptops.xlsx does not exist in Office Information.xlsx`
         )
     }
 }
