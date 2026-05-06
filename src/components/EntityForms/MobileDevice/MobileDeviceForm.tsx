@@ -3,6 +3,7 @@ import {addNewMobileDeviceAction, updateMobileDeviceAction} from "@/actions/enti
 import {AccordionGroup, Button, ButtonGroup, Form} from "@bcgov/design-system-react-components";
 import {MobileDeviceDetails} from "@/components/EntityForms/MobileDevice/MobileDeviceDetails";
 import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
+import {useMobileDeviceLookupProps} from "@/components/EntityForms/MobileDevice/useMobileDeviceLookupProps";
 
 
 interface MobileDeviceFormProps {
@@ -35,8 +36,17 @@ export function MobileDeviceForm({
         onError
     })
 
+    const mobileDeviceLookupProps = useMobileDeviceLookupProps()
+
     return (
         <Form action={formAction}>
+
+            {/* pass mobile device id through FormData in edit mode */}
+            {isEditMode && mobileDevice?.id !== undefined
+                ? (<input type="hidden" name="id" value={mobileDevice.id}/>)
+                : null
+            }
+
             <AccordionGroup allowsMultipleExpanded
                             defaultExpandedKeys={["mobileDeviceDetails"]}
                             style={{
@@ -45,6 +55,7 @@ export function MobileDeviceForm({
                             }}
             >
                 <MobileDeviceDetails mobileDevice={mobileDevice}
+                                     {...mobileDeviceLookupProps}
                                      isEditMode={isEditMode}
                 >
                 </MobileDeviceDetails>

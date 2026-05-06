@@ -118,19 +118,30 @@ export const parseWorkstationFormData = (formData: FormData): WorkstationFormVal
 }
 
 export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormValues => {
+    // id
+    const rawId = formData.get("id")
+    const id = rawId ? Number(rawId) : undefined
+
     // imei
-    const imei = formData.get("imei") as string
+    const rawImei = formData.get("imei") as string
+    const imei = rawImei || null
 
     // notes
     const rawNotes = formData.get("notes") as string
     const notes = rawNotes || null
 
+    // model_id
+    const rawModelId = formData.get("model")
+    const modelId = Number(rawModelId)
+
     // office_number
     const officeNumber = formData.get("officeNumber") as string
 
     return {
+        id,
         imei,
         notes,
+        model_id: modelId,
         office_number: officeNumber,
     }
 }

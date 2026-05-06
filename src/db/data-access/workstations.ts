@@ -1,7 +1,7 @@
 import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
-import {workstationSearchResultArgs} from "@/db/data-access/shared";
 import {WorkstationFormValues, WorkstationSearchResult} from "@/types";
+import {workstationSearchResultArgs} from "@/db/data-access/searchResultArgs";
 
 
 export async function getWorkstationsByAssetTags(assetTags: string[]) {
@@ -46,9 +46,16 @@ export async function getWorkstationsByFilter(query?: string): Promise<Workstati
     return prisma.workstation.findMany({
         where: searchFilter,
         ...workstationSearchResultArgs,
-        orderBy: {
-            asset_tag: "asc"
-        }
+        orderBy: [
+            {
+                workstation_model: {
+                    name: "asc"
+                }
+            },
+            {
+                asset_tag: "asc"
+            },
+        ]
     })
 }
 

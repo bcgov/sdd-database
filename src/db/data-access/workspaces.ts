@@ -1,7 +1,7 @@
 import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
-import {workspaceSearchResultArgs} from "@/db/data-access/shared";
 import {WorkspaceSearchResult} from "@/types";
+import {workspaceSearchResultArgs} from "@/db/data-access/searchResultArgs";
 
 
 export async function getWorkspaceByOfficeAndWorkspaceNumber(

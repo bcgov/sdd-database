@@ -1,9 +1,10 @@
-import type {Prisma, Office, MobileDevice} from "@/generated/prisma/client";
+import type {Prisma, Office} from "@/generated/prisma/client";
 import {
     employeeSearchResultArgs,
+    mobileDeviceSearchResultArgs,
     workspaceSearchResultArgs,
     workstationSearchResultArgs
-} from "@/db/data-access/shared";
+} from "@/db/data-access/searchResultArgs";
 
 
 /**
@@ -23,19 +24,19 @@ type EmployeePersistedFields = {
 }
 
 type EmployeeFormExtraFields = {
-    id?: number;
+    id?: number
 
     // UI-only branch cache so branch prefill survives modal close/open
-    ui_branch_id?: number;
+    ui_branch_id?: number
 
     // UI-only workspace state
-    ui_workspace_number?: string;
-    ui_workspace_restricted_program_area_id?: number | null;
+    ui_workspace_number?: string
+    ui_workspace_restricted_program_area_id?: number | null
 
     // UI-only workstation state
     ui_workstation_asset_tags?: string[]
 
-    ohs_accommodation_type_ids: number[];
+    ohs_accommodation_type_ids: number[]
 }
 
 export type EmployeeFormValues = EmployeePersistedFields & EmployeeFormExtraFields
@@ -44,9 +45,9 @@ export type EmployeeFormValues = EmployeePersistedFields & EmployeeFormExtraFiel
 export type EmployeeSearchResult = Prisma.EmployeeGetPayload<typeof employeeSearchResultArgs>
 
 type EmployeeEntityFields = EmployeeSearchResult & {
-    ui_branch_id?: number;
-    ui_workspace_number?: string;
-    ui_workspace_restricted_program_area_id?: number | null;
+    ui_branch_id?: number
+    ui_workspace_number?: string
+    ui_workspace_restricted_program_area_id?: number | null
     ui_workstation_asset_tags?: string[]
 };
 
@@ -92,12 +93,16 @@ export type WorkstationEntity = WorkstationSearchResult & {
  */
 
 export type MobileDeviceFormValues = {
-    imei: string
+    id?: number
+    imei: string | null
     notes: string | null
+    model_id: number
     office_number: string
 }
 
-export type MobileDeviceEntity = MobileDevice & {
+export type MobileDeviceSearchResult = Prisma.MobileDeviceGetPayload<typeof mobileDeviceSearchResultArgs>
+
+export type MobileDeviceEntity = MobileDeviceSearchResult & {
     type: "mobileDevice"
 }
 

@@ -113,6 +113,21 @@ export async function getWorkstationModelById(id: number) {
     })
 }
 
+export async function getMobileDeviceModels() {
+    return getLookupOptions(prisma.mobileDeviceModel)
+}
+
+export async function getMobileDeviceModelById(id: number) {
+    return prisma.mobileDeviceModel.findUnique({
+        where: {
+            id
+        },
+        select: {
+            name: true
+        }
+    })
+}
+
 export async function getOhsAccommodationTypes() {
     return getLookupOptions(prisma.ohsAccommodationType)
 }

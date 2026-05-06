@@ -18,9 +18,9 @@ import {
     isNonResidentWorkspaceAssignmentType,
     resolveEmployeeId
 } from "../shared/employees";
-import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
 import {assertBranch, assertProgramArea} from "../validators/employees.validators";
 import {isPublicJobBankKiosk} from "../shared/sourceRows";
+import {normalizeProgramAreaName} from "../normalizers/employees.normalizers";
 
 
 const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(

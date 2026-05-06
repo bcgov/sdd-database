@@ -29,7 +29,7 @@ const getSearchResultKey = (item: Entity) => {
             key = `workstation-${item.asset_tag}`
             break
         case "mobileDevice":
-            key = `mobile-device-${item.imei}`
+            key = `mobile-device-${item.id}`
             break
     }
 
@@ -56,7 +56,9 @@ const getSearchResultTitle = (item: Entity) => {
             title = `${item.workstation_model.name} - ${item.asset_tag}`
             break
         case "mobileDevice":
-            title = `Mobile Device - ${item.imei}`
+            title = item.imei
+                ? `${item.mobile_device_model.name} - ${item.imei}`
+                : `${item.mobile_device_model.name}`
             break
     }
 

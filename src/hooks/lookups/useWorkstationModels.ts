@@ -5,7 +5,7 @@ import {useLookup} from "@/hooks/lookups/useLookup";
 
 export function useWorkstationModels() {
 
-    const fetcher = useCallback(() => fetchWorkstationModelsAction(), []);
+    const fetcher = useCallback(() => fetchWorkstationModelsAction(), [])
 
     const {data} = useLookup(fetcher, "workstation models")
 

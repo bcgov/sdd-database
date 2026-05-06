@@ -5,7 +5,7 @@ import {validateAssetTagField, validateNotesField, validateOfficeNumberField} fr
 
 interface WorkstationDetailsProps {
     workstation?: WorkstationSearchResult
-    workstationModels: LookupOption[]
+    models: LookupOption[]
 
     isAssetTagReadOnly: boolean
     isModelReadOnly: boolean
@@ -15,7 +15,7 @@ interface WorkstationDetailsProps {
 
 export function WorkstationDetails({
                                        workstation,
-                                       workstationModels,
+                                       models,
 
                                        isAssetTagReadOnly,
                                        isModelReadOnly,
@@ -37,7 +37,7 @@ export function WorkstationDetails({
                 <Select label="Model"
                         name="model"
                         isRequired
-                        items={workstationModels.map(model => (
+                        items={models.map(model => (
                             {
                                 id: model.id,
                                 label: model.name

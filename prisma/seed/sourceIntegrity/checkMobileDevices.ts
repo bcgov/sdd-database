@@ -3,6 +3,7 @@ import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../s
 import ExcelJS from "exceljs";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertOfficeNumberExistsInOfficeInformation, buildValidOfficeNumbersFromOfficeInformation} from "./shared";
+import {assertImei} from "../validators/mobileDevices.validators";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -15,8 +16,14 @@ const MOBILE_DEVICES_FILE_PATH = path.join(
 const MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS = [
     "OfficeNum",
     "IMEI",
-    "Notes"
+    "Notes",
+    "Hardware"
 ] as const
+
+const HARDWARE_WITHOUT_IMEI = new Set<string>([
+    "OiaB",
+    "Qualcomm GSP-1700"
+])
 
 export async function checkMobileDevices() {
     const mobileDevicesWorksheet = await loadWorksheetFromFile(MOBILE_DEVICES_FILE_PATH)
@@ -31,24 +38,10 @@ export async function checkMobileDevices() {
     for (let r = 2; r <= mobileDevicesWorksheet.rowCount; r++) {
         const row = mobileDevicesWorksheet.getRow(r)
 
-        assertPopulatedOfficeNumberExistsInOfficeInformation(
-            row,
-            r,
-            headerToCol,
-            validOfficeNumbers
-        )
-
-        assertBlankImeiHasNotes(
-            row,
-            r,
-            headerToCol
-        )
-
-        assertImeiRowsHaveOfficeNumber(
-            row,
-            r,
-            headerToCol
-        )
+        assertPopulatedOfficeNumberExistsInOfficeInformation(row, r, headerToCol, validOfficeNumbers)
+        assertHardwareImeiRules(row, r, headerToCol)
+        assertBlankImeiHasNotes(row, r, headerToCol)
+        assertImeiRowsHaveOfficeNumber(row, r, headerToCol)
     }
 }
 
@@ -119,4 +112,33 @@ function assertImeiRowsHaveOfficeNumber(
     if (!imei) return
 
     assertOfficeNumber(officeNumber, rowNumber)
+}
+
+/**
+ * Cellular phone hardware must have a valid IMEI
+ * Non-cellular hardware must have blank IMEI
+ *
+ * @param row
+ * @param rowNumber
+ * @param headerToCol
+ */
+function assertHardwareImeiRules(
+    row: ExcelJS.Row,
+    rowNumber: number,
+    headerToCol: Record<(typeof MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS)[number], number>
+) {
+    const hardware = getCellString(row, headerToCol, "Hardware")
+    const imei = getCellString(row, headerToCol, "IMEI")
+
+    if (!hardware) return
+
+    if (HARDWARE_WITHOUT_IMEI.has(hardware)) {
+        if (!imei) return
+
+        throw new Error(
+            `Mobile Devices.xlsx row ${rowNumber} has Hardware "${hardware}" but IMEI is populated. ${hardware} records should not have an IMEI.`
+        )
+    }
+
+    assertImei(imei, rowNumber)
 }

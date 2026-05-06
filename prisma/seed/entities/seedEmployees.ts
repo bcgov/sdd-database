@@ -20,8 +20,7 @@ import {assertOfficeNumber} from "../validators/offices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
 import {parseAndAssertAssignedTo} from "../shared/parsers";
 import {buildIdLookupByName, buildProgramAreaLookup, idNameSelect} from "../shared/lookups";
-import {normalizeJobTitleName} from "../normalizers/employees.normalizers";
-import {normalizeProgramAreaName} from "../normalizers/lookups.normalizers";
+import {normalizeJobTitleName, normalizeProgramAreaName} from "../normalizers/employees.normalizers";
 import {
     isNonResidentWorkspaceAssignmentType,
     isNotAnEmployeeRow,

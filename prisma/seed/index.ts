@@ -19,12 +19,14 @@ import {seedWorkspaceAssignmentTypes} from "./lookups/employees/seedWorkspaceAss
 import {seedMobileDevices} from "./entities/seedMobileDevices";
 import {checkComputersAndLaptops} from "./sourceIntegrity/checkComputersAndLaptops";
 import {checkMobileDevices} from "./sourceIntegrity/checkMobileDevices";
+import {seedMobileDeviceModels} from "./lookups/mobileDevices/seedMobileDeviceModels";
 
 
 async function clearSeedTables() {
     console.log("🧹 Clearing existing seed data...");
 
     await prisma.mobileDevice.deleteMany()
+    await prisma.mobileDeviceModel.deleteMany()
     await prisma.workstation.deleteMany()
     await prisma.workstationModel.deleteMany()
     await prisma.workspace.deleteMany()
@@ -91,6 +93,9 @@ async function seedTables() {
 
     console.log("➡️ Seeding workstations...")
     await seedWorkstations(prisma)
+
+    console.log("➡️ Seeding mobile device models...");
+    await seedMobileDeviceModels(prisma);
 
     console.log("➡️ Seeding mobile devices...")
     await seedMobileDevices(prisma)

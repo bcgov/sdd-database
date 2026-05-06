@@ -9,7 +9,7 @@ import {
     Form,
 } from "@bcgov/design-system-react-components";
 
-import {AssignMode, EntityActionResult} from "@/types";
+import {AssignMode} from "@/types";
 
 import {WorkspaceDetails} from "@/components/EntityForms/Employee/WorkspaceDetails";
 import {OfficeDetails} from "@/components/EntityForms/Employee/OfficeDetails";
@@ -135,9 +135,10 @@ export function EmployeeForm({
               }}>
 
             {/* pass employee.id through FormData in edit mode */}
-            {isEditMode && employee?.id !== undefined ? (
-                <input type="hidden" name="id" value={employee.id}/>
-            ) : null}
+            {isEditMode && employee?.id !== undefined
+                ? (<input type="hidden" name="id" value={employee.id}/>)
+                : null
+            }
 
             <div
                 style={{

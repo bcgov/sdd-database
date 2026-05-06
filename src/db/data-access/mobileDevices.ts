@@ -1,41 +1,56 @@
-import {MobileDeviceFormValues} from "@/types";
+import {MobileDeviceFormValues, MobileDeviceSearchResult} from "@/types";
 import {prisma} from "@/db/client";
-import {MobileDevice, Prisma} from "@/generated/prisma/client";
+import {Prisma} from "@/generated/prisma/client";
+import {mobileDeviceSearchResultArgs} from "@/db/data-access/searchResultArgs";
 
 
-export async function getMobileDevicesByFilter(query?: string): Promise<MobileDevice[]> {
+export async function getMobileDevicesByFilter(query?: string): Promise<MobileDeviceSearchResult[]> {
 
     const searchFilter: Prisma.MobileDeviceWhereInput = query
         ? {
             OR: [
                 {imei: {contains: query}},
+                {mobile_device_model: {name: {contains: query, mode: 'insensitive'}}},
                 {office_number: {contains: query}},
             ]
         }
         : {}
 
     return prisma.mobileDevice.findMany({
-        where: searchFilter,
-        orderBy: {
-            imei: "asc"
+            where: searchFilter,
+            ...mobileDeviceSearchResultArgs,
+            orderBy: [
+                {
+                    mobile_device_model: {
+                        name: "asc"
+                    }
+                },
+                {
+                    imei: "asc"
+                }]
         }
-    })
+    )
 }
 
 export async function addNewMobileDevice(mobileDevice: MobileDeviceFormValues) {
+    const {
+        id,
+        ...mobileDeviceDbFields
+    } = mobileDevice
+
     return prisma.mobileDevice.create({
-        data: mobileDevice
+        data: mobileDeviceDbFields
     })
 }
 
 export async function updateMobileDevice(mobileDevice: MobileDeviceFormValues) {
-    if (!mobileDevice.imei) {
-        throw new Error("Didn't find the IMEI. Can't update mobile device");
+    if (mobileDevice.id === undefined) {
+        throw new Error("Didn't find the mobile device primary key id. Can't update mobile device")
     }
 
     return prisma.mobileDevice.update({
         where: {
-            imei: mobileDevice.imei
+            id: mobileDevice.id
         },
         data: {
             notes: mobileDevice.notes,

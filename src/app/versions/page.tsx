@@ -8,7 +8,7 @@ export default function Updates() {
         {
             version: "v0.0.35",
             notes: [
-                "Mobile Devices modal now has notes field and office number field",
+                "Mobile Devices modal now has office number field, model selection field and notes field",
                 "Restrict all notes fields to a maximum of 200 characters",
                 "Employee Search Results are now sorted by name",
                 "Workstation Search Results are now sorted by asset tag"

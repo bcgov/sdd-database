@@ -7,6 +7,6 @@ export function useWorkstationLookupProps() {
     return {
         // empty array to make the WorkstationDetails component safe on first render when workstationModels is
         // undefined/null
-        workstationModels: workstationModels ?? []
+        models: workstationModels ?? []
     }
 }

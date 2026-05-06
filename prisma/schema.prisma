@@ -189,10 +189,20 @@ model WorkstationModel {
 }
 
 model MobileDevice {
-  imei  String  @id @db.VarChar(15)
+  id    Int     @id @default(autoincrement())
+  imei  String? @unique @db.VarChar(15)
   notes String? @db.VarChar(200)
 
+  model_id      Int
   office_number String @db.VarChar(3)
 
-  current_office Office @relation(fields: [office_number], references: [office_number])
+  mobile_device_model MobileDeviceModel @relation(fields: [model_id], references: [id])
+  current_office      Office            @relation(fields: [office_number], references: [office_number])
+}
+
+model MobileDeviceModel {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  mobile_devices MobileDevice[]
 }

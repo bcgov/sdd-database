@@ -4,8 +4,10 @@ import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../s
 import ExcelJS from "exceljs";
 import {assertImei} from "../validators/mobileDevices.validators";
 import {assertNoDuplicates} from "../shared/assertions";
-import {assertNotes} from "../validators/common.validators";
+import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {assertOfficeNumber} from "../validators/offices.validators";
+import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
+import {normalizeMobileDeviceModelName} from "../normalizers/mobileDevices.normalizers";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -18,12 +20,14 @@ const MOBILE_DEVICES_FILE_PATH = path.join(
 const MOBILE_DEVICES_REQUIRED_HEADERS = [
     "OfficeNum",
     "IMEI",
-    "Notes"
+    "Notes",
+    "Hardware"
 ] as const
 
 type ParsedMobileDeviceRow = {
-    imei: string
+    imei: string | null
     notes: string | null
+    model_id: number
     office_number: string
 }
 
@@ -33,6 +37,12 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
     const headerToCol = getRequiredHeaderToCol(
         mobileDevicesWorksheet,
         MOBILE_DEVICES_REQUIRED_HEADERS
+    )
+
+    const modelLookup = buildIdLookupByName(
+        await prismaClient.mobileDeviceModel.findMany({
+            select: idNameSelect
+        })
     )
 
     const finalMobileDeviceRows: ParsedMobileDeviceRow[] = []
@@ -45,7 +55,8 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
         const mobileDeviceData = parseMobileDeviceRow(
             row,
             r,
-            headerToCol
+            headerToCol,
+            modelLookup
         )
 
         finalMobileDeviceRows.push(mobileDeviceData)
@@ -54,8 +65,9 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
     assertNoDuplicates(
         finalMobileDeviceRows,
         {
-            getKey: row => row.imei,
+            getKey: row => row.imei!,
             label: "mobile device IMEI",
+            shouldSkip: row => !row.imei
         }
     )
 
@@ -70,25 +82,34 @@ function ignoreForNow(
     row: ExcelJS.Row,
     headerToCol: Record<(typeof MOBILE_DEVICES_REQUIRED_HEADERS)[number], number>
 ) {
-    const imei = getCellString(row, headerToCol, "IMEI")
+    const hardware = getCellString(row, headerToCol, "Hardware")
 
-    return !imei
+    // Rows without Hardware are plan-only records, like cancellation/suspension rows.
+    // They are not physical devices and will be modeled later when we add plan/phone-number fields.
+    return !hardware
 }
 
 function parseMobileDeviceRow(
     row: ExcelJS.Row,
     rowNumber: number,
-    headerToCol: Record<(typeof MOBILE_DEVICES_REQUIRED_HEADERS)[number], number>
+    headerToCol: Record<(typeof MOBILE_DEVICES_REQUIRED_HEADERS)[number], number>,
+    modelLookup: Map<string, number>
 ): ParsedMobileDeviceRow {
 
     // IMEI
-    const imei = getCellString(row, headerToCol, "IMEI")
-    assertImei(imei, rowNumber)
+    const rawImei = getCellString(row, headerToCol, "IMEI")
+    const imei = rawImei || null
+    if (imei) assertImei(imei, rowNumber)
 
     // notes
     const rawNotes = getCellString(row, headerToCol, "Notes")
     assertNotes(rawNotes, rowNumber)
     const notes = rawNotes || null   // making sure to store null instead of ""
+
+    // model
+    const rawHardware = getCellString(row, headerToCol, "Hardware")
+    const hardware = normalizeMobileDeviceModelName(rawHardware)
+    const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
     // office_number
     const officeNumber = getCellString(row, headerToCol, "OfficeNum")
@@ -96,7 +117,8 @@ function parseMobileDeviceRow(
 
     return {
         imei,
-        office_number: officeNumber,
-        notes
+        notes,
+        model_id: modelId,
+        office_number: officeNumber
     }
 }

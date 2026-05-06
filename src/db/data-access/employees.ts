@@ -1,7 +1,7 @@
 import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
 import {EmployeeFormValues, EmployeeSearchResult} from "@/types";
-import {employeeSearchResultArgs} from "@/db/data-access/shared";
+import {employeeSearchResultArgs} from "@/db/data-access/searchResultArgs";
 
 
 type DbClient = Prisma.TransactionClient

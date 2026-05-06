@@ -1,4 +1,4 @@
-export function normalizeModelName(rawModelName: string) {
+export function normalizeWorkstationModelName(rawModelName: string) {
     const remappedModelNames: Record<string, string> = {
         "T14": "Lenovo ThinkPad T14",
         "T15": "Lenovo ThinkPad T15",

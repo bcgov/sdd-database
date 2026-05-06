@@ -50,6 +50,10 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
                     case "MobileDevice_office_number_fkey":
                         errorMessage = `The selected Office Number is invalid. Please enter a valid Office Number and try again.`
                         break
+
+                    case "MobileDevice_model_id_fkey":
+                        errorMessage = `It seems like a model wasn't selected for this new mobile device. Please select a model and try again.`
+                        break
                 }
 
                 break

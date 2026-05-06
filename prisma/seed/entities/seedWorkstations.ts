@@ -11,7 +11,7 @@ import {
 } from "../shared/employees";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
-import {normalizeModelName} from "../normalizers/workstations.normalizers";
+import {normalizeWorkstationModelName} from "../normalizers/workstations.normalizers";
 import {isPublicJobBankKiosk} from "../shared/sourceRows";
 import {assertOfficeNumber} from "../validators/offices.validators";
 
@@ -114,7 +114,7 @@ function parseWorkstationRow(
 
     // model
     const rawHardware = getCellString(row, headerToCol, "Hardware")
-    const hardware = normalizeModelName(rawHardware)
+    const hardware = normalizeWorkstationModelName(rawHardware)
     const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
     // asset tag

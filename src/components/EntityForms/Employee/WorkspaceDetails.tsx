@@ -62,8 +62,11 @@ export function WorkspaceDetails({
                             }
                         ))}
                         selectedKey={selectedWorkspaceAssignmentTypeId}
-                        onSelectionChange={(key) =>
-                            setSelectedWorkspaceAssignmentTypeId(key == null ? null : Number(key))}>
+                        onSelectionChange={
+                            (key) =>
+                                setSelectedWorkspaceAssignmentTypeId(key == null ? null : Number(key))
+                        }
+                >
                 </Select>
 
                 {isResidentAssignmentType && (

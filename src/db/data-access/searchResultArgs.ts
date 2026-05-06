@@ -49,3 +49,9 @@ export const workstationSearchResultArgs = {
         }
     }
 } satisfies Prisma.WorkstationDefaultArgs
+
+export const mobileDeviceSearchResultArgs = {
+    include: {
+        mobile_device_model: true,
+    }
+} satisfies Prisma.MobileDeviceDefaultArgs
