@@ -51,11 +51,21 @@ export async function getEmployeesByFilter(query?: string): Promise<EmployeeSear
 async function addNewEmployee(db: DbClient, employee: EmployeeFormValues) {
 
     const {
+        // parseEmployeeFormData will pass undefined for id
         id,
+
         ui_branch_id,
         ui_workspace_number,
         ui_workstation_asset_tags,
+        ui_mobile_device_id,
         ohs_accommodation_type_ids,
+
+        // we do not pass these 2 in the parseEmployeeFormData but still we add it here since the return value for
+        // parseEmployeeFormData is EmployeeFormValues which supports these 2 fields
+        // i.e. defensive programming
+        ui_workspace_restricted_program_area_id,
+        ui_mobile_device_title,
+
         ...employeeDbFields
     } = employee
 
@@ -69,24 +79,10 @@ export async function addNewEmployeeWithAssignments(employee: EmployeeFormValues
     return prisma.$transaction(async (db) => {
         const createdEmployee = await addNewEmployee(db, employee);
 
-        await syncEmployeeWorkspace(
+        await syncEmployeeRelatedAssignments(
             db,
             createdEmployee.id,
-            employee.office_number,
-            employee.ui_workspace_number
-        )
-
-        await syncEmployeeWorkstations(
-            db,
-            createdEmployee.id,
-            employee.office_number,
-            employee.ui_workstation_asset_tags ?? []
-        )
-
-        await syncEmployeeOhsAccommodations(
-            db,
-            createdEmployee.id,
-            employee.ohs_accommodation_type_ids
+            employee
         )
 
         return createdEmployee
@@ -123,13 +119,21 @@ async function updateEmployee(db: DbClient, employee: EmployeeFormValues) {
         ui_branch_id,
         ui_workspace_number,
         ui_workstation_asset_tags,
+        ui_mobile_device_id,
         ohs_accommodation_type_ids,
-        ...rest
+
+        // we do not pass these 2 in the parseEmployeeFormData but still we add it here since the return value for
+        // parseEmployeeFormData is EmployeeFormValues which supports these 2 fields
+        // i.e. defensive programming
+        ui_workspace_restricted_program_area_id,
+        ui_mobile_device_title,
+
+        ...employeeDbFields
     } = employee
 
     // we don't update employee_id and idir if existing employee already has them set
     const data = {
-        ...rest,
+        ...employeeDbFields,
         ...(existingEmployee.employee_id ? {} : {employee_id}),
         ...(existingEmployee.idir ? {} : {idir}),
     }
@@ -145,28 +149,47 @@ export async function updateEmployeeWithAssignments(employee: EmployeeFormValues
     return prisma.$transaction(async (db) => {
         const updatedEmployee = await updateEmployee(db, employee)
 
-        await syncEmployeeWorkspace(
+        await syncEmployeeRelatedAssignments(
             db,
             updatedEmployee.id,
-            employee.office_number,
-            employee.ui_workspace_number
-        )
-
-        await syncEmployeeWorkstations(
-            db,
-            updatedEmployee.id,
-            employee.office_number,
-            employee.ui_workstation_asset_tags ?? []
-        )
-
-        await syncEmployeeOhsAccommodations(
-            db,
-            updatedEmployee.id,
-            employee.ohs_accommodation_type_ids
+            employee
         )
 
         return updatedEmployee
     })
+}
+
+async function syncEmployeeRelatedAssignments(
+    db: DbClient,
+    employeeId: number,
+    employee: EmployeeFormValues
+) {
+    await syncEmployeeWorkspace(
+        db,
+        employeeId,
+        employee.office_number,
+        employee.ui_workspace_number
+    )
+
+    await syncEmployeeWorkstations(
+        db,
+        employeeId,
+        employee.office_number,
+        employee.ui_workstation_asset_tags ?? []
+    )
+
+    await syncEmployeeMobileDevice(
+        db,
+        employeeId,
+        employee.office_number,
+        employee.ui_mobile_device_id
+    )
+
+    await syncEmployeeOhsAccommodations(
+        db,
+        employeeId,
+        employee.ohs_accommodation_type_ids
+    )
 }
 
 async function syncEmployeeWorkspace(
@@ -236,6 +259,39 @@ async function syncEmployeeWorkstations(
         }
     })
 }
+
+async function syncEmployeeMobileDevice(
+    db: DbClient,
+    employeeId: number,
+    employeeOfficeNumber: string,
+    mobileDeviceId?: number
+) {
+    // Clear any mobile device assignment currently linked to this employee
+    // Do not change office_number here. Once unassigned, a mobile device keeps its last known office.
+    await db.mobileDevice.updateMany({
+        where: {
+            employee_id: employeeId
+        },
+        data: {
+            employee_id: null,
+        }
+    })
+
+    // if user assigned no mobile device, stop
+    if (mobileDeviceId === undefined) return
+
+    // Assign the selected mobile device to this employee and move it to the employee's current office
+    await db.mobileDevice.update({
+        where: {
+            id: mobileDeviceId
+        },
+        data: {
+            employee_id: employeeId,
+            office_number: employeeOfficeNumber
+        }
+    })
+}
+
 
 /**
  * Replace all OHS accommodation join rows for the given employee with the currently selected accommodation type ids.

@@ -1,15 +1,8 @@
 import {SearchResultItem} from "@/components/Search/SearchResultItem";
-import {AssignMode, Entity, SelectedWorkspaceAssignment} from "@/types";
-import {getEmployeeFullName} from "@/utils";
+import {AssignMode, Entity, MobileDeviceEntity, SelectedWorkspaceAssignment} from "@/types";
+import {getMobileDeviceTitle} from "@/domain/mobileDevices";
+import {getEmployeeFullName} from "@/domain/employees";
 
-interface SearchResultsListProps {
-    visibleSearchResults: Entity[]
-    searchResultClickHandler: (item: Entity) => void
-    assignMode: AssignMode
-    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
-    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
-    assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void
-}
 
 const getSearchResultKey = (item: Entity) => {
     // Determine a unique key based on the discriminant property
@@ -56,9 +49,7 @@ const getSearchResultTitle = (item: Entity) => {
             title = `${item.workstation_model.name} - ${item.asset_tag}`
             break
         case "mobileDevice":
-            title = item.imei
-                ? `${item.mobile_device_model.name} - ${item.imei}`
-                : `${item.mobile_device_model.name}`
+            title = getMobileDeviceTitle(item)
             break
     }
 
@@ -71,6 +62,7 @@ const getAssignClickHandler = (
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void,
     assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void,
     assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void,
+    assignMobileDeviceClickHandler: (assignedMobileDevice: MobileDeviceEntity) => void
 ) => {
     if (item.type === "office" && assignMode === "office") {
         return () => assignOfficeClickHandler(item.office_number)
@@ -87,16 +79,33 @@ const getAssignClickHandler = (
         return () => assignWorkstationClickHandler(item.asset_tag)
     }
 
-    return undefined;
+    if (item.type === "mobileDevice" && assignMode === "mobileDevice") {
+        return () => assignMobileDeviceClickHandler(item)
+    }
+
+    return undefined
+}
+
+interface SearchResultsListProps {
+    visibleSearchResults: Entity[]
+    searchResultClickHandler: (item: Entity) => void
+
+    assignMode: AssignMode
+    assignOfficeClickHandler: (assignedOfficeNumber: string) => void
+    assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
+    assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void
+    assignMobileDeviceClickHandler: (assignedMobileDevice: MobileDeviceEntity) => void
 }
 
 export function SearchResultsList({
                                       visibleSearchResults,
                                       searchResultClickHandler,
+
                                       assignMode,
                                       assignOfficeClickHandler,
                                       assignWorkspaceClickHandler,
                                       assignWorkstationClickHandler,
+                                      assignMobileDeviceClickHandler
                                   }: SearchResultsListProps) {
     return (
         <>
@@ -110,7 +119,8 @@ export function SearchResultsList({
                                           assignMode,
                                           assignOfficeClickHandler,
                                           assignWorkspaceClickHandler,
-                                          assignWorkstationClickHandler
+                                          assignWorkstationClickHandler,
+                                          assignMobileDeviceClickHandler
                                       )
                                   }
                 >

@@ -2,6 +2,7 @@ import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
 import {WorkstationFormValues, WorkstationSearchResult} from "@/types";
 import {workstationSearchResultArgs} from "@/db/data-access/searchResultArgs";
+import {buildAssignedEmployeeSearchFilter} from "@/db/data-access/searchFilters";
 
 
 export async function getWorkstationsByAssetTags(assetTags: string[]) {
@@ -16,6 +17,17 @@ export async function getWorkstationsByAssetTags(assetTags: string[]) {
     })
 }
 
+const workstationsOrderBy: Prisma.WorkstationOrderByWithRelationInput[] = [
+    {
+        workstation_model: {
+            name: "desc"
+        }
+    },
+    {
+        asset_tag: "asc"
+    },
+]
+
 export async function getWorkstationsByFilter(query?: string): Promise<WorkstationSearchResult[]> {
 
     const searchFilter: Prisma.WorkstationWhereInput = query
@@ -25,20 +37,7 @@ export async function getWorkstationsByFilter(query?: string): Promise<Workstati
                 {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
                 {office_number: {contains: query}},
                 {notes: {contains: query, mode: 'insensitive'}},
-                {
-                    // find workstations whose assigned employee exists and matches at least one of these
-                    // employee-field filters
-                    assigned_employee: {
-                        is: {
-                            OR: [
-                                {idir: {contains: query, mode: 'insensitive'}},
-                                {first_name: {contains: query, mode: 'insensitive'}},
-                                {alternate_name: {contains: query, mode: 'insensitive'}},
-                                {last_name: {contains: query, mode: 'insensitive'}},
-                            ]
-                        }
-                    }
-                }
+                buildAssignedEmployeeSearchFilter(query)
             ]
         }
         : {}
@@ -46,16 +45,7 @@ export async function getWorkstationsByFilter(query?: string): Promise<Workstati
     return prisma.workstation.findMany({
         where: searchFilter,
         ...workstationSearchResultArgs,
-        orderBy: [
-            {
-                workstation_model: {
-                    name: "asc"
-                }
-            },
-            {
-                asset_tag: "asc"
-            },
-        ]
+        orderBy: workstationsOrderBy
     })
 }
 
@@ -77,10 +67,8 @@ export async function getAssignableWorkstationsByFilter(query?: string): Promise
             employee_id: null,
             ...searchFilter
         },
-        orderBy: {
-            asset_tag: "asc"
-        },
         ...workstationSearchResultArgs,
+        orderBy: workstationsOrderBy
     })
 }
 

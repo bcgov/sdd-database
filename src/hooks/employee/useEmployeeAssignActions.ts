@@ -2,12 +2,15 @@ import {
     AssignMode,
     EmployeeEntity,
     EmployeeFormValues,
-    Entity, SearchOptions,
+    Entity,
+    MobileDeviceEntity,
+    SearchOptions,
     SelectedWorkspaceAssignment
 } from "@/types";
 import {parseEmployeeFormData} from "@/utils";
 import {Dispatch, SetStateAction, useCallback} from "react";
 import type {Selection} from "@react-types/shared";
+import {getMobileDeviceTitle} from "@/domain/mobileDevices";
 
 
 interface EmployeeAssignActionsProps {
@@ -194,67 +197,78 @@ export function useEmployeeAssignActions({
         saveEmployeeFormData
     ])
 
-    /** This function is called when the user clicks on "Assign Office/Workspace/Workstation" in the add new employee
-     *  modal or the
-     *  "Update Office/Workspace/Workstation" button in the add new employee modal or the edit employee modal.
+    /** This function is called when the user clicks an assignment button in the employee modal so "Assign/Update"
+     *  button for Office/Workspace/Workstation/Mobile Device in the add new employee modal or the edit employee modal
      * @param mode
      * @param formData
      */
     const activateAssignMode = useCallback(async (mode: AssignMode, formData: FormData) => {
 
-        if (mode === "office") {
-            await enterAssignMode(mode, formData)
-            return
-        }
+        switch (mode) {
+            case "office": {
+                await enterAssignMode(mode, formData)
+                return
+            }
 
-        if (mode === "workspace") {
-            const employeeOfficeNumber = formData.get("officeNumber") as string;
-            const rawEmployeeProgramAreaId = formData.get("programArea") as string;
-            const employeeProgramAreaId = rawEmployeeProgramAreaId ? Number(rawEmployeeProgramAreaId) : undefined;
+            case "workspace": {
+                const employeeOfficeNumber = formData.get("officeNumber") as string
+                const rawEmployeeProgramAreaId = formData.get("programArea") as string
+                const employeeProgramAreaId = rawEmployeeProgramAreaId ? Number(rawEmployeeProgramAreaId) : undefined
 
-            if (!employeeOfficeNumber) {
-                addErrorAlert(
-                    "Error: Office required",
-                    "Please assign an office before assigning a workspace"
+                if (!employeeOfficeNumber) {
+                    addErrorAlert(
+                        "Error: Office required",
+                        "Please assign an office before assigning a workspace"
+                    )
+                    return
+                }
+
+                if (employeeProgramAreaId == null || Number.isNaN(employeeProgramAreaId)) {
+                    addErrorAlert(
+                        "Error: Program Area required",
+                        "Please select a valid Program Area before assigning a workspace"
+                    )
+                    return
+                }
+
+                setAssignEmployeeOfficeNumber(employeeOfficeNumber)
+                setAssignEmployeeProgramAreaId(employeeProgramAreaId)
+
+                await enterAssignMode(
+                    mode,
+                    formData,
+                    employeeOfficeNumber,
+                    employeeProgramAreaId
                 )
                 return
             }
 
-            if (employeeProgramAreaId == null || Number.isNaN(employeeProgramAreaId)) {
-                addErrorAlert(
-                    "Error: Program Area required",
-                    "Please select a valid Program Area before assigning a workspace"
+            case "workstation": {
+
+                const employeeWorkstationAssetTags = formData
+                    .getAll("workstationAssetTags")
+                    .map(value => String(value))
+
+                setAssignEmployeeWorkstationAssetTags(employeeWorkstationAssetTags)
+
+                await enterAssignMode(
+                    mode,
+                    formData,
+                    undefined,
+                    undefined,
+                    employeeWorkstationAssetTags
                 )
                 return
             }
 
-            setAssignEmployeeOfficeNumber(employeeOfficeNumber)
-            setAssignEmployeeProgramAreaId(employeeProgramAreaId)
+            case "mobileDevice": {
+                await enterAssignMode(mode, formData)
+                return
+            }
 
-            await enterAssignMode(
-                mode,
-                formData,
-                employeeOfficeNumber,
-                employeeProgramAreaId
-            )
-            return
-        }
-
-        if (mode === "workstation") {
-
-            const employeeWorkstationAssetTags = formData
-                .getAll("workstationAssetTags")
-                .map(value => String(value))
-
-            setAssignEmployeeWorkstationAssetTags(employeeWorkstationAssetTags)
-
-            await enterAssignMode(
-                mode,
-                formData,
-                undefined,
-                undefined,
-                employeeWorkstationAssetTags
-            )
+            case "none": {
+                return
+            }
         }
     }, [
         enterAssignMode,
@@ -313,6 +327,7 @@ export function useEmployeeAssignActions({
                 ui_workspace_number: nextWorkspaceNumber,
                 ui_workspace_restricted_program_area_id: nextWorkspaceRestrictedProgramAreaId,
             })
+
             openCloseAddNewEmployeeModal(true)
         } else {
 
@@ -361,6 +376,7 @@ export function useEmployeeAssignActions({
                 ui_workspace_number: assignedWorkspace.workspace_number,
                 ui_workspace_restricted_program_area_id: assignedWorkspace.restricted_program_area_id
             })
+
             openCloseAddNewEmployeeModal(true)
         } else {
 
@@ -380,7 +396,7 @@ export function useEmployeeAssignActions({
                 setIsEntityModalOpen(true)
             }
         }
-    },[
+    }, [
         setAssignMode,
         draftNewEmployee,
         setDraftNewEmployee,
@@ -434,7 +450,48 @@ export function useEmployeeAssignActions({
                 setIsEntityModalOpen(true)
             }
         }
-    },[
+    }, [
+        setAssignMode,
+        draftNewEmployee,
+        setDraftNewEmployee,
+        openCloseAddNewEmployeeModal,
+        getCurrentEditEmployee,
+        setDraftEditEmployee,
+        setViewedEntity,
+        setIsEntityModalOpen
+    ])
+
+    const assignMobileDeviceClickHandler = useCallback((assignedMobileDevice: MobileDeviceEntity) => {
+        setAssignMode("none")
+
+        const mobileDeviceTitle = getMobileDeviceTitle(assignedMobileDevice)
+
+        if (draftNewEmployee) {
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_mobile_device_id: assignedMobileDevice.id,
+                ui_mobile_device_title: mobileDeviceTitle
+            })
+
+            openCloseAddNewEmployeeModal(true)
+        } else {
+
+            const editEmployee = getCurrentEditEmployee()
+
+            if (editEmployee) {
+                const nextEmployee = {
+                    ...editEmployee,
+                    ui_mobile_device_id: assignedMobileDevice.id,
+                    ui_mobile_device_title: mobileDeviceTitle
+                }
+
+                setDraftEditEmployee(nextEmployee)
+                setViewedEntity(nextEmployee)
+
+                setIsEntityModalOpen(true)
+            }
+        }
+    }, [
         setAssignMode,
         draftNewEmployee,
         setDraftNewEmployee,
@@ -514,6 +571,34 @@ export function useEmployeeAssignActions({
         setDraftEditEmployee
     ])
 
+    const removeMobileDeviceClickHandler = useCallback(() => {
+        if (draftNewEmployee) {
+            setDraftNewEmployee({
+                ...draftNewEmployee,
+                ui_mobile_device_id: undefined,
+                ui_mobile_device_title: undefined
+            })
+        } else {
+            const editEmployee = getCurrentEditEmployee()
+
+            if (editEmployee) {
+                const nextEmployee = {
+                    ...editEmployee,
+                    ui_mobile_device_id: undefined,
+                    ui_mobile_device_title: undefined,
+                    mobile_device: null
+                }
+
+                setDraftEditEmployee(nextEmployee)
+            }
+        }
+    }, [
+        draftNewEmployee,
+        setDraftNewEmployee,
+        getCurrentEditEmployee,
+        setDraftEditEmployee
+    ])
+
     return {
         activateAssignMode,
         cancelAssignModeHandler,
@@ -521,8 +606,10 @@ export function useEmployeeAssignActions({
         assignOfficeClickHandler,
         assignWorkspaceClickHandler,
         assignWorkstationClickHandler,
+        assignMobileDeviceClickHandler,
 
         removeWorkspaceClickHandler,
-        removeWorkstationClickHandler
+        removeWorkstationClickHandler,
+        removeMobileDeviceClickHandler
     }
 }

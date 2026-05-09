@@ -1,12 +1,30 @@
 import {Prisma} from "@/generated/prisma/client";
 
 
+const assignedEmployeePreviewSelect = {
+    idir: true,
+    first_name: true,
+    alternate_name: true,
+    last_name: true
+} satisfies Prisma.EmployeeSelect
+
 export const employeeSearchResultArgs = {
     include: {
         program_area: true,
         workspace_assignment_type: true,
         workspace: true,
         workstations: true,
+        mobile_device: {
+            select: {
+                id: true,
+                imei: true,
+                mobile_device_model: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        },
         ohs_accommodations: {
             include: {
                 ohs_accommodation_type: true,
@@ -26,12 +44,7 @@ export const workspaceSearchResultArgs =
                 }
             },
             assigned_employee: {
-                select: {
-                    idir: true,
-                    first_name: true,
-                    alternate_name: true,
-                    last_name: true,
-                }
+                select: assignedEmployeePreviewSelect
             }
         }
     } satisfies Prisma.WorkspaceDefaultArgs
@@ -40,12 +53,7 @@ export const workstationSearchResultArgs = {
     include: {
         workstation_model: true,
         assigned_employee: {
-            select: {
-                idir: true,
-                first_name: true,
-                alternate_name: true,
-                last_name: true,
-            }
+            select: assignedEmployeePreviewSelect
         }
     }
 } satisfies Prisma.WorkstationDefaultArgs
@@ -53,5 +61,8 @@ export const workstationSearchResultArgs = {
 export const mobileDeviceSearchResultArgs = {
     include: {
         mobile_device_model: true,
+        assigned_employee: {
+            select: assignedEmployeePreviewSelect
+        }
     }
 } satisfies Prisma.MobileDeviceDefaultArgs

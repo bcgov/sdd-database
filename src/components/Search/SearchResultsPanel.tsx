@@ -1,4 +1,4 @@
-import {AssignMode, Entity, SelectedWorkspaceAssignment} from "@/types";
+import {AssignMode, Entity, MobileDeviceEntity, SelectedWorkspaceAssignment} from "@/types";
 import {SearchResultsList} from "@/components/Search/SearchResultsList";
 
 
@@ -12,6 +12,7 @@ interface SearchResultsPanelProps {
     assignOfficeClickHandler: (assignedOfficeNumber: string) => void
     assignWorkspaceClickHandler: (assignedWorkspace: SelectedWorkspaceAssignment) => void
     assignWorkstationClickHandler: (assignedWorkstationAssetTag: string) => void
+    assignMobileDeviceClickHandler: (assignedMobileDevice: MobileDeviceEntity) => void
 }
 
 export function SearchResultsPanel({
@@ -24,6 +25,7 @@ export function SearchResultsPanel({
                                        assignOfficeClickHandler,
                                        assignWorkspaceClickHandler,
                                        assignWorkstationClickHandler,
+                                       assignMobileDeviceClickHandler
                                    }: SearchResultsPanelProps) {
     const showBody = userHasSearchedOnce() || assignMode !== "none"
 
@@ -46,10 +48,12 @@ export function SearchResultsPanel({
     return (
         <SearchResultsList visibleSearchResults={visibleSearchResults}
                            searchResultClickHandler={searchResultClickHandler}
+
                            assignMode={assignMode}
                            assignOfficeClickHandler={assignOfficeClickHandler}
                            assignWorkspaceClickHandler={assignWorkspaceClickHandler}
                            assignWorkstationClickHandler={assignWorkstationClickHandler}
+                           assignMobileDeviceClickHandler={assignMobileDeviceClickHandler}
         >
         </SearchResultsList>
     )

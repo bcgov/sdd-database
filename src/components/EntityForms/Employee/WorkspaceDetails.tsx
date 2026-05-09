@@ -92,19 +92,17 @@ export function WorkspaceDetails({
                         </TextField>
 
                         <ButtonGroup>
-                            <Button
-                                variant="secondary"
-                                isDisabled={!hasOfficeAssignment || !hasProgramAreaAssignment}
-                                onPress={handleAssignWorkspace}
+                            <Button variant="secondary"
+                                    isDisabled={!hasOfficeAssignment || !hasProgramAreaAssignment}
+                                    onPress={handleAssignWorkspace}
                             >
                                 {hasWorkspaceAssignment ? "Update" : "Assign"} Workspace
                             </Button>
 
                             {hasWorkspaceAssignment && (
-                                <Button
-                                    variant="secondary"
-                                    danger
-                                    onPress={handleRemoveWorkspace}
+                                <Button variant="secondary"
+                                        danger
+                                        onPress={handleRemoveWorkspace}
                                 >
                                     Remove Workspace
                                 </Button>

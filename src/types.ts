@@ -23,9 +23,7 @@ type EmployeePersistedFields = {
     workspace_assignment_type_id: number | null
 }
 
-type EmployeeFormExtraFields = {
-    id?: number
-
+type EmployeeUIAssignmentFields = {
     // UI-only branch cache so branch prefill survives modal close/open
     ui_branch_id?: number
 
@@ -36,6 +34,13 @@ type EmployeeFormExtraFields = {
     // UI-only workstation state
     ui_workstation_asset_tags?: string[]
 
+    // ui_only mobile device state
+    ui_mobile_device_id?: number
+    ui_mobile_device_title?: string
+}
+
+type EmployeeFormExtraFields = EmployeeUIAssignmentFields & {
+    id?: number
     ohs_accommodation_type_ids: number[]
 }
 
@@ -44,12 +49,7 @@ export type EmployeeFormValues = EmployeePersistedFields & EmployeeFormExtraFiel
 // employee returned from DB search results with hydrated program area, workspace and ohs accommodations
 export type EmployeeSearchResult = Prisma.EmployeeGetPayload<typeof employeeSearchResultArgs>
 
-type EmployeeEntityFields = EmployeeSearchResult & {
-    ui_branch_id?: number
-    ui_workspace_number?: string
-    ui_workspace_restricted_program_area_id?: number | null
-    ui_workstation_asset_tags?: string[]
-};
+type EmployeeEntityFields = EmployeeSearchResult & EmployeeUIAssignmentFields
 
 export type EmployeeEntity = EmployeeEntityFields & {
     type: "employee"
@@ -113,9 +113,14 @@ export type MobileDeviceEntity = MobileDeviceSearchResult & {
 export type LookupOption = {
     id: number;
     name: string;
-};
+}
 
-export type AssignMode = "none" | "office" | "workspace" | "workstation"
+export type AssignMode =
+    | "none"
+    | "office"
+    | "workspace"
+    | "workstation"
+    | "mobileDevice"
 
 export type SelectedWorkspaceAssignment = {
     workspace_number: string

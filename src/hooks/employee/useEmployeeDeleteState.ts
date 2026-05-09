@@ -2,8 +2,8 @@ import {startTransition, useCallback, useState} from "react";
 
 import {Entity} from "@/types";
 
-import {getEmployeeFullName} from "@/utils";
 import {deleteEmployeeAction} from "@/actions/entities/employee/actions";
+import {getEmployeeFullName} from "@/domain/employees";
 
 
 interface useEmployeeDeleteStateProps {

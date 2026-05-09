@@ -1,7 +1,7 @@
 import {AlertDialog, Button, DialogTrigger, Modal} from "@bcgov/design-system-react-components";
 
-import {getEmployeeFullName} from "@/utils";
 import {EmployeeEntity} from "@/types";
+import {getEmployeeFullName} from "@/domain/employees";
 
 
 interface DeleteAlertDialogProps {

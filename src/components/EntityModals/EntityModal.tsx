@@ -14,6 +14,7 @@ interface EntityModalProps {
 
     handleRemoveWorkspace: () => void
     handleRemoveWorkstation: (assetTag: string) => void
+    handleRemoveMobileDevice: () => void
 
     handleHoldWorkspace: () => void
     handleRemoveWorkspaceHold: () => void
@@ -34,6 +35,7 @@ export function EntityModal({
 
                                 handleRemoveWorkspace,
                                 handleRemoveWorkstation,
+                                handleRemoveMobileDevice,
 
                                 handleHoldWorkspace,
                                 handleRemoveWorkspaceHold,
@@ -50,11 +52,16 @@ export function EntityModal({
         case "employee":
             return (
                 <EmployeeModal employee={draftEditEmployee ?? viewedEntity}
+
                                activateAssignMode={activateAssignMode}
+
                                handleRemoveWorkspace={handleRemoveWorkspace}
                                handleRemoveWorkstation={handleRemoveWorkstation}
+                               handleRemoveMobileDevice={handleRemoveMobileDevice}
+
                                isOpen={isOpen}
                                setIsOpen={setIsOpen}
+
                                onSuccess={onSuccess}
                                onError={onError}
                                onDelete={onDelete}

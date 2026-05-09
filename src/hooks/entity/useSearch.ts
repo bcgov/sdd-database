@@ -7,6 +7,7 @@ import {searchOfficesAction} from "@/actions/entities/offices";
 import {searchAllAction} from "@/actions/search";
 import {searchAssignableWorkspacesAction} from "@/actions/entities/workspaces";
 import {searchAssignableWorkstationsAction} from "@/actions/entities/workstation/actions";
+import {searchAssignableMobileDevicesAction} from "@/actions/entities/mobile-device/actions";
 
 
 export function useSearch() {
@@ -63,8 +64,8 @@ export function useSearch() {
         switch (effectiveMode) {
 
             case "office":
-                results = await searchOfficesAction(query);
-                break;
+                results = await searchOfficesAction(query)
+                break
 
             case "workspace":
                 if (!effectiveEmployeeOfficeNumber || effectiveEmployeeProgramAreaId == null) {
@@ -75,9 +76,9 @@ export function useSearch() {
                         effectiveEmployeeOfficeNumber,
                         effectiveEmployeeProgramAreaId,
                         query
-                    );
+                    )
                 }
-                break;
+                break
 
             case "workstation":
                 const workstationResults = await searchAssignableWorkstationsAction(query);
@@ -86,11 +87,15 @@ export function useSearch() {
                     !effectiveEmployeeWorkstationAssetTags.includes(workstation.asset_tag)
                 )
 
-                break;
+                break
+
+            case "mobileDevice":
+                results = await searchAssignableMobileDevicesAction(query)
+                break
 
             case "none":
-                results = await searchAllAction(query);
-                break;
+                results = await searchAllAction(query)
+                break
         }
 
         setSearchResults(results);

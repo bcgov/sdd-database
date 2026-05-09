@@ -35,6 +35,11 @@ export function SearchControls({
                     title: "Available Workstations",
                     description: "Use the search box to find a workstation, then click Assign next to the correct result"
                 }
+            case "mobileDevice":
+                return {
+                    title: "Available Mobile Devices",
+                    description: "Use the search box to find a mobile device, then click Assign next to the correct result"
+                }
             default:
                 return null
         }

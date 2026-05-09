@@ -5,6 +5,8 @@ import {useCallback, useState} from "react";
 export function useEmployeeEditorState() {
 
     const [draftNewEmployee, setDraftNewEmployee] = useState<EmployeeFormValues>();
+
+    // draftEditEmployee can be thought of as viewedEntity + unsaved edits
     const [draftEditEmployee, setDraftEditEmployee] = useState<EmployeeEntity>();
 
     const [isAddNewEmployeeModalOpen, setIsAddNewEmployeeModalOpen] = useState(false);

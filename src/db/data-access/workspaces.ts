@@ -2,6 +2,7 @@ import {Prisma} from "@/generated/prisma/client"
 import {prisma} from "@/db/client";
 import {WorkspaceSearchResult} from "@/types";
 import {workspaceSearchResultArgs} from "@/db/data-access/searchResultArgs";
+import {buildAssignedEmployeeSearchFilter} from "@/db/data-access/searchFilters";
 
 
 export async function getWorkspaceByOfficeAndWorkspaceNumber(
@@ -27,20 +28,7 @@ export async function getWorkspacesByFilter(query?: string): Promise<WorkspaceSe
                 {workspace_number: {contains: query, mode: 'insensitive'}},
                 {category: {name: {contains: query, mode: 'insensitive'}}},
                 {desk_type: {name: {contains: query, mode: 'insensitive'}}},
-                {
-                    // find workspaces whose assigned employee exists and matches at least one of these
-                    // employee-field filters
-                    assigned_employee: {
-                        is: {
-                            OR: [
-                                {idir: {contains: query, mode: 'insensitive'}},
-                                {first_name: {contains: query, mode: 'insensitive'}},
-                                {alternate_name: {contains: query, mode: 'insensitive'}},
-                                {last_name: {contains: query, mode: 'insensitive'}},
-                            ]
-                        }
-                    }
-                }
+                buildAssignedEmployeeSearchFilter(query)
             ]
         }
         : {}
@@ -78,15 +66,15 @@ export async function getAssignableWorkspacesByFilter(
             ],
             ...searchFilter
         },
-        orderBy: {
-            workspace_number: "asc"
-        },
         /**
          * assigned_employee should be null
          * Other included relations like category, desk_type and restrictions are still needed for display and to
          * align with the WorkspaceSearchResult / Entity shape
          */
-        ...workspaceSearchResultArgs
+        ...workspaceSearchResultArgs,
+        orderBy: {
+            workspace_number: "asc"
+        }
     })
 }
 

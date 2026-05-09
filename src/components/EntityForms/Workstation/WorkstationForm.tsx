@@ -1,7 +1,4 @@
-import {
-    AccordionGroup, Button, ButtonGroup,
-    Form,
-} from "@bcgov/design-system-react-components";
+import {AccordionGroup, Form} from "@bcgov/design-system-react-components";
 
 import {WorkstationDetails} from "@/components/EntityForms/Workstation/WorkstationDetails";
 import {WorkstationSearchResult} from "@/types";
@@ -9,6 +6,7 @@ import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedE
 import {useWorkstationLookupProps} from "@/components/EntityForms/Workstation/useWorkstationLookupProps";
 import {addNewWorkstationAction, updateWorkstationAction} from "@/actions/entities/workstation/actions";
 import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
+import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
 
 
 interface WorkstationFormProps {
@@ -47,9 +45,10 @@ export function WorkstationForm({
         <Form action={formAction}>
             <AccordionGroup allowsMultipleExpanded
                             defaultExpandedKeys={
-                isEditMode? ["workstationDetails", "assignedEmployeeDetails"]
-            : ["workstationDetails"]
-            }
+                                isEditMode
+                                    ? ["workstationDetails", "assignedEmployeeDetails"]
+                                    : ["workstationDetails"]
+                            }
                             style={{
                                 marginTop: "1rem",
                                 marginBottom: "1rem"
@@ -67,18 +66,11 @@ export function WorkstationForm({
                     <AssignedEmployeeDetails assignedEmployee={workstation.assigned_employee}/>}
             </AccordionGroup>
 
-            <ButtonGroup>
-                <Button type="submit"
-                        size="large"
-                        isDisabled={isPending}>
-                    {isEditMode ? "Save" : "Create"}
-                </Button>
-                <Button size="large"
-                        variant="secondary"
-                        onPress={onClose}>
-                    Cancel
-                </Button>
-            </ButtonGroup>
+            <FormActionButtons isEditMode={isEditMode}
+                               isPending={isPending}
+                               onClose={onClose}
+            >
+            </FormActionButtons>
         </Form>
     )
 }

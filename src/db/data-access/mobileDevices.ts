@@ -2,9 +2,49 @@ import {MobileDeviceFormValues, MobileDeviceSearchResult} from "@/types";
 import {prisma} from "@/db/client";
 import {Prisma} from "@/generated/prisma/client";
 import {mobileDeviceSearchResultArgs} from "@/db/data-access/searchResultArgs";
+import {buildAssignedEmployeeSearchFilter} from "@/db/data-access/searchFilters";
 
+
+export async function getMobileDeviceById(id: number) {
+    return prisma.mobileDevice.findUnique({
+        where: {
+            id
+        }
+    })
+}
+
+const mobileDeviceOrderBy: Prisma.MobileDeviceOrderByWithRelationInput[] = [
+    {
+        mobile_device_model: {
+            name: "asc"
+        }
+    },
+    {
+        imei: "asc"
+    }
+]
 
 export async function getMobileDevicesByFilter(query?: string): Promise<MobileDeviceSearchResult[]> {
+
+    const searchFilter: Prisma.MobileDeviceWhereInput = query
+        ? {
+            OR: [
+                {imei: {contains: query}},
+                {mobile_device_model: {name: {contains: query, mode: 'insensitive'}}},
+                {office_number: {contains: query}},
+                buildAssignedEmployeeSearchFilter(query)
+            ]
+        }
+        : {}
+
+    return prisma.mobileDevice.findMany({
+        where: searchFilter,
+        ...mobileDeviceSearchResultArgs,
+        orderBy: mobileDeviceOrderBy
+    })
+}
+
+export async function getAssignableMobileDevicesByFilter(query?: string): Promise<MobileDeviceSearchResult[]> {
 
     const searchFilter: Prisma.MobileDeviceWhereInput = query
         ? {
@@ -17,19 +57,13 @@ export async function getMobileDevicesByFilter(query?: string): Promise<MobileDe
         : {}
 
     return prisma.mobileDevice.findMany({
-            where: searchFilter,
-            ...mobileDeviceSearchResultArgs,
-            orderBy: [
-                {
-                    mobile_device_model: {
-                        name: "asc"
-                    }
-                },
-                {
-                    imei: "asc"
-                }]
-        }
-    )
+        where: {
+            employee_id: null,
+            ...searchFilter
+        },
+        ...mobileDeviceSearchResultArgs,
+        orderBy: mobileDeviceOrderBy
+    })
 }
 
 export async function addNewMobileDevice(mobileDevice: MobileDeviceFormValues) {

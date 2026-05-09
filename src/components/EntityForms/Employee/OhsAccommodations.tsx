@@ -8,9 +8,9 @@ interface OhsAccommodationsProps {
 }
 
 export function OhsAccommodations({
-                                             ohsAccommodationTypes,
-                                             selectedOhsAccommodationTypeIds,
-                                         }: OhsAccommodationsProps
+                                      ohsAccommodationTypes,
+                                      selectedOhsAccommodationTypeIds,
+                                  }: OhsAccommodationsProps
 ) {
     return (
         <Accordion label="Occupational Health and Safety Accommodations" id="ohsAccommodations">

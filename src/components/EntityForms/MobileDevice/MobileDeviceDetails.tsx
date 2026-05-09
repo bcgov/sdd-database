@@ -8,13 +8,17 @@ import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
 interface MobileDeviceDetailsProps {
     mobileDevice?: MobileDeviceFormValues
     models: LookupOption[]
+
     isEditMode: boolean
+    isOfficeNumberReadOnly: boolean
 }
 
 export function MobileDeviceDetails({
                                         mobileDevice,
                                         models,
+
                                         isEditMode,
+                                        isOfficeNumberReadOnly
                                     }: MobileDeviceDetailsProps) {
 
     const initialSelectedModelId = mobileDevice?.model_id ?? null
@@ -72,6 +76,7 @@ export function MobileDeviceDetails({
                 <TextField label="Currently at Office Number"
                            name="officeNumber"
                            isRequired
+                           isReadOnly={isOfficeNumberReadOnly}
                            validate={validateOfficeNumberField}
                            defaultValue={mobileDevice?.office_number}>
                 </TextField>

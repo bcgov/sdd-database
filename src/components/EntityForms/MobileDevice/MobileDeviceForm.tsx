@@ -1,13 +1,15 @@
-import {MobileDeviceFormValues} from "@/types";
+import {MobileDeviceSearchResult} from "@/types";
 import {addNewMobileDeviceAction, updateMobileDeviceAction} from "@/actions/entities/mobile-device/actions";
-import {AccordionGroup, Button, ButtonGroup, Form} from "@bcgov/design-system-react-components";
+import {AccordionGroup, Form} from "@bcgov/design-system-react-components";
 import {MobileDeviceDetails} from "@/components/EntityForms/MobileDevice/MobileDeviceDetails";
 import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
 import {useMobileDeviceLookupProps} from "@/components/EntityForms/MobileDevice/useMobileDeviceLookupProps";
+import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
+import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
 
 
 interface MobileDeviceFormProps {
-    mobileDevice?: MobileDeviceFormValues
+    mobileDevice?: MobileDeviceSearchResult
 
     onSuccess: () => void
     onError: (error: string) => void
@@ -38,6 +40,8 @@ export function MobileDeviceForm({
 
     const mobileDeviceLookupProps = useMobileDeviceLookupProps()
 
+    const hasAssignedEmployee = !!mobileDevice?.assigned_employee
+
     return (
         <Form action={formAction}>
 
@@ -48,7 +52,11 @@ export function MobileDeviceForm({
             }
 
             <AccordionGroup allowsMultipleExpanded
-                            defaultExpandedKeys={["mobileDeviceDetails"]}
+                            defaultExpandedKeys={
+                                isEditMode
+                                    ? ["mobileDeviceDetails", "assignedEmployeeDetails"]
+                                    : ["mobileDeviceDetails"]
+                            }
                             style={{
                                 marginTop: "1rem",
                                 marginBottom: "1rem"
@@ -57,23 +65,20 @@ export function MobileDeviceForm({
                 <MobileDeviceDetails mobileDevice={mobileDevice}
                                      {...mobileDeviceLookupProps}
                                      isEditMode={isEditMode}
+                                     isOfficeNumberReadOnly={isEditMode && hasAssignedEmployee}
                 >
                 </MobileDeviceDetails>
 
+                {mobileDevice?.assigned_employee &&
+                    <AssignedEmployeeDetails assignedEmployee={mobileDevice.assigned_employee}/>}
+
             </AccordionGroup>
 
-            <ButtonGroup>
-                <Button type="submit"
-                        size="large"
-                        isDisabled={isPending}>
-                    {isEditMode ? "Save" : "Create"}
-                </Button>
-                <Button size="large"
-                        variant="secondary"
-                        onPress={onClose}>
-                    Cancel
-                </Button>
-            </ButtonGroup>
+            <FormActionButtons isEditMode={isEditMode}
+                               isPending={isPending}
+                               onClose={onClose}
+            >
+            </FormActionButtons>
         </Form>
     )
 }

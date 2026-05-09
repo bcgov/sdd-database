@@ -4,8 +4,6 @@ import {PressEvent} from "@react-types/shared";
 
 import {
     AccordionGroup,
-    Button,
-    ButtonGroup,
     Form,
 } from "@bcgov/design-system-react-components";
 
@@ -21,6 +19,8 @@ import {getEmployeeAssignmentState} from "@/components/EntityForms/Employee/getE
 import {EmployeeLike} from "@/components/EntityForms/Employee/types";
 import {addNewEmployeeAction, updateEmployeeAction} from "@/actions/entities/employee/actions";
 import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
+import {MobileDeviceDetails} from "@/components/EntityForms/Employee/MobileDeviceDetails";
+import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
 
 
 interface EmployeeFormProps {
@@ -30,6 +30,7 @@ interface EmployeeFormProps {
 
     handleRemoveWorkspace: () => void
     handleRemoveWorkstation: (assetTag: string) => void
+    handleRemoveMobileDevice: () => void
 
     onSuccess: () => void
     onError: (error: string) => void
@@ -45,6 +46,7 @@ export function EmployeeForm({
 
                                  handleRemoveWorkspace,
                                  handleRemoveWorkstation,
+                                 handleRemoveMobileDevice,
 
                                  onSuccess,
                                  onError,
@@ -77,7 +79,11 @@ export function EmployeeForm({
         workspaceNumber,
         selectedWorkspaceRestrictedProgramAreaId,
 
-        workstationAssetTags
+        workstationAssetTags,
+
+        hasMobileDeviceAssignment,
+        mobileDeviceId,
+        mobileDeviceTitle
     } = getEmployeeAssignmentState(employee)
 
     useEffect(() => {
@@ -180,38 +186,27 @@ export function EmployeeForm({
                                         handleRemoveWorkstation={handleRemoveWorkstation}>
                     </WorkstationDetails>
 
+                    <MobileDeviceDetails mobileDeviceId={mobileDeviceId}
+                                         mobileDeviceTitle={mobileDeviceTitle}
+
+                                         hasMobileDeviceAssignment={hasMobileDeviceAssignment}
+                                         handleAssignMobileDevice={(e) => handleAssign("mobileDevice", e)}
+                                         handleRemoveMobileDevice={handleRemoveMobileDevice}
+                    >
+                    </MobileDeviceDetails>
+
                     <OhsAccommodations ohsAccommodationTypes={employeeLookupState.ohsAccommodationTypes}
                                        selectedOhsAccommodationTypeIds={employeeLookupState.selectedOhsAccommodationTypeIds}>
                     </OhsAccommodations>
                 </AccordionGroup>
             </div>
 
-            {/*<div style={{backgroundColor: "gray"}}>*/}
-            <ButtonGroup>
-                <Button type="submit"
-                        size="large"
-                        isDisabled={isPending}>
-                    {isEditMode ? "Save" : "Create"}
-                </Button>
-                <Button size="large"
-                        variant="secondary"
-                        onPress={onClose}>
-                    Cancel
-                </Button>
-
-                {/* Only render the delete button in the edit modal */}
-                {isEditMode ? (
-                    <ButtonGroup alignment="end">
-                        <Button size="large"
-                                variant="secondary"
-                                danger
-                                onPress={onDelete}>
-                            Delete
-                        </Button>
-                    </ButtonGroup>
-                ) : null}
-            </ButtonGroup>
-            {/*</div>*/}
+            <FormActionButtons isEditMode={isEditMode}
+                               isPending={isPending}
+                               onClose={onClose}
+                               onDelete={onDelete}
+            >
+            </FormActionButtons>
 
         </Form>
     )

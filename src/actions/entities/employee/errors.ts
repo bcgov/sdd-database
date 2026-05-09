@@ -30,16 +30,19 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
             case "P2002": {
 
                 const errorFieldName = getPrismaUniqueFieldName(meta)
+                const modelName = meta?.modelName
 
-                if (errorFieldName === "employee_id"  && employee?.employee_id) {
+                if (modelName === "MobileDevice" && errorFieldName === "employee_id") {
+                    errorMessage = `This employee is already assigned to another mobile device. Please refresh the page and try again.`
+                } else if (modelName === "Workspace" && errorFieldName === "employee_Id") {
+                    errorMessage = `This employee is already assigned to another workspace. Please refresh the page and try again.`
+                } else if (errorFieldName === "employee_id" && employee?.employee_id) {
                     errorMessage = `Employee ID '${employee.employee_id}' is already in use for some other employee`
+                } else if (errorFieldName === "idir" && employee?.idir) {
+                    errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
                 } else {
-                    if (errorFieldName === "idir" && employee?.idir) {
-                        errorMessage = `IDIR '${employee.idir}' is already in use for some other employee`
-                    } else {
-                        // fallback if we can't determine the exact field
-                        errorMessage = `An employee already exists with the same unique value. Please verify Employee ID and IDIR and try again.`;
-                    }
+                    // fallback if we can't determine the exact field
+                    errorMessage = `An employee already exists with the same unique value. Please verify Employee ID and IDIR and try again.`;
                 }
 
                 break
@@ -48,7 +51,7 @@ export function getReadablePrismaError(error: unknown, employee?: EmployeeFormVa
 
                 const foreignKey = getPrismaForeignKeyName(meta)
 
-                switch(foreignKey) {
+                switch (foreignKey) {
                     case "Employee_office_number_fkey":
                         errorMessage = `It seems like an office wasn't assigned for this new employee. Please assign an office and try again.`
                         break

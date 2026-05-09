@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.36",
+            notes: [
+                "Add employee assignment for mobile devices"
+            ]
+        },
+        {
             version: "v0.0.35",
             notes: [
                 "Mobile Devices modal now has office number field, model selection field and notes field",

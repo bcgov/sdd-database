@@ -69,6 +69,10 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     const rawUIWorkstationAssetTags = formData.getAll("workstationAssetTags")
     const uiWorkstationAssetTags = rawUIWorkstationAssetTags.map(value => String(value))
 
+    // ui_mobile_device_id
+    const rawUIMobileDeviceId = formData.get("mobileDeviceId")
+    const uiMobileDeviceId = rawUIMobileDeviceId ? Number(rawUIMobileDeviceId) : undefined
+
     // ohs_accommodation_type_ids
     const rawOhsAccommodationTypeIds = formData.getAll("ohsAccommodationTypeIds")
     const ohsAccommodationTypeIds = rawOhsAccommodationTypeIds.map(value => Number(value))
@@ -89,6 +93,7 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
         ui_branch_id: uiBranchId,
         ui_workspace_number: uiWorkspaceNumber,
         ui_workstation_asset_tags: uiWorkstationAssetTags,
+        ui_mobile_device_id: uiMobileDeviceId,
         ohs_accommodation_type_ids: ohsAccommodationTypeIds
     }
 }
@@ -144,24 +149,4 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
         model_id: modelId,
         office_number: officeNumber,
     }
-}
-
-export const getEmployeeFullName = (
-    employee: {
-        first_name: string
-        alternate_name?: string | null
-        last_name: string
-    } | undefined
-) => {
-
-    let fullName = "";
-
-    if (employee) {
-
-        fullName = employee.alternate_name
-            ? `${employee.first_name} (${employee.alternate_name}) ${employee.last_name}`
-            : `${employee.first_name} ${employee.last_name}`
-    }
-
-    return fullName;
 }

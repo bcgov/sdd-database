@@ -11,6 +11,7 @@ import {
     validateOfficeNumberField
 } from "@/validators";
 import {getBranchNameByProgramAreaId, getWorkspaceAssignmentTypeNameById} from "@/db/data-access/lookups";
+import {getMobileDeviceById} from "@/db/data-access/mobileDevices";
 
 
 export async function validateEmployeeData(employee: EmployeeFormValues) {
@@ -60,6 +61,11 @@ export async function validateEmployeeData(employee: EmployeeFormValues) {
     const workstationValidationError = await validateAssignedWorkstations(employee)
     if (workstationValidationError) {
         return workstationValidationError
+    }
+
+    const mobileDeviceValidationError = await validateAssignedMobileDevice(employee)
+    if (mobileDeviceValidationError) {
+        return mobileDeviceValidationError
     }
 }
 
@@ -125,4 +131,21 @@ async function validateAssignedWorkstations(employee: EmployeeFormValues)  {
     if (conflictingWorkstation) {
         return `Workstation ${conflictingWorkstation.asset_tag} is already assigned to another employee. Please choose another workstation.`
     }
+}
+
+async function validateAssignedMobileDevice(employee: EmployeeFormValues) {
+    const mobileDeviceId = employee.ui_mobile_device_id
+
+    if (mobileDeviceId === undefined) return
+
+    const mobileDevice = await getMobileDeviceById(mobileDeviceId)
+
+    if (!mobileDevice) {
+        return `The selected mobile device no longer exists. Please refresh the page and try again.`
+    }
+
+    if (mobileDevice.employee_id != null && mobileDevice.employee_id !== employee.id) {
+        return `The selected mobile device is already assigned to another employee. Please choose another mobile device.`
+    }
+
 }

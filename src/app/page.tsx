@@ -84,10 +84,12 @@ export default function Home() {
                     searchResultsAreEmpty={search.searchResultsAreEmpty}
                     userHasSearchedOnce={search.userHasSearchedOnce}
                     searchResultClickHandler={selection.openSearchResultEntityModal}
+
                     assignMode={search.assignMode}
                     assignOfficeClickHandler={employeeAssign.assignOfficeClickHandler}
                     assignWorkspaceClickHandler={employeeAssign.assignWorkspaceClickHandler}
                     assignWorkstationClickHandler={employeeAssign.assignWorkstationClickHandler}
+                    assignMobileDeviceClickHandler={employeeAssign.assignMobileDeviceClickHandler}
                 >
                 </SearchResultsPanel>
             </div>
@@ -108,9 +110,13 @@ export default function Home() {
                                      modalTitle="Add New Employee"
                         >
                             <EmployeeForm employee={employeeEditor.draftNewEmployee}
+
                                           activateAssignMode={employeeAssign.activateAssignMode}
+
                                           handleRemoveWorkspace={employeeAssign.removeWorkspaceClickHandler}
                                           handleRemoveWorkstation={employeeAssign.removeWorkstationClickHandler}
+                                          handleRemoveMobileDevice={employeeAssign.removeMobileDeviceClickHandler}
+
                                           onSuccess={employeeCreateHandlers.onCreateSuccess}
                                           onError={employeeCreateHandlers.onCreateError}
                                           onClose={() => employeeEditor.openCloseAddNewEmployeeModal(false)}
@@ -155,6 +161,7 @@ export default function Home() {
 
                         handleRemoveWorkspace={employeeAssign.removeWorkspaceClickHandler}
                         handleRemoveWorkstation={employeeAssign.removeWorkstationClickHandler}
+                        handleRemoveMobileDevice={employeeAssign.removeMobileDeviceClickHandler}
 
                         handleHoldWorkspace={workspaceActions.holdWorkspaceClickHandler}
                         handleRemoveWorkspaceHold={workspaceActions.removeHoldWorkspaceClickHandler}

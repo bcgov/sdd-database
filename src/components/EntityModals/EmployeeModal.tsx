@@ -12,6 +12,7 @@ interface EmployeeModalProps {
 
     handleRemoveWorkspace: () => void
     handleRemoveWorkstation: (assetTag: string) => void
+    handleRemoveMobileDevice: () => void
 
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
@@ -28,6 +29,7 @@ export function EmployeeModal({
 
                                   handleRemoveWorkspace,
                                   handleRemoveWorkstation,
+                                  handleRemoveMobileDevice,
 
                                   isOpen,
                                   setIsOpen,
@@ -53,9 +55,13 @@ export function EmployeeModal({
             </div>
 
             <EmployeeForm employee={employee}
+
                           activateAssignMode={activateAssignMode}
+
                           handleRemoveWorkspace={handleRemoveWorkspace}
                           handleRemoveWorkstation={handleRemoveWorkstation}
+                          handleRemoveMobileDevice={handleRemoveMobileDevice}
+
                           onSuccess={onSuccess}
                           onError={onError}
                           onDelete={onDelete}

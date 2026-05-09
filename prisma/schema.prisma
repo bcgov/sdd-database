@@ -27,10 +27,10 @@ model Employee {
   job_title                 JobTitle?                @relation(fields: [job_title_id], references: [id])
   workspace_assignment_type WorkspaceAssignmentType? @relation(fields: [workspace_assignment_type_id], references: [id])
 
-  workspace Workspace?
-
+  workspace          Workspace?
   workstations       Workstation[]
   ohs_accommodations EmployeeOhsAccommodation[]
+  mobile_device      MobileDevice?
 }
 
 model Branch {
@@ -195,9 +195,11 @@ model MobileDevice {
 
   model_id      Int
   office_number String @db.VarChar(3)
+  employee_id   Int?   @unique
 
   mobile_device_model MobileDeviceModel @relation(fields: [model_id], references: [id])
   current_office      Office            @relation(fields: [office_number], references: [office_number])
+  assigned_employee   Employee?         @relation(fields: [employee_id], references: [id])
 }
 
 model MobileDeviceModel {
