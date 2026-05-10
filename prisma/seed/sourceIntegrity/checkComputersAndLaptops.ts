@@ -12,7 +12,7 @@ const COMPUTERS_AND_LAPTOPS_FILE_PATH = path.join(
     "prisma",
     "data",
     "Computers and Laptops.xlsx"
-);
+)
 
 const COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS = [
     "OfficeNum",

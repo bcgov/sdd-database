@@ -8,6 +8,7 @@ import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {normalizeMobileDeviceModelName} from "../normalizers/mobileDevices.normalizers";
+import {isNotAMobileDeviceRow} from "../shared/mobileDevices";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -50,7 +51,7 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
     for (let r = 2; r <= mobileDevicesWorksheet.rowCount; r++) {
         const row = mobileDevicesWorksheet.getRow(r)
 
-        if (ignoreForNow(row, headerToCol)) continue
+        if (isNotAMobileDeviceRow(row, headerToCol)) continue
 
         const mobileDeviceData = parseMobileDeviceRow(
             row,
@@ -76,17 +77,6 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
     await prismaClient.mobileDevice.createMany({
         data: finalMobileDeviceRows
     })
-}
-
-function ignoreForNow(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof MOBILE_DEVICES_REQUIRED_HEADERS)[number], number>
-) {
-    const hardware = getCellString(row, headerToCol, "Hardware")
-
-    // Rows without Hardware are plan-only records, like cancellation/suspension rows.
-    // They are not physical devices and will be modeled later when we add plan/phone-number fields.
-    return !hardware
 }
 
 function parseMobileDeviceRow(
