@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.36",
             notes: [
-                "Add employee assignment for mobile devices"
+                "Add employee assignment for mobile devices",
+                "Employees can now be marked on leave"
             ]
         },
         {

@@ -3,12 +3,13 @@ import {PrismaClient} from "@/generated/prisma/client";
 import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 import ExcelJS from "exceljs";
 import {assertImei} from "../validators/mobileDevices.validators";
-import {assertNoDuplicates} from "../shared/assertions";
 import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {assertOfficeNumber} from "../validators/offices.validators";
 import {buildIdLookupByName, idNameSelect} from "../shared/lookups";
 import {normalizeMobileDeviceModelName} from "../normalizers/mobileDevices.normalizers";
-import {isNotAMobileDeviceRow} from "../shared/mobileDevices";
+import {isNotAMobileDeviceRow, isNotAnEmployeeMobileDeviceAssignment} from "../shared/mobileDevices";
+import {buildEmployeeResolutionContext, EmployeeResolutionContext, resolveEmployeeId} from "../shared/employees";
+import {assertNoDuplicates} from "../shared/assertions";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -21,6 +22,8 @@ const MOBILE_DEVICES_FILE_PATH = path.join(
 const MOBILE_DEVICES_REQUIRED_HEADERS = [
     "OfficeNum",
     "IMEI",
+    "IDIR",
+    "Assigned To",
     "Notes",
     "Hardware"
 ] as const
@@ -30,6 +33,7 @@ type ParsedMobileDeviceRow = {
     notes: string | null
     model_id: number
     office_number: string
+    employee_id: number | null
 }
 
 export async function seedMobileDevices(prismaClient: PrismaClient) {
@@ -46,6 +50,8 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
         })
     )
 
+    const employeeResolutionContext = await buildEmployeeResolutionContext(prismaClient)
+
     const finalMobileDeviceRows: ParsedMobileDeviceRow[] = []
 
     for (let r = 2; r <= mobileDevicesWorksheet.rowCount; r++) {
@@ -57,7 +63,8 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
             row,
             r,
             headerToCol,
-            modelLookup
+            modelLookup,
+            employeeResolutionContext
         )
 
         finalMobileDeviceRows.push(mobileDeviceData)
@@ -66,12 +73,14 @@ export async function seedMobileDevices(prismaClient: PrismaClient) {
     assertNoDuplicates(
         finalMobileDeviceRows,
         {
-            getKey: row => row.imei!,
-            label: "mobile device IMEI",
-            shouldSkip: row => !row.imei
+            getKey: row => row.employee_id!,
+            label: "mobile device employee_id",
+            shouldSkip: row => row.employee_id == null
         }
     )
 
+    const assignedMobileDeviceRows = finalMobileDeviceRows.filter(row => row.employee_id !== null)
+    console.log(`Prepared ${assignedMobileDeviceRows.length} mobile device rows with employee assignment`)
     console.log(`Prepared ${finalMobileDeviceRows.length} mobile device rows for insert`)
 
     await prismaClient.mobileDevice.createMany({
@@ -83,7 +92,8 @@ function parseMobileDeviceRow(
     row: ExcelJS.Row,
     rowNumber: number,
     headerToCol: Record<(typeof MOBILE_DEVICES_REQUIRED_HEADERS)[number], number>,
-    modelLookup: Map<string, number>
+    modelLookup: Map<string, number>,
+    employeeResolutionContext: EmployeeResolutionContext
 ): ParsedMobileDeviceRow {
 
     // IMEI
@@ -102,13 +112,30 @@ function parseMobileDeviceRow(
     const modelId = assertLookupValue(hardware, "Hardware", rowNumber, modelLookup)
 
     // office_number
-    const officeNumber = getCellString(row, headerToCol, "OfficeNum")
+    const officeNumberHeader = "OfficeNum"
+    const officeNumber = getCellString(row, headerToCol, officeNumberHeader)
     assertOfficeNumber(officeNumber, rowNumber)
+
+    // employee_id
+    const employeeId = isNotAnEmployeeMobileDeviceAssignment(row, headerToCol)
+        ? null
+        : resolveEmployeeId(
+            row,
+            rowNumber,
+            headerToCol,
+            {
+                assignedToHeader: "Assigned To",
+                idirHeader: "IDIR",
+                officeNumberHeader,
+                employeeResolutionContext
+            }
+        )
 
     return {
         imei,
         notes,
         model_id: modelId,
-        office_number: officeNumber
+        office_number: officeNumber,
+        employee_id: employeeId,
     }
 }

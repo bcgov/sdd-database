@@ -6,8 +6,12 @@ import {assertOfficeNumberExistsInOfficeInformation, buildValidOfficeNumbersFrom
 import {assertImei} from "../validators/mobileDevices.validators";
 import {isNotAnEmployeeRow} from "../shared/employees";
 import {
-    isNotAMobileDeviceRow
+    isNotAMobileDeviceRow,
+    isNotAnEmployeeMobileDeviceAssignment,
+    NON_EMPLOYEE_MOBILE_DEVICE_ASSIGNED_TO,
+    NON_EMPLOYEE_MOBILE_DEVICE_IDIR
 } from "../shared/mobileDevices";
+import {assertNoDuplicates} from "../shared/assertions";
 
 
 const MOBILE_DEVICES_FILE_PATH = path.join(
@@ -51,8 +55,10 @@ const HARDWARE_WITHOUT_IMEI = new Set<string>([
     "Qualcomm GSP-1700"
 ])
 
-const NON_EMPLOYEE_MOBILE_DEVICE_ASSIGNED_TO = "REDEPLOY"
-const NON_EMPLOYEE_MOBILE_DEVICE_IDIR = "REASSIGN"
+type MobileDeviceImeiRecord = {
+    rowNumber: number
+    imei: string
+}
 
 type ComputersAndLaptopsEmployeeRecord = {
     rowNumber: number
@@ -74,6 +80,8 @@ export async function checkMobileDevices() {
         MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS
     )
 
+    assertNoDuplicateMobileDeviceImeis(mobileDevicesWorksheet, headerToCol)
+
     const validOfficeNumbers = await buildValidOfficeNumbersFromOfficeInformation()
     const computersAndLaptopsEmployeeLookup = await buildComputersAndLaptopsEmployeeLookup()
 
@@ -91,6 +99,8 @@ export async function checkMobileDevices() {
         "Computers and Laptops OfficeNum"
     ])
 
+    const sourceRowsToDelete = new Set<number>()
+
     for (let r = 2; r <= mobileDevicesWorksheet.rowCount; r++) {
         const row = mobileDevicesWorksheet.getRow(r)
 
@@ -100,8 +110,23 @@ export async function checkMobileDevices() {
         assertImeiRowsHaveOfficeNumber(row, r, headerToCol)
         assertMobileNonEmployeeAssignmentFieldsAreConsistent(row, r, headerToCol)
         assertMobileEmployeeExistsInComputersAndLaptops(row, r, headerToCol, computersAndLaptopsEmployeeLookup)
-        recordMobileAssignedToMismatchIfNeeded(row, headerToCol, computersAndLaptopsEmployeeLookup, assignedToMismatchRows)
-        recordMobileOfficeNumberMismatchIfNeeded(row, headerToCol, computersAndLaptopsEmployeeLookup, officeNumberMismatchRows)
+
+        recordMobileAssignedToMismatchIfNeeded(
+            row,
+            r,
+            headerToCol,
+            computersAndLaptopsEmployeeLookup,
+            assignedToMismatchRows,
+            sourceRowsToDelete
+        )
+        recordMobileOfficeNumberMismatchIfNeeded(
+            row,
+            r,
+            headerToCol,
+            computersAndLaptopsEmployeeLookup,
+            officeNumberMismatchRows,
+            sourceRowsToDelete
+        )
     }
 
     const hasSourceEdgeCaseRows =
@@ -116,7 +141,37 @@ export async function checkMobileDevices() {
         console.log(
             `Wrote mobile device source edge cases to ${MOBILE_DEVICE_SOURCE_EDGE_CASES_OUTPUT_FILE_PATH}`
         )
+
+        await deleteRowsFromMobileDevicesSourceFile(sourceRowsToDelete)
     }
+}
+
+function assertNoDuplicateMobileDeviceImeis(
+    worksheet: ExcelJS.Worksheet,
+    headerToCol: Record<(typeof MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS)[number], number>
+) {
+    const imeiRows: MobileDeviceImeiRecord[] = []
+
+    for (let r = 2; r <= worksheet.rowCount; r++) {
+        const row = worksheet.getRow(r)
+
+        const imei = getCellString(row, headerToCol, "IMEI")
+
+        if (!imei) continue
+
+        imeiRows.push({
+            rowNumber: r,
+            imei
+        })
+    }
+
+    assertNoDuplicates(
+        imeiRows,
+        {
+            getKey: row => row.imei,
+            label: "mobile device IMEI"
+        }
+    )
 }
 
 /**
@@ -204,7 +259,12 @@ function assertHardwareImeiRules(
     const hardware = getCellString(row, headerToCol, "Hardware")
     const imei = getCellString(row, headerToCol, "IMEI")
 
-    if (!hardware) return
+    if (!hardware) {
+        if (!imei) return
+        throw new Error(
+            `Mobile Devices.xlsx row ${rowNumber} has IMEI "${imei}" but Hardware is blank. Rows with IMEI should have Hardware populated.`
+        )
+    }
 
     if (HARDWARE_WITHOUT_IMEI.has(hardware)) {
         if (!imei) return
@@ -356,36 +416,25 @@ function findMobileEmployeeInComputersAndLaptops(
     ) ?? null
 }
 
-function isNotAnEmployeeMobileDeviceAssignment(
-    row: ExcelJS.Row,
-    headerToCol: Record<(typeof MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS)[number], number>
-) {
-
-    const assignedTo = getCellString(row, headerToCol, "Assigned To")
-    const idir = getCellString(row, headerToCol, "IDIR")
-
-    return (
-        assignedTo === NON_EMPLOYEE_MOBILE_DEVICE_ASSIGNED_TO &&
-        idir === NON_EMPLOYEE_MOBILE_DEVICE_IDIR
-    )
-}
-
 /**
 
  * If Mobile Devices.xlsx has an IDIR, and that IDIR exists in Computers and Laptops.xlsx, record cases where the
  * Assigned To value does not match across both files.
  *
  * @param row
+ * @param rowNumber
  * @param headerToCol
  * @param computersAndLaptopsEmployeeLookup
  * @param outputWorksheet
-
+ * @param sourceRowsToDelete
  */
 function recordMobileAssignedToMismatchIfNeeded(
     row: ExcelJS.Row,
+    rowNumber: number,
     headerToCol: Record<(typeof MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS)[number], number>,
     computersAndLaptopsEmployeeLookup: ComputersAndLaptopsEmployeeLookup,
-    outputWorksheet: ExcelJS.Worksheet
+    outputWorksheet: ExcelJS.Worksheet,
+    sourceRowsToDelete: Set<number>
 ) {
     if (isNotAMobileDeviceRow(row, headerToCol)) return
     if (isNotAnEmployeeMobileDeviceAssignment(row, headerToCol)) return
@@ -411,8 +460,9 @@ function recordMobileAssignedToMismatchIfNeeded(
             idir,
             mobileAssignedTo,
             computersAndLaptopsEmployee.assignedTo
-        ]
-    )
+        ])
+
+    sourceRowsToDelete.add(rowNumber)
 }
 
 /**
@@ -423,9 +473,11 @@ function recordMobileAssignedToMismatchIfNeeded(
  */
 function recordMobileOfficeNumberMismatchIfNeeded(
     row: ExcelJS.Row,
+    rowNumber: number,
     headerToCol: Record<(typeof MOBILE_DEVICES_SOURCE_INTEGRITY_HEADERS)[number], number>,
     computersAndLaptopsEmployeeLookup: ComputersAndLaptopsEmployeeLookup,
-    outputWorksheet: ExcelJS.Worksheet
+    outputWorksheet: ExcelJS.Worksheet,
+    sourceRowsToDelete: Set<number>
 ) {
     if (isNotAMobileDeviceRow(row, headerToCol)) return
     if (isNotAnEmployeeMobileDeviceAssignment(row, headerToCol)) return
@@ -452,4 +504,30 @@ function recordMobileOfficeNumberMismatchIfNeeded(
         mobileOfficeNumber,
         computersAndLaptopsEmployee.officeNumber
     ])
+
+    sourceRowsToDelete.add(rowNumber)
+}
+
+async function deleteRowsFromMobileDevicesSourceFile(rowNumbersToDelete: Set<number>) {
+    if (rowNumbersToDelete.size === 0) return
+
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.readFile(MOBILE_DEVICES_FILE_PATH)
+
+    const worksheet = workbook.worksheets[0]
+
+    // convert set to array and then sort in descending order in order to delete rows in descending order
+    const sortedRowNumbersToDelete = Array.from(rowNumbersToDelete).sort(
+        (a, b) => b - a
+    )
+
+    for (const rowNumber of sortedRowNumbersToDelete) {
+        worksheet.spliceRows(rowNumber, 1)
+    }
+
+    await workbook.xlsx.writeFile(MOBILE_DEVICES_FILE_PATH)
+
+    console.log(
+        `Deleted ${rowNumbersToDelete.size} edge-case rows from ${MOBILE_DEVICES_FILE_PATH}`
+    )
 }
