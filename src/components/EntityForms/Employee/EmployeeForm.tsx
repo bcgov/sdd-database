@@ -1,4 +1,4 @@
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 
 import {PressEvent} from "@react-types/shared";
 
@@ -86,6 +86,8 @@ export function EmployeeForm({
         mobileDeviceTitle
     } = getEmployeeAssignmentState(employee)
 
+    const [isOnLeave, setIsOnLeave] = useState(employee?.is_on_leave ?? false)
+
     useEffect(() => {
         const previousBranchId = previousBranchIdRef.current
         const previousProgramAreaId = previousProgramAreaIdRef.current
@@ -160,7 +162,10 @@ export function EmployeeForm({
 
                     <EmployeeDetails employee={employee}
                                      lookupState={employeeLookupState}
-                                     isEditMode={isEditMode}>
+                                     isEditMode={isEditMode}
+                                     isOnLeave={isOnLeave}
+                                     setIsOnLeave={setIsOnLeave}
+                    >
                     </EmployeeDetails>
 
                     <OfficeDetails officeNumber={officeNumber}
@@ -169,7 +174,8 @@ export function EmployeeForm({
                                    handleAssignOffice={(e) => handleAssign("office", e)}>
                     </OfficeDetails>
 
-                    <WorkspaceDetails workspaceAssignmentTypes={employeeLookupState.workspaceAssignmentTypes}
+                    <WorkspaceDetails isOnLeave={isOnLeave}
+                                      workspaceAssignmentTypes={employeeLookupState.workspaceAssignmentTypes}
                                       selectedWorkspaceAssignmentTypeId={employeeLookupState.selectedWorkspaceAssignmentTypeId}
                                       setSelectedWorkspaceAssignmentTypeId={employeeLookupState.setSelectedWorkspaceAssignmentTypeId}
 

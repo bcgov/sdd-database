@@ -11,6 +11,7 @@ import {LookupOption} from "@/types";
 
 
 interface WorkspaceDetailsProps {
+    isOnLeave: boolean
     workspaceAssignmentTypes: LookupOption[]
     selectedWorkspaceAssignmentTypeId: number | null
     setSelectedWorkspaceAssignmentTypeId: (id: number | null) => void
@@ -24,6 +25,7 @@ interface WorkspaceDetailsProps {
 }
 
 export function WorkspaceDetails({
+                                     isOnLeave,
                                      workspaceAssignmentTypes,
                                      selectedWorkspaceAssignmentTypeId,
                                      setSelectedWorkspaceAssignmentTypeId,
@@ -55,6 +57,7 @@ export function WorkspaceDetails({
             <div>
                 <Select label="Assignment Type"
                         name="workspaceAssignmentType"
+                        isRequired={!isOnLeave}
                         items={workspaceAssignmentTypes.map(workspaceAssignmentType => (
                             {
                                 id: workspaceAssignmentType.id,
@@ -66,6 +69,7 @@ export function WorkspaceDetails({
                             (key) =>
                                 setSelectedWorkspaceAssignmentTypeId(key == null ? null : Number(key))
                         }
+                        placeholder="Select an Assignment Type"
                 >
                 </Select>
 

@@ -132,18 +132,18 @@ export function validateOfficeNumberField(value: string, label: string = "Office
 }
 
 export function validateEmployeeProgramAreaField(value: number, label: string = "Program Area") {
-    const requiredError = validateRequiredField(value, label);
+    const requiredError = validateRequiredField(value, label)
 
     if (requiredError) {
-        return requiredError;
+        return requiredError
     }
 }
 
 export function validateEmployeeJobTitleField(value: number | null, label: string = "Job Title") {
-    const requiredError = validateRequiredField(value, label);
+    const requiredError = validateRequiredField(value, label)
 
     if (requiredError) {
-        return requiredError;
+        return requiredError
     }
 }
 

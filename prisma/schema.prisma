@@ -9,17 +9,18 @@ datasource db {
 }
 
 model Employee {
-  id              Int     @id @default(autoincrement())
-  office_number   String  @db.VarChar(3)
-  idir            String? @unique @db.Citext
-  first_name      String  @db.VarChar(30)
-  alternate_name  String? @db.VarChar(30)
-  last_name       String  @db.VarChar(30)
-  employee_id     String? @unique @db.VarChar(6)
-  program_area_id Int
-  job_title_id    Int?
-  notes           String? @db.VarChar(200)
+  id             Int     @id @default(autoincrement())
+  idir           String? @unique @db.Citext
+  first_name     String  @db.VarChar(30)
+  alternate_name String? @db.VarChar(30)
+  last_name      String  @db.VarChar(30)
+  employee_id    String? @unique @db.VarChar(6)
+  is_on_leave    Boolean @default(false)
+  notes          String? @db.VarChar(200)
 
+  office_number                String @db.VarChar(3)
+  program_area_id              Int
+  job_title_id                 Int?
   workspace_assignment_type_id Int?
 
   assigned_office           Office                   @relation(fields: [office_number], references: [office_number])

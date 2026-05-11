@@ -21,6 +21,10 @@ const NON_EMPLOYEE_ASSIGNED_TO_VALUES = new Set<string>([
     "Vacant",
 ] as const)
 
+export function isLeaveWorkspaceNumber(value: string) {
+    return value === "Leave"
+}
+
 export function isNonResidentWorkspaceAssignmentType(value: string) {
     return NON_RESIDENT_WORKSPACE_ASSIGNMENT_TYPES.has(value)
 }

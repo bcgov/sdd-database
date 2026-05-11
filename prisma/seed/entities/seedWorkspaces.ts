@@ -15,6 +15,7 @@ import {assertLookupValue, assertNotes} from "../validators/common.validators";
 import {
     buildEmployeeResolutionContext,
     EmployeeResolutionContext,
+    isLeaveWorkspaceNumber,
     isNonResidentWorkspaceAssignmentType,
     resolveEmployeeId
 } from "../shared/employees";
@@ -214,6 +215,7 @@ function isNotAWorkspaceRow(
     const rawCategory = getCellString(row, headerToCol, "Workspace Category")
     const rawDeskType = getCellString(row, headerToCol, "DeskType")
 
+    if(isLeaveWorkspaceNumber(rawWorkspaceNumber)) return true
     if (isNonResidentWorkspaceAssignmentType(rawWorkspaceNumber)) return true
 
     if (rawAssignedTo === "HOLD") return false

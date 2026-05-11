@@ -72,6 +72,10 @@ export async function validateEmployeeData(employee: EmployeeFormValues) {
 async function validateWorkspaceAssignmentTypeRules(employee: EmployeeFormValues) {
     const workspaceAssignmentTypeId = employee.workspace_assignment_type_id
 
+    if (!employee.is_on_leave && workspaceAssignmentTypeId == null) {
+        return `Please select a Workspace Assignment Type.`
+    }
+
     if (workspaceAssignmentTypeId == null) return
 
     const workspaceAssignmentTypeName = await getWorkspaceAssignmentTypeNameById(workspaceAssignmentTypeId)
@@ -113,7 +117,7 @@ async function validateAssignedWorkspace(employee: EmployeeFormValues) {
     }
 }
 
-async function validateAssignedWorkstations(employee: EmployeeFormValues)  {
+async function validateAssignedWorkstations(employee: EmployeeFormValues) {
     const workstationAssetTags = employee.ui_workstation_asset_tags ?? []
 
     if (workstationAssetTags.length === 0) return

@@ -22,6 +22,7 @@ import {parseAndAssertAssignedTo} from "../shared/parsers";
 import {buildIdLookupByName, buildProgramAreaLookup, idNameSelect} from "../shared/lookups";
 import {normalizeJobTitleName, normalizeProgramAreaName} from "../normalizers/employees.normalizers";
 import {
+    isLeaveWorkspaceNumber,
     isNonResidentWorkspaceAssignmentType,
     isNotAnEmployeeRow,
 } from "../shared/employees";
@@ -66,15 +67,16 @@ const EMPLOYEE_ID_LOOKUP_REQUIRED_HEADERS = [
 ] as const
 
 type ParsedEmployeeRow = {
-    office_number: string
     idir: string | null
     first_name: string
     alternate_name: string | null
     last_name: string
     employee_id: string | null
+    is_on_leave: boolean
+    notes: string | null
+    office_number: string
     program_area_id: number
     job_title_id: number | null
-    notes: string | null
     workspace_assignment_type_id: number | null
 }
 
@@ -401,6 +403,7 @@ function parseEmployeeRow(
 
     // workspace_assignment_type
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
+    const isOnLeave = isLeaveWorkspaceNumber(rawWorkspaceNumber)
     const workspaceAssignmentTypeName = resolveWorkspaceAssignmentTypeName(
         rawWorkspaceNumber,
         rowNumber
@@ -443,15 +446,16 @@ function parseEmployeeRow(
     }
 
     return {
-        office_number: officeNumber,
         idir,
         first_name: fullName.firstName,
         alternate_name: fullName.alternateName,
         last_name: fullName.lastName,
         employee_id: employeeId,
+        is_on_leave: isOnLeave,
+        notes,
+        office_number: officeNumber,
         program_area_id: programAreaId,
         job_title_id: jobTitleId,
-        notes,
         workspace_assignment_type_id: workspaceAssignmentTypeId,
     }
 }
@@ -461,6 +465,12 @@ function resolveWorkspaceAssignmentTypeName(
     rowNumber: number
 ) {
     if (!rawWorkspaceNumber) {
+        throw new Error(
+            `Employee row at row ${rowNumber} has a blank Workspace Number.`
+        )
+    }
+
+    if (isLeaveWorkspaceNumber(rawWorkspaceNumber)) {
         return null
     }
 
@@ -507,12 +517,13 @@ function areEmployeeRowsConsistent(rows: ParsedEmployeeRow[]) {
     const firstRow = rows[0]
 
     return rows.every(row =>
-        row.office_number === firstRow.office_number &&
         row.idir === firstRow.idir &&
         row.first_name === firstRow.first_name &&
         row.alternate_name === firstRow.alternate_name &&
         row.last_name === firstRow.last_name &&
         row.employee_id === firstRow.employee_id &&
+        row.is_on_leave === firstRow.is_on_leave &&
+        row.office_number === firstRow.office_number &&
         row.program_area_id === firstRow.program_area_id &&
         row.job_title_id === firstRow.job_title_id &&
         row.workspace_assignment_type_id === firstRow.workspace_assignment_type_id

@@ -11,10 +11,6 @@ export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
 
 export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues => {
 
-    // office_number
-    const rawOfficeNumber = formData.get("officeNumber") as string
-    const officeNumber = rawOfficeNumber !== "Unassigned" ? rawOfficeNumber : ""
-
     // idir
     const rawIdir = formData.get("idir") as string
     const idir = rawIdir ? rawIdir.toUpperCase() : null  // normalizing to maintain consistency in the DB
@@ -33,6 +29,19 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     const rawEmployeeId = formData.get("employeeId") as string
     const employeeId = rawEmployeeId || null
 
+    // is_on_leave
+    // Switch submits "on" when selected and nothing/null when not selected.
+    const rawIsOnLeave = formData.get("isOnLeave")
+    const isOnLeave = rawIsOnLeave === "on"
+
+    // notes
+    const rawNotes = formData.get("notes") as string
+    const notes = rawNotes || null
+
+    // office_number
+    const rawOfficeNumber = formData.get("officeNumber") as string
+    const officeNumber = rawOfficeNumber !== "Unassigned" ? rawOfficeNumber : ""
+
     // program_area_id
     const rawProgramAreaId = formData.get("programArea")
     const programAreaId = Number(rawProgramAreaId)
@@ -40,10 +49,6 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     // job_title_id
     const rawJobTitleId = formData.get("jobTitle")
     const jobTitleId = rawJobTitleId ? Number(rawJobTitleId) : null
-
-    // notes
-    const rawNotes = formData.get("notes") as string
-    const notes = rawNotes || null
 
     // workspace_assignment_type_id
     const rawWorkspaceAssignmentTypeId = formData.get("workspaceAssignmentType") as string
@@ -78,15 +83,16 @@ export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues =>
     const ohsAccommodationTypeIds = rawOhsAccommodationTypeIds.map(value => Number(value))
 
     return {
-        office_number: officeNumber,
         idir,
         first_name: firstName,
         alternate_name: alternateName,
         last_name: lastName,
         employee_id: employeeId,
+        is_on_leave: isOnLeave,
+        notes,
+        office_number: officeNumber,
         program_area_id: programAreaId,
         job_title_id: jobTitleId,
-        notes,
         workspace_assignment_type_id: workspaceAssignmentTypeId,
 
         id,

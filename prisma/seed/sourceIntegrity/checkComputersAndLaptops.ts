@@ -2,7 +2,7 @@ import path from "path";
 import ExcelJS from "exceljs";
 import {getCellString, getRequiredHeaderToCol, loadWorksheetFromFile} from "../shared/excel";
 import {isPublicJobBankKiosk} from "../shared/sourceRows";
-import {isNonResidentWorkspaceAssignmentType, isNotAnEmployeeRow} from "../shared/employees";
+import {isLeaveWorkspaceNumber, isNonResidentWorkspaceAssignmentType, isNotAnEmployeeRow} from "../shared/employees";
 import {assertWorkspaceNumber} from "../validators/workspaces.validators";
 import {assertOfficeNumberExistsInOfficeInformation, buildValidOfficeNumbersFromOfficeInformation} from "./shared";
 
@@ -50,19 +50,7 @@ export async function checkComputersAndLaptops() {
             validOfficeNumbers
         )
 
-        if (isPublicJobBankKiosk(row, computersAndLaptopsHeaderToCol)) continue
-
-        assertWorkspaceFieldsMatchWorkspaceNumber(
-            row,
-            r,
-            computersAndLaptopsHeaderToCol
-        )
-
-        assertBlankWorkspaceNumberEmployeeHasLeaveStatus(
-            row,
-            r,
-            computersAndLaptopsHeaderToCol
-        )
+        assertWorkspaceFieldsMatchWorkspaceNumber(row, r, computersAndLaptopsHeaderToCol)
     }
 }
 
@@ -71,6 +59,9 @@ function assertWorkspaceFieldsMatchWorkspaceNumber(
     rowNumber: number,
     headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS)[number], number>
 ) {
+    if (isPublicJobBankKiosk(row, headerToCol)) return
+    if (isNotAnEmployeeRow(row, headerToCol, "Assigned To")) return
+
     const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
 
     const workspaceFields = [
@@ -95,12 +86,17 @@ function assertWorkspaceFieldsMatchWorkspaceNumber(
     const populatedWorkspaceFields = workspaceFields.filter(field => field.value)
 
     if (!rawWorkspaceNumber) {
+        throw new Error(
+            `Employee row at row ${rowNumber} has a blank Workspace Number. Use "Leave" for employees on leave, or use a valid workspace number / non-resident assignment type.`
+        )
+    }
+
+    if (isLeaveWorkspaceNumber(rawWorkspaceNumber)) {
         if (populatedWorkspaceFields.length > 0) {
             throw new Error(
-                `Workspace Number is blank at row ${rowNumber}, so workspace fields should also be blank. Please clear: ${populatedWorkspaceFields.map(field => field.label).join(", ")}.`
+                `Workspace Number ${rawWorkspaceNumber} at row ${rowNumber} indicates leave, so workspace fields should be blank. Please clear: ${populatedWorkspaceFields.map(field => field.label).join(", ")}.`
             )
         }
-
         return
     }
 
@@ -115,30 +111,4 @@ function assertWorkspaceFieldsMatchWorkspaceNumber(
 
     // if we reach this step then this is indeed a resident space
     assertWorkspaceNumber(rawWorkspaceNumber, rowNumber)
-}
-
-function assertBlankWorkspaceNumberEmployeeHasLeaveStatus(
-    row: ExcelJS.Row,
-    rowNumber: number,
-    headerToCol: Record<(typeof COMPUTERS_AND_LAPTOPS_SOURCE_INTEGRITY_HEADERS)[number], number>,
-) {
-    const rawWorkspaceNumber = getCellString(row, headerToCol, "Workspace Number")
-    const rawStatus = getCellString(row, headerToCol, "Status")
-
-    if (rawWorkspaceNumber) return
-
-    if (isNotAnEmployeeRow(row, headerToCol, "Assigned To")) return
-
-    if (isLeaveLikeStatus(rawStatus)) return
-
-    throw new Error(
-        `Employee row at row ${rowNumber} has a blank Workspace Number, but Status does not indicate leave/LTD. Status='${rawStatus}'`
-    )
-}
-
-function isLeaveLikeStatus(status: string) {
-    return (
-        /\bLTD\b/.test(status) ||
-        /^Leave\b/.test(status)
-    )
 }

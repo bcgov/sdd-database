@@ -1,4 +1,4 @@
-import {Accordion, Callout, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
+import {Accordion, Callout, Select, Switch, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {
     validateEmployeeIdField,
     validateEmployeeIdirField,
@@ -13,12 +13,16 @@ interface EmployeeDetailsProps {
     employee: EmployeeLike
     lookupState: EmployeeLookupState
     isEditMode: boolean
+    isOnLeave: boolean
+    setIsOnLeave: (isOnLeave: boolean) => void
 }
 
 export function EmployeeDetails({
                                     employee,
                                     lookupState,
-                                    isEditMode
+                                    isEditMode,
+                                    isOnLeave,
+                                    setIsOnLeave
                                 }: EmployeeDetailsProps) {
 
     const {
@@ -137,6 +141,22 @@ export function EmployeeDetails({
                         placeholder="Select a Job Title">
                 </Select>
 
+                <div style={{
+                    marginTop: "1rem",
+                    marginBottom: "1rem",
+                    padding: "0.75rem 1rem",
+                    border: "1px solid #d8d8d8",
+                    borderRadius: "4px",
+                    width: "fit-content",
+                }}>
+                    <Switch name="isOnLeave"
+                            labelPosition="left"
+                            isSelected={isOnLeave}
+                            onChange={setIsOnLeave}
+                    >
+                        Employee is on Leave
+                    </Switch>
+                </div>
 
                 <TextArea label="Notes"
                           name="notes"
