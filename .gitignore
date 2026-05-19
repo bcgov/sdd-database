@@ -18,7 +18,10 @@
 /out/
 
 # Seed/import data snapshots
-prisma/data/
+prisma/*
+!prisma/schema.prisma
+!prisma/migrations
+!prisma/migrations/**
 
 # prisma output
 /src/generated/prisma
