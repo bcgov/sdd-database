@@ -137,6 +137,10 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
     const rawImei = formData.get("imei") as string
     const imei = rawImei || null
 
+    // adr
+    const rawAdr = formData.get("adr") as string
+    const adr = rawAdr || null
+
     // notes
     const rawNotes = formData.get("notes") as string
     const notes = rawNotes || null
@@ -151,6 +155,7 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
     return {
         id,
         imei,
+        adr,
         notes,
         model_id: modelId,
         office_number: officeNumber,

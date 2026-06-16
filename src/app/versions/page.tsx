@@ -6,6 +6,12 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.37",
+            notes: [
+                "Add Asset Disposal Request (ADR) Number Field in Mobile Devices"
+            ]
+        },
+        {
             version: "v0.0.36",
             notes: [
                 "Add employee assignment for mobile devices",

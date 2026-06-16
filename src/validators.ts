@@ -170,3 +170,19 @@ export function validateImeiField(value: string, label: string = "IMEI") {
         return invalidCharacterError
     }
 }
+
+export function validateAdrField(value: string, label: string = "ADR Number ") {
+    const ADR_LENGTH = 18
+
+    if (!value) {
+        return;
+    }
+
+    if (value.length !== ADR_LENGTH) {
+        return `${label} must be exactly ${ADR_LENGTH} digits long`;
+    }
+
+    if (!/^\d{7}-\d{10}$/.test(value)) {
+        return `${label} must use format #######-########## i.e. ADR number (7 digits), hyphen, followed by 10-digit legacy phone number`
+    }
+}

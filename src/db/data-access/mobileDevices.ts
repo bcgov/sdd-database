@@ -87,6 +87,7 @@ export async function updateMobileDevice(mobileDevice: MobileDeviceFormValues) {
             id: mobileDevice.id
         },
         data: {
+            adr: mobileDevice.adr,
             notes: mobileDevice.notes,
             office_number: mobileDevice.office_number
         }

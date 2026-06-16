@@ -1,5 +1,5 @@
 import {MobileDeviceFormValues} from "@/types";
-import {validateImeiField, validateNotesField, validateOfficeNumberField} from "@/validators";
+import {validateAdrField, validateImeiField, validateNotesField, validateOfficeNumberField} from "@/validators";
 import {officeExistsByOfficeNumber} from "@/db/data-access/offices";
 import {getMobileDeviceModelById} from "@/db/data-access/lookups";
 import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
@@ -8,6 +8,7 @@ import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
 export async function validateMobileDeviceData(mobileDevice: MobileDeviceFormValues) {
     const fieldValidationError =
         (mobileDevice.imei ? validateImeiField(mobileDevice.imei) : undefined) ??
+        (mobileDevice.adr ? validateAdrField(mobileDevice.adr) : undefined) ??
         (mobileDevice.notes ? validateNotesField(mobileDevice.notes) : undefined) ??
         validateOfficeNumberField(mobileDevice.office_number)
 

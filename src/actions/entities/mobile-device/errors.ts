@@ -22,7 +22,7 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
 
             case "P2000": {
 
-                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: IMEI must be exactly 15 digits long, Office Number can be up to 3 digits long, and Notes can be up to 200 characters long.`
+                errorMessage = `One of the fields is longer than the max limit. Please shorten it and try again. Note: IMEI must be exactly 15 digits long, ADR must be exactly 18 digits long, Office Number can be up to 3 digits long, and Notes can be up to 200 characters long.`
 
                 break
             }
@@ -33,10 +33,12 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
 
                 if (errorFieldName === "imei" && mobileDevice?.imei) {
                     errorMessage = `IMEI '${mobileDevice.imei}' is already in use for some other mobile device.`
+                } else if (errorFieldName === "adr" && mobileDevice?.adr) {
+                    errorMessage = `ADR Number '${mobileDevice.adr}' is already in use for some other mobile device.`
                 } else {
 
                     // fallback if we can't determine the exact field
-                    errorMessage = `A mobile device already exists with the same unique value. Please verify IMEI and try again.`
+                    errorMessage = `A mobile device already exists with the same unique value. Please verify IMEI/ADR Number and try again.`
                 }
 
                 break

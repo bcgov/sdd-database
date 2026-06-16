@@ -123,7 +123,7 @@ though it isn't and remains in the office (e.g. a new hire quits in a week and t
 Let's say a workstation is assigned to an employee and that employee leaves.
 
 - When the employee leaves, the 
-workstation in unlinked/unassigned from the employee but it doesn't directly become available for reassignment for 
+workstation is unlinked/unassigned from the employee but it doesn't directly become available for reassignment for 
 any one. In the access database the employee record is deleted and another record is created for this workstation.
 
 - First, it is recalled or can be represented by in transit. You shall see the Status section with recall written and 
@@ -164,6 +164,22 @@ Erin: Comment isn't removed yet because there is a delay from the shipping to co
 ---
 
 Also, there is an email confirmation step from the office
+
+---
+
+Latest from Erin on this REASSIGN and REDEPLOY Process
+
+Confirmed with the Coordinators the process for Redeploys is as follows:
+
+Recall asset >> set to REDEPLOY AND REASSIGN FOR IDR
+Shipped to hub >> arrives remove shipping note and adjust to hub OFF code
+Bulk ticket submitted weekly to reassign REDEPLOY assets to a coordinator's IDIR.
+REASSIGN is basically temporary while the asset is in transit. Once received for actual hub inventory, then is updated to a coordinator's IDIR.
+There was one entry missing an IDIR in these lists and was fixed. Essentially the rest of the entries are right. - EC Jun'11
+
+So, in short you can have Assigned To as "REDEPLOY" without IDIR = "REASSIGN" as long as IDIR is the coordinator's idir
+
+---
 
 # Status
 
