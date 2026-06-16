@@ -97,6 +97,7 @@ export type MobileDeviceFormValues = {
     id?: number
     imei: string | null
     adr: string | null
+    gilr: string | null
     notes: string | null
     model_id: number
     office_number: string

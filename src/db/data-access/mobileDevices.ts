@@ -82,14 +82,32 @@ export async function updateMobileDevice(mobileDevice: MobileDeviceFormValues) {
         throw new Error("Didn't find the mobile device primary key id. Can't update mobile device")
     }
 
+    const existingMobileDevice = await prisma.mobileDevice.findUnique({
+        where: {
+            id: mobileDevice.id
+        },
+        select: {
+            employee_id: true
+        }
+    })
+
+    if (!existingMobileDevice) {
+        throw new Error(`Mobile Device with id ${mobileDevice.id} not found`)
+    }
+
     return prisma.mobileDevice.update({
         where: {
             id: mobileDevice.id
         },
         data: {
             adr: mobileDevice.adr,
+            gilr: mobileDevice.gilr,
             notes: mobileDevice.notes,
-            office_number: mobileDevice.office_number
+
+            // Office number is manually editable only while the mobile device is unassigned
+            ...(existingMobileDevice.employee_id === null
+                ? {office_number: mobileDevice.office_number}
+                : {})
         }
     })
 }

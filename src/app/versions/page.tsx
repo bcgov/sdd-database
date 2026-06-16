@@ -8,7 +8,8 @@ export default function Updates() {
         {
             version: "v0.0.37",
             notes: [
-                "Add Asset Disposal Request (ADR) Number Field in Mobile Devices"
+                "Add Asset Disposal Report (ADR) Number Field in Mobile Devices",
+                "Add General Incident Loss Report (GILR) Number Field in Mobile Devices"
             ]
         },
         {

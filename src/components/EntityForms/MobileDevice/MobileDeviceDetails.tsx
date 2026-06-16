@@ -1,6 +1,12 @@
 import {Accordion, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
 import {LookupOption, MobileDeviceFormValues} from "@/types";
-import {validateAdrField, validateImeiField, validateNotesField, validateOfficeNumberField} from "@/validators";
+import {
+    validateAdrField,
+    validateGilrField,
+    validateImeiField,
+    validateNotesField,
+    validateOfficeNumberField
+} from "@/validators";
 import {useState} from "react";
 import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
 
@@ -81,10 +87,16 @@ export function MobileDeviceDetails({
                            defaultValue={mobileDevice?.office_number}>
                 </TextField>
 
-                <TextField label="Asset Disposal Request (ADR) Number"
+                <TextField label="Asset Disposal Report (ADR) Number"
                            name="adr"
                            validate={validateAdrField}
                            defaultValue={mobileDevice?.adr ?? undefined}>
+                </TextField>
+
+                <TextField label="General Incident Loss Report (GILR) Number"
+                           name="gilr"
+                           validate={validateGilrField}
+                           defaultValue={mobileDevice?.gilr ?? undefined}>
                 </TextField>
 
                 <TextArea label="Notes"

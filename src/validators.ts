@@ -171,7 +171,7 @@ export function validateImeiField(value: string, label: string = "IMEI") {
     }
 }
 
-export function validateAdrField(value: string, label: string = "ADR Number ") {
+export function validateAdrField(value: string, label: string = "ADR Number") {
     const ADR_LENGTH = 18
 
     if (!value) {
@@ -179,10 +179,26 @@ export function validateAdrField(value: string, label: string = "ADR Number ") {
     }
 
     if (value.length !== ADR_LENGTH) {
-        return `${label} must be exactly ${ADR_LENGTH} digits long`;
+        return `${label} must be exactly ${ADR_LENGTH} characters long`;
     }
 
     if (!/^\d{7}-\d{10}$/.test(value)) {
-        return `${label} must use format #######-########## i.e. ADR number (7 digits), hyphen, followed by 10-digit legacy phone number`
+        return `${label} must use format #######-########## i.e. ADR reference (7 digits), hyphen, followed by 10-digit legacy phone number`
+    }
+}
+
+export function validateGilrField(value: string, label: string = "GILR Number ") {
+    const GILR_LENGTH = 25
+
+    if (!value) {
+        return;
+    }
+
+    if (value.length !== GILR_LENGTH) {
+        return `${label} must be exactly ${GILR_LENGTH} characters long`;
+    }
+
+    if (!/^\d{4}-C\d{2}-\d{5}-\d{10}$/.test(value)) {
+        return `${label} must use format ####-C##-#####-########## i.e. GILR reference (14 characters), hyphen, followed by 10-digit legacy phone number`
     }
 }

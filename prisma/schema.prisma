@@ -193,6 +193,7 @@ model MobileDevice {
   id    Int     @id @default(autoincrement())
   imei  String? @unique @db.VarChar(15)
   adr   String? @unique @db.VarChar(18)
+  gilr  String? @unique @db.VarChar(25)
   notes String? @db.VarChar(200)
 
   model_id      Int
