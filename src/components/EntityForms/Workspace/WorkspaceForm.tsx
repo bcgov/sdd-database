@@ -3,10 +3,11 @@ import {AccordionGroup} from "@bcgov/design-system-react-components";
 import {WorkspaceDetails} from "@/components/EntityForms/Workspace/WorkspaceDetails";
 import {WorkspaceProtections} from "@/components/EntityForms/Workspace/WorkspaceProtections";
 import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
+import {canHoldWorkspace, canRemoveWorkspaceHold, getWorkspaceStatus} from "@/domain/workspaces";
 
 
 interface WorkspaceFormProps {
-    workspace: WorkspaceSearchResult;
+    workspace: WorkspaceSearchResult
     onHold: () => void
     onRemoveHold: () => void
 }
@@ -17,16 +18,7 @@ export function WorkspaceForm({
                                   onRemoveHold,
                               }: WorkspaceFormProps) {
 
-    const hasAssignedEmployee = !!workspace.assigned_employee
-
-    const workspaceStatus = hasAssignedEmployee
-        ? "occupied"
-        : workspace.is_on_hold
-            ? "onHold"
-            : "available"
-
-    const canHold = workspaceStatus === "available"
-    const canRemoveHold = workspaceStatus === "onHold"
+    const workspaceStatus = getWorkspaceStatus(workspace)
 
     const restrictedProgramArea = workspace.restricted_program_area
     const restrictedBranch = restrictedProgramArea?.branch
@@ -46,8 +38,8 @@ export function WorkspaceForm({
                             }}>
                 <WorkspaceDetails workspace={workspace}
                                   workspaceStatus={workspaceStatus}
-                                  canHold={canHold}
-                                  canRemoveHold={canRemoveHold}
+                                  canHold={canHoldWorkspace(workspaceStatus)}
+                                  canRemoveHold={canRemoveWorkspaceHold(workspaceStatus)}
                                   onHold={onHold}
                                   onRemoveHold={onRemoveHold}>
                 </WorkspaceDetails>

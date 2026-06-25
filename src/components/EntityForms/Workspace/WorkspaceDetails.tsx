@@ -8,11 +8,12 @@ import {
     ToggleButtonGroup
 } from "@bcgov/design-system-react-components";
 import {WorkspaceSearchResult} from "@/types";
+import {WorkspaceStatus} from "@/domain/workspaces";
 
 
 interface WorkspaceDetailsProps {
     workspace: WorkspaceSearchResult
-    workspaceStatus: "available" | "onHold" | "occupied"
+    workspaceStatus: WorkspaceStatus
     canHold: boolean
     canRemoveHold: boolean
     onHold: () => void

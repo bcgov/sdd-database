@@ -174,8 +174,9 @@ export function validateImeiField(value: string, label: string = "IMEI") {
 export function validateAdrField(value: string, label: string = "ADR Number") {
     const ADR_LENGTH = 18
 
-    if (!value) {
-        return;
+    const requiredError = validateRequiredField(value, label);
+    if (requiredError) {
+        return requiredError;
     }
 
     if (value.length !== ADR_LENGTH) {
@@ -187,11 +188,12 @@ export function validateAdrField(value: string, label: string = "ADR Number") {
     }
 }
 
-export function validateGilrField(value: string, label: string = "GILR Number ") {
+export function validateGilrField(value: string, label: string = "GILR Number") {
     const GILR_LENGTH = 25
 
-    if (!value) {
-        return;
+    const requiredError = validateRequiredField(value, label);
+    if (requiredError) {
+        return requiredError;
     }
 
     if (value.length !== GILR_LENGTH) {

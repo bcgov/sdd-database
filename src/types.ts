@@ -6,6 +6,9 @@ import {
     workstationSearchResultArgs
 } from "@/db/data-access/searchResultArgs";
 
+// Using type-only import to prevent circular dependency
+import type {MobileDeviceStatus} from "@/domain/mobileDevices";
+
 
 /**
  * Employee Types
@@ -93,8 +96,7 @@ export type WorkstationEntity = WorkstationSearchResult & {
  * Mobile Device Types
  */
 
-export type MobileDeviceFormValues = {
-    id?: number
+type MobileDevicePersistedFields = {
     imei: string | null
     adr: string | null
     gilr: string | null
@@ -102,6 +104,17 @@ export type MobileDeviceFormValues = {
     model_id: number
     office_number: string
 }
+
+type MobileDeviceUIFields = {
+    // UI-only status submitted by the form for conditional validation
+    ui_mobile_device_status: MobileDeviceStatus
+}
+
+type MobileDeviceFormExtraFields = MobileDeviceUIFields & {
+    id?: number
+}
+
+export type MobileDeviceFormValues = MobileDevicePersistedFields & MobileDeviceFormExtraFields
 
 export type MobileDeviceSearchResult = Prisma.MobileDeviceGetPayload<typeof mobileDeviceSearchResultArgs>
 

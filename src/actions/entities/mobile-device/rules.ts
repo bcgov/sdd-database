@@ -23,6 +23,12 @@ export async function validateMobileDeviceData(mobileDevice: MobileDeviceFormVal
         return fieldValidationError
     }
 
+    const mobileDeviceStatusValidationError = validateMobileDeviceStatusRules(mobileDevice)
+
+    if (mobileDeviceStatusValidationError) {
+        return mobileDeviceStatusValidationError
+    }
+
     const mobileDeviceModel = await getMobileDeviceModelById(mobileDevice.model_id)
     if (!mobileDeviceModel) {
         return `The selected mobile device model is invalid. Please reselect a model and try again.`
@@ -51,4 +57,26 @@ function validateImeiRulesForMobileDeviceModel(
 
     if (requiresImei && !imei) return `IMEI is required for ${modelName}`
     if (!requiresImei && imei) return `IMEI should be blank for ${modelName}`
+}
+
+function validateMobileDeviceStatusRules(mobileDevice: MobileDeviceFormValues) {
+    if (mobileDevice.ui_mobile_device_status === "adr" && !mobileDevice.adr) {
+        return "ADR Number is required when mobile device status is Disposed"
+    }
+
+    if (mobileDevice.ui_mobile_device_status === "gilr" && !mobileDevice.gilr) {
+        return "GILR Number is required when mobile device status is Lost / Stolen"
+    }
+
+    if (mobileDevice.adr && mobileDevice.gilr) {
+        return "A mobile device cannot have both ADR and GILR number at the same time"
+    }
+
+    if (mobileDevice.ui_mobile_device_status === "unassigned" && (mobileDevice.adr || mobileDevice.gilr)) {
+        return "Unassigned mobile devices cannot have ADR or GILR numbers"
+    }
+
+    if (mobileDevice.ui_mobile_device_status === "assigned" && (mobileDevice.adr || mobileDevice.gilr)) {
+        return "Assigned mobile devices cannot have ADR or GILR numbers"
+    }
 }

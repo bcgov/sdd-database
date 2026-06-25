@@ -6,6 +6,8 @@ import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState"
 import {useMobileDeviceLookupProps} from "@/components/EntityForms/MobileDevice/useMobileDeviceLookupProps";
 import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
 import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
+import {getMobileDeviceStatus} from "@/domain/mobileDevices";
+import type {MobileDeviceStatus} from "@/domain/mobileDevices";
 
 
 interface MobileDeviceFormProps {
@@ -42,6 +44,10 @@ export function MobileDeviceForm({
 
     const hasAssignedEmployee = !!mobileDevice?.assigned_employee
 
+    const mobileDeviceStatus: MobileDeviceStatus = mobileDevice
+        ? getMobileDeviceStatus(mobileDevice)
+        : "unassigned"
+
     return (
         <Form action={formAction}>
 
@@ -64,8 +70,11 @@ export function MobileDeviceForm({
             >
                 <MobileDeviceDetails mobileDevice={mobileDevice}
                                      {...mobileDeviceLookupProps}
+
                                      isEditMode={isEditMode}
                                      isOfficeNumberReadOnly={isEditMode && hasAssignedEmployee}
+
+                                     mobileDeviceStatus={mobileDeviceStatus}
                 >
                 </MobileDeviceDetails>
 

@@ -148,6 +148,10 @@ async function validateAssignedMobileDevice(employee: EmployeeFormValues) {
         return `The selected mobile device no longer exists. Please refresh the page and try again.`
     }
 
+    if (mobileDevice.adr || mobileDevice.gilr) {
+        return `The selected mobile device is marked as disposed or lost/stolen and cannot be assigned. Please choose another mobile device.`
+    }
+
     if (mobileDevice.employee_id != null && mobileDevice.employee_id !== employee.id) {
         return `The selected mobile device is already assigned to another employee. Please choose another mobile device.`
     }

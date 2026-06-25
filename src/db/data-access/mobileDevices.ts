@@ -30,6 +30,8 @@ export async function getMobileDevicesByFilter(query?: string): Promise<MobileDe
         ? {
             OR: [
                 {imei: {contains: query}},
+                {adr: {contains: query}},
+                {gilr: {contains: query, mode: 'insensitive'}},
                 {mobile_device_model: {name: {contains: query, mode: 'insensitive'}}},
                 {office_number: {contains: query}},
                 buildAssignedEmployeeSearchFilter(query)
@@ -58,6 +60,8 @@ export async function getAssignableMobileDevicesByFilter(query?: string): Promis
 
     return prisma.mobileDevice.findMany({
         where: {
+            adr: null,
+            gilr: null,
             employee_id: null,
             ...searchFilter
         },
@@ -69,6 +73,7 @@ export async function getAssignableMobileDevicesByFilter(query?: string): Promis
 export async function addNewMobileDevice(mobileDevice: MobileDeviceFormValues) {
     const {
         id,
+        ui_mobile_device_status,
         ...mobileDeviceDbFields
     } = mobileDevice
 

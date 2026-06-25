@@ -1,4 +1,5 @@
 import {EmployeeFormValues, EntityType, MobileDeviceFormValues, WorkstationFormValues} from "@/types";
+import type {MobileDeviceStatus} from "@/domain/mobileDevices";
 
 
 export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
@@ -156,13 +157,18 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
     // office_number
     const officeNumber = formData.get("officeNumber") as string
 
+    // ui_mobile_device_status
+    const uiMobileDeviceStatus = formData.get("mobileDeviceStatus") as MobileDeviceStatus
+
     return {
-        id,
         imei,
         adr,
         gilr,
         notes,
         model_id: modelId,
         office_number: officeNumber,
+
+        id,
+        ui_mobile_device_status: uiMobileDeviceStatus
     }
 }

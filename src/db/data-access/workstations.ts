@@ -57,7 +57,6 @@ export async function getAssignableWorkstationsByFilter(query?: string): Promise
                 {asset_tag: {contains: query, mode: 'insensitive'}},
                 {workstation_model: {name: {contains: query, mode: 'insensitive'}}},
                 {office_number: {contains: query}},
-                {notes: {contains: query, mode: 'insensitive'}},
             ]
         }
         : {}

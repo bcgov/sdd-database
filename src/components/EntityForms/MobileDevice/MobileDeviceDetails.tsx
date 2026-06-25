@@ -1,5 +1,12 @@
-import {Accordion, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
-import {LookupOption, MobileDeviceFormValues} from "@/types";
+import {
+    Accordion,
+    Select,
+    TextArea,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup
+} from "@bcgov/design-system-react-components";
+import {LookupOption, MobileDeviceSearchResult} from "@/types";
 import {
     validateAdrField,
     validateGilrField,
@@ -8,15 +15,20 @@ import {
     validateOfficeNumberField
 } from "@/validators";
 import {useState} from "react";
-import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
+import {
+    mobileDeviceModelRequiresImei,
+    MobileDeviceStatus
+} from "@/domain/mobileDevices";
 
 
 interface MobileDeviceDetailsProps {
-    mobileDevice?: MobileDeviceFormValues
+    mobileDevice?: MobileDeviceSearchResult
     models: LookupOption[]
 
     isEditMode: boolean
     isOfficeNumberReadOnly: boolean
+
+    mobileDeviceStatus: MobileDeviceStatus
 }
 
 export function MobileDeviceDetails({
@@ -24,7 +36,9 @@ export function MobileDeviceDetails({
                                         models,
 
                                         isEditMode,
-                                        isOfficeNumberReadOnly
+                                        isOfficeNumberReadOnly,
+
+                                        mobileDeviceStatus
                                     }: MobileDeviceDetailsProps) {
 
     const initialSelectedModelId = mobileDevice?.model_id ?? null
@@ -34,6 +48,8 @@ export function MobileDeviceDetails({
     const selectedModel = models.find((model) => model.id === selectedModelId)
 
     const shouldShowImeiField = mobileDeviceModelRequiresImei(selectedModel?.name)
+
+    const [draftMobileDeviceStatus, setDraftMobileDeviceStatus] = useState<MobileDeviceStatus>(mobileDeviceStatus)
 
     return (
         <Accordion label="Mobile Device Details"
@@ -87,17 +103,60 @@ export function MobileDeviceDetails({
                            defaultValue={mobileDevice?.office_number}>
                 </TextField>
 
-                <TextField label="Asset Disposal Report (ADR) Number"
-                           name="adr"
-                           validate={validateAdrField}
-                           defaultValue={mobileDevice?.adr ?? undefined}>
-                </TextField>
+                <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
+                    <ToggleButtonGroup label="Status"
+                                       disallowEmptySelection
+                                       selectedKeys={[draftMobileDeviceStatus]}
+                                       isDisabled={mobileDeviceStatus === "adr" || mobileDeviceStatus === "gilr" || mobileDeviceStatus === "assigned"}
+                                       style={{width: "fit-content"}}
+                    >
+                        <ToggleButton id="unassigned"
+                                      isDisabled={draftMobileDeviceStatus === "assigned"}
+                                      onPress={() => setDraftMobileDeviceStatus("unassigned")}
+                        >
+                            Unassigned
+                        </ToggleButton>
 
-                <TextField label="General Incident Loss Report (GILR) Number"
-                           name="gilr"
-                           validate={validateGilrField}
-                           defaultValue={mobileDevice?.gilr ?? undefined}>
-                </TextField>
+                        <ToggleButton id="assigned" isDisabled>Assigned</ToggleButton>
+
+                        <ToggleButton id="adr"
+                                      isDisabled={draftMobileDeviceStatus === "assigned"}
+                                      onPress={() => setDraftMobileDeviceStatus("adr")}
+                        >
+                            Disposed
+                        </ToggleButton>
+
+                        <ToggleButton id="gilr"
+                                      isDisabled={draftMobileDeviceStatus === "assigned"}
+                                      onPress={() => setDraftMobileDeviceStatus("gilr")}
+                        >
+                            Lost / Stolen
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </div>
+
+                <input type="hidden"
+                       name="mobileDeviceStatus"
+                       value={draftMobileDeviceStatus}
+                />
+
+                {draftMobileDeviceStatus === "adr" && (
+                    <TextField label="Asset Disposal Report (ADR) Number"
+                               name="adr"
+                               isRequired
+                               validate={validateAdrField}
+                               defaultValue={mobileDevice?.adr ?? undefined}>
+                    </TextField>
+                )}
+
+                {draftMobileDeviceStatus === "gilr" && (
+                    <TextField label="General Incident Loss Report (GILR) Number"
+                               name="gilr"
+                               isRequired
+                               validate={validateGilrField}
+                               defaultValue={mobileDevice?.gilr ?? undefined}>
+                    </TextField>
+                )}
 
                 <TextArea label="Notes"
                           name="notes"
