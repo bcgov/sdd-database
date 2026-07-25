@@ -138,6 +138,22 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
     const rawImei = formData.get("imei") as string
     const imei = rawImei || null
 
+    // order_date
+    const rawOrderDate = formData.get("orderDate") as string
+
+    /**
+     * rawOrderDate = "2026-07-21"
+     * `${rawOrderDate}T00:00:00.000Z` creates 2026-07-21T00:00:00.000Z
+     * 2026-07-21 — calendar date
+     * T — separates the date and time
+     * 00:00:00.000 — exactly midnight
+     * Z — UTC timezone
+     *
+     * So, in essence, we convert the submitted calendar date into a JavaScript Date, representing midnight UTC on that
+     * day. Using UTC midnight preserves the selected calendar day without Vancouver timezone shifting it during storage.
+     */
+    const orderDate = new Date(`${rawOrderDate}T00:00:00.000Z`)
+
     // adr
     const rawAdr = formData.get("adr") as string
     const adr = rawAdr || null
@@ -162,6 +178,7 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
 
     return {
         imei,
+        order_date: orderDate,
         adr,
         gilr,
         notes,

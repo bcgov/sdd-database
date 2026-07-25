@@ -98,6 +98,7 @@ export type WorkstationEntity = WorkstationSearchResult & {
 
 type MobileDevicePersistedFields = {
     imei: string | null
+    order_date: Date
     adr: string | null
     gilr: string | null
     notes: string | null

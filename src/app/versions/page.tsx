@@ -6,6 +6,13 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.38",
+            notes: [
+                "Add Enrolled Date (Order Date) field to Mobile Devices",
+                "Add Hardware Fee End Date (Payment End Date) field to Mobile Devices"
+            ]
+        },
+        {
             version: "v0.0.37",
             notes: [
                 "Add Asset Disposal Report (ADR) Number Field in Mobile Devices",

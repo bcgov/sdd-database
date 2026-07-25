@@ -1,23 +1,31 @@
+import {useState} from "react";
+import {type CalendarDate, parseDate, today} from "@internationalized/date";
+
 import {
     Accordion,
+    DatePicker,
     Select,
     TextArea,
     TextField,
     ToggleButton,
     ToggleButtonGroup
 } from "@bcgov/design-system-react-components";
+
 import {LookupOption, MobileDeviceSearchResult} from "@/types";
+
 import {
     validateAdrField,
     validateGilrField,
     validateImeiField,
     validateNotesField,
-    validateOfficeNumberField
+    validateOfficeNumberField,
+    validateOrderDateField
 } from "@/validators";
-import {useState} from "react";
+
 import {
+    calculateMobileDevicePaymentEndDate,
     mobileDeviceModelRequiresImei,
-    MobileDeviceStatus
+    type MobileDeviceStatus
 } from "@/domain/mobileDevices";
 
 
@@ -25,7 +33,6 @@ interface MobileDeviceDetailsProps {
     mobileDevice?: MobileDeviceSearchResult
     models: LookupOption[]
 
-    isEditMode: boolean
     isOfficeNumberReadOnly: boolean
 
     mobileDeviceStatus: MobileDeviceStatus
@@ -35,7 +42,6 @@ export function MobileDeviceDetails({
                                         mobileDevice,
                                         models,
 
-                                        isEditMode,
                                         isOfficeNumberReadOnly,
 
                                         mobileDeviceStatus
@@ -50,6 +56,18 @@ export function MobileDeviceDetails({
     const shouldShowImeiField = mobileDeviceModelRequiresImei(selectedModel?.name)
 
     const [draftMobileDeviceStatus, setDraftMobileDeviceStatus] = useState<MobileDeviceStatus>(mobileDeviceStatus)
+
+    const isEditMode = !!mobileDevice
+
+    const initialOrderDate = mobileDevice
+        ? parseDate(mobileDevice.order_date.toISOString().slice(0, 10))
+        : null
+
+    const [orderDate, setOrderDate] = useState<CalendarDate | null>(initialOrderDate)
+
+    const paymentEndDate = orderDate
+        ? calculateMobileDevicePaymentEndDate(orderDate)
+        : null
 
     return (
         <Accordion label="Mobile Device Details"
@@ -102,6 +120,30 @@ export function MobileDeviceDetails({
                            validate={validateOfficeNumberField}
                            defaultValue={mobileDevice?.office_number}>
                 </TextField>
+
+                <DatePicker label="Order Date"
+                            name="orderDate"
+                            firstDayOfWeek="mon"
+                            showFormatHelpText={isEditMode}
+                            isBrowserLocaleUsed
+                            isRequired
+                            isReadOnly={isEditMode}
+                            value={orderDate}
+                            onChange={setOrderDate}
+                            maxValue={today("America/Vancouver")}
+                            validate={validateOrderDateField}
+                >
+                </DatePicker>
+
+                <DatePicker label="Payment End Date"
+                            isCalendarDisabled
+                            isBrowserLocaleUsed
+                            showFormatHelpText={false}
+                            isReadOnly
+                            value={paymentEndDate}
+                            description="This date is automatically calculated as 36 months after the Order Date"
+                >
+                </DatePicker>
 
                 <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
                     <ToggleButtonGroup label="Status"

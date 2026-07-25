@@ -71,7 +71,6 @@ export function MobileDeviceForm({
                 <MobileDeviceDetails mobileDevice={mobileDevice}
                                      {...mobileDeviceLookupProps}
 
-                                     isEditMode={isEditMode}
                                      isOfficeNumberReadOnly={isEditMode && hasAssignedEmployee}
 
                                      mobileDeviceStatus={mobileDeviceStatus}

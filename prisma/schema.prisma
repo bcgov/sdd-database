@@ -190,11 +190,12 @@ model WorkstationModel {
 }
 
 model MobileDevice {
-  id    Int     @id @default(autoincrement())
-  imei  String? @unique @db.VarChar(15)
-  adr   String? @unique @db.VarChar(18)
-  gilr  String? @unique @db.VarChar(25)
-  notes String? @db.VarChar(200)
+  id         Int      @id @default(autoincrement())
+  imei       String?  @unique @db.VarChar(15)
+  order_date DateTime @db.Date
+  adr        String?  @unique @db.VarChar(18)
+  gilr       String?  @unique @db.VarChar(25)
+  notes      String?  @db.VarChar(200)
 
   model_id      Int
   office_number String @db.VarChar(3)

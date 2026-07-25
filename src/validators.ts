@@ -1,3 +1,5 @@
+import {DateValue, parseDate, today} from "@internationalized/date";
+
 function validateRequiredField(value: string | number | null | undefined, label: string) {
     if (value == null || value == "") {
         return `${label} is required`;
@@ -168,6 +170,35 @@ export function validateImeiField(value: string, label: string = "IMEI") {
     const invalidCharacterError = validateOnlyDigits(value, label)
     if (invalidCharacterError) {
         return invalidCharacterError
+    }
+}
+
+export function validateOrderDateField(value: Date | DateValue, label: string = "Order Date") {
+    /**
+     * JavaScript dates internally store a timestamp—the number of milliseconds since January 1, 1970. We access it
+     * with .getTime()
+     *
+     * For a valid date like
+     * new Date("2026-07-21T00:00:00.000Z").getTime()
+     * // returns a normal number
+     *
+     * For an invalid date
+     * new Date("nonsense").getTime()
+     * // returns NaN
+     */
+
+    if (value instanceof Date && Number.isNaN(value.getTime())) {
+        return `${label} must be a valid date`
+    }
+
+    const orderDate = value instanceof Date
+        ? parseDate(value.toISOString().slice(0, 10))
+        : value
+
+    const todayInVancouver = today("America/Vancouver")
+
+    if (orderDate.compare(todayInVancouver) > 0) {
+        return `${label} must be today or earlier (today is ${todayInVancouver.toString()})`
     }
 }
 

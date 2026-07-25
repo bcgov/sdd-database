@@ -1,5 +1,6 @@
 // Using type-only import to prevent circular dependency
 import type {MobileDeviceEntity} from "@/types";
+import type {CalendarDate} from "@internationalized/date";
 
 
 export type MobileDeviceStatus = "unassigned" | "assigned" | "adr" | "gilr"
@@ -8,6 +9,8 @@ const MODELS_WITHOUT_IMEI = new Set([
     "Office in a Box (OiaB)",
     "Qualcomm GSP-1700",
 ])
+
+const MOBILE_DEVICE_PAYMENT_TERM_MONTHS = 36
 
 export function mobileDeviceModelRequiresImei(modelName: string | undefined) {
     if (!modelName) return false
@@ -36,4 +39,10 @@ export function getMobileDeviceTitle(
     return mobileDevice.imei
         ? `${modelName} - ${mobileDevice.imei}`
         : `${modelName}`
+}
+
+export function calculateMobileDevicePaymentEndDate(orderDate: CalendarDate) {
+    return orderDate.add({
+        months: MOBILE_DEVICE_PAYMENT_TERM_MONTHS
+    })
 }
