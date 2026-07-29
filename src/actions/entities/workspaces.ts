@@ -3,6 +3,7 @@
 import {
     getAssignableWorkspacesByFilter,
     getWorkspacesByFilter,
+    getWorkspacesByOfficeCode,
     hold,
     updateWorkspace,
     removeHold
@@ -14,6 +15,13 @@ export async function searchWorkspacesAction(query?: string): Promise<WorkspaceE
     const workspaceSearchResults = await getWorkspacesByFilter(query)
 
     // Attaching discriminant 'type'
+    return attachEntityType(workspaceSearchResults, "workspace")
+}
+
+export async function searchWorkspacesByOfficeCodeAction(
+    officeCode: string
+): Promise<WorkspaceEntity[]> {
+    const workspaceSearchResults = await getWorkspacesByOfficeCode(officeCode)
     return attachEntityType(workspaceSearchResults, "workspace")
 }
 
