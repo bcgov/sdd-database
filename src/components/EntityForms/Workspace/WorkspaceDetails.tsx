@@ -9,6 +9,7 @@ import {
 } from "@bcgov/design-system-react-components";
 import {WorkspaceSearchResult} from "@/types";
 import {WorkspaceStatus} from "@/domain/workspaces";
+import {validateNotesField} from "@/validators";
 
 
 interface WorkspaceDetailsProps {
@@ -112,13 +113,12 @@ export function WorkspaceDetails({
                         </Button>}
                 </div>
 
-                {hasNotes &&
-                    <TextArea label="Notes"
-                              name="notes"
-                              isReadOnly
-                              maxLength={200}
-                              defaultValue={workspace.notes ?? undefined}>
-                    </TextArea>}
+                <TextArea label="Notes"
+                            name="notes"
+                            maxLength={200}
+                            validate={validateNotesField}
+                            defaultValue={workspace.notes ?? undefined}>
+                </TextArea>
             </div>
         </Accordion>
     )

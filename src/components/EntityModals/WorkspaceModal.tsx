@@ -12,6 +12,9 @@ interface WorkspaceModalProps {
 
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
+    
+    onSuccess: () => void
+    onError: (error: string) => void
 }
 
 export function WorkspaceModal({
@@ -21,8 +24,13 @@ export function WorkspaceModal({
                                    onRemoveHold,
 
                                    isOpen,
-                                   setIsOpen,
+                                   setIsOpen,                                     
+                                   onSuccess,
+                                   onError,
                                }: WorkspaceModalProps) {
+
+    const onClose = () => setIsOpen(false)
+    
     return (
         <ModalDialog isOpen={isOpen}
                      setIsOpen={setIsOpen}
@@ -31,6 +39,9 @@ export function WorkspaceModal({
             <WorkspaceForm workspace={workspace}
                            onHold={onHold}
                            onRemoveHold={onRemoveHold}
+                           onSuccess={onSuccess}
+                           onError={onError}
+                           onClose={onClose}
             >
             </WorkspaceForm>
         </ModalDialog>
