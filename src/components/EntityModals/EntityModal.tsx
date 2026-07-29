@@ -73,44 +73,45 @@ export function EntityModal({
         ></OfficeModal>
       );
 
-    case "workspace":
-      return (
-        <WorkspaceModal
-          workspace={viewedEntity}
-          onHold={handleHoldWorkspace}
-          onRemoveHold={handleRemoveWorkspaceHold}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        ></WorkspaceModal>
-      );
-    case "workstation":
-      return (
-        <WorkstationModal
-          workstation={viewedEntity}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          onSuccess={onSuccess}
-          onError={onError}
-          onDelete={onDelete}
-        ></WorkstationModal>
-      );
-    case "mobileDevice":
-      return (
-        <MobileDeviceModal
-          mobileDevice={viewedEntity}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          onSuccess={onSuccess}
-          onError={onError}
-        ></MobileDeviceModal>
-      );
-    case "mobilePlan":
-      return (
-        <MobilePlanModal
-          mobilePlan={viewedEntity}
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-        ></MobilePlanModal>
-      );
-  }
+        case "workspace":
+            return (
+                <WorkspaceModal workspace={viewedEntity}
+                                onHold={handleHoldWorkspace}
+                                onRemoveHold={handleRemoveWorkspaceHold}
+                                isOpen={isOpen}
+                                setIsOpen={setIsOpen}
+                                onSuccess={onSuccess}
+                                onError={onError}
+                >
+                </WorkspaceModal>
+            )
+        case "workstation":
+            return (
+                <WorkstationModal workstation={viewedEntity}
+                                  isOpen={isOpen}
+                                  setIsOpen={setIsOpen}
+                                  onSuccess={onSuccess}
+                                  onError={onError}
+                >
+                </WorkstationModal>
+            )
+        case "mobileDevice":
+            return (
+                <MobileDeviceModal mobileDevice={viewedEntity}
+                                   isOpen={isOpen}
+                                   setIsOpen={setIsOpen}
+                                   onSuccess={onSuccess}
+                                   onError={onError}
+                >
+                </MobileDeviceModal>
+            )
+        case "mobilePlan":
+            return (
+                <MobilePlanModal mobilePlan={viewedEntity}
+                                   isOpen={isOpen}
+                                   setIsOpen={setIsOpen}
+                >
+                </MobilePlanModal>
+            )
+    }
 }
