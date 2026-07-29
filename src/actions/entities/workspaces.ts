@@ -4,11 +4,11 @@ import {
     getAssignableWorkspacesByFilter,
     getWorkspacesByFilter,
     hold,
+    updateWorkspace,
     removeHold
 } from "@/db/data-access/workspaces";
 import {EntityActionResult, WorkspaceEntity} from "@/types";
 import {attachEntityType} from "@/actions/attachEntityType";
-
 
 export async function searchWorkspacesAction(query?: string): Promise<WorkspaceEntity[]>  {
     const workspaceSearchResults = await getWorkspacesByFilter(query)
@@ -65,6 +65,36 @@ export async function removeHoldAction(
             error: error instanceof Error
                 ? error.message
                 : "Could not remove workspace hold"
+        }
+    }
+}
+
+export async function updateWorkspaceAction(
+    _prevState: EntityActionResult,
+    formData: FormData
+): Promise<EntityActionResult> {
+    const officeNumber = formData.get("officeNumber")?.toString();
+    const workspaceNumber = formData.get("workspaceNumber")?.toString();
+    const notes = formData.get("notes")?.toString();
+
+    if (!officeNumber || !workspaceNumber) {
+        return {
+            status: "error",
+            error: "Missing workspace identifiers"
+        }
+    }
+
+    try {
+        await updateWorkspace(officeNumber, workspaceNumber, notes)
+
+        return {status: "ok" }
+    }
+    catch (error) {
+        return {
+            status: "error",
+            error: error instanceof Error
+                ? error.message
+                : "Could not update workspace"
         }
     }
 }

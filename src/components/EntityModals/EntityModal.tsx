@@ -81,6 +81,8 @@ export function EntityModal({
           onRemoveHold={handleRemoveWorkspaceHold}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
+          onSuccess={onSuccess}
+          onError={onError}
         ></WorkspaceModal>
       );
     case "workstation":
