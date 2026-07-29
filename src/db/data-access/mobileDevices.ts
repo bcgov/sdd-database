@@ -3,6 +3,7 @@ import {prisma} from "@/db/client";
 import {Prisma} from "@/generated/prisma/client";
 import {mobileDeviceSearchResultArgs} from "@/db/data-access/searchResultArgs";
 import {buildAssignedEmployeeSearchFilter} from "@/db/data-access/searchFilters";
+import {normalizeMobilePlanPhoneNumber} from "@/domain/mobilePlans";
 
 
 export async function getMobileDeviceById(id: number) {
@@ -34,10 +35,16 @@ export async function getMobileDevicesByFilter(query?: string): Promise<MobileDe
                 {gilr: {contains: query, mode: 'insensitive'}},
                 {mobile_device_model: {name: {contains: query, mode: 'insensitive'}}},
                 {office_number: {contains: query}},
+                {
+                    mobile_plan: {
+                        phone_number: {equals: normalizeMobilePlanPhoneNumber(query)}
+                    }
+                },
                 buildAssignedEmployeeSearchFilter(query)
             ]
         }
-        : {}
+        :
+        {}
 
     return prisma.mobileDevice.findMany({
         where: searchFilter,

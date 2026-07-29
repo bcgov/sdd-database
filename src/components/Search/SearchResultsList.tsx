@@ -2,6 +2,7 @@ import {SearchResultItem} from "@/components/Search/SearchResultItem";
 import {AssignMode, Entity, MobileDeviceEntity, SelectedWorkspaceAssignment} from "@/types";
 import {getMobileDeviceTitle} from "@/domain/mobileDevices";
 import {getEmployeeFullName} from "@/domain/employees";
+import {formatMobilePlanPhoneNumber} from "@/domain/mobilePlans";
 
 
 const getSearchResultKey = (item: Entity) => {
@@ -23,6 +24,9 @@ const getSearchResultKey = (item: Entity) => {
             break
         case "mobileDevice":
             key = `mobile-device-${item.id}`
+            break
+        case "mobilePlan":
+            key = `mobile-plan-${item.id}`
             break
     }
 
@@ -50,6 +54,9 @@ const getSearchResultTitle = (item: Entity) => {
             break
         case "mobileDevice":
             title = getMobileDeviceTitle(item)
+            break
+        case "mobilePlan":
+            title = formatMobilePlanPhoneNumber(item.phone_number)
             break
     }
 

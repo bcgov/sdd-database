@@ -1,7 +1,7 @@
 import type {Prisma, Office} from "@/generated/prisma/client";
 import {
     employeeSearchResultArgs,
-    mobileDeviceSearchResultArgs,
+    mobileDeviceSearchResultArgs, mobilePlanSearchResultArgs,
     workspaceSearchResultArgs,
     workstationSearchResultArgs
 } from "@/db/data-access/searchResultArgs";
@@ -124,6 +124,16 @@ export type MobileDeviceEntity = MobileDeviceSearchResult & {
 }
 
 /**
+ * Mobile Plan Types
+ */
+
+export type MobilePlanSearchResult = Prisma.MobilePlanGetPayload<typeof mobilePlanSearchResultArgs>
+
+export type MobilePlanEntity = MobilePlanSearchResult & {
+    type: "mobilePlan"
+}
+
+/**
  * Common Types
  */
 
@@ -151,6 +161,7 @@ export type Entity =
     | WorkspaceEntity
     | WorkstationEntity
     | MobileDeviceEntity
+    | MobilePlanEntity
 
 export type EntityType = Entity["type"]
 

@@ -8,6 +8,16 @@ const assignedEmployeePreviewSelect = {
     last_name: true
 } satisfies Prisma.EmployeeSelect
 
+const assignedMobileDevicePreviewSelect = {
+    id: true,
+    imei: true,
+    mobile_device_model: {
+        select: {
+            name: true
+        }
+    }
+} satisfies Prisma.MobileDeviceSelect
+
 export const employeeSearchResultArgs = {
     include: {
         program_area: true,
@@ -15,15 +25,7 @@ export const employeeSearchResultArgs = {
         workspace: true,
         workstations: true,
         mobile_device: {
-            select: {
-                id: true,
-                imei: true,
-                mobile_device_model: {
-                    select: {
-                        name: true
-                    }
-                }
-            }
+            select: assignedMobileDevicePreviewSelect
         },
         ohs_accommodations: {
             include: {
@@ -61,8 +63,22 @@ export const workstationSearchResultArgs = {
 export const mobileDeviceSearchResultArgs = {
     include: {
         mobile_device_model: true,
+        mobile_plan: {
+            select: {
+                id: true,
+                phone_number: true,
+            }
+        },
         assigned_employee: {
             select: assignedEmployeePreviewSelect
         }
     }
 } satisfies Prisma.MobileDeviceDefaultArgs
+
+export const mobilePlanSearchResultArgs = {
+    include: {
+        assigned_mobile_device: {
+            select: assignedMobileDevicePreviewSelect
+        }
+    }
+} satisfies Prisma.MobilePlanDefaultArgs

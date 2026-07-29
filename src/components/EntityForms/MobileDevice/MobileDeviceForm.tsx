@@ -8,6 +8,7 @@ import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedE
 import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
 import {getMobileDeviceStatus} from "@/domain/mobileDevices";
 import type {MobileDeviceStatus} from "@/domain/mobileDevices";
+import {MobilePlanDetails} from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
 
 
 interface MobileDeviceFormProps {
@@ -58,11 +59,7 @@ export function MobileDeviceForm({
             }
 
             <AccordionGroup allowsMultipleExpanded
-                            defaultExpandedKeys={
-                                isEditMode
-                                    ? ["mobileDeviceDetails", "assignedEmployeeDetails"]
-                                    : ["mobileDeviceDetails"]
-                            }
+                            defaultExpandedKeys={["mobileDeviceDetails"]}
                             style={{
                                 marginTop: "1rem",
                                 marginBottom: "1rem"
@@ -76,6 +73,10 @@ export function MobileDeviceForm({
                                      mobileDeviceStatus={mobileDeviceStatus}
                 >
                 </MobileDeviceDetails>
+
+                {mobileDevice?.mobile_plan && (
+                    <MobilePlanDetails phoneNumber={mobileDevice.mobile_plan.phone_number} />
+                )}
 
                 {mobileDevice?.assigned_employee &&
                     <AssignedEmployeeDetails assignedEmployee={mobileDevice.assigned_employee}/>}

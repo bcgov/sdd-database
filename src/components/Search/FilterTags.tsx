@@ -16,7 +16,8 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
         "office",
         "workspace",
         "workstation",
-        "mobileDevice"
+        "mobileDevice",
+        "mobilePlan"
     ]
 
     return (
@@ -34,7 +35,7 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                             id: "employee",
                             textValue: "Employees",
                             size: "medium",
-                            color: "blue",
+                            color: "bc-gold",
                         },
                         {
                             id: "office",
@@ -46,7 +47,7 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                             id: "workspace",
                             textValue: "Workspaces",
                             size: "medium",
-                            color: "yellow",
+                            color: "blue",
                         },
                         {
                             id: "workstation",
@@ -57,6 +58,12 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                         {
                             id: "mobileDevice",
                             textValue: "Mobile Devices",
+                            size: "medium",
+                            color: "yellow",
+                        },
+                        {
+                            id: "mobilePlan",
+                            textValue: "Mobile Plan",
                             size: "medium",
                             color: "grey",
                         }

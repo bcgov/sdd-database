@@ -1,4 +1,9 @@
-import {EmployeeFormValues, EntityType, MobileDeviceFormValues, WorkstationFormValues} from "@/types";
+import {
+    EmployeeFormValues,
+    EntityType,
+    MobileDeviceFormValues,
+    WorkstationFormValues
+} from "@/types";
 import type {MobileDeviceStatus} from "@/domain/mobileDevices";
 
 
@@ -7,7 +12,8 @@ export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
     office: "Office",
     workspace: "Workspace",
     workstation: "Workstation",
-    mobileDevice: "Mobile Device"
+    mobileDevice: "Mobile Device",
+    mobilePlan: "Mobile Plan",
 } as const;
 
 export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues => {

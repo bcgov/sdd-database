@@ -9,7 +9,9 @@ export default function Updates() {
             version: "v0.0.38",
             notes: [
                 "Add Enrolled Date (Order Date) field to Mobile Devices",
-                "Add Hardware Fee End Date (Payment End Date) field to Mobile Devices"
+                "Add Hardware Fee End Date (Payment End Date) field to Mobile Devices",
+                "Add a new Entity: Mobile Plan",
+                "Add Cell Phone Number field to Mobile Devices"
             ]
         },
         {

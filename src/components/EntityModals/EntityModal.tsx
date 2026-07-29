@@ -4,6 +4,7 @@ import {OfficeModal} from "@/components/EntityModals/OfficeModal";
 import {WorkspaceModal} from "@/components/EntityModals/WorkspaceModal";
 import {WorkstationModal} from "@/components/EntityModals/WorkstationModal";
 import {MobileDeviceModal} from "@/components/EntityModals/MobileDeviceModal";
+import {MobilePlanModal} from "@/components/EntityModals/MobilePlanModal";
 
 
 interface EntityModalProps {
@@ -107,6 +108,14 @@ export function EntityModal({
                                    onError={onError}
                 >
                 </MobileDeviceModal>
+            )
+        case "mobilePlan":
+            return (
+                <MobilePlanModal mobilePlan={viewedEntity}
+                                   isOpen={isOpen}
+                                   setIsOpen={setIsOpen}
+                >
+                </MobilePlanModal>
             )
     }
 }

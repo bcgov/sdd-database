@@ -204,6 +204,8 @@ model MobileDevice {
   mobile_device_model MobileDeviceModel @relation(fields: [model_id], references: [id])
   current_office      Office            @relation(fields: [office_number], references: [office_number])
   assigned_employee   Employee?         @relation(fields: [employee_id], references: [id])
+
+  mobile_plan MobilePlan?
 }
 
 model MobileDeviceModel {
@@ -211,4 +213,13 @@ model MobileDeviceModel {
   name String @unique @db.Citext
 
   mobile_devices MobileDevice[]
+}
+
+model MobilePlan {
+  id           Int    @id @default(autoincrement())
+  phone_number String @unique @db.VarChar(10)
+
+  mobile_device_id Int? @unique
+
+  assigned_mobile_device MobileDevice? @relation(fields: [mobile_device_id], references: [id])
 }

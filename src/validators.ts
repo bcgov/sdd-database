@@ -1,5 +1,6 @@
 import {DateValue, parseDate, today} from "@internationalized/date";
 
+
 function validateRequiredField(value: string | number | null | undefined, label: string) {
     if (value == null || value == "") {
         return `${label} is required`;
