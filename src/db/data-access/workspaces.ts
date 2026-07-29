@@ -145,3 +145,30 @@ export async function removeHold(
         }
     })
 }
+
+export async function updateWorkspace(
+    officeNumber: string,
+    workspaceNumber: string,
+    notes?: string,
+) {
+    const workspace = await getWorkspaceByOfficeAndWorkspaceNumber(
+        officeNumber,
+        workspaceNumber,
+    )
+
+    if (!workspace) {
+        throw new Error("Workspace not found");
+    }
+
+    return prisma.workspace.update({
+        where: {
+            office_number_workspace_number: {
+                office_number: officeNumber,
+                workspace_number: workspaceNumber
+            }
+        },
+        data: {
+            notes: notes ?? workspace.notes,
+        }
+    })
+}
