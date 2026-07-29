@@ -39,6 +39,20 @@ export async function getWorkspacesByFilter(query?: string): Promise<WorkspaceSe
     })
 }
 
+export async function getWorkspacesByOfficeCode(
+    officeCode: string,
+): Promise<WorkspaceSearchResult[]> {
+    return prisma.workspace.findMany({
+        where: {
+            office_number: officeCode,
+        },
+        orderBy: {
+            workspace_number: "asc",
+        },
+        ...workspaceSearchResultArgs
+    })
+}
+
 export async function getAssignableWorkspacesByFilter(
     employeeOfficeNumber: string,
     employeeProgramAreaId: number,
