@@ -8,6 +8,7 @@ import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 const reportOptions = [
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
+    {id: "mobile_devices_by_imei", label: "Mobile Devices (by IMEI)"},
     {id: "workstation_assets_by_asset_number", label: "Workstation Asset (by Asset Number)"},
     {id: "workstation_assets_by_office_code_and_model", label: "Workstation Asset (by Office Code and Model)"},
 ];
@@ -18,6 +19,7 @@ export function ReportsModal() {
     const [officeCode, setOfficeCode] = useState<string>("");
     const [assetNumber, setAssetNumber] = useState<string>("");
     const [modelName, setModelName] = useState<string>("");
+    const [imei, setImei] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -34,8 +36,12 @@ export function ReportsModal() {
                 setError(officeValidationError);
                 return;
             }
+        } else if (selectedReport === "mobile_devices_by_imei") {
+            if (!imei.trim()) {
+                setError("IMEI is required");
+                return;
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
-            
             setError(null);
         } else {
             setError(null);
@@ -46,7 +52,7 @@ export function ReportsModal() {
         setIsLoading(true);
 
         try {
-            const endpoint = selectedReport === "mobile_devices_by_office_code"
+            const endpoint = selectedReport === "mobile_devices_by_office_code" || selectedReport === "mobile_devices_by_imei"
                 ? "/api/reports/mobile-devices"
                 : selectedReport === "workstation_assets_by_asset_number"
                     ? "/api/reports/workstations"
@@ -55,16 +61,20 @@ export function ReportsModal() {
                         : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
-                : selectedReport === "workstation_assets_by_asset_number"
-                    ? `workstations-${assetNumber}.xlsx`
-                    : selectedReport === "workstation_assets_by_office_code_and_model"
-                        ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
-                        : `workspaces-${officeCode}.xlsx`;
+                : selectedReport === "mobile_devices_by_imei"
+                    ? `mobile-devices-${imei}.xlsx`
+                    : selectedReport === "workstation_assets_by_asset_number"
+                        ? `workstations-${assetNumber}.xlsx`
+                        : selectedReport === "workstation_assets_by_office_code_and_model"
+                            ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
+                            : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
                 : selectedReport === "workstation_assets_by_office_code_and_model"
                     ? JSON.stringify({officeCode, modelName: modelName.trim() || undefined})
-                    : JSON.stringify({officeCode});
+                    : selectedReport === "mobile_devices_by_imei"
+                        ? JSON.stringify({imei: imei.trim()})
+                        : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -125,6 +135,7 @@ export function ReportsModal() {
                             setOfficeCode("");
                             setAssetNumber("");
                             setModelName("");
+                            setImei("");
                             setError(null);
                         }
                     }}
@@ -153,6 +164,20 @@ export function ReportsModal() {
                             type="text"
                             value={officeCode}
                             onChange={(event) => setOfficeCode(event.target.value)}
+                            style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                        />
+                    </div>
+                )}
+
+                {selectedReport === "mobile_devices_by_imei" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                        <label htmlFor="imei">IMEI</label>
+                        <input
+                            id="imei"
+                            name="imei"
+                            type="text"
+                            value={imei}
+                            onChange={(event) => setImei(event.target.value)}
                             style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
                         />
                     </div>
@@ -210,7 +235,9 @@ export function ReportsModal() {
                     isDisabled={
                         selectedReport === "workstation_assets_by_asset_number"
                             ? assetNumber === ""
-                            : false
+                            : selectedReport === "mobile_devices_by_imei"
+                                ? imei === ""
+                                : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
