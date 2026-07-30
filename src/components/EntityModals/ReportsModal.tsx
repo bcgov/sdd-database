@@ -2,11 +2,12 @@
 
 import {Button, Select, Heading} from "@bcgov/design-system-react-components";
 import {ModalDialog} from "@/components/ModalDialog";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
-    {id: "employees_by_name_or_idir", label: "Employees (by Name or IDIR)"},
+    {id: "employees_by_name_or_idir", label: "Employee (by Name or IDIR)"},
+    {id: "employees_by_branch_or_program_area", label: "Employees (by Branch or Program Area)"},
     {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, availability, and Hold Status)"},
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
@@ -24,8 +25,45 @@ export function ReportsModal() {
     const [imei, setImei] = useState<string>("");
     const [availabilityStatus, setAvailabilityStatus] = useState<string>("");
     const [employeeQuery, setEmployeeQuery] = useState<string>("");
+    const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+    const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<string>("");
+    const [branchOptions, setBranchOptions] = useState<Array<{id: string; label: string}>>([]);
+    const [allProgramAreaOptions, setAllProgramAreaOptions] = useState<Array<{id: string; label: string; branchId: string}>>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const visibleProgramAreaOptions = selectedBranchId
+        ? allProgramAreaOptions.filter((option) => option.branchId === selectedBranchId)
+        : allProgramAreaOptions;
+
+    useEffect(() => {
+        const loadFilterOptions = async () => {
+            if (selectedReport !== "employees_by_branch_or_program_area") {
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/reports/employee-filters");
+                if (!response.ok) {
+                    throw new Error("Unable to load branch and program area options");
+                }
+
+                const data = await response.json();
+                setBranchOptions(data.branches.map((branch: {id: number; name: string}) => ({id: branch.id.toString(), label: branch.name})));
+                setAllProgramAreaOptions(data.programAreas.map((programArea: {id: number; name: string; branch_id: number}) => ({
+                    id: programArea.id.toString(),
+                    label: programArea.name,
+                    branchId: programArea.branch_id.toString(),
+                })));
+            } catch (e) {
+                setError(e instanceof Error ? e.message : "Unable to load branch and program area options");
+            }
+        };
+
+        if (isOpen) {
+            void loadFilterOptions();
+        }
+    }, [isOpen, selectedReport]);
 
     const handleGenerate = async () => {
         if (selectedReport === "workstation_assets_by_asset_number") {
@@ -59,6 +97,11 @@ export function ReportsModal() {
                 setError("Name or IDIR is required");
                 return;
             }
+        } else if (selectedReport === "employees_by_branch_or_program_area") {
+            if (!selectedBranchId && !selectedProgramAreaId) {
+                setError("Branch or program area is required");
+                return;
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
             setError(null);
         } else {
@@ -74,7 +117,7 @@ export function ReportsModal() {
                 ? "/api/reports/mobile-devices"
                 : selectedReport === "workspace_holds_by_office_code_and_status"
                     ? "/api/reports/workspaces"
-                    : selectedReport === "employees_by_name_or_idir"
+                    : selectedReport === "employees_by_name_or_idir" || selectedReport === "employees_by_branch_or_program_area"
                         ? "/api/reports/employees"
                         : selectedReport === "workstation_assets_by_asset_number"
                             ? "/api/reports/workstations"
@@ -89,7 +132,9 @@ export function ReportsModal() {
                         ? `workspace-holds-${officeCode}-${availabilityStatus}.xlsx`
                         : selectedReport === "employees_by_name_or_idir"
                             ? `employees-${employeeQuery}.xlsx`
-                            : selectedReport === "workstation_assets_by_asset_number"
+                            : selectedReport === "employees_by_branch_or_program_area"
+                                ? `employees-branch-program-area.xlsx`
+                                : selectedReport === "workstation_assets_by_asset_number"
                                 ? `workstations-${assetNumber}.xlsx`
                                 : selectedReport === "workstation_assets_by_office_code_and_model"
                                     ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
@@ -104,7 +149,9 @@ export function ReportsModal() {
                             ? JSON.stringify({officeCode, availability: availabilityStatus})
                             : selectedReport === "employees_by_name_or_idir"
                                 ? JSON.stringify({query: employeeQuery.trim()})
-                                : JSON.stringify({officeCode});
+                                : selectedReport === "employees_by_branch_or_program_area"
+                                    ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, mode: "branch_or_program_area"})
+                                    : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -168,6 +215,8 @@ export function ReportsModal() {
                             setImei("");
                             setAvailabilityStatus("");
                             setEmployeeQuery("");
+                            setSelectedBranchId("");
+                            setSelectedProgramAreaId("");
                             setError(null);
                         }
                     }}
@@ -226,6 +275,35 @@ export function ReportsModal() {
                             onChange={(event) => setEmployeeQuery(event.target.value)}
                             style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
                         />
+                    </div>
+                )}
+
+                {selectedReport === "employees_by_branch_or_program_area" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.75rem"}}>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="branchSelect">Branch</label>
+                            <Select
+                                name="branchSelect"
+                                items={branchOptions}
+                                selectedKey={selectedBranchId}
+                                onSelectionChange={(key) => {
+                                    const nextValue = key?.toString() ?? "";
+                                    setSelectedBranchId(nextValue);
+                                    setSelectedProgramAreaId("");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="programAreaSelect">Program Area</label>
+                            <Select
+                                name="programAreaSelect"
+                                items={visibleProgramAreaOptions}
+                                selectedKey={selectedProgramAreaId}
+                                onSelectionChange={(key) => {
+                                    setSelectedProgramAreaId(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
                     </div>
                 )}
 
@@ -318,7 +396,9 @@ export function ReportsModal() {
                                     ? officeCode === "" || availabilityStatus === ""
                                     : selectedReport === "employees_by_name_or_idir"
                                         ? employeeQuery === ""
-                                        : false
+                                        : selectedReport === "employees_by_branch_or_program_area"
+                                            ? selectedBranchId === "" && selectedProgramAreaId === ""
+                                            : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
