@@ -7,7 +7,7 @@ import {validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
-    {id: "placeholder_report_1", label: "Placeholder report 1"},
+    {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
     {id: "placeholder_report_2", label: "Placeholder report 2"},
     {id: "placeholder_report_3", label: "Placeholder report 3"},
 ];
@@ -20,7 +20,7 @@ export function ReportsModal() {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGenerate = async () => {
-        if (selectedReport !== "workspaces_by_office_code") {
+        if (selectedReport !== "workspaces_by_office_code" && selectedReport !== "mobile_devices_by_office_code") {
             setError(null);
             return;
         }
@@ -35,7 +35,14 @@ export function ReportsModal() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("/api/reports/workspaces", {
+            const endpoint = selectedReport === "mobile_devices_by_office_code"
+                ? "/api/reports/mobile-devices"
+                : "/api/reports/workspaces";
+            const filename = selectedReport === "mobile_devices_by_office_code"
+                ? `mobile-devices-${officeCode}.xlsx`
+                : `workspaces-${officeCode}.xlsx`;
+
+            const response = await fetch(endpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -44,15 +51,24 @@ export function ReportsModal() {
             });
 
             if (!response.ok) {
-                const body = await response.json().catch(() => null);
-                throw new Error(body?.message || "Unable to generate report");
+                const text = await response.text();
+                let message = "Unable to generate report";
+
+                try {
+                    const body = JSON.parse(text);
+                    message = body?.message || message;
+                } catch {
+                    message = text || message;
+                }
+
+                throw new Error(message);
             }
 
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `workspaces-${officeCode}.xlsx`;
+            link.download = filename;
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -104,6 +120,20 @@ export function ReportsModal() {
                     </div>
                 )}
 
+                {selectedReport === "mobile_devices_by_office_code" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                        <label htmlFor="officeCode">Office code</label>
+                        <input
+                            id="officeCode"
+                            name="officeCode"
+                            type="text"
+                            value={officeCode}
+                            onChange={(event) => setOfficeCode(event.target.value)}
+                            style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                        />
+                    </div>
+                )}
+
                 {error && (
                     <div style={{color: "red"}}>{error}</div>
                 )}
@@ -112,7 +142,7 @@ export function ReportsModal() {
                     type="button"
                     variant="secondary"
                     onPress={handleGenerate}
-                    isDisabled={selectedReport === "workspaces_by_office_code" && officeCode === ""}
+                    isDisabled={(selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") && officeCode === ""}
                 >
                     {isLoading ? "Generating..." : "Generate"}
                 </Button>
