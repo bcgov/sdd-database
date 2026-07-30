@@ -9,6 +9,7 @@ const reportOptions = [
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
     {id: "workstation_assets_by_asset_number", label: "Workstation Asset (by Asset Number)"},
+    {id: "workstation_assets_by_office_code_and_model", label: "Workstation Asset (by Office Code and Model)"},
 ];
 
 export function ReportsModal() {
@@ -16,6 +17,7 @@ export function ReportsModal() {
     const [selectedReport, setSelectedReport] = useState<string>(reportOptions[0].id);
     const [officeCode, setOfficeCode] = useState<string>("");
     const [assetNumber, setAssetNumber] = useState<string>("");
+    const [modelName, setModelName] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -26,12 +28,15 @@ export function ReportsModal() {
                 setError(validationError);
                 return;
             }
-        } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
-            const validationError = validateOfficeNumberField(officeCode, "Office code");
-            if (validationError) {
-                setError(validationError);
+        } else if (selectedReport === "workstation_assets_by_office_code_and_model") {
+            const officeValidationError = validateOfficeNumberField(officeCode, "Office code");
+            if (officeValidationError) {
+                setError(officeValidationError);
                 return;
             }
+        } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
+            
+            setError(null);
         } else {
             setError(null);
             return;
@@ -45,15 +50,21 @@ export function ReportsModal() {
                 ? "/api/reports/mobile-devices"
                 : selectedReport === "workstation_assets_by_asset_number"
                     ? "/api/reports/workstations"
-                    : "/api/reports/workspaces";
+                    : selectedReport === "workstation_assets_by_office_code_and_model"
+                        ? "/api/reports/workstations"
+                        : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
                 : selectedReport === "workstation_assets_by_asset_number"
                     ? `workstations-${assetNumber}.xlsx`
-                    : `workspaces-${officeCode}.xlsx`;
+                    : selectedReport === "workstation_assets_by_office_code_and_model"
+                        ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
+                        : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
-                : JSON.stringify({officeCode});
+                : selectedReport === "workstation_assets_by_office_code_and_model"
+                    ? JSON.stringify({officeCode, modelName: modelName.trim() || undefined})
+                    : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -113,6 +124,7 @@ export function ReportsModal() {
                             setSelectedReport(selection);
                             setOfficeCode("");
                             setAssetNumber("");
+                            setModelName("");
                             setError(null);
                         }
                     }}
@@ -160,6 +172,33 @@ export function ReportsModal() {
                     </div>
                 )}
 
+                {selectedReport === "workstation_assets_by_office_code_and_model" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.75rem"}}>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="officeCodeModel">Office code</label>
+                            <input
+                                id="officeCodeModel"
+                                name="officeCodeModel"
+                                type="text"
+                                value={officeCode}
+                                onChange={(event) => setOfficeCode(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="modelName">Model (optional)</label>
+                            <input
+                                id="modelName"
+                                name="modelName"
+                                type="text"
+                                value={modelName}
+                                onChange={(event) => setModelName(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 {error && (
                     <div style={{color: "red"}}>{error}</div>
                 )}
@@ -169,11 +208,9 @@ export function ReportsModal() {
                     variant="secondary"
                     onPress={handleGenerate}
                     isDisabled={
-                        (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code")
-                            ? officeCode === ""
-                            : selectedReport === "workstation_assets_by_asset_number"
-                                ? assetNumber === ""
-                                : false
+                        selectedReport === "workstation_assets_by_asset_number"
+                            ? assetNumber === ""
+                            : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
