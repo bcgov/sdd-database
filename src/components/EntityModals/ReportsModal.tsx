@@ -6,8 +6,10 @@ import {useEffect, useState} from "react";
 import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
+    {id: "records_by_office_code", label: "All Records (by Office Code)"},
     {id: "employees_by_name_or_idir", label: "Employee (by Name or IDIR)"},
     {id: "employees_by_branch_or_program_area", label: "Employees (by Branch or Program Area)"},
+    {id: "employees_by_job_title", label: "Employees (by Position Title)"},
     {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, availability, and Hold Status)"},
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
@@ -29,6 +31,7 @@ export function ReportsModal() {
     const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<string>("");
     const [selectedOfficeCode, setSelectedOfficeCode] = useState<string>("");
     const [selectedJobTitleId, setSelectedJobTitleId] = useState<string>("");
+    const [selectedJobTitleReportId, setSelectedJobTitleReportId] = useState<string>("");
     const [branchOptions, setBranchOptions] = useState<Array<{id: string; label: string}>>([]);
     const [allProgramAreaOptions, setAllProgramAreaOptions] = useState<Array<{id: string; label: string; branchId: string}>>([]);
     const [jobTitleOptions, setJobTitleOptions] = useState<Array<{id: string; label: string}>>([]);
@@ -41,7 +44,7 @@ export function ReportsModal() {
 
     useEffect(() => {
         const loadFilterOptions = async () => {
-            if (selectedReport !== "employees_by_branch_or_program_area") {
+            if (selectedReport !== "employees_by_branch_or_program_area" && selectedReport !== "employees_by_job_title") {
                 return;
             }
 
@@ -106,6 +109,17 @@ export function ReportsModal() {
                 setError("Branch or program area is required");
                 return;
             }
+        } else if (selectedReport === "employees_by_job_title") {
+            if (!selectedJobTitleReportId) {
+                setError("Job title is required");
+                return;
+            }
+        } else if (selectedReport === "records_by_office_code") {
+            const officeValidationError = validateOfficeNumberField(officeCode, "Office code");
+            if (officeValidationError) {
+                setError(officeValidationError);
+                return;
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
             setError(null);
         } else {
@@ -121,13 +135,15 @@ export function ReportsModal() {
                 ? "/api/reports/mobile-devices"
                 : selectedReport === "workspace_holds_by_office_code_and_status"
                     ? "/api/reports/workspaces"
-                    : selectedReport === "employees_by_name_or_idir" || selectedReport === "employees_by_branch_or_program_area"
-                        ? "/api/reports/employees"
-                        : selectedReport === "workstation_assets_by_asset_number"
-                            ? "/api/reports/workstations"
-                            : selectedReport === "workstation_assets_by_office_code_and_model"
+                    : selectedReport === "records_by_office_code"
+                        ? "/api/reports/office"
+                        : selectedReport === "employees_by_name_or_idir" || selectedReport === "employees_by_branch_or_program_area" || selectedReport === "employees_by_job_title"
+                            ? "/api/reports/employees"
+                            : selectedReport === "workstation_assets_by_asset_number"
                                 ? "/api/reports/workstations"
-                                : "/api/reports/workspaces";
+                                : selectedReport === "workstation_assets_by_office_code_and_model"
+                                    ? "/api/reports/workstations"
+                                    : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
                 : selectedReport === "mobile_devices_by_imei"
@@ -138,11 +154,15 @@ export function ReportsModal() {
                             ? `employees-${employeeQuery}.xlsx`
                             : selectedReport === "employees_by_branch_or_program_area"
                                 ? `employees-branch-program-area.xlsx`
-                                : selectedReport === "workstation_assets_by_asset_number"
-                                ? `workstations-${assetNumber}.xlsx`
-                                : selectedReport === "workstation_assets_by_office_code_and_model"
-                                    ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
-                                    : `workspaces-${officeCode}.xlsx`;
+                                : selectedReport === "employees_by_job_title"
+                                    ? `employees-job-title.xlsx`
+                                    : selectedReport === "records_by_office_code"
+                                        ? `office-records-${officeCode}.xlsx`
+                                        : selectedReport === "workstation_assets_by_asset_number"
+                                            ? `workstations-${assetNumber}.xlsx`
+                                            : selectedReport === "workstation_assets_by_office_code_and_model"
+                                                ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
+                                                : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
                 : selectedReport === "workstation_assets_by_office_code_and_model"
@@ -155,7 +175,11 @@ export function ReportsModal() {
                                 ? JSON.stringify({query: employeeQuery.trim()})
                                 : selectedReport === "employees_by_branch_or_program_area"
                                     ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, officeCode: selectedOfficeCode.trim() || undefined, jobTitleId: selectedJobTitleId || undefined, mode: "branch_or_program_area"})
-                                    : JSON.stringify({officeCode});
+                                    : selectedReport === "employees_by_job_title"
+                                        ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, officeCode: selectedOfficeCode.trim() || undefined, jobTitleId: selectedJobTitleReportId || undefined, mode: "job_title"})
+                                        : selectedReport === "records_by_office_code"
+                                            ? JSON.stringify({officeCode: officeCode.trim().toUpperCase()})
+                                            : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -223,12 +247,13 @@ export function ReportsModal() {
                             setSelectedProgramAreaId("");
                             setSelectedOfficeCode("");
                             setSelectedJobTitleId("");
+                            setSelectedJobTitleReportId("");
                             setError(null);
                         }
                     }}
                 />
 
-                {selectedReport === "workspaces_by_office_code" && (
+                {(selectedReport === "workspaces_by_office_code" || selectedReport === "records_by_office_code") && (
                     <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
                         <label htmlFor="officeCode">Office code</label>
                         <input
@@ -281,6 +306,57 @@ export function ReportsModal() {
                             onChange={(event) => setEmployeeQuery(event.target.value)}
                             style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
                         />
+                    </div>
+                )}
+
+                {selectedReport === "employees_by_job_title" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.75rem"}}>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="jobTitleReportSelect">Position Title</label>
+                            <Select
+                                name="jobTitleReportSelect"
+                                items={jobTitleOptions}
+                                selectedKey={selectedJobTitleReportId}
+                                onSelectionChange={(key) => {
+                                    setSelectedJobTitleReportId(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="jobTitleBranchSelect">Branch (optional)</label>
+                            <Select
+                                name="jobTitleBranchSelect"
+                                items={branchOptions}
+                                selectedKey={selectedBranchId}
+                                onSelectionChange={(key) => {
+                                    const nextValue = key?.toString() ?? "";
+                                    setSelectedBranchId(nextValue);
+                                    setSelectedProgramAreaId("");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="jobTitleProgramAreaSelect">Program Area (optional)</label>
+                            <Select
+                                name="jobTitleProgramAreaSelect"
+                                items={visibleProgramAreaOptions}
+                                selectedKey={selectedProgramAreaId}
+                                onSelectionChange={(key) => {
+                                    setSelectedProgramAreaId(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="jobTitleOfficeCodeSelect">Office Code (optional)</label>
+                            <input
+                                id="jobTitleOfficeCodeSelect"
+                                name="jobTitleOfficeCodeSelect"
+                                type="text"
+                                value={selectedOfficeCode}
+                                onChange={(event) => setSelectedOfficeCode(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            />
+                        </div>
                     </div>
                 )}
 
@@ -426,7 +502,11 @@ export function ReportsModal() {
                                         ? employeeQuery === ""
                                         : selectedReport === "employees_by_branch_or_program_area"
                                             ? selectedBranchId === "" && selectedProgramAreaId === ""
-                                            : false
+                                            : selectedReport === "employees_by_job_title"
+                                                ? selectedJobTitleReportId === ""
+                                                : selectedReport === "office_records_by_office_code"
+                                                    ? officeCode === ""
+                                                    : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
