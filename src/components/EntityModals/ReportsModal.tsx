@@ -10,7 +10,8 @@ const reportOptions = [
     {id: "employees_by_name_or_idir", label: "Employee (by Name or IDIR)"},
     {id: "employees_by_branch_or_program_area", label: "Employees (by Branch or Program Area)"},
     {id: "employees_by_job_title", label: "Employees (by Position Title)"},
-    {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, availability, and Hold Status)"},
+    {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, Availability)"},
+    {id: "unassigned_workspaces_by_office_code_and_status", label: "Unassigned Workspaces (by Office Code and Hold Status)"},
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
     {id: "mobile_devices_by_imei", label: "Mobile Devices (by IMEI)"},
@@ -26,6 +27,7 @@ export function ReportsModal() {
     const [modelName, setModelName] = useState<string>("");
     const [imei, setImei] = useState<string>("");
     const [availabilityStatus, setAvailabilityStatus] = useState<string>("");
+    const [workspaceAvailability, setWorkspaceAvailability] = useState<string>("");
     const [employeeQuery, setEmployeeQuery] = useState<string>("");
     const [selectedBranchId, setSelectedBranchId] = useState<string>("");
     const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<string>("");
@@ -35,6 +37,7 @@ export function ReportsModal() {
     const [branchOptions, setBranchOptions] = useState<Array<{id: string; label: string}>>([]);
     const [allProgramAreaOptions, setAllProgramAreaOptions] = useState<Array<{id: string; label: string; branchId: string}>>([]);
     const [jobTitleOptions, setJobTitleOptions] = useState<Array<{id: string; label: string}>>([]);
+    const [workspaceStatusOptions, setWorkspaceStatusOptions] = useState<Array<{id: string; label: string}>>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -44,27 +47,58 @@ export function ReportsModal() {
 
     useEffect(() => {
         const loadFilterOptions = async () => {
-            if (selectedReport !== "employees_by_branch_or_program_area" && selectedReport !== "employees_by_job_title") {
+            if (selectedReport === "employees_by_branch_or_program_area" || selectedReport === "employees_by_job_title") {
+                try {
+                    const response = await fetch("/api/reports/employee-filters");
+                    if (!response.ok) {
+                        throw new Error("Unable to load branch and program area options");
+                    }
+
+                    const data = await response.json();
+                    setBranchOptions(data.branches.map((branch: {id: number; name: string}) => ({id: branch.id.toString(), label: branch.name})));
+                    setAllProgramAreaOptions(data.programAreas.map((programArea: {id: number; name: string; branch_id: number}) => ({
+                        id: programArea.id.toString(),
+                        label: programArea.name,
+                        branchId: programArea.branch_id.toString(),
+                    })));
+                    setJobTitleOptions(data.jobTitles.map((jobTitle: {id: number; name: string}) => ({id: jobTitle.id.toString(), label: jobTitle.name})));
+                } catch (e) {
+                    setError(e instanceof Error ? e.message : "Unable to load branch and program area options");
+                }
+            }
+
+            if (selectedReport === "workspace_holds_by_office_code_and_status") {
+                try {
+                    const response = await fetch("/api/reports/workspace-status-options");
+                    if (!response.ok) {
+                        throw new Error("Unable to load workspace status options");
+                    }
+
+                    const data = await response.json();
+                    setWorkspaceStatusOptions(data.statuses.map((status: {value: string; label: string}) => ({id: status.value, label: status.label})));
+                } catch (e) {
+                    setError(e instanceof Error ? e.message : "Unable to load workspace status options");
+                }
+            }
+
+            if (selectedReport === "unassigned_workspaces_by_office_code_and_status") {
+                try {
+                    const response = await fetch("/api/reports/unassigned-workspace-status-options");
+                    if (!response.ok) {
+                        throw new Error("Unable to load unassigned workspace status options");
+                    }
+
+                    const data = await response.json();
+                    setWorkspaceStatusOptions(data.statuses.map((status: {value: string; label: string}) => ({id: status.value, label: status.label})));
+                } catch (e) {
+                    setError(e instanceof Error ? e.message : "Unable to load unassigned workspace status options");
+                }
+            }
+
+            if (selectedReport !== "employees_by_branch_or_program_area" && selectedReport !== "employees_by_job_title" && selectedReport !== "workspace_holds_by_office_code_and_status" && selectedReport !== "unassigned_workspaces_by_office_code_and_status") {
                 return;
             }
 
-            try {
-                const response = await fetch("/api/reports/employee-filters");
-                if (!response.ok) {
-                    throw new Error("Unable to load branch and program area options");
-                }
-
-                const data = await response.json();
-                setBranchOptions(data.branches.map((branch: {id: number; name: string}) => ({id: branch.id.toString(), label: branch.name})));
-                setAllProgramAreaOptions(data.programAreas.map((programArea: {id: number; name: string; branch_id: number}) => ({
-                    id: programArea.id.toString(),
-                    label: programArea.name,
-                    branchId: programArea.branch_id.toString(),
-                })));
-                setJobTitleOptions(data.jobTitles.map((jobTitle: {id: number; name: string}) => ({id: jobTitle.id.toString(), label: jobTitle.name})));
-            } catch (e) {
-                setError(e instanceof Error ? e.message : "Unable to load branch and program area options");
-            }
         };
 
         if (isOpen) {
@@ -95,6 +129,11 @@ export function ReportsModal() {
                 setError("Office code is required");
                 return;
             }
+            if (!availabilityStatus) {
+                setError("Availability is required");
+                return;
+            }
+        } else if (selectedReport === "unassigned_workspaces_by_office_code_and_status") {
             if (!availabilityStatus) {
                 setError("Availability is required");
                 return;
@@ -133,7 +172,7 @@ export function ReportsModal() {
         try {
             const endpoint = selectedReport === "mobile_devices_by_office_code" || selectedReport === "mobile_devices_by_imei"
                 ? "/api/reports/mobile-devices"
-                : selectedReport === "workspace_holds_by_office_code_and_status"
+                : selectedReport === "workspace_holds_by_office_code_and_status" || selectedReport === "unassigned_workspaces_by_office_code_and_status"
                     ? "/api/reports/workspaces"
                     : selectedReport === "records_by_office_code"
                         ? "/api/reports/office"
@@ -149,8 +188,10 @@ export function ReportsModal() {
                 : selectedReport === "mobile_devices_by_imei"
                     ? `mobile-devices-${imei}.xlsx`
                     : selectedReport === "workspace_holds_by_office_code_and_status"
-                        ? `workspace-holds-${officeCode}-${availabilityStatus}.xlsx`
-                        : selectedReport === "employees_by_name_or_idir"
+                        ? `workspace-holds-${officeCode || "all"}-${availabilityStatus}.xlsx`
+                        : selectedReport === "unassigned_workspaces_by_office_code_and_status"
+                            ? `unassigned-workspaces-${officeCode || "all"}-${availabilityStatus}.xlsx`
+                            : selectedReport === "employees_by_name_or_idir"
                             ? `employees-${employeeQuery}.xlsx`
                             : selectedReport === "employees_by_branch_or_program_area"
                                 ? `employees-branch-program-area.xlsx`
@@ -170,8 +211,10 @@ export function ReportsModal() {
                     : selectedReport === "mobile_devices_by_imei"
                         ? JSON.stringify({imei: imei.trim()})
                         : selectedReport === "workspace_holds_by_office_code_and_status"
-                            ? JSON.stringify({officeCode, availability: availabilityStatus})
-                            : selectedReport === "employees_by_name_or_idir"
+                            ? JSON.stringify({officeCode, availability: availabilityStatus, employeeIdPopulated: workspaceAvailability || undefined})
+                            : selectedReport === "unassigned_workspaces_by_office_code_and_status"
+                                ? JSON.stringify({officeCode: officeCode.trim() || undefined, availability: availabilityStatus, mode: "unassigned"})
+                                : selectedReport === "employees_by_name_or_idir"
                                 ? JSON.stringify({query: employeeQuery.trim()})
                                 : selectedReport === "employees_by_branch_or_program_area"
                                     ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, officeCode: selectedOfficeCode.trim() || undefined, jobTitleId: selectedJobTitleId || undefined, mode: "branch_or_program_area"})
@@ -242,6 +285,7 @@ export function ReportsModal() {
                             setModelName("");
                             setImei("");
                             setAvailabilityStatus("");
+                            setWorkspaceAvailability("");
                             setEmployeeQuery("");
                             setSelectedBranchId("");
                             setSelectedProgramAreaId("");
@@ -425,19 +469,56 @@ export function ReportsModal() {
                             />
                         </div>
                         <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
-                            <label htmlFor="availabilityStatus">Availability</label>
-                            <select
-                                id="availabilityStatus"
+                            <label htmlFor="availabilityStatus">Hold Status</label>
+                            <Select
                                 name="availabilityStatus"
-                                value={availabilityStatus}
-                                onChange={(event) => setAvailabilityStatus(event.target.value)}
+                                items={workspaceStatusOptions}
+                                selectedKey={availabilityStatus}
+                                onSelectionChange={(key) => {
+                                    setAvailabilityStatus(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="workspaceAvailability">Availability (optional)</label>
+                            <Select
+                                name="workspaceAvailability"
+                                items={[
+                                    {id: "true", label: "True"},
+                                    {id: "false", label: "False"},
+                                ]}
+                                selectedKey={workspaceAvailability}
+                                onSelectionChange={(key) => {
+                                    setWorkspaceAvailability(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {selectedReport === "unassigned_workspaces_by_office_code_and_status" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.75rem"}}>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="workspaceHoldOfficeCode">Office code (optional)</label>
+                            <input
+                                id="workspaceHoldOfficeCode"
+                                name="workspaceHoldOfficeCode"
+                                type="text"
+                                value={officeCode}
+                                onChange={(event) => setOfficeCode(event.target.value)}
                                 style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
-                            >
-                                <option value="">Select...</option>
-                                <option value="available">Available</option>
-                                <option value="occupied">Occupied</option>
-                                <option value="onHold">On Hold</option>
-                            </select>
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="availabilityStatus">Hold Status</label>
+                            <Select
+                                name="availabilityStatus"
+                                items={workspaceStatusOptions}
+                                selectedKey={availabilityStatus}
+                                onSelectionChange={(key) => {
+                                    setAvailabilityStatus(key?.toString() ?? "");
+                                }}
+                            />
                         </div>
                     </div>
                 )}
@@ -498,7 +579,9 @@ export function ReportsModal() {
                                 ? imei === ""
                                 : selectedReport === "workspace_holds_by_office_code_and_status"
                                     ? officeCode === "" || availabilityStatus === ""
-                                    : selectedReport === "employees_by_name_or_idir"
+                                    : selectedReport === "unassigned_workspaces_by_office_code_and_status"
+                                        ? availabilityStatus === ""
+                                        : selectedReport === "employees_by_name_or_idir"
                                         ? employeeQuery === ""
                                         : selectedReport === "employees_by_branch_or_program_area"
                                             ? selectedBranchId === "" && selectedProgramAreaId === ""
