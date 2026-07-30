@@ -4,18 +4,21 @@ import {prisma} from "@/db/client";
 export async function POST(req: Request) {
     const body = await req.json();
     const officeCode = body?.officeCode?.toString()?.trim();
+    const imei = body?.imei?.toString()?.trim();
 
-    if (!officeCode) {
-        return new Response(JSON.stringify({message: "Office code is required"}), {
+    if (!officeCode && !imei) {
+        return new Response(JSON.stringify({message: "Office code or IMEI is required"}), {
             status: 400,
             headers: {"Content-Type": "application/json"}
         });
     }
 
+    const whereClause = officeCode
+        ? { office_number: officeCode }
+        : { imei };
+
     const mobileDevices = await prisma.mobileDevice.findMany({
-        where: {
-            office_number: officeCode,
-        },
+        where: whereClause,
         include: {
             assigned_employee: {
                 select: {
@@ -71,7 +74,7 @@ export async function POST(req: Request) {
         const employee = device.assigned_employee;
 
         sheet.addRow([
-            officeCode,
+            officeCode ?? "",
             employee ? `${employee.first_name} ${employee.last_name}` : "",
             employee?.idir ?? "",
             employee?.program_area?.branch?.name ?? "",
@@ -87,11 +90,13 @@ export async function POST(req: Request) {
 
     const buffer = await workbook.xlsx.writeBuffer();
 
+    const filenameBase = officeCode || imei || "all";
+
     return new Response(buffer, {
         status: 200,
         headers: {
             "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="mobile-devices-${officeCode}.xlsx"`
+            "Content-Disposition": `attachment; filename="mobile-devices-${filenameBase}.xlsx"`
         }
     });
 }
