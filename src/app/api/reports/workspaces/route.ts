@@ -1,21 +1,37 @@
 import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
+import {Prisma} from "@/generated/prisma/client";
 
 export async function POST(req: Request) {
     const body = await req.json();
     const officeCode = body?.officeCode?.toString()?.trim();
+    const availability = body?.availability?.toString()?.trim();
 
-    if (!officeCode) {
+    if (!officeCode && !availability) {
         return new Response(JSON.stringify({message: "Office code is required"}), {
             status: 400,
             headers: {"Content-Type": "application/json"}
         });
     }
 
+    const whereClause: Prisma.WorkspaceWhereInput = {};
+
+    if (officeCode) {
+        whereClause.office_number = officeCode;
+    }
+
+    if (availability) {
+        if (availability === "available") {
+            whereClause.employee_id = null;
+        } else if (availability === "occupied") {
+            whereClause.employee_id = { not: null };
+        } else if (availability === "onHold") {
+            whereClause.is_on_hold = true;
+        }
+    }
+
     const workspaces = await prisma.workspace.findMany({
-        where: {
-            office_number: officeCode,
-        },
+        where: whereClause,
         orderBy: {
             workspace_number: "asc",
         },
@@ -59,7 +75,8 @@ export async function POST(req: Request) {
         "Workspace Number",
         "Category",
         "Desk Type",
-        "On Hold",
+        "Available",
+        "Hold Status",
         "Assigned Employee",
         "Employee IDIR",
         "Employee ID",
@@ -78,7 +95,8 @@ export async function POST(req: Request) {
             workspace.workspace_number,
             workspace.category?.name ?? "",
             workspace.desk_type?.name ?? "",
-            workspace.is_on_hold ? "Yes" : "No",
+            workspace.employee_id === null ? "Yes" : "No",
+            workspace.is_on_hold ? "On Hold" : "Not On Hold",
             employee ? `${employee.first_name} ${employee.last_name}` : "",
             employee?.idir ?? "",
             employee?.employee_id ?? "",
@@ -92,11 +110,13 @@ export async function POST(req: Request) {
 
     const buffer = await workbook.xlsx.writeBuffer();
 
+    const filenameBase = officeCode || "all";
+
     return new Response(buffer, {
         status: 200,
         headers: {
             "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="workspaces-${officeCode}.xlsx"`
+            "Content-Disposition": `attachment; filename="workspaces-${filenameBase}.xlsx"`
         }
     });
 }

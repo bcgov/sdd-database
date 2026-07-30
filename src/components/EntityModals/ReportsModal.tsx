@@ -6,6 +6,7 @@ import {useState} from "react";
 import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
+    {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, availability, and Hold Status)"},
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
     {id: "mobile_devices_by_imei", label: "Mobile Devices (by IMEI)"},
@@ -20,6 +21,7 @@ export function ReportsModal() {
     const [assetNumber, setAssetNumber] = useState<string>("");
     const [modelName, setModelName] = useState<string>("");
     const [imei, setImei] = useState<string>("");
+    const [availabilityStatus, setAvailabilityStatus] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -41,6 +43,15 @@ export function ReportsModal() {
                 setError("IMEI is required");
                 return;
             }
+        } else if (selectedReport === "workspace_holds_by_office_code_and_status") {
+            if (!officeCode.trim()) {
+                setError("Office code is required");
+                return;
+            }
+            if (!availabilityStatus) {
+                setError("Availability is required");
+                return;
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
             setError(null);
         } else {
@@ -54,27 +65,33 @@ export function ReportsModal() {
         try {
             const endpoint = selectedReport === "mobile_devices_by_office_code" || selectedReport === "mobile_devices_by_imei"
                 ? "/api/reports/mobile-devices"
-                : selectedReport === "workstation_assets_by_asset_number"
-                    ? "/api/reports/workstations"
-                    : selectedReport === "workstation_assets_by_office_code_and_model"
+                : selectedReport === "workspace_holds_by_office_code_and_status"
+                    ? "/api/reports/workspaces"
+                    : selectedReport === "workstation_assets_by_asset_number"
                         ? "/api/reports/workstations"
-                        : "/api/reports/workspaces";
+                        : selectedReport === "workstation_assets_by_office_code_and_model"
+                            ? "/api/reports/workstations"
+                            : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
                 : selectedReport === "mobile_devices_by_imei"
                     ? `mobile-devices-${imei}.xlsx`
-                    : selectedReport === "workstation_assets_by_asset_number"
-                        ? `workstations-${assetNumber}.xlsx`
-                        : selectedReport === "workstation_assets_by_office_code_and_model"
-                            ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
-                            : `workspaces-${officeCode}.xlsx`;
+                    : selectedReport === "workspace_holds_by_office_code_and_status"
+                        ? `workspace-holds-${officeCode}-${availabilityStatus}.xlsx`
+                        : selectedReport === "workstation_assets_by_asset_number"
+                            ? `workstations-${assetNumber}.xlsx`
+                            : selectedReport === "workstation_assets_by_office_code_and_model"
+                                ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
+                                : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
                 : selectedReport === "workstation_assets_by_office_code_and_model"
                     ? JSON.stringify({officeCode, modelName: modelName.trim() || undefined})
                     : selectedReport === "mobile_devices_by_imei"
                         ? JSON.stringify({imei: imei.trim()})
-                        : JSON.stringify({officeCode});
+                        : selectedReport === "workspace_holds_by_office_code_and_status"
+                            ? JSON.stringify({officeCode, availability: availabilityStatus})
+                            : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -136,6 +153,7 @@ export function ReportsModal() {
                             setAssetNumber("");
                             setModelName("");
                             setImei("");
+                            setAvailabilityStatus("");
                             setError(null);
                         }
                     }}
@@ -180,6 +198,37 @@ export function ReportsModal() {
                             onChange={(event) => setImei(event.target.value)}
                             style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
                         />
+                    </div>
+                )}
+
+                {selectedReport === "workspace_holds_by_office_code_and_status" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.75rem"}}>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="workspaceHoldOfficeCode">Office code</label>
+                            <input
+                                id="workspaceHoldOfficeCode"
+                                name="workspaceHoldOfficeCode"
+                                type="text"
+                                value={officeCode}
+                                onChange={(event) => setOfficeCode(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="availabilityStatus">Availability</label>
+                            <select
+                                id="availabilityStatus"
+                                name="availabilityStatus"
+                                value={availabilityStatus}
+                                onChange={(event) => setAvailabilityStatus(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            >
+                                <option value="">Select...</option>
+                                <option value="available">Available</option>
+                                <option value="occupied">Occupied</option>
+                                <option value="onHold">On Hold</option>
+                            </select>
+                        </div>
                     </div>
                 )}
 
@@ -237,7 +286,9 @@ export function ReportsModal() {
                             ? assetNumber === ""
                             : selectedReport === "mobile_devices_by_imei"
                                 ? imei === ""
-                                : false
+                                : selectedReport === "workspace_holds_by_office_code_and_status"
+                                    ? officeCode === "" || availabilityStatus === ""
+                                    : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
