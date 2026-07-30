@@ -1,4 +1,8 @@
-import { AccordionGroup, Form } from "@bcgov/design-system-react-components";
+import {
+  AccordionGroup,
+  Callout,
+  Form,
+} from "@bcgov/design-system-react-components";
 
 import { WorkstationDetails } from "@/components/EntityForms/Workstation/WorkstationDetails";
 import { WorkstationSearchResult } from "@/types";
@@ -18,6 +22,7 @@ interface WorkstationFormProps {
   onError: (error: string) => void;
 
   onClose: () => void;
+  onDelete?: () => void;
 }
 
 export function WorkstationForm({
@@ -27,6 +32,7 @@ export function WorkstationForm({
   onError,
 
   onClose,
+  onDelete,
 }: WorkstationFormProps) {
   const isEditMode = !!workstation;
 
@@ -61,6 +67,15 @@ export function WorkstationForm({
           paddingRight: "0.5rem",
         }}
       >
+        {hasAssignedEmployee && (
+          <div style={{ marginTop: "1rem" }}>
+            <Callout
+              title="Info"
+              description="Workstations can only be deleted when they are not assigned to an employee. To delete this workstation, open the assigned employee's modal and remove the workstation assignment."
+            />
+          </div>
+        )}
+
         <AccordionGroup
           allowsMultipleExpanded
           defaultExpandedKeys={
@@ -94,6 +109,8 @@ export function WorkstationForm({
         isEditMode={isEditMode}
         isPending={isPending}
         onClose={onClose}
+        onDelete={onDelete}
+        isDeleteDisabled={hasAssignedEmployee}
       ></FormActionButtons>
     </Form>
   );

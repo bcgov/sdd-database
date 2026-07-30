@@ -31,7 +31,7 @@ export default function Home() {
     employeeEditor,
     employeeAssign,
     employeeCreateHandlers,
-    employeeDelete,
+    entityDelete,
 
     workspaceActions,
 
@@ -213,15 +213,16 @@ export default function Home() {
             setIsOpen={uiState.setIsEntityModalOpen}
             onSuccess={editHandlers.onEditSuccess}
             onError={editHandlers.onEditError}
-            onDelete={() => employeeDelete.setIsDeleteAlertDialogOpen(true)}
+            onDelete={() => entityDelete.setIsDeleteAlertDialogOpen(true)}
           ></EntityModal>
 
-          {selection.viewedEntity.type === "employee" && (
+          {(selection.viewedEntity.type === "employee" ||
+            selection.viewedEntity.type === "workstation") && (
             <DeleteAlertDialog
-              employee={selection.viewedEntity}
-              isOpen={employeeDelete.isDeleteAlertDialogOpen}
-              setIsOpen={employeeDelete.setIsDeleteAlertDialogOpen}
-              onDelete={employeeDelete.removeEmployeeById}
+              entity={selection.viewedEntity}
+              isOpen={entityDelete.isDeleteAlertDialogOpen}
+              setIsOpen={entityDelete.setIsDeleteAlertDialogOpen}
+              onDelete={entityDelete.removeEntity}
             ></DeleteAlertDialog>
           )}
         </>

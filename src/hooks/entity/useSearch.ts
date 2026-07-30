@@ -1,129 +1,163 @@
-import {useCallback, useOptimistic, useState} from "react";
-import type {Selection} from "@react-types/shared";
+import { useCallback, useOptimistic, useState } from "react";
+import type { Selection } from "@react-types/shared";
 
-import {AssignMode, Entity, SearchOptions} from "@/types";
+import { AssignMode, Entity, SearchOptions } from "@/types";
 
-import {searchOfficesAction} from "@/actions/entities/offices";
-import {searchAllAction} from "@/actions/search";
-import {searchAssignableWorkspacesAction} from "@/actions/entities/workspaces";
-import {searchAssignableWorkstationsAction} from "@/actions/entities/workstation/actions";
-import {searchAssignableMobileDevicesAction} from "@/actions/entities/mobile-device/actions";
-
+import { searchOfficesAction } from "@/actions/entities/offices";
+import { searchAllAction } from "@/actions/search";
+import { searchAssignableWorkspacesAction } from "@/actions/entities/workspaces";
+import { searchAssignableWorkstationsAction } from "@/actions/entities/workstation/actions";
+import { searchAssignableMobileDevicesAction } from "@/actions/entities/mobile-device/actions";
 
 export function useSearch() {
+  const [searchPhrase, setSearchPhrase] = useState<string>();
+  const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(
+    new Set<string>(),
+  );
+  const [searchResults, setSearchResults] = useState<Entity[]>([]);
 
-    const [searchPhrase, setSearchPhrase] = useState<string>();
-    const [selectedFilterTags, setSelectedFilterTags] = useState<Selection>(new Set<string>());
-    const [searchResults, setSearchResults] = useState<Entity[]>([]);
+  const [assignMode, setAssignMode] = useState<AssignMode>("none");
+  const [assignEmployeeOfficeNumber, setAssignEmployeeOfficeNumber] =
+    useState<string>();
+  const [assignEmployeeProgramAreaId, setAssignEmployeeProgramAreaId] =
+    useState<number>();
+  const [
+    assignEmployeeWorkstationAssetTags,
+    setAssignEmployeeWorkstationAssetTags,
+  ] = useState<string[]>([]);
 
-    const [assignMode, setAssignMode] = useState<AssignMode>("none");
-    const [assignEmployeeOfficeNumber, setAssignEmployeeOfficeNumber] = useState<string>();
-    const [assignEmployeeProgramAreaId, setAssignEmployeeProgramAreaId] = useState<number>();
-    const [assignEmployeeWorkstationAssetTags, setAssignEmployeeWorkstationAssetTags] = useState<string[]>([])
+  const filteredSearchResults = searchResults.filter((item) => {
+    if (selectedFilterTags === "all") return true;
 
-    const filteredSearchResults = searchResults.filter((item) => {
+    if (selectedFilterTags.size === 0) return true;
 
-        if (selectedFilterTags === "all") return true;
+    return selectedFilterTags.has(item.type);
+  });
 
-        if (selectedFilterTags.size === 0) return true;
+  // A reducer function used for optimistic deletes.
+  const excludeEntityReducer = (
+    filteredSearchResults: Entity[],
+    deletedEntity: Entity,
+  ) =>
+    filteredSearchResults.filter((item) => {
+      if (item.type !== deletedEntity.type) return true;
 
-        return selectedFilterTags.has(item.type)
-    })
+      if (item.type === "employee" && deletedEntity.type === "employee") {
+        return item.id !== deletedEntity.id;
+      }
 
-    // A reducer function used for optimistic deletes.
-    const excludeEmployeeReducer = (filteredSearchResults: Entity[], id: number) => filteredSearchResults.filter(
-        item =>
-            // keep every non-employee item
-            item.type !== "employee" ||
-            // ...or keep an employee whose ID does not match the one we're deleting
-            item.id !== id
-    )
+      if (item.type === "workstation" && deletedEntity.type === "workstation") {
+        return item.asset_tag !== deletedEntity.asset_tag;
+      }
 
-    const [optimisticSearchResults, setOptimisticSearchResults] = useOptimistic(filteredSearchResults, excludeEmployeeReducer);
+      return true;
+    });
 
-    const userHasSearchedOnce = () => searchPhrase !== undefined;
+  const [optimisticSearchResults, setOptimisticSearchResults] = useOptimistic(
+    filteredSearchResults,
+    excludeEntityReducer,
+  );
 
-    const searchResultsAreEmpty = searchResults.length === 0
+  const userHasSearchedOnce = () => searchPhrase !== undefined;
 
-    const handleSearch = async (formData: FormData) => {
-        const query = formData.get("search") as string;
-        setSearchPhrase(query);
+  const searchResultsAreEmpty = searchResults.length === 0;
 
-        await runSearch(query);
-    }
+  const handleSearch = async (formData: FormData) => {
+    const query = formData.get("search") as string;
+    setSearchPhrase(query);
 
-    const runSearch = useCallback(async (query?: string, options?: SearchOptions) => {
+    await runSearch(query);
+  };
 
-        const effectiveMode = options?.modeOverride ?? assignMode
-        const effectiveEmployeeOfficeNumber = options?.employeeOfficeNumber ?? assignEmployeeOfficeNumber
-        const effectiveEmployeeProgramAreaId = options?.employeeProgramAreaId ?? assignEmployeeProgramAreaId
-        const effectiveEmployeeWorkstationAssetTags = options?.employeeWorkstationAssetTags ?? assignEmployeeWorkstationAssetTags
+  const runSearch = useCallback(
+    async (query?: string, options?: SearchOptions) => {
+      const effectiveMode = options?.modeOverride ?? assignMode;
+      const effectiveEmployeeOfficeNumber =
+        options?.employeeOfficeNumber ?? assignEmployeeOfficeNumber;
+      const effectiveEmployeeProgramAreaId =
+        options?.employeeProgramAreaId ?? assignEmployeeProgramAreaId;
+      const effectiveEmployeeWorkstationAssetTags =
+        options?.employeeWorkstationAssetTags ??
+        assignEmployeeWorkstationAssetTags;
 
-        let results: Entity[] = [];
+      let results: Entity[] = [];
 
-        switch (effectiveMode) {
+      switch (effectiveMode) {
+        case "office":
+          results = await searchOfficesAction(query);
+          break;
 
-            case "office":
-                results = await searchOfficesAction(query)
-                break
+        case "workspace":
+          if (
+            !effectiveEmployeeOfficeNumber ||
+            effectiveEmployeeProgramAreaId == null
+          ) {
+            console.warn(
+              "Workspace search requested without employee office number or employee program area id",
+            );
+            results = [];
+          } else {
+            results = await searchAssignableWorkspacesAction(
+              effectiveEmployeeOfficeNumber,
+              effectiveEmployeeProgramAreaId,
+              query,
+            );
+          }
+          break;
 
-            case "workspace":
-                if (!effectiveEmployeeOfficeNumber || effectiveEmployeeProgramAreaId == null) {
-                    console.warn("Workspace search requested without employee office number or employee program area id")
-                    results = []
-                } else {
-                    results = await searchAssignableWorkspacesAction(
-                        effectiveEmployeeOfficeNumber,
-                        effectiveEmployeeProgramAreaId,
-                        query
-                    )
-                }
-                break
+        case "workstation":
+          const workstationResults =
+            await searchAssignableWorkstationsAction(query);
 
-            case "workstation":
-                const workstationResults = await searchAssignableWorkstationsAction(query);
+          results = workstationResults.filter(
+            (workstation) =>
+              !effectiveEmployeeWorkstationAssetTags.includes(
+                workstation.asset_tag,
+              ),
+          );
 
-                results = workstationResults.filter(workstation =>
-                    !effectiveEmployeeWorkstationAssetTags.includes(workstation.asset_tag)
-                )
+          break;
 
-                break
+        case "mobileDevice":
+          results = await searchAssignableMobileDevicesAction(query);
+          break;
 
-            case "mobileDevice":
-                results = await searchAssignableMobileDevicesAction(query)
-                break
+        case "none":
+          results = await searchAllAction(query);
+          break;
+      }
 
-            case "none":
-                results = await searchAllAction(query)
-                break
-        }
+      setSearchResults(results);
+    },
+    [
+      assignMode,
+      assignEmployeeOfficeNumber,
+      assignEmployeeProgramAreaId,
+      assignEmployeeWorkstationAssetTags,
+    ],
+  );
 
-        setSearchResults(results);
-    }, [
-        assignMode,
-        assignEmployeeOfficeNumber,
-        assignEmployeeProgramAreaId,
-        assignEmployeeWorkstationAssetTags,
-    ]);
+  const refreshSearchResults = useCallback(
+    () => runSearch(searchPhrase),
+    [runSearch, searchPhrase],
+  );
 
-    const refreshSearchResults = useCallback(() => runSearch(searchPhrase), [runSearch, searchPhrase])
+  return {
+    selectedFilterTags,
+    setSelectedFilterTags,
 
-    return {
-        selectedFilterTags,
-        setSelectedFilterTags,
+    assignMode,
+    setAssignMode,
+    setAssignEmployeeOfficeNumber,
+    setAssignEmployeeProgramAreaId,
+    setAssignEmployeeWorkstationAssetTags,
 
-        assignMode,
-        setAssignMode,
-        setAssignEmployeeOfficeNumber,
-        setAssignEmployeeProgramAreaId,
-        setAssignEmployeeWorkstationAssetTags,
-
-        optimisticSearchResults,
-        setOptimisticSearchResults,
-        userHasSearchedOnce,
-        searchResultsAreEmpty,
-        handleSearch,
-        runSearch,
-        refreshSearchResults
-    }
+    optimisticSearchResults,
+    setOptimisticSearchResults,
+    userHasSearchedOnce,
+    searchResultsAreEmpty,
+    handleSearch,
+    runSearch,
+    refreshSearchResults,
+  };
 }

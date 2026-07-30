@@ -1,44 +1,59 @@
-import {AlertDialog, Button, DialogTrigger, Modal} from "@bcgov/design-system-react-components";
+import {
+  AlertDialog,
+  Button,
+  DialogTrigger,
+  Modal,
+} from "@bcgov/design-system-react-components";
 
-import {EmployeeEntity} from "@/types";
-import {getEmployeeFullName} from "@/domain/employees";
-
+import { EmployeeEntity, WorkstationEntity } from "@/types";
+import { getEmployeeFullName } from "@/domain/employees";
 
 interface DeleteAlertDialogProps {
-    employee: EmployeeEntity
-    isOpen: boolean
-    setIsOpen: (isDeleteAlertDialogOpen: boolean) => void
-    /**
-     * Optimistic-aware callback coming from `useSearch / useEntityActions`.
-     * It **first** updates local UI (useOptimistic) and **then** calls the
-     * server action that actually deletes the record.
-     */
-    onDelete: (id: number) => Promise<void>;
+  entity: EmployeeEntity | WorkstationEntity;
+  isOpen: boolean;
+  setIsOpen: (isDeleteAlertDialogOpen: boolean) => void;
+  onDelete: () => Promise<void>;
 }
 
-export function DeleteAlertDialog({employee, isOpen, setIsOpen, onDelete}: DeleteAlertDialogProps) {
+export function DeleteAlertDialog({
+  entity,
+  isOpen,
+  setIsOpen,
+  onDelete,
+}: DeleteAlertDialogProps) {
+  const entityName =
+    entity.type === "employee"
+      ? getEmployeeFullName(entity)
+      : `${entity.workstation_model.name} (${entity.asset_tag})`;
+  const entityTypeName =
+    entity.type === "employee" ? "employee" : "workstation";
 
-    return (
-        <DialogTrigger isOpen={isOpen}
-                       onOpenChange={setIsOpen}>
-            <Modal>
-                <AlertDialog role="alertdialog" variant="destructive"
-                             title={`Are you sure you want to delete this employee '${getEmployeeFullName(employee)}'?`}
-                             buttons={[
-                                 <Button key="alert-dialog-button-1"
-                                         type="submit"
-                                         danger
-                                         onPress={() => onDelete(employee.id)}>
-                                     Delete
-                                 </Button>,
-                                 <Button key="alert-dialog-button-2"
-                                         variant="secondary"
-                                         onPress={() => setIsOpen(false)}>
-                                     Cancel
-                                 </Button>
-                             ]}>
-                </AlertDialog>
-            </Modal>
-        </DialogTrigger>
-    )
+  return (
+    <DialogTrigger isOpen={isOpen} onOpenChange={setIsOpen}>
+      <Modal>
+        <AlertDialog
+          role="alertdialog"
+          variant="destructive"
+          title={`Are you sure you want to delete this ${entityTypeName} '${entityName}'?`}
+          buttons={[
+            <Button
+              key="alert-dialog-button-1"
+              type="submit"
+              danger
+              onPress={onDelete}
+            >
+              Delete
+            </Button>,
+            <Button
+              key="alert-dialog-button-2"
+              variant="secondary"
+              onPress={() => setIsOpen(false)}
+            >
+              Cancel
+            </Button>,
+          ]}
+        ></AlertDialog>
+      </Modal>
+    </DialogTrigger>
+  );
 }

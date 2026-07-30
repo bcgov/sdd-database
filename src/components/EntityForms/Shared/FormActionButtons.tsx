@@ -5,6 +5,7 @@ interface FormActionButtonsProps {
   isPending: boolean;
   onClose: () => void;
   onDelete?: () => void;
+  isDeleteDisabled?: boolean;
 }
 
 export function FormActionButtons({
@@ -12,15 +13,24 @@ export function FormActionButtons({
   isPending,
   onClose,
   onDelete,
+  isDeleteDisabled = false,
 }: FormActionButtonsProps) {
+  const deleteButton = (
+    <Button
+      size="large"
+      variant="secondary"
+      danger
+      isDisabled={isDeleteDisabled || isPending}
+      onPress={onDelete}
+    >
+      Delete
+    </Button>
+  );
+
   return (
     <ButtonGroup>
       {/* Only render the delete button in the edit modal */}
-      {isEditMode && onDelete ? (
-        <Button size="large" variant="secondary" danger onPress={onDelete}>
-          Delete
-        </Button>
-      ) : null}
+      {isEditMode && onDelete ? deleteButton : null}
       <ButtonGroup alignment="end">
         <Button size="large" variant="secondary" onPress={onClose}>
           Cancel

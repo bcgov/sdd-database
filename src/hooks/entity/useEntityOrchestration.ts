@@ -1,247 +1,279 @@
-import {useEntityUIState} from "@/hooks/entity/useEntityUIState";
-import {useEntityAlerts} from "@/hooks/entity/useEntityAlerts";
-import {useSearch} from "@/hooks/entity/useSearch";
-import {useEmployeeEditorState} from "@/hooks/employee/useEmployeeEditorState";
-import {useEntitySelectionState} from "@/hooks/entity/useEntitySelectionState";
-import {useEmployeeAssignActions} from "@/hooks/employee/useEmployeeAssignActions";
-import {useEntityEditCallbacks} from "@/hooks/entity/useEntityEditCallbacks";
-import {useWorkspaceActions} from "@/hooks/workspace/useWorkspaceActions";
-import {useWorkstationCreateState} from "@/hooks/workstation/useWorkstationCreateState";
-import {useEmployeeDeleteState} from "@/hooks/employee/useEmployeeDeleteState";
-import {useEntityCreateCallbacks} from "@/hooks/entity/useEntityCreateCallbacks";
-import {useMobileDeviceCreateState} from "@/hooks/mobile-device/useMobileDeviceCreateState";
-import {useCallback} from "react";
-
+import { useEntityUIState } from "@/hooks/entity/useEntityUIState";
+import { useEntityAlerts } from "@/hooks/entity/useEntityAlerts";
+import { useSearch } from "@/hooks/entity/useSearch";
+import { useEmployeeEditorState } from "@/hooks/employee/useEmployeeEditorState";
+import { useEntitySelectionState } from "@/hooks/entity/useEntitySelectionState";
+import { useEmployeeAssignActions } from "@/hooks/employee/useEmployeeAssignActions";
+import { useEntityEditCallbacks } from "@/hooks/entity/useEntityEditCallbacks";
+import { useWorkspaceActions } from "@/hooks/workspace/useWorkspaceActions";
+import { useWorkstationCreateState } from "@/hooks/workstation/useWorkstationCreateState";
+import { useEntityDeleteState } from "@/hooks/entity/useEntityDeleteState";
+import { useEntityCreateCallbacks } from "@/hooks/entity/useEntityCreateCallbacks";
+import { useMobileDeviceCreateState } from "@/hooks/mobile-device/useMobileDeviceCreateState";
+import { useCallback } from "react";
+import { deleteEmployeeAction } from "@/actions/entities/employee/actions";
+import { deleteWorkstationAction } from "@/actions/entities/workstation/actions";
+import { getEmployeeFullName } from "@/domain/employees";
 
 export function useEntityOrchestration() {
+  const uiState = useEntityUIState();
+  const { setIsEntityModalOpen } = uiState;
 
-    const uiState = useEntityUIState()
-    const {setIsEntityModalOpen} = uiState
+  const alertsAll = useEntityAlerts();
+  const { alert, setAlert, addSuccessAlert, addErrorAlert } = alertsAll;
 
-    const alertsAll = useEntityAlerts()
-    const {alert, setAlert, addSuccessAlert, addErrorAlert} = alertsAll
+  // Expose only what page needs from alerts
+  const alerts = { alert, setAlert };
 
-    // Expose only what page needs from alerts
-    const alerts = {alert, setAlert}
+  const searchAll = useSearch();
 
-    const searchAll = useSearch()
+  const {
+    selectedFilterTags,
+    setSelectedFilterTags,
 
-    const {
-        selectedFilterTags,
-        setSelectedFilterTags,
+    assignMode,
+    setAssignMode,
+    setAssignEmployeeOfficeNumber,
+    setAssignEmployeeProgramAreaId,
+    setAssignEmployeeWorkstationAssetTags,
 
-        assignMode,
-        setAssignMode,
-        setAssignEmployeeOfficeNumber,
-        setAssignEmployeeProgramAreaId,
-        setAssignEmployeeWorkstationAssetTags,
+    optimisticSearchResults,
+    setOptimisticSearchResults,
+    userHasSearchedOnce,
+    searchResultsAreEmpty,
+    handleSearch,
+    runSearch,
+    refreshSearchResults,
+  } = searchAll;
 
-        optimisticSearchResults,
-        setOptimisticSearchResults,
-        userHasSearchedOnce,
-        searchResultsAreEmpty,
-        handleSearch,
-        runSearch,
-        refreshSearchResults,
-    } = searchAll
+  // Expose only what page needs from search
+  const search = {
+    selectedFilterTags,
+    setSelectedFilterTags,
+    assignMode,
+    optimisticSearchResults,
+    userHasSearchedOnce,
+    searchResultsAreEmpty,
+    handleSearch,
+  };
 
-    // Expose only what page needs from search
-    const search = {
-        selectedFilterTags,
-        setSelectedFilterTags,
-        assignMode,
-        optimisticSearchResults,
-        userHasSearchedOnce,
-        searchResultsAreEmpty,
-        handleSearch
-    }
+  // employee draft/modal state
+  const employeeEditorAll = useEmployeeEditorState();
 
-    // employee draft/modal state
-    const employeeEditorAll = useEmployeeEditorState()
+  const {
+    draftNewEmployee,
+    setDraftNewEmployee,
 
-    const {
-        draftNewEmployee,
-        setDraftNewEmployee,
+    draftEditEmployee,
+    setDraftEditEmployee,
+    clearDraftEditEmployee,
 
-        draftEditEmployee,
-        setDraftEditEmployee,
-        clearDraftEditEmployee,
+    isAddNewEmployeeModalOpen,
+    openCloseAddNewEmployeeModal,
+  } = employeeEditorAll;
 
-        isAddNewEmployeeModalOpen,
-        openCloseAddNewEmployeeModal,
-    } = employeeEditorAll
+  const employeeEditor = {
+    draftNewEmployee,
+    draftEditEmployee,
+    isAddNewEmployeeModalOpen,
+    openCloseAddNewEmployeeModal,
+  };
 
-    const employeeEditor = {
-        draftNewEmployee,
-        draftEditEmployee,
-        isAddNewEmployeeModalOpen,
-        openCloseAddNewEmployeeModal
-    }
+  // generic viewed entity state
+  const selectionAll = useEntitySelectionState({
+    setIsEntityModalOpen,
+    clearDraftEditEmployee,
+  });
 
-    // generic viewed entity state
-    const selectionAll = useEntitySelectionState({
-        setIsEntityModalOpen,
-        clearDraftEditEmployee
-    })
+  const {
+    viewedEntity,
+    setViewedEntity,
 
-    const {
-        viewedEntity,
-        setViewedEntity,
+    openSearchResultEntityModal,
+  } = selectionAll;
 
-        openSearchResultEntityModal
-    } = selectionAll
+  // viewed entity state
+  const selection = {
+    viewedEntity,
+    openSearchResultEntityModal,
+  };
 
-    // viewed entity state
-    const selection = {
-        viewedEntity,
-        openSearchResultEntityModal,
-    }
+  // derive the entity type from the selected item (or fallback)
+  const entityType = viewedEntity?.type ?? "employee";
 
-    // derive the entity type from the selected item (or fallback)
-    const entityType = viewedEntity?.type ?? "employee";
+  // edit success/error callbacks
+  const editHandlers = useEntityEditCallbacks({
+    entityType,
+    refreshSearchResults,
+    setIsEntityModalOpen,
+    addSuccessAlert,
+    addErrorAlert,
+  });
 
-    // edit success/error callbacks
-    const editHandlers = useEntityEditCallbacks({
-        entityType,
-        refreshSearchResults,
-        setIsEntityModalOpen,
-        addSuccessAlert,
-        addErrorAlert
-    })
+  // employee assignment workflow
+  const employeeAssign = useEmployeeAssignActions({
+    viewedEntity,
+    setViewedEntity,
 
-    // employee assignment workflow
-    const employeeAssign = useEmployeeAssignActions({
-        viewedEntity,
-        setViewedEntity,
+    draftNewEmployee,
+    setDraftNewEmployee,
 
-        draftNewEmployee,
-        setDraftNewEmployee,
+    draftEditEmployee,
+    setDraftEditEmployee,
 
-        draftEditEmployee,
-        setDraftEditEmployee,
+    isAddNewEmployeeModalOpen,
+    openCloseAddNewEmployeeModal,
+    setIsEntityModalOpen,
 
-        isAddNewEmployeeModalOpen,
-        openCloseAddNewEmployeeModal,
-        setIsEntityModalOpen,
+    setSelectedFilterTags,
 
-        setSelectedFilterTags,
+    setAssignMode,
+    setAssignEmployeeOfficeNumber,
+    setAssignEmployeeProgramAreaId,
+    setAssignEmployeeWorkstationAssetTags,
 
-        setAssignMode,
-        setAssignEmployeeOfficeNumber,
-        setAssignEmployeeProgramAreaId,
-        setAssignEmployeeWorkstationAssetTags,
+    runSearch,
 
-        runSearch,
+    addErrorAlert,
+  });
 
-        addErrorAlert
-    })
+  const closeEmployeeCreateModal = useCallback(() => {
+    openCloseAddNewEmployeeModal(false);
+  }, [openCloseAddNewEmployeeModal]);
 
-    const closeEmployeeCreateModal = useCallback(() => {
-        openCloseAddNewEmployeeModal(false)
-    }, [openCloseAddNewEmployeeModal])
+  const closeEmployeeCreateModalOnError = useCallback(() => {
+    openCloseAddNewEmployeeModal(false, false);
+  }, [openCloseAddNewEmployeeModal]);
 
-    const closeEmployeeCreateModalOnError = useCallback(() => {
-        openCloseAddNewEmployeeModal(false, false)
-    }, [openCloseAddNewEmployeeModal])
+  // add employee success/error callbacks
+  const employeeCreateHandlers = useEntityCreateCallbacks({
+    entityType: "employee",
 
-    // add employee success/error callbacks
-    const employeeCreateHandlers = useEntityCreateCallbacks({
-        entityType: "employee",
+    refreshSearchResults,
 
-        refreshSearchResults,
+    closeCreateModal: closeEmployeeCreateModal,
+    closeCreateModalOnError: closeEmployeeCreateModalOnError,
 
-        closeCreateModal: closeEmployeeCreateModal,
-        closeCreateModalOnError: closeEmployeeCreateModalOnError,
+    addSuccessAlert,
+    addErrorAlert,
+  });
 
-        addSuccessAlert,
-        addErrorAlert
-    })
+  const deletableViewedEntity =
+    viewedEntity?.type === "employee" || viewedEntity?.type === "workstation"
+      ? viewedEntity
+      : undefined;
 
-    // employee delete state/action
-    const employeeDelete = useEmployeeDeleteState({
-        viewedEntity,
+  const deleteEntity = useCallback(
+    async (
+      entity: typeof deletableViewedEntity extends undefined
+        ? never
+        : NonNullable<typeof deletableViewedEntity>,
+    ) => {
+      if (entity.type === "employee") {
+        return deleteEmployeeAction(entity.id);
+      }
 
-        setIsEntityModalOpen,
+      return deleteWorkstationAction(entity.asset_tag);
+    },
+    [],
+  );
 
-        setOptimisticSearchResults,
-        refreshSearchResults,
+  const getEntityName = useCallback(
+    (entity: NonNullable<typeof deletableViewedEntity>) => {
+      return entity.type === "employee"
+        ? getEmployeeFullName(entity)
+        : entity.asset_tag;
+    },
+    [],
+  );
 
-        addSuccessAlert,
-        addErrorAlert
-    })
+  const entityDelete = useEntityDeleteState({
+    viewedEntity: deletableViewedEntity,
 
-    // workspace hold/unhold
-    const workspaceActions = useWorkspaceActions({
-        viewedEntity,
-        setViewedEntity,
+    setIsEntityModalOpen,
 
-        refreshSearchResults,
+    setOptimisticSearchResults,
+    refreshSearchResults,
 
-        addSuccessAlert,
-        addErrorAlert
-    })
+    addSuccessAlert,
+    addErrorAlert,
 
-    // workstation add modal state
-    const workstationCreate = useWorkstationCreateState()
-    const {openCloseAddNewWorkstationModal} = workstationCreate
+    deleteEntity,
+    getEntityName,
+  });
 
-    const closeWorkstationCreateModal = useCallback(() => {
-        openCloseAddNewWorkstationModal(false)
-    }, [openCloseAddNewWorkstationModal])
+  // workspace hold/unhold
+  const workspaceActions = useWorkspaceActions({
+    viewedEntity,
+    setViewedEntity,
 
-    // add workstation success/error callbacks
-    const workstationCreateHandlers = useEntityCreateCallbacks({
-        entityType: "workstation",
+    refreshSearchResults,
 
-        refreshSearchResults,
+    addSuccessAlert,
+    addErrorAlert,
+  });
 
-        closeCreateModal: closeWorkstationCreateModal,
+  // workstation add modal state
+  const workstationCreate = useWorkstationCreateState();
+  const { openCloseAddNewWorkstationModal } = workstationCreate;
 
-        addSuccessAlert,
-        addErrorAlert
-    })
+  const closeWorkstationCreateModal = useCallback(() => {
+    openCloseAddNewWorkstationModal(false);
+  }, [openCloseAddNewWorkstationModal]);
 
-    // mobile device add modal state
-    const mobileDeviceCreate = useMobileDeviceCreateState()
-    const {openCloseAddNewMobileDeviceModal} = mobileDeviceCreate
+  // add workstation success/error callbacks
+  const workstationCreateHandlers = useEntityCreateCallbacks({
+    entityType: "workstation",
 
-    const closeMobileDeviceCreateModal = useCallback(() => {
-        openCloseAddNewMobileDeviceModal(false)
-    }, [openCloseAddNewMobileDeviceModal])
+    refreshSearchResults,
 
-    // add mobile device success/error callbacks
-    const mobileDeviceCreateHandlers = useEntityCreateCallbacks({
-        entityType: "mobileDevice",
+    closeCreateModal: closeWorkstationCreateModal,
 
-        refreshSearchResults,
+    addSuccessAlert,
+    addErrorAlert,
+  });
 
-        closeCreateModal: closeMobileDeviceCreateModal,
+  // mobile device add modal state
+  const mobileDeviceCreate = useMobileDeviceCreateState();
+  const { openCloseAddNewMobileDeviceModal } = mobileDeviceCreate;
 
-        addSuccessAlert,
-        addErrorAlert
-    })
+  const closeMobileDeviceCreateModal = useCallback(() => {
+    openCloseAddNewMobileDeviceModal(false);
+  }, [openCloseAddNewMobileDeviceModal]);
 
-    return {
-        selection,
-        uiState,
+  // add mobile device success/error callbacks
+  const mobileDeviceCreateHandlers = useEntityCreateCallbacks({
+    entityType: "mobileDevice",
 
-        search,
+    refreshSearchResults,
 
-        editHandlers,
+    closeCreateModal: closeMobileDeviceCreateModal,
 
-        employeeEditor,
-        employeeAssign,
-        employeeCreateHandlers,
-        employeeDelete,
+    addSuccessAlert,
+    addErrorAlert,
+  });
 
-        workspaceActions,
+  return {
+    selection,
+    uiState,
 
-        workstationCreate,
-        workstationCreateHandlers,
+    search,
 
-        mobileDeviceCreate,
-        mobileDeviceCreateHandlers,
+    editHandlers,
 
-        alerts
-    }
+    employeeEditor,
+    employeeAssign,
+    employeeCreateHandlers,
+    entityDelete,
+
+    workspaceActions,
+
+    workstationCreate,
+    workstationCreateHandlers,
+
+    mobileDeviceCreate,
+    mobileDeviceCreateHandlers,
+
+    alerts,
+  };
 }

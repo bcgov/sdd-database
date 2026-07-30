@@ -1,121 +1,116 @@
-import {AssignMode, EmployeeEntity, Entity} from "@/types";
-import {EmployeeModal} from "@/components/EntityModals/EmployeeModal";
-import {OfficeModal} from "@/components/EntityModals/OfficeModal";
-import {WorkspaceModal} from "@/components/EntityModals/WorkspaceModal";
-import {WorkstationModal} from "@/components/EntityModals/WorkstationModal";
-import {MobileDeviceModal} from "@/components/EntityModals/MobileDeviceModal";
-import {MobilePlanModal} from "@/components/EntityModals/MobilePlanModal";
-
+import { AssignMode, EmployeeEntity, Entity } from "@/types";
+import { EmployeeModal } from "@/components/EntityModals/EmployeeModal";
+import { OfficeModal } from "@/components/EntityModals/OfficeModal";
+import { WorkspaceModal } from "@/components/EntityModals/WorkspaceModal";
+import { WorkstationModal } from "@/components/EntityModals/WorkstationModal";
+import { MobileDeviceModal } from "@/components/EntityModals/MobileDeviceModal";
+import { MobilePlanModal } from "@/components/EntityModals/MobilePlanModal";
 
 interface EntityModalProps {
-    viewedEntity: Entity
-    draftEditEmployee?: EmployeeEntity
+  viewedEntity: Entity;
+  draftEditEmployee?: EmployeeEntity;
 
-    activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
+  activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>;
 
-    handleRemoveWorkspace: () => void
-    handleRemoveWorkstation: (assetTag: string) => void
-    handleRemoveMobileDevice: () => void
+  handleRemoveWorkspace: () => void;
+  handleRemoveWorkstation: (assetTag: string) => void;
+  handleRemoveMobileDevice: () => void;
 
-    handleHoldWorkspace: () => void
-    handleRemoveWorkspaceHold: () => void
+  handleHoldWorkspace: () => void;
+  handleRemoveWorkspaceHold: () => void;
 
-    isOpen: boolean
-    setIsOpen: (isOpen: boolean) => void
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 
-    onSuccess: () => void
-    onError: (error: string) => void
-    onDelete: () => void
+  onSuccess: () => void;
+  onError: (error: string) => void;
+  onDelete: () => void;
 }
 
 export function EntityModal({
-                                viewedEntity,
-                                draftEditEmployee,
+  viewedEntity,
+  draftEditEmployee,
 
-                                activateAssignMode,
+  activateAssignMode,
 
-                                handleRemoveWorkspace,
-                                handleRemoveWorkstation,
-                                handleRemoveMobileDevice,
+  handleRemoveWorkspace,
+  handleRemoveWorkstation,
+  handleRemoveMobileDevice,
 
-                                handleHoldWorkspace,
-                                handleRemoveWorkspaceHold,
+  handleHoldWorkspace,
+  handleRemoveWorkspaceHold,
 
-                                isOpen,
-                                setIsOpen,
+  isOpen,
+  setIsOpen,
 
-                                onSuccess,
-                                onError,
-                                onDelete,
-                            }: EntityModalProps) {
+  onSuccess,
+  onError,
+  onDelete,
+}: EntityModalProps) {
+  switch (viewedEntity.type) {
+    case "employee":
+      return (
+        <EmployeeModal
+          employee={draftEditEmployee ?? viewedEntity}
+          activateAssignMode={activateAssignMode}
+          handleRemoveWorkspace={handleRemoveWorkspace}
+          handleRemoveWorkstation={handleRemoveWorkstation}
+          handleRemoveMobileDevice={handleRemoveMobileDevice}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          onSuccess={onSuccess}
+          onError={onError}
+          onDelete={onDelete}
+        ></EmployeeModal>
+      );
 
-    switch (viewedEntity.type) {
-        case "employee":
-            return (
-                <EmployeeModal employee={draftEditEmployee ?? viewedEntity}
+    case "office":
+      return (
+        <OfficeModal
+          office={viewedEntity}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        ></OfficeModal>
+      );
 
-                               activateAssignMode={activateAssignMode}
-
-                               handleRemoveWorkspace={handleRemoveWorkspace}
-                               handleRemoveWorkstation={handleRemoveWorkstation}
-                               handleRemoveMobileDevice={handleRemoveMobileDevice}
-
-                               isOpen={isOpen}
-                               setIsOpen={setIsOpen}
-
-                               onSuccess={onSuccess}
-                               onError={onError}
-                               onDelete={onDelete}
-                >
-                </EmployeeModal>
-            )
-
-        case "office":
-            return (
-                <OfficeModal office={viewedEntity}
-                             isOpen={isOpen}
-                             setIsOpen={setIsOpen}
-                >
-                </OfficeModal>
-            )
-
-        case "workspace":
-            return (
-                <WorkspaceModal workspace={viewedEntity}
-                                onHold={handleHoldWorkspace}
-                                onRemoveHold={handleRemoveWorkspaceHold}
-                                isOpen={isOpen}
-                                setIsOpen={setIsOpen}
-                >
-                </WorkspaceModal>
-            )
-        case "workstation":
-            return (
-                <WorkstationModal workstation={viewedEntity}
-                                  isOpen={isOpen}
-                                  setIsOpen={setIsOpen}
-                                  onSuccess={onSuccess}
-                                  onError={onError}
-                >
-                </WorkstationModal>
-            )
-        case "mobileDevice":
-            return (
-                <MobileDeviceModal mobileDevice={viewedEntity}
-                                   isOpen={isOpen}
-                                   setIsOpen={setIsOpen}
-                                   onSuccess={onSuccess}
-                                   onError={onError}
-                >
-                </MobileDeviceModal>
-            )
-        case "mobilePlan":
-            return (
-                <MobilePlanModal mobilePlan={viewedEntity}
-                                   isOpen={isOpen}
-                                   setIsOpen={setIsOpen}
-                >
-                </MobilePlanModal>
-            )
-    }
+    case "workspace":
+      return (
+        <WorkspaceModal
+          workspace={viewedEntity}
+          onHold={handleHoldWorkspace}
+          onRemoveHold={handleRemoveWorkspaceHold}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        ></WorkspaceModal>
+      );
+    case "workstation":
+      return (
+        <WorkstationModal
+          workstation={viewedEntity}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          onSuccess={onSuccess}
+          onError={onError}
+          onDelete={onDelete}
+        ></WorkstationModal>
+      );
+    case "mobileDevice":
+      return (
+        <MobileDeviceModal
+          mobileDevice={viewedEntity}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          onSuccess={onSuccess}
+          onError={onError}
+        ></MobileDeviceModal>
+      );
+    case "mobilePlan":
+      return (
+        <MobilePlanModal
+          mobilePlan={viewedEntity}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        ></MobilePlanModal>
+      );
+  }
 }
