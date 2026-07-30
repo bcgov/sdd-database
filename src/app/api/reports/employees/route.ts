@@ -12,41 +12,65 @@ export async function POST(req: Request) {
         });
     }
 
-    const employees = await prisma.employee.findMany({
-        where: {
-            OR: [
+    const normalizedQuery = query.trim().toLowerCase();
+    const words = normalizedQuery.split(/\s+/).filter(Boolean);
+
+    const whereClause: any = {
+        OR: [
+            {
+                first_name: {
+                    contains: query,
+                    mode: "insensitive",
+                },
+            },
+            {
+                last_name: {
+                    contains: query,
+                    mode: "insensitive",
+                },
+            },
+            {
+                idir: {
+                    contains: query,
+                    mode: "insensitive",
+                },
+            },
+            {
+                employee_id: {
+                    contains: query,
+                    mode: "insensitive",
+                },
+            },
+            {
+                alternate_name: {
+                    contains: query,
+                    mode: "insensitive",
+                },
+            },
+        ],
+    };
+
+    if (words.length >= 2) {
+        whereClause.OR.push({
+            AND: [
                 {
                     first_name: {
-                        contains: query,
+                        contains: words[0],
                         mode: "insensitive",
                     },
                 },
                 {
                     last_name: {
-                        contains: query,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    idir: {
-                        contains: query,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    employee_id: {
-                        contains: query,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    alternate_name: {
-                        contains: query,
+                        contains: words[words.length - 1],
                         mode: "insensitive",
                     },
                 },
             ],
-        },
+        });
+    }
+
+    const employees = await prisma.employee.findMany({
+        where: whereClause,
         include: {
             program_area: {
                 select: {
@@ -104,7 +128,62 @@ export async function POST(req: Request) {
         orderBy: {
             last_name: "asc",
         },
-    });
+    }) as Array<{
+        id: number;
+        idir: string | null;
+        first_name: string;
+        alternate_name: string | null;
+        last_name: string;
+        employee_id: string | null;
+        is_on_leave: boolean;
+        notes: string | null;
+        office_number: string;
+        program_area_id: number;
+        job_title_id: number | null;
+        workspace_assignment_type_id: number | null;
+        program_area?: {
+            name: string | null;
+            branch?: {
+                name: string | null;
+            } | null;
+        } | null;
+        job_title?: {
+            name: string | null;
+        } | null;
+        assigned_office?: {
+            office_number: string;
+            office_name: string;
+        } | null;
+        workspace?: {
+            office_number: string;
+            workspace_number: string;
+            is_on_hold: boolean;
+            notes: string | null;
+            category?: {
+                name: string | null;
+            } | null;
+            desk_type?: {
+                name: string | null;
+            } | null;
+        } | null;
+        workstations?: Array<{
+            asset_tag: string;
+            notes: string | null;
+            workstation_model?: {
+                name: string | null;
+            } | null;
+        }> | null;
+        mobile_device?: {
+            imei: string | null;
+            notes: string | null;
+            mobile_device_model?: {
+                name: string | null;
+            } | null;
+            current_office?: {
+                office_number: string;
+            } | null;
+        } | null;
+    }>;
 
     const workbook = new Workbook();
     const sheet = workbook.addWorksheet("Employees");
@@ -136,9 +215,10 @@ export async function POST(req: Request) {
     ]);
 
     employees.forEach((employee) => {
-        const workstationAssetTags = employee.workstations.map((workstation) => workstation.asset_tag).join(" | ");
-        const workstationModels = employee.workstations.map((workstation) => workstation.workstation_model?.name ?? "").join(" | ");
-        const workstationNotes = employee.workstations.map((workstation) => workstation.notes ?? "").join(" | ");
+        const workstations = employee.workstations ?? [];
+        const workstationAssetTags = workstations.map((workstation) => workstation.asset_tag).join(" | ");
+        const workstationModels = workstations.map((workstation) => workstation.workstation_model?.name ?? "").join(" | ");
+        const workstationNotes = workstations.map((workstation) => workstation.notes ?? "").join(" | ");
 
         sheet.addRow([
             employee.first_name,
