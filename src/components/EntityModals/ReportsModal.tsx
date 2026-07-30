@@ -3,31 +3,37 @@
 import {Button, Select, Heading} from "@bcgov/design-system-react-components";
 import {ModalDialog} from "@/components/ModalDialog";
 import {useState} from "react";
-import {validateOfficeNumberField} from "@/validators";
+import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
-    {id: "placeholder_report_2", label: "Placeholder report 2"},
-    {id: "placeholder_report_3", label: "Placeholder report 3"},
+    {id: "workstation_assets_by_asset_number", label: "Workstation Asset (by Asset Number)"},
 ];
 
 export function ReportsModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState<string>(reportOptions[0].id);
     const [officeCode, setOfficeCode] = useState<string>("");
+    const [assetNumber, setAssetNumber] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGenerate = async () => {
-        if (selectedReport !== "workspaces_by_office_code" && selectedReport !== "mobile_devices_by_office_code") {
+        if (selectedReport === "workstation_assets_by_asset_number") {
+            const validationError = validateAssetTagField(assetNumber, "Asset number");
+            if (validationError) {
+                setError(validationError);
+                return;
+            }
+        } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
+            const validationError = validateOfficeNumberField(officeCode, "Office code");
+            if (validationError) {
+                setError(validationError);
+                return;
+            }
+        } else {
             setError(null);
-            return;
-        }
-
-        const validationError = validateOfficeNumberField(officeCode, "Office code");
-        if (validationError) {
-            setError(validationError);
             return;
         }
 
@@ -37,17 +43,24 @@ export function ReportsModal() {
         try {
             const endpoint = selectedReport === "mobile_devices_by_office_code"
                 ? "/api/reports/mobile-devices"
-                : "/api/reports/workspaces";
+                : selectedReport === "workstation_assets_by_asset_number"
+                    ? "/api/reports/workstations"
+                    : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
-                : `workspaces-${officeCode}.xlsx`;
+                : selectedReport === "workstation_assets_by_asset_number"
+                    ? `workstations-${assetNumber}.xlsx`
+                    : `workspaces-${officeCode}.xlsx`;
+            const body = selectedReport === "workstation_assets_by_asset_number"
+                ? JSON.stringify({assetTag: assetNumber.trim()})
+                : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({officeCode}),
+                body,
             });
 
             if (!response.ok) {
@@ -98,10 +111,9 @@ export function ReportsModal() {
                         if (key != null) {
                             const selection = key.toString();
                             setSelectedReport(selection);
-                            if (selection !== "workspaces_by_office_code") {
-                                setOfficeCode("");
-                                setError(null);
-                            }
+                            setOfficeCode("");
+                            setAssetNumber("");
+                            setError(null);
                         }
                     }}
                 />
@@ -134,6 +146,20 @@ export function ReportsModal() {
                     </div>
                 )}
 
+                {selectedReport === "workstation_assets_by_asset_number" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                        <label htmlFor="Asset Number">Asset Tag</label>
+                        <input
+                            id="assetNumber"
+                            name="assetNumber"
+                            type="text"
+                            value={assetNumber}
+                            onChange={(event) => setAssetNumber(event.target.value)}
+                            style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                        />
+                    </div>
+                )}
+
                 {error && (
                     <div style={{color: "red"}}>{error}</div>
                 )}
@@ -142,7 +168,13 @@ export function ReportsModal() {
                     type="button"
                     variant="secondary"
                     onPress={handleGenerate}
-                    isDisabled={(selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") && officeCode === ""}
+                    isDisabled={
+                        (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code")
+                            ? officeCode === ""
+                            : selectedReport === "workstation_assets_by_asset_number"
+                                ? assetNumber === ""
+                                : false
+                    }
                 >
                     {isLoading ? "Generating..." : "Generate"}
                 </Button>
