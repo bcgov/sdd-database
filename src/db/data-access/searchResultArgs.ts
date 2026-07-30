@@ -67,6 +67,7 @@ export const mobileDeviceSearchResultArgs = {
             select: {
                 id: true,
                 phone_number: true,
+                status: true
             }
         },
         assigned_employee: {
@@ -77,6 +78,7 @@ export const mobileDeviceSearchResultArgs = {
 
 export const mobilePlanSearchResultArgs = {
     include: {
+        status: true,
         assigned_mobile_device: {
             select: assignedMobileDevicePreviewSelect
         }

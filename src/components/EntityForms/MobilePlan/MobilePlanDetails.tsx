@@ -1,13 +1,15 @@
-import { Accordion, TextField } from "@bcgov/design-system-react-components"
+import {Accordion, TextField, ToggleButton, ToggleButtonGroup} from "@bcgov/design-system-react-components"
 import {formatMobilePlanPhoneNumber} from "@/domain/mobilePlans";
 
 
 interface MobilePlanDetailsProps {
     phoneNumber: string
+    planStatus: string
 }
 
 export function MobilePlanDetails({
-                                      phoneNumber
+                                      phoneNumber,
+                                      planStatus,
                                   }: MobilePlanDetailsProps) {
 
     return (
@@ -18,8 +20,22 @@ export function MobilePlanDetails({
                 <TextField label="Phone Number"
                            isReadOnly
                            defaultValue={formatMobilePlanPhoneNumber(phoneNumber)}
-                           >
+                >
                 </TextField>
+            </div>
+
+            <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
+                <ToggleButtonGroup label="Plan Status"
+                                   isDisabled
+                                   disallowEmptySelection
+                                   selectedKeys={[planStatus]}
+                                   style={{width: "fit-content"}}
+                >
+                    <ToggleButton id="Active">Active</ToggleButton>
+                    <ToggleButton id="Suspended">Suspended</ToggleButton>
+                    <ToggleButton id="Cancelled">Cancelled</ToggleButton>
+                    <ToggleButton id="Investigate">Investigate</ToggleButton>
+                </ToggleButtonGroup>
             </div>
         </Accordion>
     )

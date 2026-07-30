@@ -63,7 +63,7 @@ export function FilterTags({selectedFilterTags, setSelectedFilterTags, disableFi
                         },
                         {
                             id: "mobilePlan",
-                            textValue: "Mobile Plan",
+                            textValue: "Mobile Plans",
                             size: "medium",
                             color: "grey",
                         }
