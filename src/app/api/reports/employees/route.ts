@@ -7,6 +7,8 @@ export async function POST(req: Request) {
     const mode = body?.mode?.toString();
     const branchId = body?.branchId?.toString();
     const programAreaId = body?.programAreaId?.toString();
+    const officeCode = body?.officeCode?.toString()?.trim();
+    const jobTitleId = body?.jobTitleId?.toString();
 
     if (mode !== "branch_or_program_area" && !query) {
         return new Response(JSON.stringify({message: "Name or IDIR is required"}), {
@@ -147,6 +149,14 @@ export async function POST(req: Request) {
             }
 
             if (selectedProgramAreaId !== undefined && employee.program_area?.id !== selectedProgramAreaId) {
+                return false;
+            }
+
+            if (officeCode && employee.assigned_office?.office_number?.toLowerCase() !== officeCode.toLowerCase()) {
+                return false;
+            }
+
+            if (jobTitleId && employee.job_title?.id !== Number(jobTitleId)) {
                 return false;
             }
 

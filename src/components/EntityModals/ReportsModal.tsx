@@ -27,8 +27,11 @@ export function ReportsModal() {
     const [employeeQuery, setEmployeeQuery] = useState<string>("");
     const [selectedBranchId, setSelectedBranchId] = useState<string>("");
     const [selectedProgramAreaId, setSelectedProgramAreaId] = useState<string>("");
+    const [selectedOfficeCode, setSelectedOfficeCode] = useState<string>("");
+    const [selectedJobTitleId, setSelectedJobTitleId] = useState<string>("");
     const [branchOptions, setBranchOptions] = useState<Array<{id: string; label: string}>>([]);
     const [allProgramAreaOptions, setAllProgramAreaOptions] = useState<Array<{id: string; label: string; branchId: string}>>([]);
+    const [jobTitleOptions, setJobTitleOptions] = useState<Array<{id: string; label: string}>>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -55,6 +58,7 @@ export function ReportsModal() {
                     label: programArea.name,
                     branchId: programArea.branch_id.toString(),
                 })));
+                setJobTitleOptions(data.jobTitles.map((jobTitle: {id: number; name: string}) => ({id: jobTitle.id.toString(), label: jobTitle.name})));
             } catch (e) {
                 setError(e instanceof Error ? e.message : "Unable to load branch and program area options");
             }
@@ -150,7 +154,7 @@ export function ReportsModal() {
                             : selectedReport === "employees_by_name_or_idir"
                                 ? JSON.stringify({query: employeeQuery.trim()})
                                 : selectedReport === "employees_by_branch_or_program_area"
-                                    ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, mode: "branch_or_program_area"})
+                                    ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, officeCode: selectedOfficeCode.trim() || undefined, jobTitleId: selectedJobTitleId || undefined, mode: "branch_or_program_area"})
                                     : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
@@ -217,6 +221,8 @@ export function ReportsModal() {
                             setEmployeeQuery("");
                             setSelectedBranchId("");
                             setSelectedProgramAreaId("");
+                            setSelectedOfficeCode("");
+                            setSelectedJobTitleId("");
                             setError(null);
                         }
                     }}
@@ -301,6 +307,28 @@ export function ReportsModal() {
                                 selectedKey={selectedProgramAreaId}
                                 onSelectionChange={(key) => {
                                     setSelectedProgramAreaId(key?.toString() ?? "");
+                                }}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="officeCodeSelect">Office Code (optional)</label>
+                            <input
+                                id="officeCodeSelect"
+                                name="officeCodeSelect"
+                                type="text"
+                                value={selectedOfficeCode}
+                                onChange={(event) => setSelectedOfficeCode(event.target.value)}
+                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                            />
+                        </div>
+                        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                            <label htmlFor="jobTitleSelect">Job Title (optional)</label>
+                            <Select
+                                name="jobTitleSelect"
+                                items={jobTitleOptions}
+                                selectedKey={selectedJobTitleId}
+                                onSelectionChange={(key) => {
+                                    setSelectedJobTitleId(key?.toString() ?? "");
                                 }}
                             />
                         </div>

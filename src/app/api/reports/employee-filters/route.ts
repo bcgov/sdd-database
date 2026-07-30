@@ -1,7 +1,7 @@
 import {prisma} from "@/db/client";
 
 export async function GET() {
-    const [branches, programAreas] = await Promise.all([
+    const [branches, programAreas, jobTitles] = await Promise.all([
         prisma.branch.findMany({
             select: {
                 id: true,
@@ -21,9 +21,18 @@ export async function GET() {
                 name: "asc",
             },
         }),
+        prisma.jobTitle.findMany({
+            select: {
+                id: true,
+                name: true,
+            },
+            orderBy: {
+                name: "asc",
+            },
+        }),
     ]);
 
-    return new Response(JSON.stringify({branches, programAreas}), {
+    return new Response(JSON.stringify({branches, programAreas, jobTitles}), {
         status: 200,
         headers: {
             "Content-Type": "application/json",
