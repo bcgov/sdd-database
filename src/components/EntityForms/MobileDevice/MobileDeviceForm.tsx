@@ -87,17 +87,20 @@ export function MobileDeviceForm({
             mobileDeviceStatus={mobileDeviceStatus}
           ></MobileDeviceDetails>
 
-                {mobileDevice?.mobile_plan && (
-                    <MobilePlanDetails phoneNumber={mobileDevice.mobile_plan.phone_number}
-                                       planStatus={mobileDevice.mobile_plan.status.name}
-                    >
-                    </MobilePlanDetails>
-                )}
+          {mobileDevice?.mobile_plan && (
+            <MobilePlanDetails
+              phoneNumber={mobileDevice.mobile_plan.phone_number}
+              planStatus={mobileDevice.mobile_plan.status.name}
+            ></MobilePlanDetails>
+          )}
 
-                {mobileDevice?.assigned_employee &&
-                    <AssignedEmployeeDetails assignedEmployee={mobileDevice.assigned_employee}/>}
-
-            </AccordionGroup>
+          {mobileDevice?.assigned_employee && (
+            <AssignedEmployeeDetails
+              assignedEmployee={mobileDevice.assigned_employee}
+            />
+          )}
+        </AccordionGroup>
+      </div>
 
       <FormActionButtons
         isEditMode={isEditMode}
