@@ -1,34 +1,22 @@
 import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
-import {Prisma} from "@/generated/prisma/client";
+import {buildWorkspaceReportWhereClause} from "./workspaceReportFilters";
 
 export async function POST(req: Request) {
     const body = await req.json();
     const officeCode = body?.officeCode?.toString()?.trim();
     const availability = body?.availability?.toString()?.trim();
+    const employeeIdPopulated = body?.employeeIdPopulated?.toString()?.trim();
+    const isUnassignedReport = body?.mode === "unassigned";
 
-    if (!officeCode && !availability) {
+    if (!officeCode && !availability && !isUnassignedReport) {
         return new Response(JSON.stringify({message: "Office code is required"}), {
             status: 400,
             headers: {"Content-Type": "application/json"}
         });
     }
 
-    const whereClause: Prisma.WorkspaceWhereInput = {};
-
-    if (officeCode) {
-        whereClause.office_number = officeCode;
-    }
-
-    if (availability) {
-        if (availability === "available") {
-            whereClause.employee_id = null;
-        } else if (availability === "occupied") {
-            whereClause.employee_id = { not: null };
-        } else if (availability === "onHold") {
-            whereClause.is_on_hold = true;
-        }
-    }
+    const whereClause = buildWorkspaceReportWhereClause({officeCode, availability, employeeIdPopulated, mode: isUnassignedReport ? "unassigned" : undefined});
 
     const workspaces = await prisma.workspace.findMany({
         where: whereClause,
