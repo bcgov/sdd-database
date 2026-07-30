@@ -4,76 +4,26 @@ import {prisma} from "@/db/client";
 export async function POST(req: Request) {
     const body = await req.json();
     const query = body?.query?.toString()?.trim();
+    const mode = body?.mode?.toString();
+    const branchId = body?.branchId?.toString();
+    const programAreaId = body?.programAreaId?.toString();
 
-    if (!query) {
+    if (mode !== "branch_or_program_area" && !query) {
         return new Response(JSON.stringify({message: "Name or IDIR is required"}), {
             status: 400,
             headers: {"Content-Type": "application/json"}
         });
     }
 
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = query?.trim().toLowerCase() ?? "";
     const words = normalizedQuery.split(/\s+/).filter(Boolean);
 
-    const whereClause: any = {
-        OR: [
-            {
-                first_name: {
-                    contains: query,
-                    mode: "insensitive",
-                },
-            },
-            {
-                last_name: {
-                    contains: query,
-                    mode: "insensitive",
-                },
-            },
-            {
-                idir: {
-                    contains: query,
-                    mode: "insensitive",
-                },
-            },
-            {
-                employee_id: {
-                    contains: query,
-                    mode: "insensitive",
-                },
-            },
-            {
-                alternate_name: {
-                    contains: query,
-                    mode: "insensitive",
-                },
-            },
-        ],
-    };
-
-    if (words.length >= 2) {
-        whereClause.OR.push({
-            AND: [
-                {
-                    first_name: {
-                        contains: words[0],
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    last_name: {
-                        contains: words[words.length - 1],
-                        mode: "insensitive",
-                    },
-                },
-            ],
-        });
-    }
-
-    const employees = await prisma.employee.findMany({
-        where: whereClause,
+    const employees = (await prisma.employee.findMany({
         include: {
             program_area: {
                 select: {
+                    id: true,
+                    branch_id: true,
                     name: true,
                     branch: {
                         select: { name: true },
@@ -142,6 +92,8 @@ export async function POST(req: Request) {
         job_title_id: number | null;
         workspace_assignment_type_id: number | null;
         program_area?: {
+            id: number;
+            branch_id: number;
             name: string | null;
             branch?: {
                 name: string | null;
@@ -183,7 +135,47 @@ export async function POST(req: Request) {
                 office_number: string;
             } | null;
         } | null;
-    }>;
+    }>);
+
+    const filteredEmployees = employees.filter((employee) => {
+        if (mode === "branch_or_program_area") {
+            const selectedBranchId = branchId ? Number(branchId) : undefined;
+            const selectedProgramAreaId = programAreaId ? Number(programAreaId) : undefined;
+
+            if (selectedBranchId !== undefined && employee.program_area?.branch_id !== selectedBranchId) {
+                return false;
+            }
+
+            if (selectedProgramAreaId !== undefined && employee.program_area?.id !== selectedProgramAreaId) {
+                return false;
+            }
+
+            return true;
+        }
+
+        const firstName = employee.first_name?.toLowerCase() ?? "";
+        const lastName = employee.last_name?.toLowerCase() ?? "";
+        const idir = employee.idir?.toLowerCase() ?? "";
+        const employeeId = employee.employee_id?.toLowerCase() ?? "";
+        const alternateName = employee.alternate_name?.toLowerCase() ?? "";
+
+        const matchesDirect =
+            firstName.includes(normalizedQuery) ||
+            lastName.includes(normalizedQuery) ||
+            idir.includes(normalizedQuery) ||
+            employeeId.includes(normalizedQuery) ||
+            alternateName.includes(normalizedQuery);
+
+        if (matchesDirect) {
+            return true;
+        }
+
+        if (words.length >= 2) {
+            return firstName.includes(words[0]) && lastName.includes(words[words.length - 1]);
+        }
+
+        return false;
+    });
 
     const workbook = new Workbook();
     const sheet = workbook.addWorksheet("Employees");
@@ -214,7 +206,7 @@ export async function POST(req: Request) {
         "Notes",
     ]);
 
-    employees.forEach((employee) => {
+    filteredEmployees.forEach((employee) => {
         const workstations = employee.workstations ?? [];
         const workstationAssetTags = workstations.map((workstation) => workstation.asset_tag).join(" | ");
         const workstationModels = workstations.map((workstation) => workstation.workstation_model?.name ?? "").join(" | ");
