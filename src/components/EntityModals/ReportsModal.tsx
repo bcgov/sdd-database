@@ -6,6 +6,7 @@ import {useState} from "react";
 import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
 
 const reportOptions = [
+    {id: "employees_by_name_or_idir", label: "Employees (by Name or IDIR)"},
     {id: "workspace_holds_by_office_code_and_status", label: "Workspace Holds (by Office Code, availability, and Hold Status)"},
     {id: "workspaces_by_office_code", label: "Workspaces (by Office Code)"},
     {id: "mobile_devices_by_office_code", label: "Mobile Devices (by Office Code)"},
@@ -22,6 +23,7 @@ export function ReportsModal() {
     const [modelName, setModelName] = useState<string>("");
     const [imei, setImei] = useState<string>("");
     const [availabilityStatus, setAvailabilityStatus] = useState<string>("");
+    const [employeeQuery, setEmployeeQuery] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -52,6 +54,11 @@ export function ReportsModal() {
                 setError("Availability is required");
                 return;
             }
+        } else if (selectedReport === "employees_by_name_or_idir") {
+            if (!employeeQuery.trim()) {
+                setError("Name or IDIR is required");
+                return;
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
             setError(null);
         } else {
@@ -67,22 +74,26 @@ export function ReportsModal() {
                 ? "/api/reports/mobile-devices"
                 : selectedReport === "workspace_holds_by_office_code_and_status"
                     ? "/api/reports/workspaces"
-                    : selectedReport === "workstation_assets_by_asset_number"
-                        ? "/api/reports/workstations"
-                        : selectedReport === "workstation_assets_by_office_code_and_model"
+                    : selectedReport === "employees_by_name_or_idir"
+                        ? "/api/reports/employees"
+                        : selectedReport === "workstation_assets_by_asset_number"
                             ? "/api/reports/workstations"
-                            : "/api/reports/workspaces";
+                            : selectedReport === "workstation_assets_by_office_code_and_model"
+                                ? "/api/reports/workstations"
+                                : "/api/reports/workspaces";
             const filename = selectedReport === "mobile_devices_by_office_code"
                 ? `mobile-devices-${officeCode}.xlsx`
                 : selectedReport === "mobile_devices_by_imei"
                     ? `mobile-devices-${imei}.xlsx`
                     : selectedReport === "workspace_holds_by_office_code_and_status"
                         ? `workspace-holds-${officeCode}-${availabilityStatus}.xlsx`
-                        : selectedReport === "workstation_assets_by_asset_number"
-                            ? `workstations-${assetNumber}.xlsx`
-                            : selectedReport === "workstation_assets_by_office_code_and_model"
-                                ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
-                                : `workspaces-${officeCode}.xlsx`;
+                        : selectedReport === "employees_by_name_or_idir"
+                            ? `employees-${employeeQuery}.xlsx`
+                            : selectedReport === "workstation_assets_by_asset_number"
+                                ? `workstations-${assetNumber}.xlsx`
+                                : selectedReport === "workstation_assets_by_office_code_and_model"
+                                    ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
+                                    : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
                 : selectedReport === "workstation_assets_by_office_code_and_model"
@@ -91,7 +102,9 @@ export function ReportsModal() {
                         ? JSON.stringify({imei: imei.trim()})
                         : selectedReport === "workspace_holds_by_office_code_and_status"
                             ? JSON.stringify({officeCode, availability: availabilityStatus})
-                            : JSON.stringify({officeCode});
+                            : selectedReport === "employees_by_name_or_idir"
+                                ? JSON.stringify({query: employeeQuery.trim()})
+                                : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -154,6 +167,7 @@ export function ReportsModal() {
                             setModelName("");
                             setImei("");
                             setAvailabilityStatus("");
+                            setEmployeeQuery("");
                             setError(null);
                         }
                     }}
@@ -196,6 +210,20 @@ export function ReportsModal() {
                             type="text"
                             value={imei}
                             onChange={(event) => setImei(event.target.value)}
+                            style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                        />
+                    </div>
+                )}
+
+                {selectedReport === "employees_by_name_or_idir" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                        <label htmlFor="employeeQuery">Name or IDIR</label>
+                        <input
+                            id="employeeQuery"
+                            name="employeeQuery"
+                            type="text"
+                            value={employeeQuery}
+                            onChange={(event) => setEmployeeQuery(event.target.value)}
                             style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
                         />
                     </div>
@@ -288,7 +316,9 @@ export function ReportsModal() {
                                 ? imei === ""
                                 : selectedReport === "workspace_holds_by_office_code_and_status"
                                     ? officeCode === "" || availabilityStatus === ""
-                                    : false
+                                    : selectedReport === "employees_by_name_or_idir"
+                                        ? employeeQuery === ""
+                                        : false
                     }
                 >
                     {isLoading ? "Generating..." : "Generate"}
