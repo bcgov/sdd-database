@@ -43,7 +43,7 @@ const getSearchResultTitle = (item: Entity) => {
   switch (item.type) {
     case "employee":
       title = item.idir
-        ? `${getEmployeeFullName(item)} - ${item.idir}`
+        ? `${getEmployeeFullName(item)} - ${item.idir} - Office ${item.office_number}`
         : getEmployeeFullName(item);
       break;
     case "office":
