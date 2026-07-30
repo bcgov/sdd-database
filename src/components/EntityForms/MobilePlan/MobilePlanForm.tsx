@@ -26,7 +26,10 @@ export function MobilePlanForm({
                             marginBottom: "1rem",
                         }}
         >
-            <MobilePlanDetails phoneNumber={mobilePlan.phone_number}/>
+            <MobilePlanDetails phoneNumber={mobilePlan.phone_number}
+                               planStatus={mobilePlan.status.name}
+            >
+            </MobilePlanDetails>
 
             {assignedMobileDevice && (
                 <AssignedMobileDeviceDetails assignedMobileDevice={assignedMobileDevice}/>
