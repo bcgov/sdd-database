@@ -1,93 +1,111 @@
-import {MobileDeviceSearchResult} from "@/types";
-import {addNewMobileDeviceAction, updateMobileDeviceAction} from "@/actions/entities/mobile-device/actions";
-import {AccordionGroup, Form} from "@bcgov/design-system-react-components";
-import {MobileDeviceDetails} from "@/components/EntityForms/MobileDevice/MobileDeviceDetails";
-import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
-import {useMobileDeviceLookupProps} from "@/components/EntityForms/MobileDevice/useMobileDeviceLookupProps";
-import {AssignedEmployeeDetails} from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
-import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
-import {getMobileDeviceStatus} from "@/domain/mobileDevices";
-import type {MobileDeviceStatus} from "@/domain/mobileDevices";
-import {MobilePlanDetails} from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
-
+import { MobileDeviceSearchResult } from "@/types";
+import {
+  addNewMobileDeviceAction,
+  updateMobileDeviceAction,
+} from "@/actions/entities/mobile-device/actions";
+import { AccordionGroup, Form } from "@bcgov/design-system-react-components";
+import { MobileDeviceDetails } from "@/components/EntityForms/MobileDevice/MobileDeviceDetails";
+import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
+import { useMobileDeviceLookupProps } from "@/components/EntityForms/MobileDevice/useMobileDeviceLookupProps";
+import { AssignedEmployeeDetails } from "@/components/EntityForms/Shared/AssignedEmployeeDetails";
+import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
+import { getMobileDeviceStatus } from "@/domain/mobileDevices";
+import type { MobileDeviceStatus } from "@/domain/mobileDevices";
+import { MobilePlanDetails } from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
 
 interface MobileDeviceFormProps {
-    mobileDevice?: MobileDeviceSearchResult
+  mobileDevice?: MobileDeviceSearchResult;
 
-    onSuccess: () => void
-    onError: (error: string) => void
+  onSuccess: () => void;
+  onError: (error: string) => void;
 
-    onClose: () => void
+  onClose: () => void;
 }
 
 export function MobileDeviceForm({
-                                     mobileDevice,
+  mobileDevice,
 
-                                     onSuccess,
-                                     onError,
+  onSuccess,
+  onError,
 
-                                     onClose,
-                                 }: MobileDeviceFormProps) {
+  onClose,
+}: MobileDeviceFormProps) {
+  const isEditMode = !!mobileDevice;
 
-    const isEditMode = !!mobileDevice
+  const serverAction = isEditMode
+    ? updateMobileDeviceAction
+    : addNewMobileDeviceAction;
 
-    const serverAction = isEditMode
-        ? updateMobileDeviceAction
-        : addNewMobileDeviceAction
+  const { formAction, isPending } = useEntityFormActionState({
+    serverAction,
+    onSuccess,
+    onError,
+  });
 
-    const {formAction, isPending} = useEntityFormActionState({
-        serverAction,
-        onSuccess,
-        onError
-    })
+  const mobileDeviceLookupProps = useMobileDeviceLookupProps();
 
-    const mobileDeviceLookupProps = useMobileDeviceLookupProps()
+  const hasAssignedEmployee = !!mobileDevice?.assigned_employee;
 
-    const hasAssignedEmployee = !!mobileDevice?.assigned_employee
+  const mobileDeviceStatus: MobileDeviceStatus = mobileDevice
+    ? getMobileDeviceStatus(mobileDevice)
+    : "unassigned";
 
-    const mobileDeviceStatus: MobileDeviceStatus = mobileDevice
-        ? getMobileDeviceStatus(mobileDevice)
-        : "unassigned"
+  return (
+    <Form
+      action={formAction}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        maxHeight: "calc(100vh - 8rem)",
+      }}
+    >
+      {/* pass mobile device id through FormData in edit mode */}
+      {isEditMode && mobileDevice?.id !== undefined ? (
+        <input type="hidden" name="id" value={mobileDevice.id} />
+      ) : null}
 
-    return (
-        <Form action={formAction}>
+      <div
+        style={{
+          flex: "1 1 auto",
+          minHeight: 0,
+          overflowY: "auto",
+          paddingRight: "0.5rem",
+        }}
+      >
+        <AccordionGroup
+          allowsMultipleExpanded
+          defaultExpandedKeys={["mobileDeviceDetails"]}
+          style={{
+            marginTop: "1rem",
+            marginBottom: "1rem",
+          }}
+        >
+          <MobileDeviceDetails
+            mobileDevice={mobileDevice}
+            {...mobileDeviceLookupProps}
+            isOfficeNumberReadOnly={isEditMode && hasAssignedEmployee}
+            mobileDeviceStatus={mobileDeviceStatus}
+          ></MobileDeviceDetails>
 
-            {/* pass mobile device id through FormData in edit mode */}
-            {isEditMode && mobileDevice?.id !== undefined
-                ? (<input type="hidden" name="id" value={mobileDevice.id}/>)
-                : null
-            }
+          {mobileDevice?.mobile_plan && (
+            <MobilePlanDetails
+              phoneNumber={mobileDevice.mobile_plan.phone_number}
+            />
+          )}
 
-            <AccordionGroup allowsMultipleExpanded
-                            defaultExpandedKeys={["mobileDeviceDetails"]}
-                            style={{
-                                marginTop: "1rem",
-                                marginBottom: "1rem"
-                            }}
-            >
-                <MobileDeviceDetails mobileDevice={mobileDevice}
-                                     {...mobileDeviceLookupProps}
+          {mobileDevice?.assigned_employee && (
+            <AssignedEmployeeDetails
+              assignedEmployee={mobileDevice.assigned_employee}
+            />
+          )}
+        </AccordionGroup>
+      </div>
 
-                                     isOfficeNumberReadOnly={isEditMode && hasAssignedEmployee}
-
-                                     mobileDeviceStatus={mobileDeviceStatus}
-                >
-                </MobileDeviceDetails>
-
-                {mobileDevice?.mobile_plan && (
-                    <MobilePlanDetails phoneNumber={mobileDevice.mobile_plan.phone_number} />
-                )}
-
-                {mobileDevice?.assigned_employee &&
-                    <AssignedEmployeeDetails assignedEmployee={mobileDevice.assigned_employee}/>}
-
-            </AccordionGroup>
-
-            <FormActionButtons isEditMode={isEditMode}
-                               isPending={isPending}
-                               onClose={onClose}
-            >
-            </FormActionButtons>
-        </Form>
-    )
+      <FormActionButtons
+        isEditMode={isEditMode}
+        isPending={isPending}
+        onClose={onClose}
+      ></FormActionButtons>
+    </Form>
+  );
 }
