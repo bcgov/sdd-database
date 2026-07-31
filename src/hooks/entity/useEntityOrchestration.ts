@@ -5,7 +5,6 @@ import { useEmployeeEditorState } from "@/hooks/employee/useEmployeeEditorState"
 import { useEntitySelectionState } from "@/hooks/entity/useEntitySelectionState";
 import { useEmployeeAssignActions } from "@/hooks/employee/useEmployeeAssignActions";
 import { useEntityEditCallbacks } from "@/hooks/entity/useEntityEditCallbacks";
-import { useWorkspaceActions } from "@/hooks/workspace/useWorkspaceActions";
 import { useEntityDeleteState } from "@/hooks/entity/useEntityDeleteState";
 import { useEntityCreateCallbacks } from "@/hooks/entity/useEntityCreateCallbacks";
 import { useEntityCreateModalState } from "@/hooks/entity/useEntityCreateModalState";
@@ -201,17 +200,6 @@ export function useEntityOrchestration() {
     getEntityName,
   });
 
-  // workspace hold/unhold
-  const workspaceActions = useWorkspaceActions({
-    viewedEntity,
-    setViewedEntity,
-
-    refreshSearchResults,
-
-    addSuccessAlert,
-    addErrorAlert,
-  });
-
   // workstation add modal state
   const workstationCreate = useEntityCreateModalState();
   const { openCloseCreateModal: openCloseWorkstationCreateModal } =
@@ -287,8 +275,6 @@ export function useEntityOrchestration() {
     employeeAssign,
     employeeCreateHandlers,
     entityDelete,
-
-    workspaceActions,
 
     workstationCreate,
     workstationCreateHandlers,

@@ -133,6 +133,7 @@ model TypeOfClientService {
 model Workspace {
   office_number    String  @db.VarChar(3)
   workspace_number String  @db.VarChar(4)
+  position_number  String? @db.VarChar(8)
   category_id      Int
   desk_type_id     Int
   office_floor     Int

@@ -16,9 +16,6 @@ interface EntityModalProps {
   handleRemoveWorkstation: (assetTag: string) => void;
   handleRemoveMobileDevice: () => void;
 
-  handleHoldWorkspace: () => void;
-  handleRemoveWorkspaceHold: () => void;
-
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 
@@ -36,9 +33,6 @@ export function EntityModal({
   handleRemoveWorkspace,
   handleRemoveWorkstation,
   handleRemoveMobileDevice,
-
-  handleHoldWorkspace,
-  handleRemoveWorkspaceHold,
 
   isOpen,
   setIsOpen,
@@ -77,8 +71,6 @@ export function EntityModal({
       return (
         <WorkspaceModal
           workspace={viewedEntity}
-          onHold={handleHoldWorkspace}
-          onRemoveHold={handleRemoveWorkspaceHold}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           onSuccess={onSuccess}

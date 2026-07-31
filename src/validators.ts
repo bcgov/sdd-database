@@ -104,6 +104,23 @@ export function validateEmployeeIdField(
   }
 }
 
+export function validateWorkspacePositionNumberField(
+  value: string,
+  label: string = "Position No",
+) {
+  const POSITION_NUMBER_LENGTH = 8;
+
+  if (!value) {
+    return;
+  }
+
+  if (value.length !== POSITION_NUMBER_LENGTH) {
+    return `${label} must be exactly ${POSITION_NUMBER_LENGTH} digits long`;
+  }
+
+  return validateOnlyDigits(value, label);
+}
+
 export function validateEmployeeIdirField(
   value: string,
   label: string = "IDIR",

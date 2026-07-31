@@ -80,6 +80,14 @@ export type WorkspaceEntity = WorkspaceSearchResult & {
   type: "workspace";
 };
 
+export type WorkspaceFormValues = {
+  office_number: string;
+  workspace_number: string;
+  is_on_hold: boolean;
+  position_number: string | null;
+  notes?: string;
+};
+
 /**
  * Workstation Types
  */

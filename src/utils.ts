@@ -4,6 +4,7 @@ import {
   MobileDeviceFormValues,
   MobilePlanFormValues,
   MobilePlanUpdateFormValues,
+  WorkspaceFormValues,
   WorkstationFormValues,
 } from "@/types";
 import type { MobileDeviceStatus } from "@/domain/mobileDevices";
@@ -119,6 +120,28 @@ export const parseEmployeeFormData = (
     ui_workstation_asset_tags: uiWorkstationAssetTags,
     ui_mobile_device_id: uiMobileDeviceId,
     ohs_accommodation_type_ids: ohsAccommodationTypeIds,
+  };
+};
+
+export const parseWorkspaceFormData = (
+  formData: FormData,
+): WorkspaceFormValues => {
+  const officeNumber = formData.get("officeNumber")?.toString() ?? "";
+  const workspaceNumber = formData.get("workspaceNumber")?.toString() ?? "";
+
+  const isOnHold = formData.get("isOnHold") === "true";
+
+  const rawPositionNumber = formData.get("positionNumber")?.toString() ?? "";
+  const positionNumber = rawPositionNumber || null;
+
+  const notes = formData.get("notes")?.toString();
+
+  return {
+    office_number: officeNumber,
+    workspace_number: workspaceNumber,
+    is_on_hold: isOnHold,
+    position_number: positionNumber,
+    notes,
   };
 };
 

@@ -5,6 +5,16 @@ import { Header, Footer } from "@bcgov/design-system-react-components";
 export default function Updates() {
   const changelog = [
     {
+      version: "v0.0.42",
+      notes: [
+        "Add optional Position No field to Workspaces",
+        "Workspace search result names now identify on-hold workspaces and show Position No",
+        "Workspaces can now be searched by Position No",
+        "Workspace assignment now lists eligible on-hold workspaces",
+        "Workspace hold changes are now saved only when Save is selected",
+      ],
+    },
+    {
       version: "v0.0.41",
       notes: [
         "Add Data Allowance field to Mobile Plans",

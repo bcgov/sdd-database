@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import { useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -17,7 +17,7 @@ import { SearchControls } from "@/components/Search/SearchControls";
 import { SearchResultsPanel } from "@/components/Search/SearchResultsPanel";
 import { EntityModal } from "@/components/EntityModals/EntityModal";
 import { WorkstationForm } from "@/components/EntityForms/Workstation/WorkstationForm";
-import {ReportsModal} from "@/components/EntityModals/ReportsModal";
+import { ReportsModal } from "@/components/EntityModals/ReportsModal";
 import { useEntityOrchestration } from "@/hooks/entity/useEntityOrchestration";
 import { MobileDeviceForm } from "@/components/EntityForms/MobileDevice/MobileDeviceForm";
 import { MobilePlanCreateForm } from "@/components/EntityForms/MobilePlan/MobilePlanCreateForm";
@@ -36,8 +36,6 @@ export default function Home() {
     employeeCreateHandlers,
     entityDelete,
 
-    workspaceActions,
-
     workstationCreate,
     workstationCreateHandlers,
 
@@ -50,7 +48,7 @@ export default function Home() {
     alerts,
   } = useEntityOrchestration();
 
-    const [isReportsModalOpen, setIsReportsModalOpen] = useState(false)
+  const [isReportsModalOpen, setIsReportsModalOpen] = useState(false);
 
   return (
     <div
@@ -176,9 +174,7 @@ export default function Home() {
               <WorkstationForm
                 onSuccess={workstationCreateHandlers.onCreateSuccess}
                 onError={workstationCreateHandlers.onCreateError}
-                onClose={() =>
-                  workstationCreate.openCloseCreateModal(false)
-                }
+                onClose={() => workstationCreate.openCloseCreateModal(false)}
               ></WorkstationForm>
             </ModalDialog>
 
@@ -191,9 +187,7 @@ export default function Home() {
               <MobileDeviceForm
                 onSuccess={mobileDeviceCreateHandlers.onCreateSuccess}
                 onError={mobileDeviceCreateHandlers.onCreateError}
-                onClose={() =>
-                  mobileDeviceCreate.openCloseCreateModal(false)
-                }
+                onClose={() => mobileDeviceCreate.openCloseCreateModal(false)}
               ></MobileDeviceForm>
             </ModalDialog>
 
@@ -226,10 +220,6 @@ export default function Home() {
             }
             handleRemoveMobileDevice={
               employeeAssign.removeMobileDeviceClickHandler
-            }
-            handleHoldWorkspace={workspaceActions.holdWorkspaceClickHandler}
-            handleRemoveWorkspaceHold={
-              workspaceActions.removeHoldWorkspaceClickHandler
             }
             isOpen={uiState.isEntityModalOpen}
             setIsOpen={uiState.setIsEntityModalOpen}

@@ -49,9 +49,21 @@ const getSearchResultTitle = (item: Entity) => {
     case "office":
       title = `${item.office_name} - ${item.office_number}`;
       break;
-    case "workspace":
-      title = `Workspace ${item.workspace_number} - Office ${item.office_number} - ${item.category.name}${item.restricted_program_area_id ? " - Protected" : ""}`;
+    case "workspace": {
+      const workspaceTitleParts = [
+        `Workspace ${item.workspace_number}`,
+        `Office ${item.office_number}`,
+        item.category.name,
+        ...(item.restricted_program_area_id ? ["Protected"] : []),
+        ...(item.is_on_hold ? ["On Hold"] : []),
+        ...(item.position_number
+          ? [`Position No ${item.position_number}`]
+          : []),
+      ];
+
+      title = workspaceTitleParts.join(" - ");
       break;
+    }
     case "workstation":
       title = `${item.workstation_model.name} - ${item.asset_tag}`;
       break;
