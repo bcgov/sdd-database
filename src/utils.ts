@@ -3,6 +3,7 @@ import {
   EntityType,
   MobileDeviceFormValues,
   MobilePlanFormValues,
+  MobilePlanUpdateFormValues,
   WorkstationFormValues,
 } from "@/types";
 import type { MobileDeviceStatus } from "@/domain/mobileDevices";
@@ -228,6 +229,26 @@ export const parseMobilePlanFormData = (
   return {
     phone_number: phoneNumber,
     service_provider_id: parseRequiredNumber("serviceProvider"),
+    data_allowance_gb: parseRequiredNumber("dataAllowanceGb"),
+    enhanced_voicemail: enhancedVoicemail,
+    status_id: parseRequiredNumber("status"),
+  };
+};
+
+export const parseMobilePlanUpdateFormData = (
+  formData: FormData,
+): MobilePlanUpdateFormValues => {
+  const rawEnhancedVoicemail = formData.get("enhancedVoicemail");
+  const enhancedVoicemail = rawEnhancedVoicemail === "on";
+
+  const parseRequiredNumber = (fieldName: string) => {
+    const rawValue = formData.get(fieldName);
+
+    return rawValue === null || rawValue === "" ? Number.NaN : Number(rawValue);
+  };
+
+  return {
+    id: parseRequiredNumber("id"),
     data_allowance_gb: parseRequiredNumber("dataAllowanceGb"),
     enhanced_voicemail: enhancedVoicemail,
     status_id: parseRequiredNumber("status"),

@@ -1,40 +1,84 @@
-import {MobilePlanSearchResult} from "@/types";
-import {AccordionGroup} from "@bcgov/design-system-react-components";
-import {MobilePlanDetails} from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
-import {AssignedMobileDeviceDetails} from "@/components/EntityForms/Shared/AssignedMobileDeviceDetails";
-
+import { MobilePlanSearchResult } from "@/types";
+import { AccordionGroup, Form } from "@bcgov/design-system-react-components";
+import { MobilePlanDetails } from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
+import { AssignedMobileDeviceDetails } from "@/components/EntityForms/Shared/AssignedMobileDeviceDetails";
+import { updateMobilePlanAction } from "@/actions/entities/mobile-plan/actions";
+import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
+import { useMobilePlanLookupProps } from "@/components/EntityForms/MobilePlan/useMobilePlanLookupProps";
+import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
 
 interface MobilePlanFormProps {
-    mobilePlan: MobilePlanSearchResult
+  mobilePlan: MobilePlanSearchResult;
+
+  onSuccess: () => void;
+  onError: (error: string) => void;
+  onClose: () => void;
 }
 
 export function MobilePlanForm({
-                                   mobilePlan,
-                               }: MobilePlanFormProps) {
+  mobilePlan,
+  onSuccess,
+  onError,
+  onClose,
+}: MobilePlanFormProps) {
+  const assignedMobileDevice = mobilePlan.assigned_mobile_device;
+  const { formAction, isPending } = useEntityFormActionState({
+    serverAction: updateMobilePlanAction,
+    onSuccess,
+    onError,
+  });
+  const mobilePlanLookupProps = useMobilePlanLookupProps();
 
-    const assignedMobileDevice = mobilePlan.assigned_mobile_device
+  return (
+    <Form
+      action={formAction}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        maxHeight: "calc(100vh - 8rem)",
+      }}
+    >
+      <input type="hidden" name="id" value={mobilePlan.id} />
 
-    return (
-        <AccordionGroup allowsMultipleExpanded
-                        defaultExpandedKeys={
-                            assignedMobileDevice
-                                ? ["mobilePlanDetails", "assignedMobileDeviceDetails"]
-                                : ["mobilePlanDetails"]
-                        }
-                        style={{
-                            marginTop: "1rem",
-                            marginBottom: "1rem",
-                        }}
+      <div
+        style={{
+          flex: "1 1 auto",
+          minHeight: 0,
+          overflowY: "auto",
+          paddingRight: "0.5rem",
+        }}
+      >
+        <AccordionGroup
+          allowsMultipleExpanded
+          defaultExpandedKeys={
+            assignedMobileDevice
+              ? ["mobilePlanDetails", "assignedMobileDeviceDetails"]
+              : ["mobilePlanDetails"]
+          }
+          style={{
+            marginTop: "1rem",
+            marginBottom: "1rem",
+          }}
         >
-            <MobilePlanDetails mobilePlan={mobilePlan}
-                               isReadOnly
-            >
-            </MobilePlanDetails>
+          <MobilePlanDetails
+            mobilePlan={mobilePlan}
+            {...mobilePlanLookupProps}
+            isReadOnly={false}
+          ></MobilePlanDetails>
 
-            {assignedMobileDevice && (
-                <AssignedMobileDeviceDetails assignedMobileDevice={assignedMobileDevice}/>
-            )
-            }
+          {assignedMobileDevice && (
+            <AssignedMobileDeviceDetails
+              assignedMobileDevice={assignedMobileDevice}
+            />
+          )}
         </AccordionGroup>
-    )
+      </div>
+
+      <FormActionButtons
+        isEditMode
+        isPending={isPending}
+        onClose={onClose}
+      ></FormActionButtons>
+    </Form>
+  );
 }

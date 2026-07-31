@@ -10,6 +10,7 @@ export default function Updates() {
         "Add Data Allowance field to Mobile Plans",
         "Add Enhanced Voicemail field to Mobile Plans",
         "Mobile Plans can now be created",
+        "Mobile Plans are now editable",
         "Standardize assignment action button layouts in the Employee modal",
       ],
     },

@@ -110,6 +110,8 @@ export function EntityModal({
           mobilePlan={viewedEntity}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
+          onSuccess={onSuccess}
+          onError={onError}
         ></MobilePlanModal>
       );
   }

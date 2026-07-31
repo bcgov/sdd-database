@@ -1,34 +1,55 @@
 "use server";
 
-import {EntityActionResult, MobilePlanEntity} from "@/types";
+import { EntityActionResult, MobilePlanEntity } from "@/types";
 import {
-    addNewMobilePlan,
-    getMobilePlansByFilter
+  addNewMobilePlan,
+  getMobilePlansByFilter,
+  updateMobilePlan as persistMobilePlanUpdate,
 } from "@/db/data-access/mobilePlans";
-import {attachEntityType} from "@/actions/attachEntityType";
-import {createEntityAction} from "@/actions/createEntityActions";
-import {parseMobilePlanFormData} from "@/utils";
-import {validateMobilePlanData} from "@/actions/entities/mobile-plan/rules";
-import {getReadablePrismaError} from "@/actions/entities/mobile-plan/errors";
+import { attachEntityType } from "@/actions/attachEntityType";
+import { createEntityAction } from "@/actions/createEntityActions";
+import {
+  parseMobilePlanFormData,
+  parseMobilePlanUpdateFormData,
+} from "@/utils";
+import {
+  validateMobilePlanData,
+  validateMobilePlanUpdateData,
+} from "@/actions/entities/mobile-plan/rules";
+import { getReadablePrismaError } from "@/actions/entities/mobile-plan/errors";
 
+export async function searchMobilePlansAction(
+  query?: string,
+): Promise<MobilePlanEntity[]> {
+  const mobilePlanSearchResults = await getMobilePlansByFilter(query);
 
-export async function searchMobilePlansAction(query?: string): Promise<MobilePlanEntity[]>
-{
-    const mobilePlanSearchResults = await getMobilePlansByFilter(query)
-
-    return attachEntityType(mobilePlanSearchResults, "mobilePlan")
+  return attachEntityType(mobilePlanSearchResults, "mobilePlan");
 }
 
 const addMobilePlan = createEntityAction({
-    parse: parseMobilePlanFormData,
-    validate: validateMobilePlanData,
-    persist: addNewMobilePlan,
-    getReadablePrismaError
-})
+  parse: parseMobilePlanFormData,
+  validate: validateMobilePlanData,
+  persist: addNewMobilePlan,
+  getReadablePrismaError,
+});
+
+const updateMobilePlan = createEntityAction({
+  parse: parseMobilePlanUpdateFormData,
+  validate: validateMobilePlanUpdateData,
+  persist: persistMobilePlanUpdate,
+  getReadablePrismaError: (error) => getReadablePrismaError(error),
+});
 
 export async function addNewMobilePlanAction(
-    prevState: EntityActionResult,
-    formData: FormData
+  prevState: EntityActionResult,
+  formData: FormData,
 ) {
-    return addMobilePlan(prevState, formData)
+  return addMobilePlan(prevState, formData);
+}
+
+export async function updateMobilePlanAction(
+  prevState: EntityActionResult,
+  formData: FormData,
+) {
+  return updateMobilePlan(prevState, formData);
 }

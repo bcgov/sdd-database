@@ -37,6 +37,7 @@ type MobilePlanDetailsProps =
       showEnhancedVoicemail?: boolean;
     }
   | {
+      mobilePlan?: MobilePlanDetailsValue;
       statuses: LookupOption[];
       serviceProviders: LookupOption[];
       isReadOnly: false;
@@ -53,7 +54,8 @@ export function MobilePlanDetails(props: MobilePlanDetailsProps) {
             showEnhancedVoicemail={props.showEnhancedVoicemail ?? true}
           />
         ) : (
-          <CreateMobilePlanFields
+          <EditableMobilePlanFields
+            mobilePlan={props.mobilePlan}
             statuses={props.statuses}
             serviceProviders={props.serviceProviders}
           />
@@ -159,15 +161,22 @@ function ReadOnlyMobilePlanFields({
   );
 }
 
-function CreateMobilePlanFields({
+function EditableMobilePlanFields({
+  mobilePlan,
   statuses,
   serviceProviders,
 }: {
+  mobilePlan?: MobilePlanDetailsValue;
   statuses: LookupOption[];
   serviceProviders: LookupOption[];
 }) {
-  const [selectedStatusId, setSelectedStatusId] = useState<number | null>(null);
-  const [enhancedVoicemail, setEnhancedVoicemail] = useState(false);
+  const isEditMode = mobilePlan !== undefined;
+  const [selectedStatusId, setSelectedStatusId] = useState<number | null>(
+    mobilePlan?.status.id ?? null,
+  );
+  const [enhancedVoicemail, setEnhancedVoicemail] = useState(
+    mobilePlan?.enhanced_voicemail ?? false,
+  );
 
   const defaultStatusId =
     statuses.find((status) => status.name === DEFAULT_MOBILE_PLAN_STATUS)?.id ??
@@ -180,27 +189,38 @@ function CreateMobilePlanFields({
       <TextField
         label="Phone Number"
         name="phoneNumber"
-        isRequired
+        isRequired={!isEditMode}
+        isReadOnly={isEditMode}
         inputMode="numeric"
         maxLength={10}
         description="Enter the 10-digit phone number without spaces or hyphens"
-        validate={validateMobilePlanPhoneNumberField}
+        defaultValue={
+          mobilePlan
+            ? formatMobilePlanPhoneNumber(mobilePlan.phone_number)
+            : undefined
+        }
+        validate={isEditMode ? undefined : validateMobilePlanPhoneNumberField}
       ></TextField>
 
       <Select
         label="Service Provider"
         name="serviceProvider"
-        isRequired
+        isRequired={!isEditMode}
+        isDisabled={isEditMode}
         items={serviceProviders.map((serviceProvider) => ({
           id: serviceProvider.id,
           label: serviceProvider.name,
         }))}
+        selectedKey={mobilePlan?.service_provider.id}
       ></Select>
 
       <RadioGroup
         label="Data Allowance"
         name="dataAllowanceGb"
         isRequired
+        defaultValue={
+          mobilePlan ? String(mobilePlan.data_allowance_gb) : undefined
+        }
         orientation="vertical"
         validate={validateMobilePlanDataAllowanceField}
         style={{
@@ -240,6 +260,7 @@ function CreateMobilePlanFields({
         <ToggleButtonGroup
           label="Status (required)"
           aria-label="Status (required)"
+          isDisabled={!isEditMode}
           disallowEmptySelection
           selectedKeys={currentStatusId === null ? [] : [currentStatusId]}
           onSelectionChange={(selectedKeys) => {

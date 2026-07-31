@@ -145,6 +145,13 @@ export type MobilePlanFormValues = {
   service_provider_id: number;
 };
 
+export type MobilePlanUpdateFormValues = Pick<
+  MobilePlanFormValues,
+  "data_allowance_gb" | "enhanced_voicemail" | "status_id"
+> & {
+  id: number;
+};
+
 export type MobilePlanSearchResult = Prisma.MobilePlanGetPayload<
   typeof mobilePlanSearchResultArgs
 >;
