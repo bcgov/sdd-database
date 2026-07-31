@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
 
@@ -10,7 +12,7 @@ export async function POST(req: Request) {
     const officeCode = body?.officeCode?.toString()?.trim();
     const jobTitleId = body?.jobTitleId?.toString();
 
-    if (mode !== "branch_or_program_area" && mode !== "job_title" && !query) {
+    if (mode !== "branch_or_program_area" && !query) {
         return new Response(JSON.stringify({message: "Name or IDIR is required"}), {
             status: 400,
             headers: {"Content-Type": "application/json"}
@@ -33,10 +35,7 @@ export async function POST(req: Request) {
                 },
             },
             job_title: {
-                select: {
-                    id: true,
-                    name: true,
-                },
+                select: { id: true, name: true },
             },
             assigned_office: {
                 select: {
@@ -76,15 +75,6 @@ export async function POST(req: Request) {
                     },
                     current_office: {
                         select: { office_number: true },
-                    },
-                },
-            },
-            ohs_accommodations: {
-                select: {
-                    ohs_accommodation_type: {
-                        select: {
-                            name: true,
-                        },
                     },
                 },
             },
@@ -150,15 +140,10 @@ export async function POST(req: Request) {
                 office_number: string;
             } | null;
         } | null;
-        ohs_accommodations?: Array<{
-            ohs_accommodation_type?: {
-                name: string | null;
-            } | null;
-        }> | null;
     }>);
 
     const filteredEmployees = employees.filter((employee) => {
-        if (mode === "branch_or_program_area" || mode === "job_title") {
+        if (mode === "branch_or_program_area") {
             const selectedBranchId = branchId ? Number(branchId) : undefined;
             const selectedProgramAreaId = programAreaId ? Number(programAreaId) : undefined;
 
@@ -231,7 +216,6 @@ export async function POST(req: Request) {
         "Mobile Device IMEI",
         "Mobile Device Model",
         "Mobile Device Notes",
-        "OHS Accommodations",
         "Notes",
     ]);
 
@@ -240,10 +224,6 @@ export async function POST(req: Request) {
         const workstationAssetTags = workstations.map((workstation) => workstation.asset_tag).join(" | ");
         const workstationModels = workstations.map((workstation) => workstation.workstation_model?.name ?? "").join(" | ");
         const workstationNotes = workstations.map((workstation) => workstation.notes ?? "").join(" | ");
-        const ohsAccommodations = (employee.ohs_accommodations ?? [])
-            .map((accommodation) => accommodation.ohs_accommodation_type?.name ?? "")
-            .filter(Boolean)
-            .join(" | ");
 
         sheet.addRow([
             employee.first_name,
@@ -268,7 +248,6 @@ export async function POST(req: Request) {
             employee.mobile_device?.imei ?? "",
             employee.mobile_device?.mobile_device_model?.name ?? "",
             employee.mobile_device?.notes ?? "",
-            ohsAccommodations,
             employee.notes ?? "",
         ]);
     });

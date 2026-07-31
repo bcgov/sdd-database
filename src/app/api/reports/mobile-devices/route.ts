@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
 

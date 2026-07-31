@@ -1,5 +1,8 @@
+export const dynamic = "force-dynamic";
+
 import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
+import {Prisma} from "@/generated/prisma/client"
 
 export async function POST(req: Request) {
     const body = await req.json();
