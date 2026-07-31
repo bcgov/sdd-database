@@ -1,14 +1,12 @@
+import {utils, write} from "xlsx";
+
 export async function createXlsxResponse(rows: Array<Array<string | number | boolean | null>>, filename: string, sheetName = "Report") {
-    const ExcelJS = (await import("exceljs")).default;
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = "sdd-database";
-    workbook.lastModifiedBy = "sdd-database";
+    const worksheet = utils.aoa_to_sheet(rows.map((row) => row.map((value) => (value === null || value === undefined ? "" : value))));
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, sheetName);
 
-    const worksheet = workbook.addWorksheet(sheetName);
-    worksheet.addRows(rows.map((row) => row.map((value) => (value === null || value === undefined ? "" : value))));
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const bytes = new Uint8Array(buffer);
+    const buffer = write(workbook, {bookType: "xlsx", type: "buffer"});
+    const bytes = new Uint8Array(buffer as ArrayBuffer);
 
     return new Response(bytes, {
         status: 200,

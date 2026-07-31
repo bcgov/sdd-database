@@ -12,13 +12,6 @@ export async function POST(req: Request) {
     const officeCode = body?.officeCode?.toString()?.trim();
     const jobTitleId = body?.jobTitleId?.toString();
 
-    if (mode !== "branch_or_program_area" && !query) {
-        return new Response(JSON.stringify({message: "Name or IDIR is required"}), {
-            status: 400,
-            headers: {"Content-Type": "application/json"}
-        });
-    }
-
     const normalizedQuery = query?.trim().toLowerCase() ?? "";
     const words = normalizedQuery.split(/\s+/).filter(Boolean);
 
