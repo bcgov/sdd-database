@@ -59,7 +59,7 @@ const getSearchResultTitle = (item: Entity) => {
       title = getMobileDeviceTitle(item);
       break;
     case "mobilePlan":
-      title = formatMobilePlanPhoneNumber(item.phone_number);
+      title = `${formatMobilePlanPhoneNumber(item.phone_number)} - ${item.service_provider.name}`;
       break;
   }
 

@@ -1,13 +1,16 @@
 import {
     Accordion,
     Button,
-    ButtonGroup,
     Callout, Select,
     TextField,
 } from "@bcgov/design-system-react-components";
 
 import {PressEvent} from "@react-types/shared";
 import {LookupOption} from "@/types";
+import {
+    AssignmentActionRow,
+    AssignmentSectionContent
+} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
 
 
 interface WorkspaceDetailsProps {
@@ -54,7 +57,7 @@ export function WorkspaceDetails({
 
     return (
         <Accordion label="Workspace Details" id="workspaceDetails">
-            <div>
+            <AssignmentSectionContent>
                 <Select label="Assignment Type"
                         name="workspaceAssignmentType"
                         isRequired={!isOnLeave}
@@ -77,14 +80,9 @@ export function WorkspaceDetails({
                     <>
                         {
                             workspaceAssignmentBlockedReason &&
-                            <div style={{
-                                marginTop: "1rem",
-                                marginBottom: "1rem",
-                            }}>
-                                <Callout
-                                    description={workspaceAssignmentBlockedReason}>
-                                </Callout>
-                            </div>
+                            <Callout
+                                description={workspaceAssignmentBlockedReason}>
+                            </Callout>
                         }
 
                         <TextField label="Workspace Number"
@@ -95,8 +93,9 @@ export function WorkspaceDetails({
                         >
                         </TextField>
 
-                        <ButtonGroup>
-                            <Button variant="secondary"
+                        <AssignmentActionRow>
+                            <Button type="button"
+                                    variant="secondary"
                                     isDisabled={!hasOfficeAssignment || !hasProgramAreaAssignment}
                                     onPress={handleAssignWorkspace}
                             >
@@ -104,17 +103,18 @@ export function WorkspaceDetails({
                             </Button>
 
                             {hasWorkspaceAssignment && (
-                                <Button variant="secondary"
+                                <Button type="button"
+                                        variant="secondary"
                                         danger
                                         onPress={handleRemoveWorkspace}
                                 >
                                     Remove Workspace
                                 </Button>
                             )}
-                        </ButtonGroup>
+                        </AssignmentActionRow>
                     </>
                 )}
-            </div>
+            </AssignmentSectionContent>
         </Accordion>
     )
 }

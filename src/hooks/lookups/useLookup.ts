@@ -1,12 +1,11 @@
 import {useEffect, useState} from "react";
-import {LookupOption} from "@/types";
 
 
-export function useLookup(
-    fetcher: () => Promise<LookupOption[]>,
+export function useLookup<T>(
+    fetcher: () => Promise<T>,
     label: string
 ) {
-    const [data, setData] = useState<LookupOption[] | null>(null);
+    const [data, setData] = useState<T | null>(null);
 
     useEffect(() => {
         let isAlive = true;

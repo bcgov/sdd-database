@@ -128,6 +128,32 @@ export async function getMobileDeviceModelById(id: number) {
     })
 }
 
+export async function getMobilePlanStatuses() {
+    return getLookupOptions(prisma.mobilePlanStatus)
+}
+
+export async function getMobilePlanStatusById(id: number) {
+    return prisma.mobilePlanStatus.findUnique({
+        where: {
+            id
+        },
+        select: lookupOptionSelect
+    })
+}
+
+export async function getMobilePlanServiceProviders() {
+    return getLookupOptions(prisma.mobilePlanServiceProvider)
+}
+
+export async function getMobilePlanServiceProviderById(id: number) {
+    return prisma.mobilePlanServiceProvider.findUnique({
+        where: {
+            id
+        },
+        select: lookupOptionSelect
+    })
+}
+
 export async function getOhsAccommodationTypes() {
     return getLookupOptions(prisma.ohsAccommodationType)
 }

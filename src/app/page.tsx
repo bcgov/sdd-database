@@ -18,6 +18,7 @@ import { EntityModal } from "@/components/EntityModals/EntityModal";
 import { WorkstationForm } from "@/components/EntityForms/Workstation/WorkstationForm";
 import { useEntityOrchestration } from "@/hooks/entity/useEntityOrchestration";
 import { MobileDeviceForm } from "@/components/EntityForms/MobileDevice/MobileDeviceForm";
+import { MobilePlanCreateForm } from "@/components/EntityForms/MobilePlan/MobilePlanCreateForm";
 
 export default function Home() {
   const {
@@ -40,6 +41,9 @@ export default function Home() {
 
     mobileDeviceCreate,
     mobileDeviceCreateHandlers,
+
+    mobilePlanCreate,
+    mobilePlanCreateHandlers,
 
     alerts,
   } = useEntityOrchestration();
@@ -160,8 +164,8 @@ export default function Home() {
             </ModalDialog>
 
             <ModalDialog
-              isOpen={workstationCreate.isAddNewWorkstationModalOpen}
-              setIsOpen={workstationCreate.openCloseAddNewWorkstationModal}
+              isOpen={workstationCreate.isCreateModalOpen}
+              setIsOpen={workstationCreate.openCloseCreateModal}
               triggerButtonText="Add New Workstation"
               modalTitle="Add New Workstation"
             >
@@ -169,14 +173,14 @@ export default function Home() {
                 onSuccess={workstationCreateHandlers.onCreateSuccess}
                 onError={workstationCreateHandlers.onCreateError}
                 onClose={() =>
-                  workstationCreate.openCloseAddNewWorkstationModal(false)
+                  workstationCreate.openCloseCreateModal(false)
                 }
               ></WorkstationForm>
             </ModalDialog>
 
             <ModalDialog
-              isOpen={mobileDeviceCreate.isAddNewMobileDeviceModalOpen}
-              setIsOpen={mobileDeviceCreate.openCloseAddNewMobileDeviceModal}
+              isOpen={mobileDeviceCreate.isCreateModalOpen}
+              setIsOpen={mobileDeviceCreate.openCloseCreateModal}
               triggerButtonText="Add New Mobile Device"
               modalTitle="Add New Mobile Device"
             >
@@ -184,9 +188,22 @@ export default function Home() {
                 onSuccess={mobileDeviceCreateHandlers.onCreateSuccess}
                 onError={mobileDeviceCreateHandlers.onCreateError}
                 onClose={() =>
-                  mobileDeviceCreate.openCloseAddNewMobileDeviceModal(false)
+                  mobileDeviceCreate.openCloseCreateModal(false)
                 }
               ></MobileDeviceForm>
+            </ModalDialog>
+
+            <ModalDialog
+              isOpen={mobilePlanCreate.isCreateModalOpen}
+              setIsOpen={mobilePlanCreate.openCloseCreateModal}
+              triggerButtonText="Add New Mobile Plan"
+              modalTitle="Add New Mobile Plan"
+            >
+              <MobilePlanCreateForm
+                onSuccess={mobilePlanCreateHandlers.onCreateSuccess}
+                onError={mobilePlanCreateHandlers.onCreateError}
+                onClose={() => mobilePlanCreate.openCloseCreateModal(false)}
+              ></MobilePlanCreateForm>
             </ModalDialog>
           </ButtonGroup>
         )}

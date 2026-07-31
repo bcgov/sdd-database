@@ -6,10 +6,9 @@ import { useEntitySelectionState } from "@/hooks/entity/useEntitySelectionState"
 import { useEmployeeAssignActions } from "@/hooks/employee/useEmployeeAssignActions";
 import { useEntityEditCallbacks } from "@/hooks/entity/useEntityEditCallbacks";
 import { useWorkspaceActions } from "@/hooks/workspace/useWorkspaceActions";
-import { useWorkstationCreateState } from "@/hooks/workstation/useWorkstationCreateState";
 import { useEntityDeleteState } from "@/hooks/entity/useEntityDeleteState";
 import { useEntityCreateCallbacks } from "@/hooks/entity/useEntityCreateCallbacks";
-import { useMobileDeviceCreateState } from "@/hooks/mobile-device/useMobileDeviceCreateState";
+import { useEntityCreateModalState } from "@/hooks/entity/useEntityCreateModalState";
 import { useCallback } from "react";
 import { deleteEmployeeAction } from "@/actions/entities/employee/actions";
 import { deleteWorkstationAction } from "@/actions/entities/workstation/actions";
@@ -214,12 +213,13 @@ export function useEntityOrchestration() {
   });
 
   // workstation add modal state
-  const workstationCreate = useWorkstationCreateState();
-  const { openCloseAddNewWorkstationModal } = workstationCreate;
+  const workstationCreate = useEntityCreateModalState();
+  const { openCloseCreateModal: openCloseWorkstationCreateModal } =
+    workstationCreate;
 
   const closeWorkstationCreateModal = useCallback(() => {
-    openCloseAddNewWorkstationModal(false);
-  }, [openCloseAddNewWorkstationModal]);
+    openCloseWorkstationCreateModal(false);
+  }, [openCloseWorkstationCreateModal]);
 
   // add workstation success/error callbacks
   const workstationCreateHandlers = useEntityCreateCallbacks({
@@ -234,12 +234,13 @@ export function useEntityOrchestration() {
   });
 
   // mobile device add modal state
-  const mobileDeviceCreate = useMobileDeviceCreateState();
-  const { openCloseAddNewMobileDeviceModal } = mobileDeviceCreate;
+  const mobileDeviceCreate = useEntityCreateModalState();
+  const { openCloseCreateModal: openCloseMobileDeviceCreateModal } =
+    mobileDeviceCreate;
 
   const closeMobileDeviceCreateModal = useCallback(() => {
-    openCloseAddNewMobileDeviceModal(false);
-  }, [openCloseAddNewMobileDeviceModal]);
+    openCloseMobileDeviceCreateModal(false);
+  }, [openCloseMobileDeviceCreateModal]);
 
   // add mobile device success/error callbacks
   const mobileDeviceCreateHandlers = useEntityCreateCallbacks({
@@ -248,6 +249,27 @@ export function useEntityOrchestration() {
     refreshSearchResults,
 
     closeCreateModal: closeMobileDeviceCreateModal,
+
+    addSuccessAlert,
+    addErrorAlert,
+  });
+
+  // mobile plan add modal state
+  const mobilePlanCreate = useEntityCreateModalState();
+  const { openCloseCreateModal: openCloseMobilePlanCreateModal } =
+    mobilePlanCreate;
+
+  const closeMobilePlanCreateModal = useCallback(() => {
+    openCloseMobilePlanCreateModal(false);
+  }, [openCloseMobilePlanCreateModal]);
+
+  // add mobile plan success/error callbacks
+  const mobilePlanCreateHandlers = useEntityCreateCallbacks({
+    entityType: "mobilePlan",
+
+    refreshSearchResults,
+
+    closeCreateModal: closeMobilePlanCreateModal,
 
     addSuccessAlert,
     addErrorAlert,
@@ -273,6 +295,9 @@ export function useEntityOrchestration() {
 
     mobileDeviceCreate,
     mobileDeviceCreateHandlers,
+
+    mobilePlanCreate,
+    mobilePlanCreateHandlers,
 
     alerts,
   };

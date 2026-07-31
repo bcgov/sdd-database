@@ -9,7 +9,7 @@ import {
 } from "@/validators";
 import {officeExistsByOfficeNumber} from "@/db/data-access/offices";
 import {getMobileDeviceModelById} from "@/db/data-access/lookups";
-import {mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
+import {isMobileDeviceStatus, mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
 
 
 export async function validateMobileDeviceData(mobileDevice: MobileDeviceFormValues) {
@@ -62,6 +62,10 @@ function validateImeiRulesForMobileDeviceModel(
 }
 
 function validateMobileDeviceStatusRules(mobileDevice: MobileDeviceFormValues) {
+    if (!isMobileDeviceStatus(mobileDevice.ui_mobile_device_status)) {
+        return "The selected mobile device status is invalid. Please reselect a status and try again."
+    }
+
     if (mobileDevice.ui_mobile_device_status === "adr" && !mobileDevice.adr) {
         return "ADR Number is required when mobile device status is Disposed"
     }

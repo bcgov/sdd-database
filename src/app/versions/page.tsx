@@ -6,6 +6,24 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.41",
+            notes: [
+                "Add Data Allowance field to Mobile Plans",
+                "Mobile Plans can now be created",
+                "Standardize assignment action button layouts in the Employee modal"
+            ]
+        },
+        {
+            version: "v0.0.40",
+            notes: [
+                "Add Plan Status field to Mobile Plans",
+                "Add Service Provider field to Mobile Plans",
+                "Mobile Plan Search Results now display the Service Provider",
+                "Mobile Plans are now searchable by Service Provider",
+                "Mobile Plans now show the assigned Mobile Device's current Office Number"
+            ]
+        },
+        {
             version: "v0.0.39",
             notes: [
                 "Workstations can now be deleted",

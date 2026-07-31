@@ -4,6 +4,7 @@ import {Accordion, TextField} from "@bcgov/design-system-react-components"
 interface AssignedMobileDeviceDetailsProps {
     assignedMobileDevice: {
         imei: string | null
+        office_number: string
         mobile_device_model: {
             name: string
         }
@@ -31,6 +32,12 @@ export function AssignedMobileDeviceDetails({
                     >
                     </TextField>
                 )}
+
+                <TextField label="Currently at Office Number"
+                           isReadOnly
+                           defaultValue={assignedMobileDevice.office_number}
+                >
+                </TextField>
             </div>
         </Accordion>
     )

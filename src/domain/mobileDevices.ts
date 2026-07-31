@@ -3,7 +3,14 @@ import type {MobileDeviceEntity} from "@/types";
 import type {CalendarDate} from "@internationalized/date";
 
 
-export type MobileDeviceStatus = "unassigned" | "assigned" | "adr" | "gilr"
+export const MOBILE_DEVICE_STATUSES = [
+    "unassigned",
+    "assigned",
+    "adr",
+    "gilr"
+] as const
+
+export type MobileDeviceStatus = (typeof MOBILE_DEVICE_STATUSES)[number]
 
 const MODELS_WITHOUT_IMEI = new Set([
     "Office in a Box (OiaB)",
@@ -29,6 +36,10 @@ export function getMobileDeviceStatus(mobileDevice: {
     if (mobileDevice.employee_id !== null) return "assigned"
 
     return "unassigned"
+}
+
+export function isMobileDeviceStatus(value: string): value is MobileDeviceStatus {
+    return MOBILE_DEVICE_STATUSES.some(status => status === value)
 }
 
 export function getMobileDeviceTitle(

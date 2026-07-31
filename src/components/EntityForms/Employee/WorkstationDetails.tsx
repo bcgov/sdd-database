@@ -1,5 +1,10 @@
 import {Accordion, Button, TextField} from "@bcgov/design-system-react-components";
 import {PressEvent} from "@react-types/shared";
+import {
+    AssignmentActionRow,
+    AssignmentItem,
+    AssignmentSectionContent
+} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
 
 
 interface WorkstationDetailsProps {
@@ -18,9 +23,9 @@ export function WorkstationDetails({
 
     return (
         <Accordion label="Workstation Details" id="workstationDetails">
-            <div>
+            <AssignmentSectionContent>
                 {workstationAssetTags.map((assetTag) => (
-                    <div key={assetTag}>
+                    <AssignmentItem key={assetTag}>
                         <TextField label="Asset Tag"
                                    name="workstationAssetTags"
                                    isReadOnly
@@ -28,21 +33,27 @@ export function WorkstationDetails({
                         >
                         </TextField>
 
-                        <Button
-                            variant="secondary"
-                            danger
-                            onPress={() => handleRemoveWorkstation(assetTag)}
-                        >
-                            Remove Workstation
-                        </Button>
-                    </div>
+                        <AssignmentActionRow>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                danger
+                                onPress={() => handleRemoveWorkstation(assetTag)}
+                            >
+                                Remove Workstation
+                            </Button>
+                        </AssignmentActionRow>
+                    </AssignmentItem>
                 ))}
 
-                <Button variant="secondary"
-                        onPress={handleAssignWorkstation}>
-                    {hasWorkstations ? "Add Workstation" : "Assign Workstation"}
-                </Button>
-            </div>
+                <AssignmentActionRow>
+                    <Button type="button"
+                            variant="secondary"
+                            onPress={handleAssignWorkstation}>
+                        {hasWorkstations ? "Add Workstation" : "Assign Workstation"}
+                    </Button>
+                </AssignmentActionRow>
+            </AssignmentSectionContent>
         </Accordion>
     )
 }

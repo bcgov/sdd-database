@@ -1,5 +1,9 @@
 import {PressEvent} from "@react-types/shared";
 import {Accordion, Button, Callout, TextField} from "@bcgov/design-system-react-components";
+import {
+    AssignmentActionRow,
+    AssignmentSectionContent
+} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
 
 interface OfficeDetailsProps {
     officeNumber: string | undefined
@@ -16,14 +20,10 @@ export function OfficeDetails({
 }: OfficeDetailsProps) {
     return (
         <Accordion label="Office Details" id="officeDetails">
-            <div>
-                <div style={{
-                    marginBottom: "1rem",
-                }}>
-                    <Callout
-                        description={`Click on the ${hasOfficeAssignment ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the ${isEditMode ? "Save" : "Create"} button below`}>
-                    </Callout>
-                </div>
+            <AssignmentSectionContent>
+                <Callout
+                    description={`Click on the ${hasOfficeAssignment ? "Update" : "Assign"} Office button to select an office for this employee. Note that the selected office will only be linked on clicking the ${isEditMode ? "Save" : "Create"} button below`}>
+                </Callout>
 
                 <TextField label="Office Number"
                            name="officeNumber"
@@ -31,12 +31,15 @@ export function OfficeDetails({
                            isReadOnly
                            value={officeNumber}/>
 
-                <Button variant="secondary"
-                        onPress={handleAssignOffice}
-                >
-                    {hasOfficeAssignment ? "Update" : "Assign"} Office
-                </Button>
-            </div>
+                <AssignmentActionRow>
+                    <Button type="button"
+                            variant="secondary"
+                            onPress={handleAssignOffice}
+                    >
+                        {hasOfficeAssignment ? "Update" : "Assign"} Office
+                    </Button>
+                </AssignmentActionRow>
+            </AssignmentSectionContent>
         </Accordion>
     )
 }

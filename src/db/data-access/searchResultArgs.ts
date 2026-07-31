@@ -11,6 +11,7 @@ const assignedEmployeePreviewSelect = {
 const assignedMobileDevicePreviewSelect = {
     id: true,
     imei: true,
+    office_number: true,
     mobile_device_model: {
         select: {
             name: true
@@ -67,7 +68,9 @@ export const mobileDeviceSearchResultArgs = {
             select: {
                 id: true,
                 phone_number: true,
-                status: true
+                data_allowance_gb: true,
+                status: true,
+                service_provider: true
             }
         },
         assigned_employee: {
@@ -79,6 +82,7 @@ export const mobileDeviceSearchResultArgs = {
 export const mobilePlanSearchResultArgs = {
     include: {
         status: true,
+        service_provider: true,
         assigned_mobile_device: {
             select: assignedMobileDevicePreviewSelect
         }

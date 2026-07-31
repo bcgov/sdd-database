@@ -216,17 +216,27 @@ model MobileDeviceModel {
 }
 
 model MobilePlan {
-  id           Int    @id @default(autoincrement())
-  phone_number String @unique @db.VarChar(10)
+  id                Int    @id @default(autoincrement())
+  phone_number      String @unique @db.VarChar(10)
+  data_allowance_gb Int
 
-  status_id        Int
-  mobile_device_id Int? @unique
+  status_id           Int
+  service_provider_id Int
+  mobile_device_id    Int? @unique
 
-  status                 MobilePlanStatus @relation(fields: [status_id], references: [id])
-  assigned_mobile_device MobileDevice?    @relation(fields: [mobile_device_id], references: [id])
+  status                 MobilePlanStatus          @relation(fields: [status_id], references: [id])
+  service_provider       MobilePlanServiceProvider @relation(fields: [service_provider_id], references: [id])
+  assigned_mobile_device MobileDevice?             @relation(fields: [mobile_device_id], references: [id])
 }
 
 model MobilePlanStatus {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Citext
+
+  mobile_plans MobilePlan[]
+}
+
+model MobilePlanServiceProvider {
   id   Int    @id @default(autoincrement())
   name String @unique @db.Citext
 

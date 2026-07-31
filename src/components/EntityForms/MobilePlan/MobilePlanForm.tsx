@@ -26,8 +26,8 @@ export function MobilePlanForm({
                             marginBottom: "1rem",
                         }}
         >
-            <MobilePlanDetails phoneNumber={mobilePlan.phone_number}
-                               planStatus={mobilePlan.status.name}
+            <MobilePlanDetails mobilePlan={mobilePlan}
+                               isReadOnly
             >
             </MobilePlanDetails>
 

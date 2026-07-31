@@ -1,5 +1,9 @@
-import {Accordion, Button, ButtonGroup, TextField} from "@bcgov/design-system-react-components";
+import {Accordion, Button, TextField} from "@bcgov/design-system-react-components";
 import {PressEvent} from "@react-types/shared";
+import {
+    AssignmentActionRow,
+    AssignmentSectionContent
+} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
 
 
 interface MobileDeviceDetailsProps {
@@ -23,7 +27,7 @@ export function MobileDeviceDetails({
         <Accordion label="Mobile Device Details"
                    id="mobileDeviceDetails"
         >
-            <div>
+            <AssignmentSectionContent>
                 <TextField label="Mobile Device"
                            isReadOnly
                            value={mobileDeviceTitle}
@@ -38,23 +42,25 @@ export function MobileDeviceDetails({
                     </input>
                 )}
 
-                <ButtonGroup>
-                    <Button variant="secondary"
+                <AssignmentActionRow>
+                    <Button type="button"
+                            variant="secondary"
                             onPress={handleAssignMobileDevice}
                     >
-                        {hasMobileDeviceAssignment ? "Update" : "Assign"}
+                        {hasMobileDeviceAssignment ? "Update" : "Assign"} Mobile Device
                     </Button>
 
                     {hasMobileDeviceAssignment && (
-                        <Button variant="secondary"
+                        <Button type="button"
+                                variant="secondary"
                                 danger
                                 onPress={handleRemoveMobileDevice}
                         >
                             Remove Mobile Device
                         </Button>
                     )}
-                </ButtonGroup>
-            </div>
+                </AssignmentActionRow>
+            </AssignmentSectionContent>
         </Accordion>
     )
 }

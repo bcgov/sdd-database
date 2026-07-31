@@ -1,8 +1,13 @@
 import {DateValue, parseDate, today} from "@internationalized/date";
+import {MOBILE_PLAN_DATA_ALLOWANCES_GB} from "@/domain/mobilePlans";
 
 
 function validateRequiredField(value: string | number | null | undefined, label: string) {
-    if (value == null || value == "") {
+    if (
+        value == null ||
+        value === "" ||
+        (typeof value === "number" && Number.isNaN(value))
+    ) {
         return `${label} is required`;
     }
 }
@@ -234,5 +239,56 @@ export function validateGilrField(value: string, label: string = "GILR Number") 
 
     if (!/^\d{4}-C\d{2}-\d{5}-\d{10}$/.test(value)) {
         return `${label} must use format ####-C##-#####-########## i.e. GILR reference (14 characters), hyphen, followed by 10-digit legacy phone number`
+    }
+}
+
+export function validateMobilePlanPhoneNumberField(
+    value: string,
+    label: string = "Phone Number"
+) {
+    const requiredError = validateRequiredField(value, label)
+    if (requiredError) {
+        return requiredError
+    }
+
+    const PHONE_NUMBER_LENGTH = 10
+
+    if (value.length !== PHONE_NUMBER_LENGTH) {
+        return `${label} must be exactly ${PHONE_NUMBER_LENGTH} digits long`
+    }
+
+    return validateOnlyDigits(value, label)
+}
+
+export function validateMobilePlanDataAllowanceField(
+    value: string | number | null | undefined,
+    label: string = "Data Allowance"
+) {
+    const requiredError = validateRequiredField(value, label)
+    if (requiredError) {
+        return requiredError
+    }
+
+    const numericValue = Number(value)
+    const isSupported = MOBILE_PLAN_DATA_ALLOWANCES_GB.some(
+        allowanceGb => allowanceGb === numericValue
+    )
+
+    if (!isSupported) {
+        return `${label} must be one of ${MOBILE_PLAN_DATA_ALLOWANCES_GB.join(", ")} GB`
+    }
+}
+
+export function validateRequiredSelectionField(
+    value: number,
+    label: string
+) {
+    const requiredError = validateRequiredField(value, label)
+    if (requiredError) {
+        return requiredError
+    }
+
+    if (!Number.isInteger(value) || value <= 0) {
+        return `${label} must be a valid selection`
     }
 }

@@ -127,6 +127,13 @@ export type MobileDeviceEntity = MobileDeviceSearchResult & {
  * Mobile Plan Types
  */
 
+export type MobilePlanFormValues = {
+    phone_number: string
+    data_allowance_gb: number
+    status_id: number
+    service_provider_id: number
+}
+
 export type MobilePlanSearchResult = Prisma.MobilePlanGetPayload<typeof mobilePlanSearchResultArgs>
 
 export type MobilePlanEntity = MobilePlanSearchResult & {

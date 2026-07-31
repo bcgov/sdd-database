@@ -86,6 +86,7 @@ export function WorkspaceDetails({
                 <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
 
                     <ToggleButtonGroup label="Status"
+                                       aria-label="Status"
                                        isDisabled
                                        disallowEmptySelection
                                        selectedKeys={[workspaceStatus]}

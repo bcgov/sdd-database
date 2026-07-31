@@ -1,4 +1,4 @@
-import {MobilePlanSearchResult} from "@/types";
+import {MobilePlanFormValues, MobilePlanSearchResult} from "@/types";
 import {Prisma} from "@/generated/prisma/client";
 import {mobilePlanSearchResultArgs} from "@/db/data-access/searchResultArgs";
 import {prisma} from "@/db/client";
@@ -6,14 +6,30 @@ import {normalizeMobilePlanPhoneNumber} from "@/domain/mobilePlans";
 
 
 export async function getMobilePlansByFilter(query?: string): Promise<MobilePlanSearchResult[]> {
-    // Phone numbers are stored as 10 digits but users may search using the displayed ###-###-#### format.
-    const normalizedQuery = query ? normalizeMobilePlanPhoneNumber(query) : undefined
+    const trimmedQuery = query?.trim()
 
-    const searchFilter: Prisma.MobilePlanWhereInput = normalizedQuery
+    // Phone numbers are stored as 10 digits but users may search using the displayed ###-###-#### format.
+    const normalizedPhoneNumberQuery = trimmedQuery
+        ? normalizeMobilePlanPhoneNumber(trimmedQuery)
+        : undefined
+
+    const searchFilter: Prisma.MobilePlanWhereInput = trimmedQuery
         ? {
-            phone_number: {
-                equals: normalizedQuery
-            }
+            OR: [
+                {
+                    phone_number: {
+                        equals: normalizedPhoneNumberQuery
+                    }
+                },
+                {
+                    service_provider: {
+                        name: {
+                            equals: trimmedQuery,
+                            mode: "insensitive"
+                        }
+                    }
+                }
+            ]
         }
         : {}
 
@@ -23,5 +39,11 @@ export async function getMobilePlansByFilter(query?: string): Promise<MobilePlan
         orderBy: {
             phone_number: "asc"
         }
+    })
+}
+
+export async function addNewMobilePlan(mobilePlan: MobilePlanFormValues) {
+    return prisma.mobilePlan.create({
+        data: mobilePlan
     })
 }

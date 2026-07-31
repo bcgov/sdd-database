@@ -2,6 +2,7 @@ import {
     EmployeeFormValues,
     EntityType,
     MobileDeviceFormValues,
+    MobilePlanFormValues,
     WorkstationFormValues
 } from "@/types";
 import type {MobileDeviceStatus} from "@/domain/mobileDevices";
@@ -193,5 +194,24 @@ export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormV
 
         id,
         ui_mobile_device_status: uiMobileDeviceStatus
+    }
+}
+
+export const parseMobilePlanFormData = (formData: FormData): MobilePlanFormValues => {
+    const phoneNumber = String(formData.get("phoneNumber") ?? "").trim()
+
+    const parseRequiredNumber = (fieldName: string) => {
+        const rawValue = formData.get(fieldName)
+
+        return rawValue === null || rawValue === ""
+            ? Number.NaN
+            : Number(rawValue)
+    }
+
+    return {
+        phone_number: phoneNumber,
+        service_provider_id: parseRequiredNumber("serviceProvider"),
+        data_allowance_gb: parseRequiredNumber("dataAllowanceGb"),
+        status_id: parseRequiredNumber("status"),
     }
 }

@@ -146,7 +146,8 @@ export function MobileDeviceDetails({
                 </DatePicker>
 
                 <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
-                    <ToggleButtonGroup label="Status"
+                    <ToggleButtonGroup label="Status (required)"
+                                       aria-label="Status (required)"
                                        disallowEmptySelection
                                        selectedKeys={[draftMobileDeviceStatus]}
                                        isDisabled={mobileDeviceStatus === "adr" || mobileDeviceStatus === "gilr" || mobileDeviceStatus === "assigned"}

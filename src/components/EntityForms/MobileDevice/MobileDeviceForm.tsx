@@ -89,8 +89,9 @@ export function MobileDeviceForm({
 
           {mobileDevice?.mobile_plan && (
             <MobilePlanDetails
-              phoneNumber={mobileDevice.mobile_plan.phone_number}
-              planStatus={mobileDevice.mobile_plan.status.name}
+              mobilePlan={mobileDevice.mobile_plan}
+              isReadOnly
+              showStatus={false}
             ></MobilePlanDetails>
           )}
 
