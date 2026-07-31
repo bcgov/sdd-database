@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
+import {createXlsxResponse} from "../xlsx";
 
 export async function POST(req: Request) {
     const body = await req.json();
@@ -190,42 +190,13 @@ export async function POST(req: Request) {
         return false;
     });
 
-    const workbook = new Workbook();
-    const sheet = workbook.addWorksheet("Employees");
-
-    sheet.addRow([
-        "First Name",
-        "Alternate Name",
-        "Last Name",
-        "Employee ID",
-        "IDIR",
-        "Office Number",
-        "Office Name",
-        "Branch",
-        "Program Area",
-        "Job Title",
-        "On Leave",
-        "Workspace",
-        "Workspace Category",
-        "Workspace Desk Type",
-        "Workspace Hold Status",
-        "Workspace Notes",
-        "Workstation Asset Tags",
-        "Workstation Models",
-        "Workstation Notes",
-        "Mobile Device IMEI",
-        "Mobile Device Model",
-        "Mobile Device Notes",
-        "Notes",
-    ]);
-
-    filteredEmployees.forEach((employee) => {
+    const rows = filteredEmployees.map((employee) => {
         const workstations = employee.workstations ?? [];
         const workstationAssetTags = workstations.map((workstation) => workstation.asset_tag).join(" | ");
         const workstationModels = workstations.map((workstation) => workstation.workstation_model?.name ?? "").join(" | ");
         const workstationNotes = workstations.map((workstation) => workstation.notes ?? "").join(" | ");
 
-        sheet.addRow([
+        return [
             employee.first_name,
             employee.alternate_name ?? "",
             employee.last_name,
@@ -249,16 +220,34 @@ export async function POST(req: Request) {
             employee.mobile_device?.mobile_device_model?.name ?? "",
             employee.mobile_device?.notes ?? "",
             employee.notes ?? "",
-        ]);
+        ];
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
+    const header = [
+        "First Name",
+        "Alternate Name",
+        "Last Name",
+        "Employee ID",
+        "IDIR",
+        "Office Number",
+        "Office Name",
+        "Branch",
+        "Program Area",
+        "Job Title",
+        "On Leave",
+        "Workspace",
+        "Workspace Category",
+        "Workspace Desk Type",
+        "Workspace Hold Status",
+        "Workspace Notes",
+        "Workstation Asset Tags",
+        "Workstation Models",
+        "Workstation Notes",
+        "Mobile Device IMEI",
+        "Mobile Device Model",
+        "Mobile Device Notes",
+        "Notes",
+    ];
 
-    return new Response(buffer, {
-        status: 200,
-        headers: {
-            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="employees-${query}.xlsx"`,
-        },
-    });
+    return createXlsxResponse([header, ...rows], `employees-${query || "all"}.xlsx`);
 }

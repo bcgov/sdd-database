@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
+import {createXlsxResponse} from "../xlsx";
 
 export async function POST(req: Request) {
     const body = await req.json();
@@ -55,27 +55,10 @@ export async function POST(req: Request) {
         },
     });
 
-    const workbook = new Workbook();
-    const sheet = workbook.addWorksheet("Mobile Devices");
-
-    sheet.addRow([
-        "Office Code",
-        "Employee Name",
-        "IDIR",
-        "Branch",
-        "Program Area",
-        "Job Title",
-        "Notes",
-        "Model",
-        "IMEI",
-        "Plan Status",
-        "Phone Number"
-    ]);
-
-    mobileDevices.forEach((device) => {
+    const rows = mobileDevices.map((device) => {
         const employee = device.assigned_employee;
 
-        sheet.addRow([
+        return [
             officeCode ?? "",
             employee ? `${employee.first_name} ${employee.last_name}` : "",
             employee?.idir ?? "",
@@ -87,18 +70,11 @@ export async function POST(req: Request) {
             device.imei ?? "",
             device.mobile_plan ? "Yes" : "No",
             device.mobile_plan?.phone_number ?? ""
-        ]);
+        ];
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-
+    const header = ["Office Code", "Employee Name", "IDIR", "Branch", "Program Area", "Job Title", "Notes", "Model", "IMEI", "Plan Status", "Phone Number"];
     const filenameBase = officeCode || imei || "all";
 
-    return new Response(buffer, {
-        status: 200,
-        headers: {
-            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="mobile-devices-${filenameBase}.xlsx"`
-        }
-    });
+    return createXlsxResponse([header, ...rows], `mobile-devices-${filenameBase}.xlsx`);
 }

@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
-import {Prisma} from "@/generated/prisma/client"
+import {createXlsxResponse} from "../xlsx";
 
 export async function POST(req: Request) {
     const body = await req.json();
@@ -125,10 +124,8 @@ export async function POST(req: Request) {
         }),
     ]);
 
-    const workbook = new Workbook();
-
-    const employeesSheet = workbook.addWorksheet("Employees");
-    employeesSheet.addRow([
+    const header = [
+        "Type",
         "First Name",
         "Alternate Name",
         "Last Name",
@@ -141,10 +138,11 @@ export async function POST(req: Request) {
         "Job Title",
         "On Leave",
         "Notes",
-    ]);
+    ];
 
-    employees.forEach((employee) => {
-        employeesSheet.addRow([
+    const rows = [
+        ...employees.map((employee) => [
+            "Employee",
             employee.first_name,
             employee.alternate_name ?? "",
             employee.last_name,
@@ -157,93 +155,71 @@ export async function POST(req: Request) {
             employee.job_title?.name ?? "",
             employee.is_on_leave ? "Yes" : "No",
             employee.notes ?? "",
-        ]);
-    });
+        ]),
+        ...workspaces.map((workspace) => {
+            const assignedEmployee = workspace.assigned_employee
+                ? `${workspace.assigned_employee.first_name} ${workspace.assigned_employee.last_name}`.trim()
+                : "";
 
-    const workspacesSheet = workbook.addWorksheet("Workspaces");
-    workspacesSheet.addRow([
-        "Office Number",
-        "Workspace Number",
-        "Category",
-        "Desk Type",
-        "Office Floor",
-        "On Hold",
-        "Assigned Employee",
-        "Restricted Program Area",
-        "Notes",
-    ]);
+            return [
+                "Workspace",
+                workspace.workspace_number,
+                "",
+                "",
+                "",
+                "",
+                workspace.office_number,
+                office.office_name,
+                "",
+                workspace.restricted_program_area?.name ?? "",
+                "",
+                workspace.is_on_hold ? "Yes" : "No",
+                workspace.notes ?? "",
+            ];
+        }),
+        ...workstations.map((workstation) => {
+            const assignedEmployee = workstation.assigned_employee
+                ? `${workstation.assigned_employee.first_name} ${workstation.assigned_employee.last_name}`.trim()
+                : "";
 
-    workspaces.forEach((workspace) => {
-        const assignedEmployee = workspace.assigned_employee
-            ? `${workspace.assigned_employee.first_name} ${workspace.assigned_employee.last_name}`.trim()
-            : "";
+            return [
+                "Workstation",
+                assignedEmployee,
+                "",
+                "",
+                "",
+                "",
+                workstation.office_number,
+                office.office_name,
+                "",
+                "",
+                "",
+                "",
+                workstation.notes ?? "",
+            ];
+        }),
+        ...mobileDevices.map((mobileDevice) => {
+            const assignedEmployee = mobileDevice.assigned_employee
+                ? `${mobileDevice.assigned_employee.first_name} ${mobileDevice.assigned_employee.last_name}`.trim()
+                : "";
 
-        workspacesSheet.addRow([
-            workspace.office_number,
-            workspace.workspace_number,
-            workspace.category?.name ?? "",
-            workspace.desk_type?.name ?? "",
-            workspace.office_floor,
-            workspace.is_on_hold ? "Yes" : "No",
-            assignedEmployee,
-            workspace.restricted_program_area?.name ?? "",
-            workspace.notes ?? "",
-        ]);
-    });
+            return [
+                "Mobile Device",
+                assignedEmployee,
+                "",
+                "",
+                "",
+                "",
+                mobileDevice.office_number,
+                office.office_name,
+                "",
+                "",
+                "",
+                "",
+                mobileDevice.notes ?? "",
+            ];
+        }),
+    ];
 
-    const workstationsSheet = workbook.addWorksheet("Workstations");
-    workstationsSheet.addRow([
-        "Asset Tag",
-        "Model",
-        "Office Number",
-        "Assigned Employee",
-        "Notes",
-    ]);
-
-    workstations.forEach((workstation) => {
-        const assignedEmployee = workstation.assigned_employee
-            ? `${workstation.assigned_employee.first_name} ${workstation.assigned_employee.last_name}`.trim()
-            : "";
-
-        workstationsSheet.addRow([
-            workstation.asset_tag,
-            workstation.workstation_model?.name ?? "",
-            workstation.office_number,
-            assignedEmployee,
-            workstation.notes ?? "",
-        ]);
-    });
-
-    const mobileDevicesSheet = workbook.addWorksheet("Mobile Devices");
-    mobileDevicesSheet.addRow([
-        "IMEI",
-        "Model",
-        "Office Number",
-        "Assigned Employee",
-        "Notes",
-    ]);
-
-    mobileDevices.forEach((mobileDevice) => {
-        const assignedEmployee = mobileDevice.assigned_employee
-            ? `${mobileDevice.assigned_employee.first_name} ${mobileDevice.assigned_employee.last_name}`.trim()
-            : "";
-
-        mobileDevicesSheet.addRow([
-            mobileDevice.imei ?? "",
-            mobileDevice.mobile_device_model?.name ?? "",
-            mobileDevice.office_number,
-            assignedEmployee,
-            mobileDevice.notes ?? "",
-        ]);
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-
-    return new Response(buffer, {
-        status: 200,
-        headers: {
-            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="office-records-${officeCode}.xlsx"`,
-        },
-    });
+    return createXlsxResponse([header, ...rows], `office-records-${officeCode}.xlsx`);
 }

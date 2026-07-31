@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
+import {createXlsxResponse} from "../xlsx";
 
 export async function POST(req: Request) {
     const body = await req.json();
@@ -44,29 +44,16 @@ export async function POST(req: Request) {
         },
     });
 
-    const workbook = new Workbook();
-    const sheet = workbook.addWorksheet("Workstations");
+    const rows = workstations.map((workstation) => [
+        workstation.asset_tag,
+        workstation.workstation_model?.name ?? "",
+        workstation.office_number,
+        workstation.assigned_employee ? `${workstation.assigned_employee.first_name} ${workstation.assigned_employee.last_name}` : "",
+        workstation.assigned_employee?.idir ?? "",
+        workstation.notes ?? "",
+    ]);
 
-    sheet.addRow(["Asset Tag", "Model", "Office Number", "Assigned Employee", "Employee IDIR", "Notes"]);
+    const header = ["Asset Tag", "Model", "Office Number", "Assigned Employee", "Employee IDIR", "Notes"];
 
-    workstations.forEach((workstation) => {
-        sheet.addRow([
-            workstation.asset_tag,
-            workstation.workstation_model?.name ?? "",
-            workstation.office_number,
-            workstation.assigned_employee ? `${workstation.assigned_employee.first_name} ${workstation.assigned_employee.last_name}` : "",
-            workstation.assigned_employee?.idir ?? "",
-            workstation.notes ?? "",
-        ]);
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-
-    return new Response(buffer, {
-        status: 200,
-        headers: {
-            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": "attachment; filename=workstations.xlsx",
-        },
-    });
+    return createXlsxResponse([header, ...rows], "workstations.xlsx");
 }

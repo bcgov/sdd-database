@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import {Workbook} from "exceljs";
 import {prisma} from "@/db/client";
-import {Prisma} from "@/generated/prisma/client"
+import {createXlsxResponse} from "../xlsx";
 import {buildWorkspaceReportWhereClause} from "./workspaceReportFilters";
 
 export async function POST(req: Request) {
@@ -58,10 +57,7 @@ export async function POST(req: Request) {
         }
     });
 
-    const workbook = new Workbook();
-    const sheet = workbook.addWorksheet("Workspaces");
-
-    sheet.addRow([
+    const header = [
         "Office Number",
         "Workspace Number",
         "Category",
@@ -76,12 +72,12 @@ export async function POST(req: Request) {
         "Employee Job Title",
         "Employee Leave Status",
         "Employee Notes"
-    ]);
+    ];
 
-    workspaces.forEach((workspace) => {
+    const rows = workspaces.map((workspace) => {
         const employee = workspace.assigned_employee;
 
-        sheet.addRow([
+        return [
             workspace.office_number,
             workspace.workspace_number,
             workspace.category?.name ?? "",
@@ -96,18 +92,10 @@ export async function POST(req: Request) {
             employee?.job_title?.name ?? "",
             employee?.is_on_leave ? "Yes" : "No",
             employee?.notes ?? ""
-        ]);
+        ];
     });
-
-    const buffer = await workbook.xlsx.writeBuffer();
 
     const filenameBase = officeCode || "all";
 
-    return new Response(buffer, {
-        status: 200,
-        headers: {
-            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "Content-Disposition": `attachment; filename="workspaces-${filenameBase}.xlsx"`
-        }
-    });
+    return createXlsxResponse([header, ...rows], `workspaces-${filenameBase}.xlsx`);
 }
