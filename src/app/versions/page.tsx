@@ -6,6 +6,17 @@ export default function Updates() {
 
     const changelog = [
         {
+            version: "v0.0.39",
+            notes: [
+                "Workstations can now be deleted",
+                "Search now displays a count for the no of results returned",
+                "Workspace Search Results now have the word protected in the title (if they have workspace" +
+                " protections)",
+                "Employee Search Results show the office number in the title",
+                "Fix modal overflowing in smaller screens",
+            ]
+        },
+        {
             version: "v0.0.38",
             notes: [
                 "Add Enrolled Date (Order Date) field to Mobile Devices",
