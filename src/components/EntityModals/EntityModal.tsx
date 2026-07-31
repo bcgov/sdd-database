@@ -92,6 +92,7 @@ export function EntityModal({
                                   setIsOpen={setIsOpen}
                                   onSuccess={onSuccess}
                                   onError={onError}
+                                  onDelete={onDelete}
                 >
                 </WorkstationModal>
             )
