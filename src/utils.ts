@@ -1,217 +1,235 @@
 import {
-    EmployeeFormValues,
-    EntityType,
-    MobileDeviceFormValues,
-    MobilePlanFormValues,
-    WorkstationFormValues
+  EmployeeFormValues,
+  EntityType,
+  MobileDeviceFormValues,
+  MobilePlanFormValues,
+  WorkstationFormValues,
 } from "@/types";
-import type {MobileDeviceStatus} from "@/domain/mobileDevices";
-
+import type { MobileDeviceStatus } from "@/domain/mobileDevices";
 
 export const ENTITY_TYPE_NAME: Record<EntityType, string> = {
-    employee: "Employee",
-    office: "Office",
-    workspace: "Workspace",
-    workstation: "Workstation",
-    mobileDevice: "Mobile Device",
-    mobilePlan: "Mobile Plan",
+  employee: "Employee",
+  office: "Office",
+  workspace: "Workspace",
+  workstation: "Workstation",
+  mobileDevice: "Mobile Device",
+  mobilePlan: "Mobile Plan",
 } as const;
 
-export const parseEmployeeFormData = (formData: FormData): EmployeeFormValues => {
+export const parseEmployeeFormData = (
+  formData: FormData,
+): EmployeeFormValues => {
+  // idir
+  const rawIdir = formData.get("idir") as string;
+  const idir = rawIdir ? rawIdir.toUpperCase() : null; // normalizing to maintain consistency in the DB
 
-    // idir
-    const rawIdir = formData.get("idir") as string
-    const idir = rawIdir ? rawIdir.toUpperCase() : null  // normalizing to maintain consistency in the DB
+  // first_name
+  const firstName = formData.get("firstName") as string;
 
-    // first_name
-    const firstName = formData.get("firstName") as string
+  // alternate_name
+  const rawAlternateName = formData.get("alternateName") as string;
+  const alternateName = rawAlternateName || null;
 
-    // alternate_name
-    const rawAlternateName = formData.get("alternateName") as string
-    const alternateName = rawAlternateName || null
+  // last_name
+  const lastName = formData.get("lastName") as string;
 
-    // last_name
-    const lastName = formData.get("lastName") as string
+  // employee_id
+  const rawEmployeeId = formData.get("employeeId") as string;
+  const employeeId = rawEmployeeId || null;
 
-    // employee_id
-    const rawEmployeeId = formData.get("employeeId") as string
-    const employeeId = rawEmployeeId || null
+  // is_on_leave
+  // Switch submits "on" when selected and nothing/null when not selected.
+  const rawIsOnLeave = formData.get("isOnLeave");
+  const isOnLeave = rawIsOnLeave === "on";
 
-    // is_on_leave
-    // Switch submits "on" when selected and nothing/null when not selected.
-    const rawIsOnLeave = formData.get("isOnLeave")
-    const isOnLeave = rawIsOnLeave === "on"
+  // notes
+  const rawNotes = formData.get("notes") as string;
+  const notes = rawNotes || null;
 
-    // notes
-    const rawNotes = formData.get("notes") as string
-    const notes = rawNotes || null
+  // office_number
+  const rawOfficeNumber = formData.get("officeNumber") as string;
+  const officeNumber = rawOfficeNumber !== "Unassigned" ? rawOfficeNumber : "";
 
-    // office_number
-    const rawOfficeNumber = formData.get("officeNumber") as string
-    const officeNumber = rawOfficeNumber !== "Unassigned" ? rawOfficeNumber : ""
+  // program_area_id
+  const rawProgramAreaId = formData.get("programArea");
+  const programAreaId = Number(rawProgramAreaId);
 
-    // program_area_id
-    const rawProgramAreaId = formData.get("programArea")
-    const programAreaId = Number(rawProgramAreaId)
+  // job_title_id
+  const rawJobTitleId = formData.get("jobTitle");
+  const jobTitleId = rawJobTitleId ? Number(rawJobTitleId) : null;
 
-    // job_title_id
-    const rawJobTitleId = formData.get("jobTitle")
-    const jobTitleId = rawJobTitleId ? Number(rawJobTitleId) : null
+  // workspace_assignment_type_id
+  const rawWorkspaceAssignmentTypeId = formData.get(
+    "workspaceAssignmentType",
+  ) as string;
+  const workspaceAssignmentTypeId = rawWorkspaceAssignmentTypeId
+    ? Number(rawWorkspaceAssignmentTypeId)
+    : null;
 
-    // workspace_assignment_type_id
-    const rawWorkspaceAssignmentTypeId = formData.get("workspaceAssignmentType") as string
-    const workspaceAssignmentTypeId = rawWorkspaceAssignmentTypeId
-        ? Number(rawWorkspaceAssignmentTypeId)
-        : null
+  // id
+  const rawId = formData.get("id");
+  const id = rawId ? Number(rawId) : undefined;
 
-    // id
-    const rawId = formData.get("id")
-    const id = rawId ? Number(rawId) : undefined
+  // ui_branch_id
+  const rawUIBranchId = formData.get("branch");
+  const uiBranchId = rawUIBranchId ? Number(rawUIBranchId) : undefined;
 
-    // ui_branch_id
-    const rawUIBranchId = formData.get("branch")
-    const uiBranchId = rawUIBranchId ? Number(rawUIBranchId) : undefined
+  // ui_workspace_number
+  const rawUIWorkspaceNumber = formData.get("workspaceNumber");
+  const uiWorkspaceNumber =
+    rawUIWorkspaceNumber && rawUIWorkspaceNumber !== "Unassigned"
+      ? String(rawUIWorkspaceNumber)
+      : undefined;
 
-    // ui_workspace_number
-    const rawUIWorkspaceNumber = formData.get("workspaceNumber")
-    const uiWorkspaceNumber = rawUIWorkspaceNumber && rawUIWorkspaceNumber !== "Unassigned"
-        ? String(rawUIWorkspaceNumber)
-        : undefined
+  // ui_workstation_asset_tags
+  const rawUIWorkstationAssetTags = formData.getAll("workstationAssetTags");
+  const uiWorkstationAssetTags = rawUIWorkstationAssetTags.map((value) =>
+    String(value),
+  );
 
-    // ui_workstation_asset_tags
-    const rawUIWorkstationAssetTags = formData.getAll("workstationAssetTags")
-    const uiWorkstationAssetTags = rawUIWorkstationAssetTags.map(value => String(value))
+  // ui_mobile_device_id
+  const rawUIMobileDeviceId = formData.get("mobileDeviceId");
+  const uiMobileDeviceId = rawUIMobileDeviceId
+    ? Number(rawUIMobileDeviceId)
+    : undefined;
 
-    // ui_mobile_device_id
-    const rawUIMobileDeviceId = formData.get("mobileDeviceId")
-    const uiMobileDeviceId = rawUIMobileDeviceId ? Number(rawUIMobileDeviceId) : undefined
+  // ohs_accommodation_type_ids
+  const rawOhsAccommodationTypeIds = formData.getAll("ohsAccommodationTypeIds");
+  const ohsAccommodationTypeIds = rawOhsAccommodationTypeIds.map((value) =>
+    Number(value),
+  );
 
-    // ohs_accommodation_type_ids
-    const rawOhsAccommodationTypeIds = formData.getAll("ohsAccommodationTypeIds")
-    const ohsAccommodationTypeIds = rawOhsAccommodationTypeIds.map(value => Number(value))
+  return {
+    idir,
+    first_name: firstName,
+    alternate_name: alternateName,
+    last_name: lastName,
+    employee_id: employeeId,
+    is_on_leave: isOnLeave,
+    notes,
+    office_number: officeNumber,
+    program_area_id: programAreaId,
+    job_title_id: jobTitleId,
+    workspace_assignment_type_id: workspaceAssignmentTypeId,
 
-    return {
-        idir,
-        first_name: firstName,
-        alternate_name: alternateName,
-        last_name: lastName,
-        employee_id: employeeId,
-        is_on_leave: isOnLeave,
-        notes,
-        office_number: officeNumber,
-        program_area_id: programAreaId,
-        job_title_id: jobTitleId,
-        workspace_assignment_type_id: workspaceAssignmentTypeId,
+    id,
+    ui_branch_id: uiBranchId,
+    ui_workspace_number: uiWorkspaceNumber,
+    ui_workstation_asset_tags: uiWorkstationAssetTags,
+    ui_mobile_device_id: uiMobileDeviceId,
+    ohs_accommodation_type_ids: ohsAccommodationTypeIds,
+  };
+};
 
-        id,
-        ui_branch_id: uiBranchId,
-        ui_workspace_number: uiWorkspaceNumber,
-        ui_workstation_asset_tags: uiWorkstationAssetTags,
-        ui_mobile_device_id: uiMobileDeviceId,
-        ohs_accommodation_type_ids: ohsAccommodationTypeIds
-    }
-}
+export const parseWorkstationFormData = (
+  formData: FormData,
+): WorkstationFormValues => {
+  // asset_tag
+  const assetTag = formData.get("assetTag") as string;
 
-export const parseWorkstationFormData = (formData: FormData): WorkstationFormValues => {
+  // model_id
+  const rawModelId = formData.get("model");
+  const modelId = Number(rawModelId);
 
-    // asset_tag
-    const assetTag = formData.get("assetTag") as string
+  // office_number
+  const officeNumber = formData.get("officeNumber") as string;
 
-    // model_id
-    const rawModelId = formData.get("model")
-    const modelId = Number(rawModelId)
+  // notes
+  const rawNotes = formData.get("notes") as string;
+  const notes = rawNotes || null;
 
-    // office_number
-    const officeNumber = formData.get("officeNumber") as string
+  return {
+    asset_tag: assetTag,
+    model_id: modelId,
+    office_number: officeNumber,
+    notes,
+  };
+};
 
-    // notes
-    const rawNotes = formData.get("notes") as string
-    const notes = rawNotes || null
+export const parseMobileDeviceFormData = (
+  formData: FormData,
+): MobileDeviceFormValues => {
+  // id
+  const rawId = formData.get("id");
+  const id = rawId ? Number(rawId) : undefined;
 
-    return {
-        asset_tag: assetTag,
-        model_id: modelId,
-        office_number: officeNumber,
-        notes
-    }
-}
+  // imei
+  const rawImei = formData.get("imei") as string;
+  const imei = rawImei || null;
 
-export const parseMobileDeviceFormData = (formData: FormData): MobileDeviceFormValues => {
-    // id
-    const rawId = formData.get("id")
-    const id = rawId ? Number(rawId) : undefined
+  // order_date
+  const rawOrderDate = formData.get("orderDate") as string;
 
-    // imei
-    const rawImei = formData.get("imei") as string
-    const imei = rawImei || null
+  /**
+   * rawOrderDate = "2026-07-21"
+   * `${rawOrderDate}T00:00:00.000Z` creates 2026-07-21T00:00:00.000Z
+   * 2026-07-21 — calendar date
+   * T — separates the date and time
+   * 00:00:00.000 — exactly midnight
+   * Z — UTC timezone
+   *
+   * So, in essence, we convert the submitted calendar date into a JavaScript Date, representing midnight UTC on that
+   * day. Using UTC midnight preserves the selected calendar day without Vancouver timezone shifting it during storage.
+   */
+  const orderDate = new Date(`${rawOrderDate}T00:00:00.000Z`);
 
-    // order_date
-    const rawOrderDate = formData.get("orderDate") as string
+  // adr
+  const rawAdr = formData.get("adr") as string;
+  const adr = rawAdr || null;
 
-    /**
-     * rawOrderDate = "2026-07-21"
-     * `${rawOrderDate}T00:00:00.000Z` creates 2026-07-21T00:00:00.000Z
-     * 2026-07-21 — calendar date
-     * T — separates the date and time
-     * 00:00:00.000 — exactly midnight
-     * Z — UTC timezone
-     *
-     * So, in essence, we convert the submitted calendar date into a JavaScript Date, representing midnight UTC on that
-     * day. Using UTC midnight preserves the selected calendar day without Vancouver timezone shifting it during storage.
-     */
-    const orderDate = new Date(`${rawOrderDate}T00:00:00.000Z`)
+  // gilr
+  const rawGilr = formData.get("gilr") as string;
+  const gilr = rawGilr || null;
 
-    // adr
-    const rawAdr = formData.get("adr") as string
-    const adr = rawAdr || null
+  // notes
+  const rawNotes = formData.get("notes") as string;
+  const notes = rawNotes || null;
 
-    // gilr
-    const rawGilr = formData.get("gilr") as string
-    const gilr = rawGilr || null
+  // model_id
+  const rawModelId = formData.get("model");
+  const modelId = Number(rawModelId);
 
-    // notes
-    const rawNotes = formData.get("notes") as string
-    const notes = rawNotes || null
+  // office_number
+  const officeNumber = formData.get("officeNumber") as string;
 
-    // model_id
-    const rawModelId = formData.get("model")
-    const modelId = Number(rawModelId)
+  // ui_mobile_device_status
+  const uiMobileDeviceStatus = formData.get(
+    "mobileDeviceStatus",
+  ) as MobileDeviceStatus;
 
-    // office_number
-    const officeNumber = formData.get("officeNumber") as string
+  return {
+    imei,
+    order_date: orderDate,
+    adr,
+    gilr,
+    notes,
+    model_id: modelId,
+    office_number: officeNumber,
 
-    // ui_mobile_device_status
-    const uiMobileDeviceStatus = formData.get("mobileDeviceStatus") as MobileDeviceStatus
+    id,
+    ui_mobile_device_status: uiMobileDeviceStatus,
+  };
+};
 
-    return {
-        imei,
-        order_date: orderDate,
-        adr,
-        gilr,
-        notes,
-        model_id: modelId,
-        office_number: officeNumber,
+export const parseMobilePlanFormData = (
+  formData: FormData,
+): MobilePlanFormValues => {
+  const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
 
-        id,
-        ui_mobile_device_status: uiMobileDeviceStatus
-    }
-}
+  const rawEnhancedVoicemail = formData.get("enhancedVoicemail");
+  const enhancedVoicemail = rawEnhancedVoicemail === "on";
 
-export const parseMobilePlanFormData = (formData: FormData): MobilePlanFormValues => {
-    const phoneNumber = String(formData.get("phoneNumber") ?? "").trim()
+  const parseRequiredNumber = (fieldName: string) => {
+    const rawValue = formData.get(fieldName);
 
-    const parseRequiredNumber = (fieldName: string) => {
-        const rawValue = formData.get(fieldName)
+    return rawValue === null || rawValue === "" ? Number.NaN : Number(rawValue);
+  };
 
-        return rawValue === null || rawValue === ""
-            ? Number.NaN
-            : Number(rawValue)
-    }
-
-    return {
-        phone_number: phoneNumber,
-        service_provider_id: parseRequiredNumber("serviceProvider"),
-        data_allowance_gb: parseRequiredNumber("dataAllowanceGb"),
-        status_id: parseRequiredNumber("status"),
-    }
-}
+  return {
+    phone_number: phoneNumber,
+    service_provider_id: parseRequiredNumber("serviceProvider"),
+    data_allowance_gb: parseRequiredNumber("dataAllowanceGb"),
+    enhanced_voicemail: enhancedVoicemail,
+    status_id: parseRequiredNumber("status"),
+  };
+};

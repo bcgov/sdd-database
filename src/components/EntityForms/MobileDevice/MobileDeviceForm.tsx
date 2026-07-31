@@ -92,6 +92,7 @@ export function MobileDeviceForm({
               mobilePlan={mobileDevice.mobile_plan}
               isReadOnly
               showStatus={false}
+              showEnhancedVoicemail={false}
             ></MobilePlanDetails>
           )}
 

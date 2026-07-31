@@ -216,9 +216,10 @@ model MobileDeviceModel {
 }
 
 model MobilePlan {
-  id                Int    @id @default(autoincrement())
-  phone_number      String @unique @db.VarChar(10)
-  data_allowance_gb Int
+  id                 Int     @id @default(autoincrement())
+  phone_number       String  @unique @db.VarChar(10)
+  data_allowance_gb  Int
+  enhanced_voicemail Boolean @default(false)
 
   status_id           Int
   service_provider_id Int
