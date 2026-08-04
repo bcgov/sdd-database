@@ -10,7 +10,7 @@ import {LookupOption} from "@/types";
 import {
     AssignmentActionRow,
     AssignmentSectionContent
-} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
+} from "@/components/EntityForms/Shared/AssignmentSectionLayout";
 
 
 interface WorkspaceDetailsProps {

@@ -6,7 +6,10 @@ import {
 import { Prisma } from "@/generated/prisma/client";
 import { mobilePlanSearchResultArgs } from "@/db/data-access/searchResultArgs";
 import { prisma } from "@/db/client";
-import { normalizeMobilePlanPhoneNumber } from "@/domain/mobilePlans";
+import {
+  DEFAULT_MOBILE_PLAN_STATUS,
+  normalizeMobilePlanPhoneNumber,
+} from "@/domain/mobilePlans";
 
 export async function getMobilePlansByFilter(
   query?: string,
@@ -43,6 +46,72 @@ export async function getMobilePlansByFilter(
     ...mobilePlanSearchResultArgs,
     orderBy: {
       phone_number: "asc",
+    },
+  });
+}
+
+/**
+ * Plans that may be newly linked to a mobile device. Existing links are left
+ * intact when a plan later becomes suspended or cancelled, but only an active,
+ * currently unassigned plan may be selected for a new assignment.
+ */
+export async function getAssignableMobilePlansByFilter(
+  query?: string,
+): Promise<MobilePlanSearchResult[]> {
+  const trimmedQuery = query?.trim();
+  const normalizedPhoneNumberQuery = trimmedQuery
+    ? normalizeMobilePlanPhoneNumber(trimmedQuery)
+    : undefined;
+
+  const searchFilter: Prisma.MobilePlanWhereInput = trimmedQuery
+    ? {
+        OR: [
+          {
+            phone_number: {
+              equals: normalizedPhoneNumberQuery,
+            },
+          },
+          {
+            service_provider: {
+              name: {
+                equals: trimmedQuery,
+                mode: "insensitive",
+              },
+            },
+          },
+        ],
+      }
+    : {};
+
+  return prisma.mobilePlan.findMany({
+    where: {
+      mobile_device_id: null,
+      status: {
+        name: DEFAULT_MOBILE_PLAN_STATUS,
+      },
+      ...searchFilter,
+    },
+    ...mobilePlanSearchResultArgs,
+    orderBy: {
+      phone_number: "asc",
+    },
+  });
+}
+
+/**
+ * Minimal server-side state used to validate a submitted plan assignment.
+ */
+export async function getMobilePlanAssignmentById(id: number) {
+  return prisma.mobilePlan.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      mobile_device_id: true,
+      status: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 }

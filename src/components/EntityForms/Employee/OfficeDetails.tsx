@@ -3,7 +3,7 @@ import {Accordion, Button, Callout, TextField} from "@bcgov/design-system-react-
 import {
     AssignmentActionRow,
     AssignmentSectionContent
-} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
+} from "@/components/EntityForms/Shared/AssignmentSectionLayout";
 
 interface OfficeDetailsProps {
     officeNumber: string | undefined

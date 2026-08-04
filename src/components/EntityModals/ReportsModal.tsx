@@ -266,8 +266,8 @@ export function ReportsModal() {
         <ModalDialog
             isOpen={isOpen}
             setIsOpen={setIsOpen}
-            triggerButtonText="Reports"
-            modalTitle="Reports"
+            triggerButtonText="Generate Report"
+            modalTitle="Generate Report"
         >
             <div style={{display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem"}}>
                 <Heading level={5}>Select a report</Heading>

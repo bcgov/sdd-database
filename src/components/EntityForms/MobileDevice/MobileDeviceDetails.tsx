@@ -11,7 +11,8 @@ import {
     ToggleButtonGroup
 } from "@bcgov/design-system-react-components";
 
-import {LookupOption, MobileDeviceSearchResult} from "@/types";
+import {LookupOption} from "@/types";
+import {MobileDeviceLike} from "@/components/EntityForms/MobileDevice/types";
 
 import {
     validateAdrField,
@@ -30,7 +31,7 @@ import {
 
 
 interface MobileDeviceDetailsProps {
-    mobileDevice?: MobileDeviceSearchResult
+    mobileDevice: MobileDeviceLike
     models: LookupOption[]
 
     isOfficeNumberReadOnly: boolean
@@ -57,9 +58,13 @@ export function MobileDeviceDetails({
 
     const [draftMobileDeviceStatus, setDraftMobileDeviceStatus] = useState<MobileDeviceStatus>(mobileDeviceStatus)
 
-    const isEditMode = !!mobileDevice
+    const isEditMode = mobileDevice?.id !== undefined
 
-    const initialOrderDate = mobileDevice
+    // A create-form draft may contain an invalid JavaScript Date when the
+    // required field was blank at the moment the user entered assignment
+    // search. Treat that as an empty DatePicker instead of calling
+    // toISOString() and crashing when the modal reopens.
+    const initialOrderDate = mobileDevice && !Number.isNaN(mobileDevice.order_date.getTime())
         ? parseDate(mobileDevice.order_date.toISOString().slice(0, 10))
         : null
 

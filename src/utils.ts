@@ -221,6 +221,19 @@ export const parseMobileDeviceFormData = (
     "mobileDeviceStatus",
   ) as MobileDeviceStatus;
 
+  // ui_mobile_plan_id
+  // An empty value represents an intentional "no plan" selection. Unlike an
+  // undefined field, it must reach persistence so an existing plan can be removed.
+  const rawUIMobilePlanId = formData.get("mobilePlanId");
+  const uiMobilePlanId =
+    rawUIMobilePlanId === null || rawUIMobilePlanId === ""
+      ? null
+      : Number(rawUIMobilePlanId);
+
+  // This is only used to redraw the assignment summary after returning from
+  // assignment search. The database relationship is determined by the id above.
+  const uiMobilePlanTitle = String(formData.get("mobilePlanTitle") ?? "");
+
   return {
     imei,
     order_date: orderDate,
@@ -232,6 +245,8 @@ export const parseMobileDeviceFormData = (
 
     id,
     ui_mobile_device_status: uiMobileDeviceStatus,
+    ui_mobile_plan_id: uiMobilePlanId,
+    ui_mobile_plan_title: uiMobilePlanTitle,
   };
 };
 

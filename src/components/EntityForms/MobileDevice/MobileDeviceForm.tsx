@@ -1,4 +1,4 @@
-import { MobileDeviceSearchResult } from "@/types";
+import { AssignMode } from "@/types";
 import {
   addNewMobileDeviceAction,
   updateMobileDeviceAction,
@@ -11,10 +11,15 @@ import { AssignedEmployeeDetails } from "@/components/EntityForms/Shared/Assigne
 import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
 import { getMobileDeviceStatus } from "@/domain/mobileDevices";
 import type { MobileDeviceStatus } from "@/domain/mobileDevices";
-import { MobilePlanDetails } from "@/components/EntityForms/MobilePlan/MobilePlanDetails";
+import type { PressEvent } from "@react-types/shared";
+import { MobilePlanAssignmentDetails } from "@/components/EntityForms/MobileDevice/MobilePlanAssignmentDetails";
+import type { MobileDeviceLike } from "@/components/EntityForms/MobileDevice/types";
 
 interface MobileDeviceFormProps {
-  mobileDevice?: MobileDeviceSearchResult;
+  mobileDevice: MobileDeviceLike;
+
+  activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>;
+  handleRemoveMobilePlan: () => void;
 
   onSuccess: () => void;
   onError: (error: string) => void;
@@ -25,12 +30,15 @@ interface MobileDeviceFormProps {
 export function MobileDeviceForm({
   mobileDevice,
 
+  activateAssignMode,
+  handleRemoveMobilePlan,
+
   onSuccess,
   onError,
 
   onClose,
 }: MobileDeviceFormProps) {
-  const isEditMode = !!mobileDevice;
+  const isEditMode = mobileDevice?.id !== undefined;
 
   const serverAction = isEditMode
     ? updateMobileDeviceAction
@@ -44,11 +52,30 @@ export function MobileDeviceForm({
 
   const mobileDeviceLookupProps = useMobileDeviceLookupProps();
 
-  const hasAssignedEmployee = !!mobileDevice?.assigned_employee;
+  const hasAssignedEmployee =
+    mobileDevice !== undefined &&
+    "assigned_employee" in mobileDevice &&
+    !!mobileDevice.assigned_employee;
 
-  const mobileDeviceStatus: MobileDeviceStatus = mobileDevice
-    ? getMobileDeviceStatus(mobileDevice)
-    : "unassigned";
+  const mobileDeviceStatus: MobileDeviceStatus =
+    mobileDevice && "ui_mobile_device_status" in mobileDevice
+      ? (mobileDevice.ui_mobile_device_status as MobileDeviceStatus)
+      : mobileDevice
+        ? getMobileDeviceStatus(mobileDevice)
+        : "unassigned";
+
+  const assignedEmployee =
+    mobileDevice && "assigned_employee" in mobileDevice
+      ? mobileDevice.assigned_employee
+      : null;
+
+  const handleAssignMobilePlan = async (event: PressEvent) => {
+    const formElement = event.target.closest("form");
+
+    if (formElement) {
+      await activateAssignMode("mobilePlan", new FormData(formElement));
+    }
+  };
 
   return (
     <Form
@@ -87,18 +114,16 @@ export function MobileDeviceForm({
             mobileDeviceStatus={mobileDeviceStatus}
           ></MobileDeviceDetails>
 
-          {mobileDevice?.mobile_plan && (
-            <MobilePlanDetails
-              mobilePlan={mobileDevice.mobile_plan}
-              isReadOnly
-              showStatus={false}
-              showEnhancedVoicemail={false}
-            ></MobilePlanDetails>
-          )}
+          <MobilePlanAssignmentDetails
+            mobileDevice={mobileDevice}
+            isEditMode={isEditMode}
+            handleAssignMobilePlan={handleAssignMobilePlan}
+            handleRemoveMobilePlan={handleRemoveMobilePlan}
+          ></MobilePlanAssignmentDetails>
 
-          {mobileDevice?.assigned_employee && (
+          {assignedEmployee && (
             <AssignedEmployeeDetails
-              assignedEmployee={mobileDevice.assigned_employee}
+              assignedEmployee={assignedEmployee}
             />
           )}
         </AccordionGroup>

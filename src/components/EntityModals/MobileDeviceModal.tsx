@@ -1,4 +1,4 @@
-import {MobileDeviceEntity} from "@/types";
+import {AssignMode, MobileDeviceEntity} from "@/types";
 import {ModalDialog} from "@/components/ModalDialog";
 import {ENTITY_TYPE_NAME} from "@/utils";
 import {MobileDeviceForm} from "@/components/EntityForms/MobileDevice/MobileDeviceForm";
@@ -6,6 +6,10 @@ import {MobileDeviceForm} from "@/components/EntityForms/MobileDevice/MobileDevi
 
 interface MobileDeviceModalProps {
     mobileDevice: MobileDeviceEntity
+
+    activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>
+    handleRemoveMobilePlan: () => void
+    clearDraftEditMobileDevice: () => void
 
     isOpen: boolean
     setIsOpen: (isOpen: boolean) => void
@@ -17,6 +21,10 @@ interface MobileDeviceModalProps {
 export function MobileDeviceModal({
                                       mobileDevice,
 
+                                      activateAssignMode,
+                                      handleRemoveMobilePlan,
+                                      clearDraftEditMobileDevice,
+
                                       isOpen,
                                       setIsOpen,
 
@@ -24,16 +32,40 @@ export function MobileDeviceModal({
                                       onError
                                   }: MobileDeviceModalProps) {
 
-    const onClose = () => setIsOpen(false)
+    const onClose = () => {
+        clearDraftEditMobileDevice()
+        setIsOpen(false)
+    }
+
+    const handleSetIsOpen = (isOpen: boolean) => {
+        if (!isOpen) {
+            onClose()
+            return
+        }
+
+        setIsOpen(true)
+    }
+
+    const handleSuccess = () => {
+        clearDraftEditMobileDevice()
+        onSuccess()
+    }
+
+    const handleError = (error: string) => {
+        clearDraftEditMobileDevice()
+        onError(error)
+    }
 
     return (
         <ModalDialog isOpen={isOpen}
-                     setIsOpen={setIsOpen}
+                     setIsOpen={handleSetIsOpen}
                      modalTitle={`Edit ${ENTITY_TYPE_NAME.mobileDevice}`}
         >
             <MobileDeviceForm mobileDevice={mobileDevice}
-                              onSuccess={onSuccess}
-                              onError={onError}
+                              activateAssignMode={activateAssignMode}
+                              handleRemoveMobilePlan={handleRemoveMobilePlan}
+                              onSuccess={handleSuccess}
+                              onError={handleError}
                               onClose={onClose}
             >
             </MobileDeviceForm>

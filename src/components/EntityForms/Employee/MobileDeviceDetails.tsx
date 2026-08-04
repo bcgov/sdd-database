@@ -3,7 +3,7 @@ import {PressEvent} from "@react-types/shared";
 import {
     AssignmentActionRow,
     AssignmentSectionContent
-} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
+} from "@/components/EntityForms/Shared/AssignmentSectionLayout";
 
 
 interface MobileDeviceDetailsProps {

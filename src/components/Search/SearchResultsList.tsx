@@ -3,11 +3,12 @@ import {
   AssignMode,
   Entity,
   MobileDeviceEntity,
+  MobilePlanEntity,
   SelectedWorkspaceAssignment,
 } from "@/types";
 import { getMobileDeviceTitle } from "@/domain/mobileDevices";
 import { getEmployeeFullName } from "@/domain/employees";
-import { formatMobilePlanPhoneNumber } from "@/domain/mobilePlans";
+import { getMobilePlanTitle } from "@/domain/mobilePlans";
 
 const getSearchResultKey = (item: Entity) => {
   // Determine a unique key based on the discriminant property
@@ -71,7 +72,7 @@ const getSearchResultTitle = (item: Entity) => {
       title = getMobileDeviceTitle(item);
       break;
     case "mobilePlan":
-      title = `${formatMobilePlanPhoneNumber(item.phone_number)} - ${item.service_provider.name}`;
+      title = getMobilePlanTitle(item);
       break;
   }
 
@@ -89,6 +90,7 @@ const getAssignClickHandler = (
   assignMobileDeviceClickHandler: (
     assignedMobileDevice: MobileDeviceEntity,
   ) => void,
+  assignMobilePlanClickHandler: (assignedMobilePlan: MobilePlanEntity) => void,
 ) => {
   if (item.type === "office" && assignMode === "office") {
     return () => assignOfficeClickHandler(item.office_number);
@@ -110,6 +112,10 @@ const getAssignClickHandler = (
     return () => assignMobileDeviceClickHandler(item);
   }
 
+  if (item.type === "mobilePlan" && assignMode === "mobilePlan") {
+    return () => assignMobilePlanClickHandler(item);
+  }
+
   return undefined;
 };
 
@@ -126,6 +132,7 @@ interface SearchResultsListProps {
   assignMobileDeviceClickHandler: (
     assignedMobileDevice: MobileDeviceEntity,
   ) => void;
+  assignMobilePlanClickHandler: (assignedMobilePlan: MobilePlanEntity) => void;
 }
 
 export function SearchResultsList({
@@ -137,6 +144,7 @@ export function SearchResultsList({
   assignWorkspaceClickHandler,
   assignWorkstationClickHandler,
   assignMobileDeviceClickHandler,
+  assignMobilePlanClickHandler,
 }: SearchResultsListProps) {
   return (
     <>
@@ -152,6 +160,7 @@ export function SearchResultsList({
             assignWorkspaceClickHandler,
             assignWorkstationClickHandler,
             assignMobileDeviceClickHandler,
+            assignMobilePlanClickHandler,
           )}
         ></SearchResultItem>
       ))}

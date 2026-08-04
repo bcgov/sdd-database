@@ -4,7 +4,7 @@ import {
     AssignmentActionRow,
     AssignmentItem,
     AssignmentSectionContent
-} from "@/components/EntityForms/Employee/AssignmentSectionLayout";
+} from "@/components/EntityForms/Shared/AssignmentSectionLayout";
 
 
 interface WorkstationDetailsProps {

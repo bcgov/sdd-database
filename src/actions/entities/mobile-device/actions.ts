@@ -4,10 +4,10 @@ import {createEntityActions} from "@/actions/createEntityActions";
 import {parseMobileDeviceFormData} from "@/utils";
 import {validateMobileDeviceData} from "@/actions/entities/mobile-device/rules";
 import {
-    addNewMobileDevice,
+    addNewMobileDeviceWithPlanAssignment,
     getAssignableMobileDevicesByFilter,
     getMobileDevicesByFilter,
-    updateMobileDevice
+    updateMobileDeviceWithPlanAssignment
 } from "@/db/data-access/mobileDevices";
 import {getReadablePrismaError} from "@/actions/entities/mobile-device/errors";
 import {EntityActionResult, MobileDeviceEntity} from "@/types";
@@ -32,8 +32,8 @@ const mobileDeviceActions = createEntityActions({
     parse: parseMobileDeviceFormData,
     validate: validateMobileDeviceData,
     persist: {
-        create: addNewMobileDevice,
-        update: updateMobileDevice
+        create: addNewMobileDeviceWithPlanAssignment,
+        update: updateMobileDeviceWithPlanAssignment
     },
     getReadablePrismaError
 })

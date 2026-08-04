@@ -9,7 +9,10 @@ import {
 } from "@/validators";
 import {officeExistsByOfficeNumber} from "@/db/data-access/offices";
 import {getMobileDeviceModelById} from "@/db/data-access/lookups";
+import {getMobilePlanAssignmentById} from "@/db/data-access/mobilePlans";
 import {isMobileDeviceStatus, mobileDeviceModelRequiresImei} from "@/domain/mobileDevices";
+import {DEFAULT_MOBILE_PLAN_STATUS} from "@/domain/mobilePlans";
+import {validateRequiredSelectionField} from "@/validators";
 
 
 export async function validateMobileDeviceData(mobileDevice: MobileDeviceFormValues) {
@@ -48,6 +51,46 @@ export async function validateMobileDeviceData(mobileDevice: MobileDeviceFormVal
     const officeExists = await officeExistsByOfficeNumber(mobileDevice.office_number)
     if (!officeExists) {
         return `Office number ${mobileDevice.office_number} does not exist. Please enter a valid office number.`
+    }
+
+    const mobilePlanAssignmentValidationError = await validateMobilePlanAssignment(mobileDevice)
+
+    if (mobilePlanAssignmentValidationError) {
+        return mobilePlanAssignmentValidationError
+    }
+}
+
+async function validateMobilePlanAssignment(mobileDevice: MobileDeviceFormValues) {
+    const mobilePlanId = mobileDevice.ui_mobile_plan_id
+
+    if (mobilePlanId === null) return
+
+    const selectedPlanIdValidationError = validateRequiredSelectionField(
+        mobilePlanId,
+        "Mobile Plan"
+    )
+
+    if (selectedPlanIdValidationError) {
+        return selectedPlanIdValidationError
+    }
+
+    const mobilePlan = await getMobilePlanAssignmentById(mobilePlanId)
+
+    if (!mobilePlan) {
+        return "The selected mobile plan no longer exists. Please choose another plan."
+    }
+
+    // An already linked plan is valid only when the user is retaining the link
+    // on the same mobile device. This allows historical Suspended/Cancelled
+    // plans to remain visible and editable without becoming assignment choices.
+    if (mobilePlan.mobile_device_id === mobileDevice.id) return
+
+    if (mobilePlan.status.name !== DEFAULT_MOBILE_PLAN_STATUS) {
+        return "Only active mobile plans can be assigned to a mobile device. Please choose another plan."
+    }
+
+    if (mobilePlan.mobile_device_id !== null) {
+        return "The selected mobile plan is already assigned to another mobile device. Please choose another plan."
     }
 }
 

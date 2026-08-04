@@ -39,7 +39,8 @@ export default function Home() {
     workstationCreate,
     workstationCreateHandlers,
 
-    mobileDeviceCreate,
+    mobileDeviceEditor,
+    mobileDevicePlanAssign,
     mobileDeviceCreateHandlers,
 
     mobilePlanCreate,
@@ -103,6 +104,9 @@ export default function Home() {
             assignMobileDeviceClickHandler={
               employeeAssign.assignMobileDeviceClickHandler
             }
+            assignMobilePlanClickHandler={
+              mobileDevicePlanAssign.assignMobilePlanClickHandler
+            }
           ></SearchResultsPanel>
         </div>
 
@@ -133,7 +137,11 @@ export default function Home() {
           <Button
             size="large"
             variant="secondary"
-            onPress={employeeAssign.cancelAssignModeHandler}
+            onPress={
+              search.assignMode === "mobilePlan"
+                ? mobileDevicePlanAssign.cancelAssignModeHandler
+                : employeeAssign.cancelAssignModeHandler
+            }
           >
             Go Back
           </Button>
@@ -179,15 +187,22 @@ export default function Home() {
             </ModalDialog>
 
             <ModalDialog
-              isOpen={mobileDeviceCreate.isCreateModalOpen}
-              setIsOpen={mobileDeviceCreate.openCloseCreateModal}
+              isOpen={mobileDeviceEditor.isAddNewMobileDeviceModalOpen}
+              setIsOpen={mobileDeviceEditor.openCloseAddNewMobileDeviceModal}
               triggerButtonText="Add New Mobile Device"
               modalTitle="Add New Mobile Device"
             >
               <MobileDeviceForm
+                mobileDevice={mobileDeviceEditor.draftNewMobileDevice}
+                activateAssignMode={mobileDevicePlanAssign.activateAssignMode}
+                handleRemoveMobilePlan={
+                  mobileDevicePlanAssign.removeMobilePlanClickHandler
+                }
                 onSuccess={mobileDeviceCreateHandlers.onCreateSuccess}
                 onError={mobileDeviceCreateHandlers.onCreateError}
-                onClose={() => mobileDeviceCreate.openCloseCreateModal(false)}
+                onClose={() =>
+                  mobileDeviceEditor.openCloseAddNewMobileDeviceModal(false)
+                }
               ></MobileDeviceForm>
             </ModalDialog>
 
@@ -213,6 +228,7 @@ export default function Home() {
           <EntityModal
             viewedEntity={selection.viewedEntity}
             draftEditEmployee={employeeEditor.draftEditEmployee}
+            draftEditMobileDevice={mobileDeviceEditor.draftEditMobileDevice}
             activateAssignMode={employeeAssign.activateAssignMode}
             handleRemoveWorkspace={employeeAssign.removeWorkspaceClickHandler}
             handleRemoveWorkstation={
@@ -220,6 +236,15 @@ export default function Home() {
             }
             handleRemoveMobileDevice={
               employeeAssign.removeMobileDeviceClickHandler
+            }
+            activateMobilePlanAssignMode={
+              mobileDevicePlanAssign.activateAssignMode
+            }
+            handleRemoveMobilePlan={
+              mobileDevicePlanAssign.removeMobilePlanClickHandler
+            }
+            clearDraftEditMobileDevice={
+              mobileDeviceEditor.clearDraftEditMobileDevice
             }
             isOpen={uiState.isEntityModalOpen}
             setIsOpen={uiState.setIsEntityModalOpen}

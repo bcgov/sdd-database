@@ -48,6 +48,12 @@ export function SearchControls({
           description:
             "Use the search box to find a mobile device, then click Assign next to the correct result",
         };
+      case "mobilePlan":
+        return {
+          title: "Available Mobile Plans",
+          description:
+            "Only active, unassigned mobile plans are shown. Use the search box to find a plan, then click Assign next to the correct result",
+        };
       default:
         return null;
     }

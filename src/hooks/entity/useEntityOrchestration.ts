@@ -8,6 +8,8 @@ import { useEntityEditCallbacks } from "@/hooks/entity/useEntityEditCallbacks";
 import { useEntityDeleteState } from "@/hooks/entity/useEntityDeleteState";
 import { useEntityCreateCallbacks } from "@/hooks/entity/useEntityCreateCallbacks";
 import { useEntityCreateModalState } from "@/hooks/entity/useEntityCreateModalState";
+import { useMobileDeviceEditorState } from "@/hooks/mobileDevice/useMobileDeviceEditorState";
+import { useMobileDevicePlanAssignActions } from "@/hooks/mobileDevice/useMobileDevicePlanAssignActions";
 import { useCallback } from "react";
 import { deleteEmployeeAction } from "@/actions/entities/employee/actions";
 import { deleteWorkstationAction } from "@/actions/entities/workstation/actions";
@@ -77,10 +79,34 @@ export function useEntityOrchestration() {
     openCloseAddNewEmployeeModal,
   };
 
+  // mobile device draft/modal state
+  const mobileDeviceEditorAll = useMobileDeviceEditorState();
+
+  const {
+    draftNewMobileDevice,
+    setDraftNewMobileDevice,
+
+    draftEditMobileDevice,
+    setDraftEditMobileDevice,
+    clearDraftEditMobileDevice,
+
+    isAddNewMobileDeviceModalOpen,
+    openCloseAddNewMobileDeviceModal,
+  } = mobileDeviceEditorAll;
+
+  const mobileDeviceEditor = {
+    draftNewMobileDevice,
+    draftEditMobileDevice,
+    clearDraftEditMobileDevice,
+    isAddNewMobileDeviceModalOpen,
+    openCloseAddNewMobileDeviceModal,
+  };
+
   // generic viewed entity state
   const selectionAll = useEntitySelectionState({
     setIsEntityModalOpen,
     clearDraftEditEmployee,
+    clearDraftEditMobileDevice,
   });
 
   const {
@@ -130,6 +156,29 @@ export function useEntityOrchestration() {
     setAssignEmployeeProgramAreaId,
     setAssignEmployeeWorkstationAssetTags,
 
+    runSearch,
+
+    addErrorAlert,
+  });
+
+  // Mobile Device -> Mobile Plan assignment workflow
+  const mobileDevicePlanAssign = useMobileDevicePlanAssignActions({
+    viewedEntity,
+    setViewedEntity,
+
+    draftNewMobileDevice,
+    setDraftNewMobileDevice,
+
+    draftEditMobileDevice,
+    setDraftEditMobileDevice,
+
+    isAddNewMobileDeviceModalOpen,
+    openCloseAddNewMobileDeviceModal,
+    setIsEntityModalOpen,
+
+    setSelectedFilterTags,
+
+    setAssignMode,
     runSearch,
 
     addErrorAlert,
@@ -221,14 +270,13 @@ export function useEntityOrchestration() {
     addErrorAlert,
   });
 
-  // mobile device add modal state
-  const mobileDeviceCreate = useEntityCreateModalState();
-  const { openCloseCreateModal: openCloseMobileDeviceCreateModal } =
-    mobileDeviceCreate;
-
   const closeMobileDeviceCreateModal = useCallback(() => {
-    openCloseMobileDeviceCreateModal(false);
-  }, [openCloseMobileDeviceCreateModal]);
+    openCloseAddNewMobileDeviceModal(false);
+  }, [openCloseAddNewMobileDeviceModal]);
+
+  const closeMobileDeviceCreateModalOnError = useCallback(() => {
+    openCloseAddNewMobileDeviceModal(false, false);
+  }, [openCloseAddNewMobileDeviceModal]);
 
   // add mobile device success/error callbacks
   const mobileDeviceCreateHandlers = useEntityCreateCallbacks({
@@ -237,6 +285,7 @@ export function useEntityOrchestration() {
     refreshSearchResults,
 
     closeCreateModal: closeMobileDeviceCreateModal,
+    closeCreateModalOnError: closeMobileDeviceCreateModalOnError,
 
     addSuccessAlert,
     addErrorAlert,
@@ -279,7 +328,8 @@ export function useEntityOrchestration() {
     workstationCreate,
     workstationCreateHandlers,
 
-    mobileDeviceCreate,
+    mobileDeviceEditor,
+    mobileDevicePlanAssign,
     mobileDeviceCreateHandlers,
 
     mobilePlanCreate,

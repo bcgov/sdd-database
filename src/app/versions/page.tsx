@@ -5,6 +5,13 @@ import { Header, Footer } from "@bcgov/design-system-react-components";
 export default function Updates() {
   const changelog = [
     {
+      version: "v0.0.43",
+      notes: [
+        "Mobile Devices can now be assigned a Mobile Plan during creation or editing",
+        "Only active, unassigned Mobile Plans can be selected for assignment",
+      ],
+    },
+    {
       version: "v0.0.42",
       notes: [
         "Add optional Position No field to Workspaces",

@@ -8,6 +8,7 @@ import { searchAllAction } from "@/actions/search";
 import { searchAssignableWorkspacesAction } from "@/actions/entities/workspaces";
 import { searchAssignableWorkstationsAction } from "@/actions/entities/workstation/actions";
 import { searchAssignableMobileDevicesAction } from "@/actions/entities/mobile-device/actions";
+import { searchAssignableMobilePlansAction } from "@/actions/entities/mobile-plan/actions";
 
 export function useSearch() {
   const [searchPhrase, setSearchPhrase] = useState<string>();
@@ -120,6 +121,10 @@ export function useSearch() {
 
         case "mobileDevice":
           results = await searchAssignableMobileDevicesAction(query);
+          break;
+
+        case "mobilePlan":
+          results = await searchAssignableMobilePlansAction(query);
           break;
 
         case "none":

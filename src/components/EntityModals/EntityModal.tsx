@@ -1,4 +1,4 @@
-import { AssignMode, EmployeeEntity, Entity } from "@/types";
+import { AssignMode, EmployeeEntity, Entity, MobileDeviceEntity } from "@/types";
 import { EmployeeModal } from "@/components/EntityModals/EmployeeModal";
 import { OfficeModal } from "@/components/EntityModals/OfficeModal";
 import { WorkspaceModal } from "@/components/EntityModals/WorkspaceModal";
@@ -9,12 +9,20 @@ import { MobilePlanModal } from "@/components/EntityModals/MobilePlanModal";
 interface EntityModalProps {
   viewedEntity: Entity;
   draftEditEmployee?: EmployeeEntity;
+  draftEditMobileDevice?: MobileDeviceEntity;
 
   activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>;
 
   handleRemoveWorkspace: () => void;
   handleRemoveWorkstation: (assetTag: string) => void;
   handleRemoveMobileDevice: () => void;
+
+  activateMobilePlanAssignMode: (
+    mode: AssignMode,
+    formData: FormData,
+  ) => Promise<void>;
+  handleRemoveMobilePlan: () => void;
+  clearDraftEditMobileDevice: () => void;
 
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -27,12 +35,17 @@ interface EntityModalProps {
 export function EntityModal({
   viewedEntity,
   draftEditEmployee,
+  draftEditMobileDevice,
 
   activateAssignMode,
 
   handleRemoveWorkspace,
   handleRemoveWorkstation,
   handleRemoveMobileDevice,
+
+  activateMobilePlanAssignMode,
+  handleRemoveMobilePlan,
+  clearDraftEditMobileDevice,
 
   isOpen,
   setIsOpen,
@@ -91,7 +104,10 @@ export function EntityModal({
     case "mobileDevice":
       return (
         <MobileDeviceModal
-          mobileDevice={viewedEntity}
+          mobileDevice={draftEditMobileDevice ?? viewedEntity}
+          activateAssignMode={activateMobilePlanAssignMode}
+          handleRemoveMobilePlan={handleRemoveMobilePlan}
+          clearDraftEditMobileDevice={clearDraftEditMobileDevice}
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           onSuccess={onSuccess}

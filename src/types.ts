@@ -121,12 +121,21 @@ type MobileDevicePersistedFields = {
   office_number: string;
 };
 
-type MobileDeviceUIFields = {
+type MobileDeviceStatusUIFields = {
   // UI-only status submitted by the form for conditional validation
   ui_mobile_device_status: MobileDeviceStatus;
 };
 
-type MobileDeviceFormExtraFields = MobileDeviceUIFields & {
+type MobileDevicePlanAssignmentUIFields = {
+  // `null` deliberately means that the user removed the plan. This is distinct
+  // from an entity that has not yet been given a UI draft value.
+  ui_mobile_plan_id: number | null;
+  ui_mobile_plan_title: string;
+};
+
+type MobileDeviceFormExtraFields =
+  MobileDeviceStatusUIFields &
+  MobileDevicePlanAssignmentUIFields & {
   id?: number;
 };
 
@@ -137,9 +146,10 @@ export type MobileDeviceSearchResult = Prisma.MobileDeviceGetPayload<
   typeof mobileDeviceSearchResultArgs
 >;
 
-export type MobileDeviceEntity = MobileDeviceSearchResult & {
-  type: "mobileDevice";
-};
+export type MobileDeviceEntity = MobileDeviceSearchResult &
+  Partial<MobileDevicePlanAssignmentUIFields> & {
+    type: "mobileDevice";
+  };
 
 /**
  * Mobile Plan Types
@@ -182,7 +192,8 @@ export type AssignMode =
   | "office"
   | "workspace"
   | "workstation"
-  | "mobileDevice";
+  | "mobileDevice"
+  | "mobilePlan";
 
 export type SelectedWorkspaceAssignment = {
   workspace_number: string;

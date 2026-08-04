@@ -5,12 +5,17 @@ import {
     getPrismaUniqueFieldName
 } from "@/actions/prismaErrorHelpers";
 import {Prisma} from "@/generated/prisma/client";
+import {MobilePlanAssignmentError} from "@/domain/mobilePlans";
 
 
 export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDeviceFormValues) {
     const base = BASE_PRISMA_ERROR_MESSAGE
 
     let errorMessage = base
+
+    if (error instanceof MobilePlanAssignmentError) {
+        return error.message
+    }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
 
@@ -48,6 +53,10 @@ export function getReadablePrismaError(error: unknown, mobileDevice?: MobileDevi
                         if (mobileDevice?.gilr) {
                             errorMessage = `GILR Number '${mobileDevice.gilr}' is already in use for some other mobile device.`
                         }
+                        break
+
+                    case "mobile_device_id":
+                        errorMessage = `This mobile device was linked to another mobile plan while you were saving. Please refresh and try again.`
                         break
                 }
 

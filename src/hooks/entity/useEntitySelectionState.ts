@@ -5,11 +5,13 @@ import {Entity} from "@/types";
 interface UseEntitySelectionStateProps {
     setIsEntityModalOpen: (isOpen: boolean) => void
     clearDraftEditEmployee: () => void
+    clearDraftEditMobileDevice: () => void
 }
 
 export function useEntitySelectionState({
                                             setIsEntityModalOpen,
                                             clearDraftEditEmployee,
+                                            clearDraftEditMobileDevice,
                                         }: UseEntitySelectionStateProps) {
     
     const [viewedEntity, setViewedEntity] = useState<Entity>(); // entity currently selected/opened
@@ -21,9 +23,14 @@ export function useEntitySelectionState({
             clearDraftEditEmployee()
         }
 
+        if (item.type === "mobileDevice") {
+            clearDraftEditMobileDevice()
+        }
+
         setIsEntityModalOpen(true)
     }, [
         clearDraftEditEmployee,
+        clearDraftEditMobileDevice,
         setIsEntityModalOpen,
     ])
 
