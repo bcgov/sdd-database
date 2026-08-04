@@ -14,6 +14,7 @@ import {
 } from "@/actions/entities/workstation/actions";
 import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
 import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
+import { ModalContentLayout } from "@/components/ModalContentLayout";
 
 interface WorkstationFormProps {
   workstation?: WorkstationSearchResult;
@@ -55,17 +56,22 @@ export function WorkstationForm({
       action={formAction}
       style={{
         display: "flex",
+        flex: "1 1 auto",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 8rem)",
+        minHeight: 0,
+        overflow: "clip",
       }}
     >
-      <div
-        style={{
-          flex: "1 1 auto",
-          minHeight: 0,
-          overflowY: "auto",
-          paddingRight: "0.5rem",
-        }}
+      <ModalContentLayout
+        footer={
+          <FormActionButtons
+            isEditMode={isEditMode}
+            isPending={isPending}
+            onClose={onClose}
+            onDelete={onDelete}
+            isDeleteDisabled={hasAssignedEmployee}
+          />
+        }
       >
         {hasAssignedEmployee && (
           <div style={{ marginTop: "1rem" }}>
@@ -103,15 +109,7 @@ export function WorkstationForm({
             />
           )}
         </AccordionGroup>
-      </div>
-
-      <FormActionButtons
-        isEditMode={isEditMode}
-        isPending={isPending}
-        onClose={onClose}
-        onDelete={onDelete}
-        isDeleteDisabled={hasAssignedEmployee}
-      ></FormActionButtons>
+      </ModalContentLayout>
     </Form>
   );
 }

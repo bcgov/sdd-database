@@ -4,6 +4,7 @@ import {Button, Select, Heading} from "@bcgov/design-system-react-components";
 import {ModalDialog} from "@/components/ModalDialog";
 import {useEffect, useState} from "react";
 import {validateAssetTagField, validateOfficeNumberField} from "@/validators";
+import {ModalContentLayout} from "@/components/ModalContentLayout";
 
 const reportOptions = [
     {id: "records_by_office_code", label: "All Records (by Office Code)"},
@@ -262,6 +263,35 @@ export function ReportsModal() {
         }
     }
 
+    const generateButton = (
+        <Button
+            type="button"
+            variant="secondary"
+            onPress={handleGenerate}
+            isDisabled={
+                selectedReport === "workstation_assets_by_asset_number"
+                    ? assetNumber === ""
+                    : selectedReport === "mobile_devices_by_imei"
+                        ? imei === ""
+                        : selectedReport === "workspace_holds_by_office_code_and_status"
+                            ? officeCode === "" || availabilityStatus === ""
+                            : selectedReport === "unassigned_workspaces_by_office_code_and_status"
+                                ? availabilityStatus === ""
+                                : selectedReport === "employees_by_name_or_idir"
+                                    ? employeeQuery === ""
+                                    : selectedReport === "employees_by_branch_or_program_area"
+                                        ? selectedBranchId === "" && selectedProgramAreaId === ""
+                                        : selectedReport === "employees_by_job_title"
+                                            ? selectedJobTitleReportId === ""
+                                            : selectedReport === "records_by_office_code"
+                                                ? officeCode === ""
+                                                : false
+            }
+        >
+            {isLoading ? "Generating..." : "Generate"}
+        </Button>
+    );
+
     return (
         <ModalDialog
             isOpen={isOpen}
@@ -269,7 +299,8 @@ export function ReportsModal() {
             triggerButtonText="Generate Report"
             modalTitle="Generate Report"
         >
-            <div style={{display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem"}}>
+            <ModalContentLayout footer={generateButton}>
+              <div style={{display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem", marginBottom: "1rem"}}>
                 <Heading level={5}>Select a report</Heading>
                 <Select
                     label="Report type"
@@ -568,34 +599,8 @@ export function ReportsModal() {
                     <div style={{color: "red"}}>{error}</div>
                 )}
 
-                <Button
-                    type="button"
-                    variant="secondary"
-                    onPress={handleGenerate}
-                    isDisabled={
-                        selectedReport === "workstation_assets_by_asset_number"
-                            ? assetNumber === ""
-                            : selectedReport === "mobile_devices_by_imei"
-                                ? imei === ""
-                                : selectedReport === "workspace_holds_by_office_code_and_status"
-                                    ? officeCode === "" || availabilityStatus === ""
-                                    : selectedReport === "unassigned_workspaces_by_office_code_and_status"
-                                        ? availabilityStatus === ""
-                                        : selectedReport === "employees_by_name_or_idir"
-                                        ? employeeQuery === ""
-                                        : selectedReport === "employees_by_branch_or_program_area"
-                                            ? selectedBranchId === "" && selectedProgramAreaId === ""
-                                            : selectedReport === "employees_by_job_title"
-                                                ? selectedJobTitleReportId === ""
-                                                : selectedReport === "office_records_by_office_code"
-                                                    ? officeCode === ""
-                                                    : false
-                    }
-                >
-                    {isLoading ? "Generating..." : "Generate"}
-                </Button>
-
-            </div>
+              </div>
+            </ModalContentLayout>
         </ModalDialog>
     );
 }

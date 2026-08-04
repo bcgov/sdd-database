@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 
 import { PressEvent } from "@react-types/shared";
 
-import { AccordionGroup, Form } from "@bcgov/design-system-react-components";
+import {
+  AccordionGroup,
+  Callout,
+  Form,
+} from "@bcgov/design-system-react-components";
 
 import { AssignMode } from "@/types";
 
@@ -21,6 +25,7 @@ import {
 import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
 import { MobileDeviceDetails } from "@/components/EntityForms/Employee/MobileDeviceDetails";
 import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
+import { ModalContentLayout } from "@/components/ModalContentLayout";
 
 interface EmployeeFormProps {
   employee: EmployeeLike;
@@ -141,8 +146,10 @@ export function EmployeeForm({
       action={formAction}
       style={{
         display: "flex",
+        flex: "1 1 auto",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 19rem)",
+        minHeight: 0,
+        overflow: "clip",
       }}
     >
       {/* pass employee.id through FormData in edit mode */}
@@ -150,14 +157,25 @@ export function EmployeeForm({
         <input type="hidden" name="id" value={employee.id} />
       ) : null}
 
-      <div
-        style={{
-          flex: "1 1 auto",
-          minHeight: 0,
-          overflowY: "auto",
-          paddingRight: "0.5rem",
-        }}
+      <ModalContentLayout
+        footer={
+          <FormActionButtons
+            isEditMode={isEditMode}
+            isPending={isPending}
+            onClose={onClose}
+            onDelete={onDelete}
+          />
+        }
       >
+        {isEditMode ? (
+          <div style={{ marginTop: "1rem" }}>
+            <Callout
+              title="Info"
+              description="Edit below information as you want and then click 'Save'. You should see a Success Alert message on the Home Screen."
+            />
+          </div>
+        ) : null}
+
         <AccordionGroup
           allowsMultipleExpanded
           defaultExpandedKeys={["employeeDetails"]}
@@ -221,14 +239,7 @@ export function EmployeeForm({
             }
           ></OhsAccommodations>
         </AccordionGroup>
-      </div>
-
-      <FormActionButtons
-        isEditMode={isEditMode}
-        isPending={isPending}
-        onClose={onClose}
-        onDelete={onDelete}
-      ></FormActionButtons>
+      </ModalContentLayout>
     </Form>
   );
 }

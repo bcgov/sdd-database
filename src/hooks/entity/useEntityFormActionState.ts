@@ -1,5 +1,5 @@
 import {EntityActionResult} from "@/types";
-import {useActionState, useEffect} from "react";
+import {useActionState, useEffect, useRef} from "react";
 
 
 type EntityFormAction = (
@@ -26,13 +26,19 @@ export function useEntityFormActionState({
         initialState
     )
 
+    // A callback may legitimately change identity when a parent rerenders.
+    // The same completed action result must still be handled only once.
+    const handledResultRef = useRef<EntityActionResult | undefined>(undefined)
+
     useEffect(() => {
 
-        switch (result.status) {
-            case "idle":
-                // first render -> do nothing
-                return;
+        if (result.status === "idle" || handledResultRef.current === result) {
+            return
+        }
 
+        handledResultRef.current = result
+
+        switch (result.status) {
             case "ok":
                 onSuccess();
                 break;

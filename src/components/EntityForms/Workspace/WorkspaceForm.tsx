@@ -12,6 +12,7 @@ import {
 import { updateWorkspaceAction } from "@/actions/entities/workspaces";
 import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
 import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
+import { ModalContentLayout } from "@/components/ModalContentLayout";
 
 interface WorkspaceFormProps {
   workspace: WorkspaceSearchResult;
@@ -47,7 +48,16 @@ export function WorkspaceForm({
   const restrictedBranch = restrictedProgramArea?.branch;
 
   return (
-    <Form action={formAction}>
+    <Form
+      action={formAction}
+      style={{
+        display: "flex",
+        flex: "1 1 auto",
+        flexDirection: "column",
+        minHeight: 0,
+        overflow: "clip",
+      }}
+    >
       {/* pass workspace identifiers through FormData in edit mode */}
       {isEditMode &&
       workspace?.office_number !== undefined &&
@@ -66,12 +76,14 @@ export function WorkspaceForm({
           <input type="hidden" name="isOnHold" value={String(isOnHold)} />
         </>
       ) : null}
-      <div
-        style={{
-          maxHeight: "88vh",
-          overflowY: "auto",
-          paddingRight: "0.5rem",
-        }}
+      <ModalContentLayout
+        footer={
+          <FormActionButtons
+            isEditMode={isEditMode}
+            isPending={isPending}
+            onClose={onClose}
+          />
+        }
       >
         <AccordionGroup
           allowsMultipleExpanded
@@ -105,12 +117,7 @@ export function WorkspaceForm({
             />
           )}
         </AccordionGroup>
-      </div>
-      <FormActionButtons
-        isEditMode={isEditMode}
-        isPending={isPending}
-        onClose={onClose}
-      ></FormActionButtons>
+      </ModalContentLayout>
     </Form>
   );
 }

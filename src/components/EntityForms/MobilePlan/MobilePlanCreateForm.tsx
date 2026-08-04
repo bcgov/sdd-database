@@ -7,6 +7,7 @@ import {MobilePlanDetails} from "@/components/EntityForms/MobilePlan/MobilePlanD
 import {FormActionButtons} from "@/components/EntityForms/Shared/FormActionButtons";
 import {useMobilePlanLookupProps} from "@/components/EntityForms/MobilePlan/useMobilePlanLookupProps";
 import {useEntityFormActionState} from "@/hooks/entity/useEntityFormActionState";
+import {ModalContentLayout} from "@/components/ModalContentLayout";
 
 
 interface MobilePlanCreateFormProps {
@@ -32,16 +33,19 @@ export function MobilePlanCreateForm({
         <Form action={formAction}
               style={{
                   display: "flex",
+                  flex: "1 1 auto",
                   flexDirection: "column",
-                  maxHeight: "calc(100vh - 8rem)"
+                  minHeight: 0,
+                  overflow: "clip"
               }}
         >
-            <div style={{
-                flex: "1 1 auto",
-                minHeight: 0,
-                overflowY: "auto",
-                paddingRight: "0.5rem"
-            }}>
+            <ModalContentLayout footer={
+                <FormActionButtons isEditMode={false}
+                                   isPending={isPending}
+                                   onClose={onClose}
+                >
+                </FormActionButtons>
+            }>
                 <AccordionGroup allowsMultipleExpanded
                                 defaultExpandedKeys={["mobilePlanDetails"]}
                                 style={{
@@ -54,13 +58,7 @@ export function MobilePlanCreateForm({
                     >
                     </MobilePlanDetails>
                 </AccordionGroup>
-            </div>
-
-            <FormActionButtons isEditMode={false}
-                               isPending={isPending}
-                               onClose={onClose}
-            >
-            </FormActionButtons>
+            </ModalContentLayout>
         </Form>
     )
 }

@@ -6,6 +6,7 @@ import { updateMobilePlanAction } from "@/actions/entities/mobile-plan/actions";
 import { useEntityFormActionState } from "@/hooks/entity/useEntityFormActionState";
 import { useMobilePlanLookupProps } from "@/components/EntityForms/MobilePlan/useMobilePlanLookupProps";
 import { FormActionButtons } from "@/components/EntityForms/Shared/FormActionButtons";
+import { ModalContentLayout } from "@/components/ModalContentLayout";
 
 interface MobilePlanFormProps {
   mobilePlan: MobilePlanSearchResult;
@@ -34,19 +35,22 @@ export function MobilePlanForm({
       action={formAction}
       style={{
         display: "flex",
+        flex: "1 1 auto",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 8rem)",
+        minHeight: 0,
+        overflow: "clip",
       }}
     >
       <input type="hidden" name="id" value={mobilePlan.id} />
 
-      <div
-        style={{
-          flex: "1 1 auto",
-          minHeight: 0,
-          overflowY: "auto",
-          paddingRight: "0.5rem",
-        }}
+      <ModalContentLayout
+        footer={
+          <FormActionButtons
+            isEditMode
+            isPending={isPending}
+            onClose={onClose}
+          />
+        }
       >
         <AccordionGroup
           allowsMultipleExpanded
@@ -72,13 +76,7 @@ export function MobilePlanForm({
             />
           )}
         </AccordionGroup>
-      </div>
-
-      <FormActionButtons
-        isEditMode
-        isPending={isPending}
-        onClose={onClose}
-      ></FormActionButtons>
+      </ModalContentLayout>
     </Form>
   );
 }

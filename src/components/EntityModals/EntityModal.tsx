@@ -10,6 +10,7 @@ interface EntityModalProps {
   viewedEntity: Entity;
   draftEditEmployee?: EmployeeEntity;
   draftEditMobileDevice?: MobileDeviceEntity;
+  isMobileDeviceAssignmentPreview: boolean;
 
   activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>;
 
@@ -36,6 +37,7 @@ export function EntityModal({
   viewedEntity,
   draftEditEmployee,
   draftEditMobileDevice,
+  isMobileDeviceAssignmentPreview,
 
   activateAssignMode,
 
@@ -105,6 +107,7 @@ export function EntityModal({
       return (
         <MobileDeviceModal
           mobileDevice={draftEditMobileDevice ?? viewedEntity}
+          isAssignmentPreview={isMobileDeviceAssignmentPreview}
           activateAssignMode={activateMobilePlanAssignMode}
           handleRemoveMobilePlan={handleRemoveMobilePlan}
           clearDraftEditMobileDevice={clearDraftEditMobileDevice}

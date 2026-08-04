@@ -178,6 +178,7 @@ export function useEntityOrchestration() {
 
     setSelectedFilterTags,
 
+    currentAssignMode: assignMode,
     setAssignMode,
     runSearch,
 

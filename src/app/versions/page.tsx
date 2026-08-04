@@ -9,6 +9,9 @@ export default function Updates() {
       notes: [
         "Mobile Devices can now be assigned a Mobile Plan during creation or editing",
         "Only active, unassigned Mobile Plans can be selected for assignment",
+        "Mobile Plan assignment is now disabled while previewing a Mobile Device during employee assignment",
+        "Standardize modal sizing so overflowing content uses a single scroll area",
+        "Fix OHS accommodation selection causing the Employee modal content to disappear",
       ],
     },
     {

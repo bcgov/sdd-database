@@ -1,5 +1,4 @@
 import {ModalDialog} from "@/components/ModalDialog";
-import {Callout} from "@bcgov/design-system-react-components";
 import {EmployeeForm} from "@/components/EntityForms/Employee/EmployeeForm";
 import {AssignMode, EmployeeEntity} from "@/types";
 import {ENTITY_TYPE_NAME} from "@/utils";
@@ -46,14 +45,6 @@ export function EmployeeModal({
                      setIsOpen={setIsOpen}
                      modalTitle={`Edit ${ENTITY_TYPE_NAME.employee}`}
         >
-            <div style={{
-                marginTop: "1rem",
-                marginBottom: "1rem",
-            }}>
-                <Callout title="Info"
-                         description="Edit below information as you want and then click 'Save'. You should see a Success Alert message on the Home Screen."/>
-            </div>
-
             <EmployeeForm employee={employee}
 
                           activateAssignMode={activateAssignMode}

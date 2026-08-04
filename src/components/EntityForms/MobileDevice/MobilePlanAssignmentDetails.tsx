@@ -10,6 +10,7 @@ import {
 interface MobilePlanAssignmentDetailsProps {
   mobileDevice: MobileDeviceLike;
   isEditMode: boolean;
+  isAssignmentPreview: boolean;
   handleAssignMobilePlan: (event: PressEvent) => Promise<void>;
   handleRemoveMobilePlan: () => void;
 }
@@ -17,6 +18,7 @@ interface MobilePlanAssignmentDetailsProps {
 export function MobilePlanAssignmentDetails({
   mobileDevice,
   isEditMode,
+  isAssignmentPreview,
   handleAssignMobilePlan,
   handleRemoveMobilePlan,
 }: MobilePlanAssignmentDetailsProps) {
@@ -30,7 +32,11 @@ export function MobilePlanAssignmentDetails({
     <Accordion label="Mobile Plan Details" id="mobilePlanDetails">
       <AssignmentSectionContent>
         <Callout
-          description={`Click ${hasMobilePlanAssignment ? "Update" : "Assign"} Mobile Plan to choose an active, unassigned plan. The selection will be linked only when you click ${isEditMode ? "Save" : "Create"} below.`}
+          description={
+            isAssignmentPreview
+              ? "Mobile Plan assignment is unavailable while selecting a Mobile Device for an employee. Assign the device and save the employee first, then open the Mobile Device normally to manage its plan."
+              : `Click ${hasMobilePlanAssignment ? "Update" : "Assign"} Mobile Plan to choose an active, unassigned plan. The selection will be linked only when you click ${isEditMode ? "Save" : "Create"} below.`
+          }
         ></Callout>
 
         <TextField label="Mobile Plan" isReadOnly value={mobilePlanTitle}></TextField>
@@ -42,6 +48,7 @@ export function MobilePlanAssignmentDetails({
           <Button
             type="button"
             variant="secondary"
+            isDisabled={isAssignmentPreview}
             onPress={handleAssignMobilePlan}
           >
             {hasMobilePlanAssignment ? "Update" : "Assign"} Mobile Plan
@@ -52,6 +59,7 @@ export function MobilePlanAssignmentDetails({
               type="button"
               variant="secondary"
               danger
+              isDisabled={isAssignmentPreview}
               onPress={handleRemoveMobilePlan}
             >
               Remove Mobile Plan

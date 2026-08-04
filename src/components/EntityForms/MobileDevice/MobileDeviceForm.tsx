@@ -14,9 +14,11 @@ import type { MobileDeviceStatus } from "@/domain/mobileDevices";
 import type { PressEvent } from "@react-types/shared";
 import { MobilePlanAssignmentDetails } from "@/components/EntityForms/MobileDevice/MobilePlanAssignmentDetails";
 import type { MobileDeviceLike } from "@/components/EntityForms/MobileDevice/types";
+import { ModalContentLayout } from "@/components/ModalContentLayout";
 
 interface MobileDeviceFormProps {
   mobileDevice: MobileDeviceLike;
+  isAssignmentPreview?: boolean;
 
   activateAssignMode: (mode: AssignMode, formData: FormData) => Promise<void>;
   handleRemoveMobilePlan: () => void;
@@ -29,6 +31,7 @@ interface MobileDeviceFormProps {
 
 export function MobileDeviceForm({
   mobileDevice,
+  isAssignmentPreview = false,
 
   activateAssignMode,
   handleRemoveMobilePlan,
@@ -82,8 +85,10 @@ export function MobileDeviceForm({
       action={formAction}
       style={{
         display: "flex",
+        flex: "1 1 auto",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 8rem)",
+        minHeight: 0,
+        overflow: "clip",
       }}
     >
       {/* pass mobile device id through FormData in edit mode */}
@@ -91,13 +96,14 @@ export function MobileDeviceForm({
         <input type="hidden" name="id" value={mobileDevice.id} />
       ) : null}
 
-      <div
-        style={{
-          flex: "1 1 auto",
-          minHeight: 0,
-          overflowY: "auto",
-          paddingRight: "0.5rem",
-        }}
+      <ModalContentLayout
+        footer={
+          <FormActionButtons
+            isEditMode={isEditMode}
+            isPending={isPending}
+            onClose={onClose}
+          />
+        }
       >
         <AccordionGroup
           allowsMultipleExpanded
@@ -117,6 +123,7 @@ export function MobileDeviceForm({
           <MobilePlanAssignmentDetails
             mobileDevice={mobileDevice}
             isEditMode={isEditMode}
+            isAssignmentPreview={isAssignmentPreview}
             handleAssignMobilePlan={handleAssignMobilePlan}
             handleRemoveMobilePlan={handleRemoveMobilePlan}
           ></MobilePlanAssignmentDetails>
@@ -127,13 +134,7 @@ export function MobileDeviceForm({
             />
           )}
         </AccordionGroup>
-      </div>
-
-      <FormActionButtons
-        isEditMode={isEditMode}
-        isPending={isPending}
-        onClose={onClose}
-      ></FormActionButtons>
+      </ModalContentLayout>
     </Form>
   );
 }

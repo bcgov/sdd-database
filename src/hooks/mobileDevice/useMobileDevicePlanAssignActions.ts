@@ -34,6 +34,7 @@ interface MobileDevicePlanAssignActionsProps {
   setIsEntityModalOpen: (isOpen: boolean) => void;
 
   setSelectedFilterTags: Dispatch<SetStateAction<Selection>>;
+  currentAssignMode: AssignMode;
   setAssignMode: (assignMode: AssignMode) => void;
   runSearch: (query?: string, options?: SearchOptions) => Promise<void>;
 
@@ -60,6 +61,7 @@ export function useMobileDevicePlanAssignActions({
   setIsEntityModalOpen,
 
   setSelectedFilterTags,
+  currentAssignMode,
   setAssignMode,
   runSearch,
 
@@ -115,6 +117,14 @@ export function useMobileDevicePlanAssignActions({
     async (mode: AssignMode, formData: FormData) => {
       if (mode !== "mobilePlan") return;
 
+      if (currentAssignMode !== "none") {
+        addErrorAlert(
+          "Mobile Plan assignment unavailable",
+          "Finish assigning the Mobile Device to the employee, or go back, before managing the device's Mobile Plan.",
+        );
+        return;
+      }
+
       // Store the entire form before leaving the modal. Assignment search is
       // separate from persistence, so Create/Save remains the only DB write.
       const wasSaved = saveMobileDeviceFormData(formData);
@@ -124,7 +134,14 @@ export function useMobileDevicePlanAssignActions({
       setSelectedFilterTags(new Set(["mobilePlan"]));
       await runSearch(undefined, { modeOverride: "mobilePlan" });
     },
-    [saveMobileDeviceFormData, setAssignMode, setSelectedFilterTags, runSearch],
+    [
+      currentAssignMode,
+      addErrorAlert,
+      saveMobileDeviceFormData,
+      setAssignMode,
+      setSelectedFilterTags,
+      runSearch,
+    ],
   );
 
   const cancelAssignModeHandler = useCallback(() => {
@@ -208,6 +225,14 @@ export function useMobileDevicePlanAssignActions({
   );
 
   const removeMobilePlanClickHandler = useCallback(() => {
+    if (currentAssignMode !== "none") {
+      addErrorAlert(
+        "Mobile Plan assignment unavailable",
+        "Finish assigning the Mobile Device to the employee, or go back, before managing the device's Mobile Plan.",
+      );
+      return;
+    }
+
     const assignment = {
       ui_mobile_plan_id: null,
       ui_mobile_plan_title: "",
@@ -237,6 +262,7 @@ export function useMobileDevicePlanAssignActions({
       "Please refresh the webpage and try again.",
     );
   }, [
+    currentAssignMode,
     isAddNewMobileDeviceModalOpen,
     setDraftNewMobileDevice,
     getCurrentEditMobileDevice,

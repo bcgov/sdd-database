@@ -28,17 +28,19 @@ export function FormActionButtons({
   );
 
   return (
-    <ButtonGroup>
-      {/* Only render the delete button in the edit modal */}
-      {isEditMode && onDelete ? deleteButton : null}
-      <ButtonGroup alignment="end">
-        <Button size="large" variant="secondary" onPress={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" size="large" isDisabled={isPending}>
-          {isEditMode ? "Save" : "Create"}
-        </Button>
+    <div style={{ flex: "0 0 auto", width: "100%" }}>
+      <ButtonGroup>
+        {/* Only render the delete button in the edit modal */}
+        {isEditMode && onDelete ? deleteButton : null}
+        <ButtonGroup alignment="end">
+          <Button size="large" variant="secondary" onPress={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" size="large" isDisabled={isPending}>
+            {isEditMode ? "Save" : "Create"}
+          </Button>
+        </ButtonGroup>
       </ButtonGroup>
-    </ButtonGroup>
+    </div>
   );
 }

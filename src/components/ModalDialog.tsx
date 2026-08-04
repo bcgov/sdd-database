@@ -31,18 +31,33 @@ export function ModalDialog({
       <Modal
         style={{
           margin: "1rem",
-          maxHeight: "calc(100vh - 2rem)",
-          overflowY: "hidden",
+          maxHeight: "calc(100dvh - 2rem)",
+          maxWidth: "calc(100vw - 2rem)",
+          // Unlike "hidden", "clip" cannot be programmatically scrolled when
+          // React Aria moves focus to a control lower in the modal.
+          overflow: "clip",
         }}
       >
-        <Dialog>
-          <div style={{ padding: "1rem" }}>
+        <Dialog aria-label={modalTitle}>
+          <div
+            style={{
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: "calc(100dvh - 2rem)",
+              minHeight: 0,
+              overflow: "clip",
+              padding: "1rem",
+            }}
+          >
             <Heading level={4}>{modalTitle}</Heading>
             <div
               style={{
-                maxHeight: "calc(100vh - 6rem)",
-                overflowY: "auto",
-                paddingRight: "0.5rem",
+                display: "flex",
+                flex: "1 1 auto",
+                flexDirection: "column",
+                minHeight: 0,
+                overflow: "clip",
               }}
             >
               {children}

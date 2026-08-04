@@ -229,6 +229,9 @@ export default function Home() {
             viewedEntity={selection.viewedEntity}
             draftEditEmployee={employeeEditor.draftEditEmployee}
             draftEditMobileDevice={mobileDeviceEditor.draftEditMobileDevice}
+            isMobileDeviceAssignmentPreview={
+              search.assignMode === "mobileDevice"
+            }
             activateAssignMode={employeeAssign.activateAssignMode}
             handleRemoveWorkspace={employeeAssign.removeWorkspaceClickHandler}
             handleRemoveWorkstation={
