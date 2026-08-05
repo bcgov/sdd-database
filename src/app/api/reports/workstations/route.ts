@@ -32,7 +32,25 @@ export async function POST(req: Request) {
                 select: {
                     first_name: true,
                     last_name: true,
+                    employee_id: true,
                     idir: true,
+                    is_on_leave: true,
+                    notes: true,
+                    program_area: {
+                        select: {
+                            name: true,
+                            branch: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                    job_title: {
+                        select: {
+                            name: true,
+                        },
+                    },
                 },
             },
             workstation_model: {
@@ -49,11 +67,30 @@ export async function POST(req: Request) {
         workstation.workstation_model?.name ?? "",
         workstation.office_number,
         workstation.assigned_employee ? `${workstation.assigned_employee.first_name} ${workstation.assigned_employee.last_name}` : "",
+        workstation.assigned_employee?.employee_id ?? "",
         workstation.assigned_employee?.idir ?? "",
+        workstation.assigned_employee?.program_area?.branch?.name ?? "",
+        workstation.assigned_employee?.program_area?.name ?? "",
+        workstation.assigned_employee?.job_title?.name ?? "",
+        workstation.assigned_employee?.is_on_leave ? "Yes" : "No",
+        workstation.assigned_employee?.notes ?? "",
         workstation.notes ?? "",
     ]);
 
-    const header = ["Asset Tag", "Model", "Office Number", "Assigned Employee", "Employee IDIR", "Notes"];
+    const header = [
+        "Asset Tag",
+        "Model",
+        "Office Number",
+        "Assigned Employee",
+        "Employee ID",
+        "Employee IDIR",
+        "Employee Branch",
+        "Employee Program Area",
+        "Employee Job Title",
+        "Employee Leave Status",
+        "Employee Notes",
+        "Workstation Notes",
+    ];
 
     return createXlsxResponse([header, ...rows], "workstations.xlsx");
 }
