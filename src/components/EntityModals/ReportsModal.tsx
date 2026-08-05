@@ -18,6 +18,8 @@ const reportOptions = [
     {id: "mobile_devices_by_imei", label: "Mobile Devices (by IMEI)"},
     {id: "workstation_assets_by_asset_number", label: "Workstation Asset (by Asset Number)"},
     {id: "workstation_assets_by_office_code_and_model", label: "Workstation Asset (by Office Code and Model)"},
+    {id: "redeploy_workstation_assets_by_office_code", label: "Redeploy Workstation Assets (by Office Code)"},
+    //{id: "redeploy_mobile_assets_by_office_code", label: "Redeploy Mobile Assets (by Office Code)"},
 ];
 
 export function ReportsModal() {
@@ -175,6 +177,14 @@ export function ReportsModal() {
                 setError(officeValidationError);
                 return;
             }
+        } else if (selectedReport === "redeploy_workstation_assets_by_office_code") {
+            if (officeCode.trim()) {
+                const officeValidationError = validateOfficeNumberField(officeCode, "Office code");
+                if (officeValidationError) {
+                    setError(officeValidationError);
+                    return;
+                }
+            }
         } else if (selectedReport === "workspaces_by_office_code" || selectedReport === "mobile_devices_by_office_code") {
             setError(null);
         } else {
@@ -192,7 +202,9 @@ export function ReportsModal() {
                     ? "/api/reports/workspaces"
                     : selectedReport === "records_by_office_code"
                         ? "/api/reports/office"
-                        : selectedReport === "employees_by_name_or_idir" || selectedReport === "employees_by_branch_or_program_area" || selectedReport === "employees_by_job_title"
+                        : selectedReport === "redeploy_workstation_assets_by_office_code"
+                            ? "/api/reports/workstations/redeploy"
+                            : selectedReport === "employees_by_name_or_idir" || selectedReport === "employees_by_branch_or_program_area" || selectedReport === "employees_by_job_title"
                             ? "/api/reports/employees"
                             : selectedReport === "workstation_assets_by_asset_number"
                                 ? "/api/reports/workstations"
@@ -219,7 +231,9 @@ export function ReportsModal() {
                                             ? `workstations-${assetNumber}.xlsx`
                                             : selectedReport === "workstation_assets_by_office_code_and_model"
                                                 ? `workstations-${officeCode}-${modelName || "all"}.xlsx`
-                                                : `workspaces-${officeCode}.xlsx`;
+                                                : selectedReport === "redeploy_workstation_assets_by_office_code"
+                                                    ? `redeploy-workstations.xlsx`
+                                                    : `workspaces-${officeCode}.xlsx`;
             const body = selectedReport === "workstation_assets_by_asset_number"
                 ? JSON.stringify({assetTag: assetNumber.trim()})
                 : selectedReport === "workstation_assets_by_office_code_and_model"
@@ -238,7 +252,9 @@ export function ReportsModal() {
                                         ? JSON.stringify({branchId: selectedBranchId || undefined, programAreaId: selectedProgramAreaId || undefined, officeCode: selectedOfficeCode.trim() || undefined, jobTitleId: selectedJobTitleReportId || undefined, mode: "job_title"})
                                         : selectedReport === "records_by_office_code"
                                             ? JSON.stringify({officeCode: officeCode.trim().toUpperCase()})
-                                            : JSON.stringify({officeCode});
+                                            : selectedReport === "redeploy_workstation_assets_by_office_code"
+                                                ? JSON.stringify({officeCode: officeCode.trim() || undefined})
+                                                : JSON.stringify({officeCode});
 
             const response = await fetch(endpoint, {
                 method: "POST",
@@ -343,9 +359,9 @@ export function ReportsModal() {
                     }}
                 />
 
-                {(selectedReport === "workspaces_by_office_code" || selectedReport === "records_by_office_code") && (
+                {(selectedReport === "workspaces_by_office_code" || selectedReport === "records_by_office_code" || selectedReport === "redeploy_workstation_assets_by_office_code") && (
                     <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
-                        <label htmlFor="officeCode">Office code</label>
+                        <label htmlFor="officeCode">Office code (optional)</label>
                         <input
                             id="officeCode"
                             name="officeCode"
