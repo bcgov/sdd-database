@@ -22,6 +22,7 @@ export function buildWorkspaceReportWhereClause(body: unknown): Prisma.Workspace
 
     if (isUnassignedReport) {
         clauses.push({employee_id: null});
+        clauses.push({restricted_program_area_id: null});
 
         if (availability === "free") {
             clauses.push({is_on_hold: false});
