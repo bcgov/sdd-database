@@ -9,6 +9,7 @@ export default function Updates() {
       notes: [
         "Fix saving employee updates when the employee already has an assigned resident workspace",
         "Added a report suite (17 reports) to download workspace data in Excel format",
+        "Added Advanced Search with exact-match filters for Employees, Offices, Workspaces, Workstations, Mobile Devices, and Mobile Plans",
       ],
     },
     {
