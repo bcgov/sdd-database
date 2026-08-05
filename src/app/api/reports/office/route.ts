@@ -117,6 +117,20 @@ export async function POST(req: Request) {
                         employee_id: true,
                     },
                 },
+                mobile_plan: {
+                    select: {
+                        id: true,
+                        phone_number: true,
+                        data_allowance_gb: true,
+                        enhanced_voicemail: true,
+                        status: {
+                            select: { name: true },
+                        },
+                        service_provider: {
+                            select: { name: true },
+                        },
+                    },
+                },
             },
             orderBy: {
                 imei: "asc",
@@ -165,6 +179,12 @@ export async function POST(req: Request) {
         "Assigned Employee",
         "Model",
         "Notes",
+        "Mobile Plan ID",
+        "Mobile Plan Phone Number",
+        "Mobile Plan Data Allowance (GB)",
+        "Mobile Plan Enhanced Voicemail",
+        "Mobile Plan Status",
+        "Mobile Plan Service Provider",
     ];
 
     const employeeRows = [
@@ -236,6 +256,12 @@ export async function POST(req: Request) {
                 assignedEmployee,
                 mobileDevice.mobile_device_model?.name ?? "",
                 mobileDevice.notes ?? "",
+                mobileDevice.mobile_plan?.id ?? "",
+                mobileDevice.mobile_plan?.phone_number ?? "",
+                mobileDevice.mobile_plan?.data_allowance_gb ?? "",
+                mobileDevice.mobile_plan?.enhanced_voicemail ? "Yes" : "No",
+                mobileDevice.mobile_plan?.status?.name ?? "",
+                mobileDevice.mobile_plan?.service_provider?.name ?? "",
             ];
         }),
     ];

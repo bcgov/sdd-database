@@ -69,6 +69,20 @@ export async function POST(req: Request) {
                     current_office: {
                         select: { office_number: true },
                     },
+                    mobile_plan: {
+                        select: {
+                            id: true,
+                            phone_number: true,
+                            data_allowance_gb: true,
+                            enhanced_voicemail: true,
+                            status: {
+                                select: { name: true },
+                            },
+                            service_provider: {
+                                select: { name: true },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -131,6 +145,18 @@ export async function POST(req: Request) {
             } | null;
             current_office?: {
                 office_number: string;
+            } | null;
+            mobile_plan?: {
+                id: number | null;
+                phone_number: string | null;
+                data_allowance_gb: number | null;
+                enhanced_voicemail: boolean | null;
+                status?: {
+                    name: string | null;
+                } | null;
+                service_provider?: {
+                    name: string | null;
+                } | null;
             } | null;
         } | null;
     }>);
@@ -212,6 +238,12 @@ export async function POST(req: Request) {
             employee.mobile_device?.imei ?? "",
             employee.mobile_device?.mobile_device_model?.name ?? "",
             employee.mobile_device?.notes ?? "",
+            employee.mobile_device?.mobile_plan?.id ?? "",
+            employee.mobile_device?.mobile_plan?.phone_number ?? "",
+            employee.mobile_device?.mobile_plan?.data_allowance_gb ?? "",
+            employee.mobile_device?.mobile_plan?.enhanced_voicemail ? "Yes" : "No",
+            employee.mobile_device?.mobile_plan?.status?.name ?? "",
+            employee.mobile_device?.mobile_plan?.service_provider?.name ?? "",
             employee.notes ?? "",
         ];
     });
@@ -239,6 +271,12 @@ export async function POST(req: Request) {
         "Mobile Device IMEI",
         "Mobile Device Model",
         "Mobile Device Notes",
+        "Mobile Plan ID",
+        "Mobile Plan Phone Number",
+        "Mobile Plan Data Allowance (GB)",
+        "Mobile Plan Enhanced Voicemail",
+        "Mobile Plan Status",
+        "Mobile Plan Service Provider",
         "Notes",
     ];
 

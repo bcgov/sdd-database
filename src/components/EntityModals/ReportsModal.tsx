@@ -363,7 +363,7 @@ export function ReportsModal() {
                     }}
                 />
 
-                {(selectedReport === "workspaces_by_office_code" || selectedReport === "records_by_office_code" || selectedReport === "redeploy_workstation_assets_by_office_code" || selectedReport === "redeploy_mobile_assets_by_office_code") && (
+                {(selectedReport === "workspaces_by_office_code" || selectedReport === "redeploy_workstation_assets_by_office_code" || selectedReport === "redeploy_mobile_assets_by_office_code") && (
                     <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
                         <label htmlFor="officeCode">Office code (optional)</label>
                         <input
@@ -377,9 +377,23 @@ export function ReportsModal() {
                     </div>
                 )}
 
-                {selectedReport === "mobile_devices_by_office_code" && (
+                {selectedReport === "records_by_office_code" && (
                     <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
                         <label htmlFor="officeCode">Office code</label>
+                        <input
+                            id="officeCode"
+                            name="officeCode"
+                            type="text"
+                            value={officeCode}
+                            onChange={(event) => setOfficeCode(event.target.value)}
+                            style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                        />
+                    </div>
+                )}
+
+                {selectedReport === "mobile_devices_by_office_code" && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
+                        <label htmlFor="officeCode">Office code (optional)</label>
                         <input
                             id="officeCode"
                             name="officeCode"

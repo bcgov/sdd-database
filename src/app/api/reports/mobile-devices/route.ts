@@ -50,6 +50,18 @@ export async function POST(req: Request) {
                 select: {
                     id: true,
                     phone_number: true,
+                    data_allowance_gb: true,
+                    enhanced_voicemail: true,
+                    status: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                    service_provider: {
+                        select: {
+                            name: true,
+                        },
+                    },
                 },
             },
         },
@@ -68,12 +80,16 @@ export async function POST(req: Request) {
             employee?.notes ?? "",
             device.mobile_device_model?.name ?? "",
             device.imei ?? "",
-            device.mobile_plan ? "Yes" : "No",
-            device.mobile_plan?.phone_number ?? ""
+            device.mobile_plan?.id ?? "",
+            device.mobile_plan?.phone_number ?? "",
+            device.mobile_plan?.data_allowance_gb ?? "",
+            device.mobile_plan?.enhanced_voicemail ? "Yes" : "No",
+            device.mobile_plan?.status?.name ?? "",
+            device.mobile_plan?.service_provider?.name ?? ""
         ];
     });
 
-    const header = ["Office Code", "Employee Name", "IDIR", "Branch", "Program Area", "Job Title", "Notes", "Model", "IMEI", "Plan Status", "Phone Number"];
+    const header = ["Office Code", "Employee Name", "IDIR", "Branch", "Program Area", "Job Title", "Notes", "Model", "IMEI", "Plan ID", "Phone Number", "Data Allowance (GB)", "Enhanced Voicemail", "Plan Status", "Service Provider"];
     const filenameBase = officeCode || imei || "all";
 
     return createXlsxResponse([header, ...rows], `mobile-devices-${filenameBase}.xlsx`);
