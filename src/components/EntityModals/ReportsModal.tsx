@@ -39,6 +39,7 @@ export function ReportsModal() {
     const [allProgramAreaOptions, setAllProgramAreaOptions] = useState<Array<{id: string; label: string; branchId: string}>>([]);
     const [jobTitleOptions, setJobTitleOptions] = useState<Array<{id: string; label: string}>>([]);
     const [workspaceStatusOptions, setWorkspaceStatusOptions] = useState<Array<{id: string; label: string}>>([]);
+    const [workstationModelOptions, setWorkstationModelOptions] = useState<Array<{id: string; label: string}>>([]);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -96,7 +97,21 @@ export function ReportsModal() {
                 }
             }
 
-            if (selectedReport !== "employees_by_branch_or_program_area" && selectedReport !== "employees_by_job_title" && selectedReport !== "workspace_holds_by_office_code_and_status" && selectedReport !== "unassigned_workspaces_by_office_code_and_status") {
+            if (selectedReport === "workstation_assets_by_office_code_and_model") {
+                try {
+                    const response = await fetch("/api/reports/workstation-models");
+                    if (!response.ok) {
+                        throw new Error("Unable to load workstation model options");
+                    }
+
+                    const data = await response.json();
+                    setWorkstationModelOptions(data.models.map((model: {id: number; label: string}) => ({id: model.id.toString(), label: model.label})));
+                } catch (e) {
+                    setError(e instanceof Error ? e.message : "Unable to load workstation model options");
+                }
+            }
+
+            if (selectedReport !== "employees_by_branch_or_program_area" && selectedReport !== "employees_by_job_title" && selectedReport !== "workspace_holds_by_office_code_and_status" && selectedReport !== "unassigned_workspaces_by_office_code_and_status" && selectedReport !== "workstation_assets_by_office_code_and_model") {
                 return;
             }
 
@@ -583,13 +598,13 @@ export function ReportsModal() {
                         </div>
                         <div style={{display: "flex", flexDirection: "column", gap: "0.5rem"}}>
                             <label htmlFor="modelName">Model (optional)</label>
-                            <input
-                                id="modelName"
+                            <Select
                                 name="modelName"
-                                type="text"
-                                value={modelName}
-                                onChange={(event) => setModelName(event.target.value)}
-                                style={{padding: "0.5rem", fontSize: "1rem", border: "1px solid #d1d1d1", borderRadius: "4px"}}
+                                items={workstationModelOptions}
+                                selectedKey={modelName}
+                                onSelectionChange={(key) => {
+                                    setModelName(key?.toString() ?? "");
+                                }}
                             />
                         </div>
                     </div>
