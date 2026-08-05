@@ -8,6 +8,7 @@ export default function Updates() {
       version: "v0.0.44",
       notes: [
         "Fix saving employee updates when the employee already has an assigned resident workspace",
+        "Added a report suite (17 reports) to download workspace data in Excel format",
       ],
     },
     {
