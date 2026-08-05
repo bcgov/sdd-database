@@ -1,77 +1,86 @@
-import {Accordion, Select, TextArea, TextField} from "@bcgov/design-system-react-components";
-import {LookupOption, WorkstationSearchResult} from "@/types";
-import {validateAssetTagField, validateNotesField, validateOfficeNumberField} from "@/validators";
-
+import {
+  Accordion,
+  Select,
+  TextArea,
+  TextField,
+} from "@bcgov/design-system-react-components";
+import { LookupOption, WorkstationSearchResult } from "@/types";
+import {
+  validateAssetTagField,
+  validateNotesField,
+  validateOfficeNumberField,
+} from "@/validators";
 
 interface WorkstationDetailsProps {
-    workstation?: WorkstationSearchResult
-    models: LookupOption[]
+  workstation?: WorkstationSearchResult;
+  models: LookupOption[];
 
-    isAssetTagReadOnly: boolean
-    isModelReadOnly: boolean
-    isOfficeNumberReadOnly: boolean
-    isNotesReadOnly: boolean
+  isAssetTagReadOnly: boolean;
+  isModelReadOnly: boolean;
+  isOfficeNumberReadOnly: boolean;
+  isNotesReadOnly: boolean;
 }
 
 export function WorkstationDetails({
-                                       workstation,
-                                       models,
+  workstation,
+  models,
 
-                                       isAssetTagReadOnly,
-                                       isModelReadOnly,
-                                       isOfficeNumberReadOnly,
-                                       isNotesReadOnly
-                                   }: WorkstationDetailsProps) {
+  isAssetTagReadOnly,
+  isModelReadOnly,
+  isOfficeNumberReadOnly,
+  isNotesReadOnly,
+}: WorkstationDetailsProps) {
+  return (
+    <Accordion label="Workstation Details" id="workstationDetails">
+      <div>
+        <TextField
+          label="Asset Tag"
+          name="assetTag"
+          isRequired
+          isReadOnly={isAssetTagReadOnly}
+          validate={validateAssetTagField}
+          defaultValue={workstation?.asset_tag}
+        ></TextField>
 
-    return (
-        <Accordion label="Workstation Details" id="workstationDetails">
-            <div>
-                <TextField label="Asset Tag"
-                           name="assetTag"
-                           isRequired
-                           isReadOnly={isAssetTagReadOnly}
-                           validate={validateAssetTagField}
-                           defaultValue={workstation?.asset_tag}>
-                </TextField>
+        <Select
+          label="Model"
+          name="model"
+          isRequired
+          items={models.map((model) => ({
+            id: model.id,
+            label: model.name,
+          }))}
+          isDisabled={isModelReadOnly}
+          defaultValue={workstation?.model_id}
+        ></Select>
 
-                <Select label="Model"
-                        name="model"
-                        isRequired
-                        items={models.map(model => (
-                            {
-                                id: model.id,
-                                label: model.name
-                            }
-                        ))}
-                        isDisabled={isModelReadOnly}
-                        selectedKey={workstation?.model_id}>
-                </Select>
+        {/* Passing model id through a hidden field since disabled fields won't be included in form data */}
+        {isModelReadOnly && workstation && (
+          <input
+            type="hidden"
+            name="model"
+            value={workstation.model_id}
+          ></input>
+        )}
 
-                {/* Passing model id through a hidden field since disabled fields won't be included in form data */}
-                {isModelReadOnly && workstation && (
-                    <input type="hidden"
-                           name="model"
-                           value={workstation.model_id}
-                           >
-                    </input>
-                )}
+        <TextField
+          label="Currently at Office Number"
+          name="officeNumber"
+          isRequired
+          isReadOnly={isOfficeNumberReadOnly}
+          validate={validateOfficeNumberField}
+          defaultValue={workstation?.office_number}
+        ></TextField>
 
-                <TextField label="Currently at Office Number"
-                           name="officeNumber"
-                           isRequired
-                           isReadOnly={isOfficeNumberReadOnly}
-                           validate={validateOfficeNumberField}
-                           defaultValue={workstation?.office_number}>
-                </TextField>
-
-                <TextArea label="Notes"
-                          name="notes"
-                          maxLength={200}
-                          isReadOnly={isNotesReadOnly}
-                          validate={validateNotesField}
-                          defaultValue={workstation?.notes ?? undefined}>
-                </TextArea>
-            </div>
-        </Accordion>
-    )
+        <TextArea
+          label="Notes"
+          name="notes"
+          maxLength={200}
+          isReadOnly={isNotesReadOnly}
+          validate={validateNotesField}
+          defaultValue={workstation?.notes ?? undefined}
+        ></TextArea>
+      </div>
+    </Accordion>
+  );
 }

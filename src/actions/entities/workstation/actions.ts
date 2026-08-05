@@ -4,11 +4,16 @@ import {
   addNewWorkstation,
   updateWorkstation,
   getAssignableWorkstationsByFilter,
+  getWorkstationsByAdvancedFilter,
   getWorkstationsByFilter,
   deleteWorkstation,
 } from "@/db/data-access/workstations";
 
-import { EntityActionResult, WorkstationEntity } from "@/types";
+import {
+  EntityActionResult,
+  WorkstationAdvancedSearchRequest,
+  WorkstationEntity,
+} from "@/types";
 import { parseWorkstationFormData } from "@/utils";
 import { validateWorkstationData } from "@/actions/entities/workstation/rules";
 import { createEntityActions } from "@/actions/createEntityActions";
@@ -21,6 +26,15 @@ export async function searchWorkstationsAction(
   const workstationSearchResults = await getWorkstationsByFilter(query);
 
   // Attaching the discriminant 'type'
+  return attachEntityType(workstationSearchResults, "workstation");
+}
+
+export async function searchWorkstationsWithAdvancedFiltersAction(
+  request: WorkstationAdvancedSearchRequest,
+): Promise<WorkstationEntity[]> {
+  const workstationSearchResults =
+    await getWorkstationsByAdvancedFilter(request);
+
   return attachEntityType(workstationSearchResults, "workstation");
 }
 

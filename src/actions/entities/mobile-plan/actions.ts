@@ -1,9 +1,14 @@
 "use server";
 
-import { EntityActionResult, MobilePlanEntity } from "@/types";
+import {
+  EntityActionResult,
+  MobilePlanAdvancedSearchRequest,
+  MobilePlanEntity,
+} from "@/types";
 import {
   addNewMobilePlan,
   getAssignableMobilePlansByFilter,
+  getMobilePlansByAdvancedFilter,
   getMobilePlansByFilter,
   updateMobilePlan as persistMobilePlanUpdate,
 } from "@/db/data-access/mobilePlans";
@@ -23,6 +28,14 @@ export async function searchMobilePlansAction(
   query?: string,
 ): Promise<MobilePlanEntity[]> {
   const mobilePlanSearchResults = await getMobilePlansByFilter(query);
+
+  return attachEntityType(mobilePlanSearchResults, "mobilePlan");
+}
+
+export async function searchMobilePlansWithAdvancedFiltersAction(
+  request: MobilePlanAdvancedSearchRequest,
+): Promise<MobilePlanEntity[]> {
+  const mobilePlanSearchResults = await getMobilePlansByAdvancedFilter(request);
 
   return attachEntityType(mobilePlanSearchResults, "mobilePlan");
 }

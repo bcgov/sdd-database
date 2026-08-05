@@ -1,8 +1,16 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/db/client";
-import { WorkspaceFormValues, WorkspaceSearchResult } from "@/types";
+import {
+  WorkspaceAdvancedSearchRequest,
+  WorkspaceFormValues,
+  WorkspaceSearchResult,
+} from "@/types";
 import { workspaceSearchResultArgs } from "@/db/data-access/searchResultArgs";
-import { buildAssignedEmployeeSearchFilter } from "@/db/data-access/searchFilters";
+import {
+  buildWorkspaceAdvancedSearchFilter,
+  buildWorkspaceKeywordSearchFilter,
+} from "@/db/data-access/workspaceSearchFilters";
+import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
 
 export async function getWorkspaceByOfficeAndWorkspaceNumber(
   officeNumber: string,
@@ -22,20 +30,24 @@ export async function getWorkspacesByFilter(
   query?: string,
 ): Promise<WorkspaceSearchResult[]> {
   const searchFilter: Prisma.WorkspaceWhereInput = query
-    ? {
-        OR: [
-          { office_number: { contains: query, mode: "insensitive" } },
-          { workspace_number: { contains: query, mode: "insensitive" } },
-          { position_number: { contains: query } },
-          { category: { name: { contains: query, mode: "insensitive" } } },
-          { desk_type: { name: { contains: query, mode: "insensitive" } } },
-          buildAssignedEmployeeSearchFilter(query),
-        ],
-      }
+    ? buildWorkspaceKeywordSearchFilter(query)
     : {};
 
   return prisma.workspace.findMany({
     where: searchFilter,
+    ...workspaceSearchResultArgs,
+  });
+}
+
+export async function getWorkspacesByAdvancedFilter(
+  request: WorkspaceAdvancedSearchRequest,
+): Promise<WorkspaceSearchResult[]> {
+  if (!hasAdvancedSearchCriteria(request.query, request.filters)) {
+    return [];
+  }
+
+  return prisma.workspace.findMany({
+    where: buildWorkspaceAdvancedSearchFilter(request),
     ...workspaceSearchResultArgs,
   });
 }

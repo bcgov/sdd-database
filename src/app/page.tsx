@@ -66,6 +66,15 @@ export default function Home() {
         setSelectedFilterTags={search.setSelectedFilterTags}
         handleSearch={search.handleSearch}
         assignMode={search.assignMode}
+        searchPhrase={search.searchPhrase}
+        setSearchPhrase={search.setSearchPhrase}
+        employeeAdvancedSearch={search.employeeAdvancedSearch}
+        officeAdvancedSearch={search.officeAdvancedSearch}
+        workspaceAdvancedSearch={search.workspaceAdvancedSearch}
+        workstationAdvancedSearch={search.workstationAdvancedSearch}
+        mobileDeviceAdvancedSearch={search.mobileDeviceAdvancedSearch}
+        mobilePlanAdvancedSearch={search.mobilePlanAdvancedSearch}
+        runAdvancedSearch={search.runAdvancedSearch}
       ></SearchControls>
 
       {alerts.alert && (

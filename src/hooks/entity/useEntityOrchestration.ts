@@ -41,8 +41,17 @@ export function useEntityOrchestration() {
     setOptimisticSearchResults,
     userHasSearchedOnce,
     searchResultsAreEmpty,
+    searchPhrase,
+    setSearchPhrase,
+    employeeAdvancedSearch,
+    officeAdvancedSearch,
+    workspaceAdvancedSearch,
+    workstationAdvancedSearch,
+    mobileDeviceAdvancedSearch,
+    mobilePlanAdvancedSearch,
     handleSearch,
     runSearch,
+    runAdvancedSearch,
     refreshSearchResults,
   } = searchAll;
 
@@ -54,7 +63,16 @@ export function useEntityOrchestration() {
     optimisticSearchResults,
     userHasSearchedOnce,
     searchResultsAreEmpty,
+    searchPhrase,
+    setSearchPhrase,
+    employeeAdvancedSearch,
+    officeAdvancedSearch,
+    workspaceAdvancedSearch,
+    workstationAdvancedSearch,
+    mobileDeviceAdvancedSearch,
+    mobilePlanAdvancedSearch,
     handleSearch,
+    runAdvancedSearch,
   };
 
   // employee draft/modal state

@@ -1,37 +1,43 @@
-import {prisma} from "@/db/client";
-import {Office, Prisma} from "@/generated/prisma/client";
+import { prisma } from "@/db/client";
+import { Office, Prisma } from "@/generated/prisma/client";
+import type { OfficeAdvancedSearchRequest } from "@/types";
+import {
+  buildOfficeAdvancedSearchFilter,
+  buildOfficeKeywordSearchFilter,
+} from "@/db/data-access/officeSearchFilters";
+import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
 
+function findOfficesBySearchFilter(searchFilter: Prisma.OfficeWhereInput) {
+  return prisma.office.findMany({
+    where: searchFilter,
+  });
+}
 
 export async function getOfficesByFilter(query?: string): Promise<Office[]> {
+  return findOfficesBySearchFilter(
+    query ? buildOfficeKeywordSearchFilter(query) : {},
+  );
+}
 
-    const searchFilter: Prisma.OfficeWhereInput = query
-        ? {
-            OR: [
-                {office_number: {contains: query, mode: 'insensitive'}},
-                {office_name: {contains: query, mode: 'insensitive'}},
-                {office_type: {name: {contains: query, mode: 'insensitive'}}},
-                {client_service_type: {name: {contains: query, mode: 'insensitive'}}},
-                {address: {contains: query, mode: 'insensitive'}},
-                {city: {contains: query, mode: 'insensitive'}},
-                {postal_code: {contains: query, mode: 'insensitive'}},
-            ]
-        }
-        : {}
+export async function getOfficesByAdvancedFilter(
+  request: OfficeAdvancedSearchRequest,
+): Promise<Office[]> {
+  if (!hasAdvancedSearchCriteria(request.query, request.filters)) {
+    return [];
+  }
 
-    return prisma.office.findMany({
-        where: searchFilter
-    })
+  return findOfficesBySearchFilter(buildOfficeAdvancedSearchFilter(request));
 }
 
 export async function officeExistsByOfficeNumber(officeNumber: string) {
-    const office = await prisma.office.findUnique({
-        where: {
-            office_number: officeNumber
-        },
-        select: {
-            office_number: true
-        }
-    })
+  const office = await prisma.office.findUnique({
+    where: {
+      office_number: officeNumber,
+    },
+    select: {
+      office_number: true,
+    },
+  });
 
-    return office !== null
+  return office !== null;
 }

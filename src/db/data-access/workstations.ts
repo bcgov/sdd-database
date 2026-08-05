@@ -1,8 +1,16 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/db/client";
-import { WorkstationFormValues, WorkstationSearchResult } from "@/types";
+import {
+  WorkstationAdvancedSearchRequest,
+  WorkstationFormValues,
+  WorkstationSearchResult,
+} from "@/types";
 import { workstationSearchResultArgs } from "@/db/data-access/searchResultArgs";
-import { buildAssignedEmployeeSearchFilter } from "@/db/data-access/searchFilters";
+import {
+  buildWorkstationAdvancedSearchFilter,
+  buildWorkstationKeywordSearchFilter,
+} from "@/db/data-access/workstationSearchFilters";
+import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
 
 export async function getWorkstationsByAssetTags(assetTags: string[]) {
   if (assetTags.length === 0) return [];
@@ -31,23 +39,25 @@ export async function getWorkstationsByFilter(
   query?: string,
 ): Promise<WorkstationSearchResult[]> {
   const searchFilter: Prisma.WorkstationWhereInput = query
-    ? {
-        OR: [
-          { asset_tag: { contains: query, mode: "insensitive" } },
-          {
-            workstation_model: {
-              name: { contains: query, mode: "insensitive" },
-            },
-          },
-          { office_number: { contains: query } },
-          { notes: { contains: query, mode: "insensitive" } },
-          buildAssignedEmployeeSearchFilter(query),
-        ],
-      }
+    ? buildWorkstationKeywordSearchFilter(query)
     : {};
 
   return prisma.workstation.findMany({
     where: searchFilter,
+    ...workstationSearchResultArgs,
+    orderBy: workstationsOrderBy,
+  });
+}
+
+export async function getWorkstationsByAdvancedFilter(
+  request: WorkstationAdvancedSearchRequest,
+): Promise<WorkstationSearchResult[]> {
+  if (!hasAdvancedSearchCriteria(request.query, request.filters)) {
+    return [];
+  }
+
+  return prisma.workstation.findMany({
+    where: buildWorkstationAdvancedSearchFilter(request),
     ...workstationSearchResultArgs,
     orderBy: workstationsOrderBy,
   });

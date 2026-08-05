@@ -2,11 +2,16 @@
 
 import {
   getAssignableWorkspacesByFilter,
+  getWorkspacesByAdvancedFilter,
   getWorkspacesByFilter,
   getWorkspacesByOfficeCode,
   updateWorkspace,
 } from "@/db/data-access/workspaces";
-import { EntityActionResult, WorkspaceEntity } from "@/types";
+import {
+  EntityActionResult,
+  WorkspaceAdvancedSearchRequest,
+  WorkspaceEntity,
+} from "@/types";
 import { attachEntityType } from "@/actions/attachEntityType";
 import { parseWorkspaceFormData } from "@/utils";
 import { validateWorkspacePositionNumberField } from "@/validators";
@@ -17,6 +22,14 @@ export async function searchWorkspacesAction(
   const workspaceSearchResults = await getWorkspacesByFilter(query);
 
   // Attaching discriminant 'type'
+  return attachEntityType(workspaceSearchResults, "workspace");
+}
+
+export async function searchWorkspacesWithAdvancedFiltersAction(
+  request: WorkspaceAdvancedSearchRequest,
+): Promise<WorkspaceEntity[]> {
+  const workspaceSearchResults = await getWorkspacesByAdvancedFilter(request);
+
   return attachEntityType(workspaceSearchResults, "workspace");
 }
 

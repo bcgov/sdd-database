@@ -97,7 +97,7 @@ function ReadOnlyMobilePlanFields({
           },
         ]}
         isDisabled
-        selectedKey={mobilePlan.service_provider.id}
+        value={mobilePlan.service_provider.id}
       ></Select>
 
       <RadioGroup
@@ -211,7 +211,7 @@ function EditableMobilePlanFields({
           id: serviceProvider.id,
           label: serviceProvider.name,
         }))}
-        selectedKey={mobilePlan?.service_provider.id}
+        defaultValue={mobilePlan?.service_provider.id}
       ></Select>
 
       <RadioGroup

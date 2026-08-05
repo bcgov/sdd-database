@@ -133,11 +133,10 @@ type MobileDevicePlanAssignmentUIFields = {
   ui_mobile_plan_title: string;
 };
 
-type MobileDeviceFormExtraFields =
-  MobileDeviceStatusUIFields &
+type MobileDeviceFormExtraFields = MobileDeviceStatusUIFields &
   MobileDevicePlanAssignmentUIFields & {
-  id?: number;
-};
+    id?: number;
+  };
 
 export type MobileDeviceFormValues = MobileDevicePersistedFields &
   MobileDeviceFormExtraFields;
@@ -222,3 +221,133 @@ export type SearchOptions = {
   employeeProgramAreaId?: number;
   employeeWorkstationAssetTags?: string[];
 };
+
+export type EmployeeAdvancedSearchFilters = {
+  firstName?: string;
+  alternateName?: string;
+  lastName?: string;
+  idir?: string;
+  employeeId?: string;
+  notes?: string;
+  officeNumber?: string;
+  branchId?: number;
+  programAreaId?: number;
+  jobTitleId?: number;
+  isOnLeave?: boolean;
+  workspaceAssignmentTypeId?: number;
+  ohsAccommodationTypeIds?: number[];
+  workspaceNumber?: string;
+  workstationAssetTag?: string;
+  mobileDeviceImei?: string;
+};
+
+export type EmployeeAdvancedSearchRequest = {
+  entityType: "employee";
+  query?: string;
+  filters: EmployeeAdvancedSearchFilters;
+};
+
+export type OfficeAdvancedSearchFilters = {
+  officeNumber?: string;
+  officeName?: string;
+  officeTypeId?: number;
+  clientServiceTypeId?: number;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+};
+
+export type OfficeAdvancedSearchRequest = {
+  entityType: "office";
+  query?: string;
+  filters: OfficeAdvancedSearchFilters;
+};
+
+export type WorkspaceAdvancedSearchStatus = "available" | "onHold" | "occupied";
+
+export type WorkspaceAdvancedSearchFilters = {
+  officeNumber?: string;
+  workspaceNumber?: string;
+  positionNumber?: string;
+  categoryId?: number;
+  deskTypeId?: number;
+  officeFloor?: number;
+  notes?: string;
+  status?: WorkspaceAdvancedSearchStatus;
+  restrictedBranchId?: number;
+  restrictedProgramAreaId?: number | null;
+  assignedEmployeeIdir?: string;
+};
+
+export type WorkspaceAdvancedSearchRequest = {
+  entityType: "workspace";
+  query?: string;
+  filters: WorkspaceAdvancedSearchFilters;
+};
+
+export type WorkstationAdvancedSearchFilters = {
+  assetTag?: string;
+  modelId?: number;
+  officeNumber?: string;
+  notes?: string;
+  isAssigned?: boolean;
+  assignedEmployeeIdir?: string;
+};
+
+export type WorkstationAdvancedSearchRequest = {
+  entityType: "workstation";
+  query?: string;
+  filters: WorkstationAdvancedSearchFilters;
+};
+
+export type MobileDeviceAdvancedSearchStatus =
+  | "unassigned"
+  | "assigned"
+  | "adr"
+  | "gilr";
+
+export type MobileDeviceAdvancedSearchFilters = {
+  imei?: string;
+  orderDate?: string;
+  paymentEndDate?: string;
+  adr?: string;
+  gilr?: string;
+  notes?: string;
+  modelId?: number;
+  officeNumber?: string;
+  status?: MobileDeviceAdvancedSearchStatus;
+  isAssigned?: boolean;
+  assignedEmployeeIdir?: string;
+  hasMobilePlan?: boolean;
+  mobilePlanPhoneNumber?: string;
+};
+
+export type MobileDeviceAdvancedSearchRequest = {
+  entityType: "mobileDevice";
+  query?: string;
+  filters: MobileDeviceAdvancedSearchFilters;
+};
+
+export type MobilePlanAdvancedSearchFilters = {
+  phoneNumber?: string;
+  dataAllowanceGb?: number;
+  enhancedVoicemail?: boolean;
+  statusId?: number;
+  serviceProviderId?: number;
+  isAssigned?: boolean;
+  assignedMobileDeviceImei?: string;
+};
+
+export type MobilePlanAdvancedSearchRequest = {
+  entityType: "mobilePlan";
+  query?: string;
+  filters: MobilePlanAdvancedSearchFilters;
+};
+
+export type AdvancedSearchRequest =
+  | EmployeeAdvancedSearchRequest
+  | OfficeAdvancedSearchRequest
+  | WorkspaceAdvancedSearchRequest
+  | WorkstationAdvancedSearchRequest
+  | MobileDeviceAdvancedSearchRequest
+  | MobilePlanAdvancedSearchRequest;

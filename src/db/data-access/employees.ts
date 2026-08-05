@@ -1,50 +1,22 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/db/client";
-import { EmployeeFormValues, EmployeeSearchResult } from "@/types";
+import {
+  EmployeeAdvancedSearchRequest,
+  EmployeeFormValues,
+  EmployeeSearchResult,
+} from "@/types";
 import { employeeSearchResultArgs } from "@/db/data-access/searchResultArgs";
+import {
+  buildEmployeeAdvancedSearchFilter,
+  buildEmployeeKeywordSearchFilter,
+} from "@/db/data-access/employeeSearchFilters";
+import { hasEmployeeAdvancedSearchCriteria } from "@/domain/advancedSearch";
 
 type DbClient = Prisma.TransactionClient;
 
-export async function getEmployeesByFilter(
-  query?: string,
+function findEmployeesBySearchFilter(
+  searchFilter: Prisma.EmployeeWhereInput,
 ): Promise<EmployeeSearchResult[]> {
-  const searchFilter: Prisma.EmployeeWhereInput = query
-    ? {
-        OR: [
-          { office_number: { contains: query } },
-          { idir: { contains: query, mode: "insensitive" } },
-          { first_name: { contains: query, mode: "insensitive" } },
-          { alternate_name: { contains: query, mode: "insensitive" } },
-          { last_name: { contains: query, mode: "insensitive" } },
-          { employee_id: { contains: query, mode: "insensitive" } },
-          // 🔎 match by Branch name via ProgramArea -> Branch using a relation filter
-          {
-            program_area: {
-              branch: { name: { contains: query, mode: "insensitive" } },
-            },
-          },
-          // 🔎 match by Program Area name
-          { program_area: { name: { contains: query, mode: "insensitive" } } },
-          { job_title: { name: { contains: query, mode: "insensitive" } } },
-          { notes: { contains: query, mode: "insensitive" } },
-          {
-            workspace_assignment_type: {
-              name: { contains: query, mode: "insensitive" },
-            },
-          },
-          {
-            ohs_accommodations: {
-              some: {
-                ohs_accommodation_type: {
-                  name: { contains: query, mode: "insensitive" },
-                },
-              },
-            },
-          },
-        ],
-      }
-    : {};
-
   return prisma.employee.findMany({
     where: searchFilter,
     ...employeeSearchResultArgs,
@@ -54,6 +26,26 @@ export async function getEmployeesByFilter(
       { alternate_name: "asc" },
     ],
   });
+}
+
+export async function getEmployeesByFilter(
+  query?: string,
+): Promise<EmployeeSearchResult[]> {
+  return findEmployeesBySearchFilter(
+    query ? buildEmployeeKeywordSearchFilter(query) : {},
+  );
+}
+
+export async function getEmployeesByAdvancedFilter(
+  request: EmployeeAdvancedSearchRequest,
+): Promise<EmployeeSearchResult[]> {
+  if (!hasEmployeeAdvancedSearchCriteria(request.query, request.filters)) {
+    return [];
+  }
+
+  return findEmployeesBySearchFilter(
+    buildEmployeeAdvancedSearchFilter(request),
+  );
 }
 
 async function addNewEmployee(db: DbClient, employee: EmployeeFormValues) {

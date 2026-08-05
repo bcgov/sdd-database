@@ -1,5 +1,5 @@
 import type { Selection } from "@react-types/shared";
-import { AssignMode } from "@/types";
+import type { AssignMode, EntityType } from "@/types";
 import {
   Button,
   Callout,
@@ -7,13 +7,31 @@ import {
   TextField,
 } from "@bcgov/design-system-react-components";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import TuneIcon from "@mui/icons-material/Tune";
 import { FilterTags } from "@/components/Search/FilterTags";
+import { useState } from "react";
+import type { EmployeeAdvancedSearchState } from "@/hooks/search/useEmployeeAdvancedSearchState";
+import type { OfficeAdvancedSearchState } from "@/hooks/search/useOfficeAdvancedSearchState";
+import type { WorkspaceAdvancedSearchState } from "@/hooks/search/useWorkspaceAdvancedSearchState";
+import type { WorkstationAdvancedSearchState } from "@/hooks/search/useWorkstationAdvancedSearchState";
+import type { MobileDeviceAdvancedSearchState } from "@/hooks/search/useMobileDeviceAdvancedSearchState";
+import type { MobilePlanAdvancedSearchState } from "@/hooks/search/useMobilePlanAdvancedSearchState";
+import { AdvancedSearchModal } from "@/components/Search/AdvancedSearch/AdvancedSearchModal";
 
 interface SearchControlsProps {
   selectedFilterTags: Selection;
   setSelectedFilterTags: (selectedFilterTags: Selection) => void;
   handleSearch: (formData: FormData) => Promise<void>;
   assignMode: AssignMode;
+  searchPhrase: string;
+  setSearchPhrase: (searchPhrase: string) => void;
+  employeeAdvancedSearch: EmployeeAdvancedSearchState;
+  officeAdvancedSearch: OfficeAdvancedSearchState;
+  workspaceAdvancedSearch: WorkspaceAdvancedSearchState;
+  workstationAdvancedSearch: WorkstationAdvancedSearchState;
+  mobileDeviceAdvancedSearch: MobileDeviceAdvancedSearchState;
+  mobilePlanAdvancedSearch: MobilePlanAdvancedSearchState;
+  runAdvancedSearch: (entityType: EntityType) => Promise<void>;
 }
 
 export function SearchControls({
@@ -21,7 +39,18 @@ export function SearchControls({
   setSelectedFilterTags,
   handleSearch,
   assignMode,
+  searchPhrase,
+  setSearchPhrase,
+  employeeAdvancedSearch,
+  officeAdvancedSearch,
+  workspaceAdvancedSearch,
+  workstationAdvancedSearch,
+  mobileDeviceAdvancedSearch,
+  mobilePlanAdvancedSearch,
+  runAdvancedSearch,
 }: SearchControlsProps) {
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+
   const getAssignModeCallout = () => {
     switch (assignMode) {
       case "office":
@@ -78,13 +107,21 @@ export function SearchControls({
 
       <Form
         action={handleSearch}
-        style={{ margin: "1rem", display: "flex", gap: "1rem" }}
+        style={{
+          alignItems: "end",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1rem",
+          margin: "1rem",
+        }}
       >
         <TextField
           aria-label="Search"
           type="search"
           name="search"
           iconLeft={<SearchOutlinedIcon />}
+          value={searchPhrase}
+          onChange={setSearchPhrase}
         ></TextField>
         <Button
           type="submit"
@@ -93,7 +130,33 @@ export function SearchControls({
         >
           Search
         </Button>
+        {assignMode === "none" ? (
+          <Button
+            type="button"
+            size="large"
+            variant="secondary"
+            onPress={() => setIsAdvancedSearchOpen(true)}
+          >
+            <TuneIcon />
+            Advanced Search
+          </Button>
+        ) : null}
       </Form>
+
+      {assignMode === "none" ? (
+        <AdvancedSearchModal
+          isOpen={isAdvancedSearchOpen}
+          setIsOpen={setIsAdvancedSearchOpen}
+          searchPhrase={searchPhrase}
+          employeeAdvancedSearch={employeeAdvancedSearch}
+          officeAdvancedSearch={officeAdvancedSearch}
+          workspaceAdvancedSearch={workspaceAdvancedSearch}
+          workstationAdvancedSearch={workstationAdvancedSearch}
+          mobileDeviceAdvancedSearch={mobileDeviceAdvancedSearch}
+          mobilePlanAdvancedSearch={mobilePlanAdvancedSearch}
+          onSearch={runAdvancedSearch}
+        />
+      ) : null}
 
       <FilterTags
         selectedFilterTags={selectedFilterTags}

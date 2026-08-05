@@ -1,218 +1,233 @@
-import {useState} from "react";
-import {type CalendarDate, parseDate, today} from "@internationalized/date";
+import { useState } from "react";
+import { type CalendarDate, parseDate, today } from "@internationalized/date";
 
 import {
-    Accordion,
-    DatePicker,
-    Select,
-    TextArea,
-    TextField,
-    ToggleButton,
-    ToggleButtonGroup
+  Accordion,
+  DatePicker,
+  Select,
+  TextArea,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@bcgov/design-system-react-components";
 
-import {LookupOption} from "@/types";
-import {MobileDeviceLike} from "@/components/EntityForms/MobileDevice/types";
+import { LookupOption } from "@/types";
+import { MobileDeviceLike } from "@/components/EntityForms/MobileDevice/types";
 
 import {
-    validateAdrField,
-    validateGilrField,
-    validateImeiField,
-    validateNotesField,
-    validateOfficeNumberField,
-    validateOrderDateField
+  validateAdrField,
+  validateGilrField,
+  validateImeiField,
+  validateNotesField,
+  validateOfficeNumberField,
+  validateOrderDateField,
 } from "@/validators";
 
 import {
-    calculateMobileDevicePaymentEndDate,
-    mobileDeviceModelRequiresImei,
-    type MobileDeviceStatus
+  calculateMobileDevicePaymentEndDate,
+  mobileDeviceModelRequiresImei,
+  type MobileDeviceStatus,
 } from "@/domain/mobileDevices";
 
-
 interface MobileDeviceDetailsProps {
-    mobileDevice: MobileDeviceLike
-    models: LookupOption[]
+  mobileDevice: MobileDeviceLike;
+  models: LookupOption[];
 
-    isOfficeNumberReadOnly: boolean
+  isOfficeNumberReadOnly: boolean;
 
-    mobileDeviceStatus: MobileDeviceStatus
+  mobileDeviceStatus: MobileDeviceStatus;
 }
 
 export function MobileDeviceDetails({
-                                        mobileDevice,
-                                        models,
+  mobileDevice,
+  models,
 
-                                        isOfficeNumberReadOnly,
+  isOfficeNumberReadOnly,
 
-                                        mobileDeviceStatus
-                                    }: MobileDeviceDetailsProps) {
+  mobileDeviceStatus,
+}: MobileDeviceDetailsProps) {
+  const initialSelectedModelId = mobileDevice?.model_id ?? null;
 
-    const initialSelectedModelId = mobileDevice?.model_id ?? null
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(
+    initialSelectedModelId,
+  );
 
-    const [selectedModelId, setSelectedModelId] = useState<number | null>(initialSelectedModelId)
+  const selectedModel = models.find((model) => model.id === selectedModelId);
 
-    const selectedModel = models.find((model) => model.id === selectedModelId)
+  const shouldShowImeiField = mobileDeviceModelRequiresImei(
+    selectedModel?.name,
+  );
 
-    const shouldShowImeiField = mobileDeviceModelRequiresImei(selectedModel?.name)
+  const [draftMobileDeviceStatus, setDraftMobileDeviceStatus] =
+    useState<MobileDeviceStatus>(mobileDeviceStatus);
 
-    const [draftMobileDeviceStatus, setDraftMobileDeviceStatus] = useState<MobileDeviceStatus>(mobileDeviceStatus)
+  const isEditMode = mobileDevice?.id !== undefined;
 
-    const isEditMode = mobileDevice?.id !== undefined
+  // A create-form draft may contain an invalid JavaScript Date when the
+  // required field was blank at the moment the user entered assignment
+  // search. Treat that as an empty DatePicker instead of calling
+  // toISOString() and crashing when the modal reopens.
+  const initialOrderDate =
+    mobileDevice && !Number.isNaN(mobileDevice.order_date.getTime())
+      ? parseDate(mobileDevice.order_date.toISOString().slice(0, 10))
+      : null;
 
-    // A create-form draft may contain an invalid JavaScript Date when the
-    // required field was blank at the moment the user entered assignment
-    // search. Treat that as an empty DatePicker instead of calling
-    // toISOString() and crashing when the modal reopens.
-    const initialOrderDate = mobileDevice && !Number.isNaN(mobileDevice.order_date.getTime())
-        ? parseDate(mobileDevice.order_date.toISOString().slice(0, 10))
-        : null
+  const [orderDate, setOrderDate] = useState<CalendarDate | null>(
+    initialOrderDate,
+  );
 
-    const [orderDate, setOrderDate] = useState<CalendarDate | null>(initialOrderDate)
+  const paymentEndDate = orderDate
+    ? calculateMobileDevicePaymentEndDate(orderDate)
+    : null;
 
-    const paymentEndDate = orderDate
-        ? calculateMobileDevicePaymentEndDate(orderDate)
-        : null
+  return (
+    <Accordion label="Mobile Device Details" id="mobileDeviceDetails">
+      <div>
+        <Select
+          label="Model"
+          name="model"
+          isRequired
+          items={models.map((model) => ({
+            id: model.id,
+            label: model.name,
+          }))}
+          isDisabled={isEditMode}
+          value={selectedModelId}
+          onChange={(key) =>
+            setSelectedModelId(key == null ? null : Number(key))
+          }
+        ></Select>
 
-    return (
-        <Accordion label="Mobile Device Details"
-                   id="mobileDeviceDetails"
-        >
-            <div>
-                <Select label="Model"
-                        name="model"
-                        isRequired
-                        items={models.map(model => (
-                            {
-                                id: model.id,
-                                label: model.name,
+        {/* Passing model id through a hidden field since disabled fields won't be included in form data */}
+        {isEditMode && mobileDevice && (
+          <input
+            type="hidden"
+            name="model"
+            value={mobileDevice.model_id}
+          ></input>
+        )}
 
-                            }
-                        ))}
-                        isDisabled={isEditMode}
-                        selectedKey={selectedModelId}
-                        onSelectionChange={
-                            (key) =>
-                                setSelectedModelId(key == null ? null : Number(key))
-                        }
-                >
-                </Select>
+        {shouldShowImeiField && (
+          <TextField
+            label="IMEI"
+            name="imei"
+            isRequired
+            isReadOnly={isEditMode}
+            validate={validateImeiField}
+            defaultValue={mobileDevice?.imei ?? undefined}
+          ></TextField>
+        )}
 
-                {/* Passing model id through a hidden field since disabled fields won't be included in form data */}
-                {isEditMode && mobileDevice && (
-                    <input type="hidden"
-                           name="model"
-                           value={mobileDevice.model_id}
-                    >
-                    </input>
-                )}
+        <TextField
+          label="Currently at Office Number"
+          name="officeNumber"
+          isRequired
+          isReadOnly={isOfficeNumberReadOnly}
+          validate={validateOfficeNumberField}
+          defaultValue={mobileDevice?.office_number}
+        ></TextField>
 
-                {shouldShowImeiField && (
-                    <TextField label="IMEI"
-                               name="imei"
-                               isRequired
-                               isReadOnly={isEditMode}
-                               validate={validateImeiField}
-                               defaultValue={mobileDevice?.imei ?? undefined}
-                    >
-                    </TextField>
-                )}
+        <DatePicker
+          label="Order Date"
+          name="orderDate"
+          firstDayOfWeek="mon"
+          showFormatHelpText={isEditMode}
+          isBrowserLocaleUsed
+          isRequired
+          isReadOnly={isEditMode}
+          value={orderDate}
+          onChange={setOrderDate}
+          maxValue={today("America/Vancouver")}
+          validate={validateOrderDateField}
+        ></DatePicker>
 
-                <TextField label="Currently at Office Number"
-                           name="officeNumber"
-                           isRequired
-                           isReadOnly={isOfficeNumberReadOnly}
-                           validate={validateOfficeNumberField}
-                           defaultValue={mobileDevice?.office_number}>
-                </TextField>
+        <DatePicker
+          label="Payment End Date"
+          isCalendarDisabled
+          isBrowserLocaleUsed
+          showFormatHelpText={false}
+          isReadOnly
+          value={paymentEndDate}
+          description="This date is automatically calculated as 36 months after the Order Date"
+        ></DatePicker>
 
-                <DatePicker label="Order Date"
-                            name="orderDate"
-                            firstDayOfWeek="mon"
-                            showFormatHelpText={isEditMode}
-                            isBrowserLocaleUsed
-                            isRequired
-                            isReadOnly={isEditMode}
-                            value={orderDate}
-                            onChange={setOrderDate}
-                            maxValue={today("America/Vancouver")}
-                            validate={validateOrderDateField}
-                >
-                </DatePicker>
+        <div style={{ width: "fit-content", marginBottom: "0.5rem" }}>
+          <ToggleButtonGroup
+            label="Status (required)"
+            aria-label="Status (required)"
+            disallowEmptySelection
+            selectedKeys={[draftMobileDeviceStatus]}
+            isDisabled={
+              mobileDeviceStatus === "adr" ||
+              mobileDeviceStatus === "gilr" ||
+              mobileDeviceStatus === "assigned"
+            }
+            style={{ width: "fit-content" }}
+          >
+            <ToggleButton
+              id="unassigned"
+              isDisabled={draftMobileDeviceStatus === "assigned"}
+              onPress={() => setDraftMobileDeviceStatus("unassigned")}
+            >
+              Unassigned
+            </ToggleButton>
 
-                <DatePicker label="Payment End Date"
-                            isCalendarDisabled
-                            isBrowserLocaleUsed
-                            showFormatHelpText={false}
-                            isReadOnly
-                            value={paymentEndDate}
-                            description="This date is automatically calculated as 36 months after the Order Date"
-                >
-                </DatePicker>
+            <ToggleButton id="assigned" isDisabled>
+              Assigned
+            </ToggleButton>
 
-                <div style={{width: "fit-content", marginBottom: "0.5rem"}}>
-                    <ToggleButtonGroup label="Status (required)"
-                                       aria-label="Status (required)"
-                                       disallowEmptySelection
-                                       selectedKeys={[draftMobileDeviceStatus]}
-                                       isDisabled={mobileDeviceStatus === "adr" || mobileDeviceStatus === "gilr" || mobileDeviceStatus === "assigned"}
-                                       style={{width: "fit-content"}}
-                    >
-                        <ToggleButton id="unassigned"
-                                      isDisabled={draftMobileDeviceStatus === "assigned"}
-                                      onPress={() => setDraftMobileDeviceStatus("unassigned")}
-                        >
-                            Unassigned
-                        </ToggleButton>
+            <ToggleButton
+              id="adr"
+              isDisabled={draftMobileDeviceStatus === "assigned"}
+              onPress={() => setDraftMobileDeviceStatus("adr")}
+            >
+              Disposed
+            </ToggleButton>
 
-                        <ToggleButton id="assigned" isDisabled>Assigned</ToggleButton>
+            <ToggleButton
+              id="gilr"
+              isDisabled={draftMobileDeviceStatus === "assigned"}
+              onPress={() => setDraftMobileDeviceStatus("gilr")}
+            >
+              Lost / Stolen
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
 
-                        <ToggleButton id="adr"
-                                      isDisabled={draftMobileDeviceStatus === "assigned"}
-                                      onPress={() => setDraftMobileDeviceStatus("adr")}
-                        >
-                            Disposed
-                        </ToggleButton>
+        <input
+          type="hidden"
+          name="mobileDeviceStatus"
+          value={draftMobileDeviceStatus}
+        />
 
-                        <ToggleButton id="gilr"
-                                      isDisabled={draftMobileDeviceStatus === "assigned"}
-                                      onPress={() => setDraftMobileDeviceStatus("gilr")}
-                        >
-                            Lost / Stolen
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </div>
+        {draftMobileDeviceStatus === "adr" && (
+          <TextField
+            label="Asset Disposal Report (ADR) Number"
+            name="adr"
+            isRequired
+            validate={validateAdrField}
+            defaultValue={mobileDevice?.adr ?? undefined}
+          ></TextField>
+        )}
 
-                <input type="hidden"
-                       name="mobileDeviceStatus"
-                       value={draftMobileDeviceStatus}
-                />
+        {draftMobileDeviceStatus === "gilr" && (
+          <TextField
+            label="General Incident Loss Report (GILR) Number"
+            name="gilr"
+            isRequired
+            validate={validateGilrField}
+            defaultValue={mobileDevice?.gilr ?? undefined}
+          ></TextField>
+        )}
 
-                {draftMobileDeviceStatus === "adr" && (
-                    <TextField label="Asset Disposal Report (ADR) Number"
-                               name="adr"
-                               isRequired
-                               validate={validateAdrField}
-                               defaultValue={mobileDevice?.adr ?? undefined}>
-                    </TextField>
-                )}
-
-                {draftMobileDeviceStatus === "gilr" && (
-                    <TextField label="General Incident Loss Report (GILR) Number"
-                               name="gilr"
-                               isRequired
-                               validate={validateGilrField}
-                               defaultValue={mobileDevice?.gilr ?? undefined}>
-                    </TextField>
-                )}
-
-                <TextArea label="Notes"
-                          name="notes"
-                          maxLength={200}
-                          validate={validateNotesField}
-                          defaultValue={mobileDevice?.notes ?? undefined}>
-                </TextArea>
-            </div>
-        </Accordion>
-    )
+        <TextArea
+          label="Notes"
+          name="notes"
+          maxLength={200}
+          validate={validateNotesField}
+          defaultValue={mobileDevice?.notes ?? undefined}
+        ></TextArea>
+      </div>
+    </Accordion>
+  );
 }

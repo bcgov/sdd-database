@@ -1,4 +1,5 @@
 import {
+  MobilePlanAdvancedSearchRequest,
   MobilePlanFormValues,
   MobilePlanSearchResult,
   MobilePlanUpdateFormValues,
@@ -6,43 +7,40 @@ import {
 import { Prisma } from "@/generated/prisma/client";
 import { mobilePlanSearchResultArgs } from "@/db/data-access/searchResultArgs";
 import { prisma } from "@/db/client";
+import { DEFAULT_MOBILE_PLAN_STATUS } from "@/domain/mobilePlans";
 import {
-  DEFAULT_MOBILE_PLAN_STATUS,
-  normalizeMobilePlanPhoneNumber,
-} from "@/domain/mobilePlans";
+  buildMobilePlanAdvancedSearchFilter,
+  buildMobilePlanKeywordSearchFilter,
+} from "@/db/data-access/mobilePlanSearchFilters";
+import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
 
 export async function getMobilePlansByFilter(
   query?: string,
 ): Promise<MobilePlanSearchResult[]> {
   const trimmedQuery = query?.trim();
 
-  // Phone numbers are stored as 10 digits but users may search using the displayed ###-###-#### format.
-  const normalizedPhoneNumberQuery = trimmedQuery
-    ? normalizeMobilePlanPhoneNumber(trimmedQuery)
-    : undefined;
-
   const searchFilter: Prisma.MobilePlanWhereInput = trimmedQuery
-    ? {
-        OR: [
-          {
-            phone_number: {
-              equals: normalizedPhoneNumberQuery,
-            },
-          },
-          {
-            service_provider: {
-              name: {
-                equals: trimmedQuery,
-                mode: "insensitive",
-              },
-            },
-          },
-        ],
-      }
+    ? buildMobilePlanKeywordSearchFilter(trimmedQuery)
     : {};
 
   return prisma.mobilePlan.findMany({
     where: searchFilter,
+    ...mobilePlanSearchResultArgs,
+    orderBy: {
+      phone_number: "asc",
+    },
+  });
+}
+
+export async function getMobilePlansByAdvancedFilter(
+  request: MobilePlanAdvancedSearchRequest,
+): Promise<MobilePlanSearchResult[]> {
+  if (!hasAdvancedSearchCriteria(request.query, request.filters)) {
+    return [];
+  }
+
+  return prisma.mobilePlan.findMany({
+    where: buildMobilePlanAdvancedSearchFilter(request),
     ...mobilePlanSearchResultArgs,
     orderBy: {
       phone_number: "asc",
@@ -59,28 +57,8 @@ export async function getAssignableMobilePlansByFilter(
   query?: string,
 ): Promise<MobilePlanSearchResult[]> {
   const trimmedQuery = query?.trim();
-  const normalizedPhoneNumberQuery = trimmedQuery
-    ? normalizeMobilePlanPhoneNumber(trimmedQuery)
-    : undefined;
-
   const searchFilter: Prisma.MobilePlanWhereInput = trimmedQuery
-    ? {
-        OR: [
-          {
-            phone_number: {
-              equals: normalizedPhoneNumberQuery,
-            },
-          },
-          {
-            service_provider: {
-              name: {
-                equals: trimmedQuery,
-                mode: "insensitive",
-              },
-            },
-          },
-        ],
-      }
+    ? buildMobilePlanKeywordSearchFilter(trimmedQuery)
     : {};
 
   return prisma.mobilePlan.findMany({
