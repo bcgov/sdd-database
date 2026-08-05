@@ -122,7 +122,7 @@ async function validateAssignedWorkspace(employee: EmployeeFormValues) {
     return `The selected workspace no longer exists for Office ${employee.office_number}. Please reassign a workspace and try again.`;
   }
 
-  if (!workspace.is_on_hold) {
+  if (!workspace.is_on_hold && workspace.employee_id !== employee.id) {
     return `Workspace ${workspaceNumber} is no longer on hold and cannot be assigned. Please choose another workspace.`;
   }
 
