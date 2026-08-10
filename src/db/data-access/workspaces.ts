@@ -7,6 +7,7 @@ import {
 } from "@/types";
 import { workspaceSearchResultArgs } from "@/db/data-access/searchResultArgs";
 import {
+  buildAssignableWorkspaceKeywordSearchFilter,
   buildWorkspaceAdvancedSearchFilter,
   buildWorkspaceKeywordSearchFilter,
 } from "@/db/data-access/workspaceSearchFilters";
@@ -81,14 +82,9 @@ export async function getAssignableWorkspacesByFilter(
   ];
 
   if (query) {
-    assignmentFilters.push({
-      OR: [
-        { workspace_number: { contains: query, mode: "insensitive" } },
-        { position_number: { contains: query } },
-        { category: { name: { contains: query, mode: "insensitive" } } },
-        { desk_type: { name: { contains: query, mode: "insensitive" } } },
-      ],
-    });
+    assignmentFilters.push(
+      buildAssignableWorkspaceKeywordSearchFilter(query),
+    );
   }
 
   return prisma.workspace.findMany({

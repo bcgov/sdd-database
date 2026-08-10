@@ -5,11 +5,22 @@ import { Header, Footer } from "@bcgov/design-system-react-components";
 export default function Updates() {
   const changelog = [
     {
+      version: "v0.0.45",
+      notes: [
+        "Quick Search now keeps your search text visible after results load, making it easier to review or change",
+        "Quick Search and Advanced Search now work separately, so only the search options you choose are used",
+        "Quick Search now gives more focused results for office and workspace numbers, employee IDs, asset tags, IMEIs, and phone numbers, especially for short searches like 9 or 11",
+        "Advanced Search can now find partial names, office details, and notes without requiring the complete text",
+        "Added a Redeploy option to Advanced Search for finding Workstations and Mobile Devices that are available for assignment",
+        "The Redeploy Mobile Devices report now leaves out devices marked Disposed or Lost / Stolen",
+      ],
+    },
+    {
       version: "v0.0.44",
       notes: [
         "Fix saving employee updates when the employee already has an assigned resident workspace",
         "Added a report suite (17 reports) to download workspace data in Excel format",
-        "Added Advanced Search with exact-match filters for Employees, Offices, Workspaces, Workstations, Mobile Devices, and Mobile Plans",
+        "Added Advanced Search so users can search individual fields for Employees, Offices, Workspaces, Workstations, Mobile Devices, and Mobile Plans",
       ],
     },
     {

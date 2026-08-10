@@ -26,7 +26,6 @@ import { advancedSearchTabs } from "@/components/Search/AdvancedSearch/advancedS
 interface AdvancedSearchModalProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  searchPhrase: string;
   employeeAdvancedSearch: EmployeeAdvancedSearchState;
   officeAdvancedSearch: OfficeAdvancedSearchState;
   workspaceAdvancedSearch: WorkspaceAdvancedSearchState;
@@ -39,7 +38,6 @@ interface AdvancedSearchModalProps {
 export function AdvancedSearchModal({
   isOpen,
   setIsOpen,
-  searchPhrase,
   employeeAdvancedSearch,
   officeAdvancedSearch,
   workspaceAdvancedSearch,
@@ -55,26 +53,26 @@ export function AdvancedSearchModal({
 
   const canSearch =
     activeEntityType === "employee"
-      ? hasAdvancedSearchCriteria(searchPhrase, employeeAdvancedSearch.filters)
+      ? hasAdvancedSearchCriteria(undefined, employeeAdvancedSearch.filters)
       : activeEntityType === "office"
-        ? hasAdvancedSearchCriteria(searchPhrase, officeAdvancedSearch.filters)
+        ? hasAdvancedSearchCriteria(undefined, officeAdvancedSearch.filters)
         : activeEntityType === "workspace"
           ? hasAdvancedSearchCriteria(
-              searchPhrase,
+              undefined,
               workspaceAdvancedSearch.filters,
             )
           : activeEntityType === "workstation"
             ? hasAdvancedSearchCriteria(
-                searchPhrase,
+                undefined,
                 workstationAdvancedSearch.filters,
               )
             : activeEntityType === "mobileDevice"
               ? hasAdvancedSearchCriteria(
-                  searchPhrase,
+                  undefined,
                   mobileDeviceAdvancedSearch.filters,
                 )
               : hasAdvancedSearchCriteria(
-                  searchPhrase,
+                  undefined,
                   mobilePlanAdvancedSearch.filters,
                 );
 

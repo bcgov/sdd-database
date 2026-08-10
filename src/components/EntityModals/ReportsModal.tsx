@@ -38,11 +38,11 @@ const reportOptions = [
   },
   {
     id: "redeploy_workstation_assets_by_office_code",
-    label: "Redeploy Workstation Assets (by Office Code)",
+    label: "Redeploy Workstations (by Office Code)",
   },
   {
     id: "redeploy_mobile_assets_by_office_code",
-    label: "Redeploy Mobile Assets (by Office Code)",
+    label: "Redeploy Mobile Devices (by Office Code)",
   },
 ];
 

@@ -1,6 +1,9 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { WorkspaceAdvancedSearchRequest } from "@/types";
-import { buildAssignedEmployeeSearchFilter } from "@/db/data-access/searchFilters";
+import {
+  buildAssignedEmployeeSearchFilter,
+  parseKeywordSearchQuery,
+} from "@/db/data-access/searchFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -9,14 +12,56 @@ function getTextFilterValue(value?: string) {
 export function buildWorkspaceKeywordSearchFilter(
   query: string,
 ): Prisma.WorkspaceWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+  const descriptiveFilters: Prisma.WorkspaceWhereInput[] = isDigitsOnly
+    ? []
+    : [
+        { category: { name: { contains: value, mode: "insensitive" } } },
+        { desk_type: { name: { contains: value, mode: "insensitive" } } },
+      ];
+
   return {
     OR: [
-      { office_number: { contains: query, mode: "insensitive" } },
-      { workspace_number: { contains: query, mode: "insensitive" } },
-      { position_number: { contains: query } },
-      { category: { name: { contains: query, mode: "insensitive" } } },
-      { desk_type: { name: { contains: query, mode: "insensitive" } } },
-      buildAssignedEmployeeSearchFilter(query),
+      { office_number: { equals: value, mode: "insensitive" } },
+      { workspace_number: { equals: value, mode: "insensitive" } },
+      { position_number: { equals: value } },
+      buildAssignedEmployeeSearchFilter(searchQuery),
+      ...descriptiveFilters,
+    ],
+  };
+}
+
+export function buildAssignableWorkspaceKeywordSearchFilter(
+  query: string,
+): Prisma.WorkspaceWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+
+  return {
+    OR: [
+      { workspace_number: { equals: value, mode: "insensitive" } },
+      { position_number: { equals: value } },
+      ...(!isDigitsOnly
+        ? [
+            {
+              category: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+            {
+              desk_type: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -65,7 +110,7 @@ export function buildWorkspaceAdvancedSearchFilter(
 
   const notes = getTextFilterValue(filters.notes);
   if (notes) {
-    conditions.push({ notes: { equals: notes, mode: "insensitive" } });
+    conditions.push({ notes: { contains: notes, mode: "insensitive" } });
   }
 
   switch (filters.status) {

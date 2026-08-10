@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { MobilePlanAdvancedSearchRequest } from "@/types";
 import { normalizeMobilePlanPhoneNumber } from "@/domain/mobilePlans";
+import { parseKeywordSearchQuery } from "@/db/data-access/searchFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -9,16 +10,25 @@ function getTextFilterValue(value?: string) {
 export function buildMobilePlanKeywordSearchFilter(
   query: string,
 ): Prisma.MobilePlanWhereInput {
-  const normalizedPhoneNumber = normalizeMobilePlanPhoneNumber(query);
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+  const normalizedPhoneNumber = normalizeMobilePlanPhoneNumber(value);
 
   return {
     OR: [
       { phone_number: { equals: normalizedPhoneNumber } },
-      {
-        service_provider: {
-          name: { equals: query, mode: "insensitive" },
-        },
-      },
+      ...(!isDigitsOnly
+        ? [
+            {
+              service_provider: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+          ]
+        : []),
     ],
   };
 }

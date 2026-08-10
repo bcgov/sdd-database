@@ -98,14 +98,6 @@ export function useSearch() {
 
   const searchResultsAreEmpty = searchResults.length === 0;
 
-  const handleSearch = async (formData: FormData) => {
-    const query = (formData.get("search") as string | null) ?? "";
-    setSearchPhrase(query);
-    setHasSearched(true);
-
-    await runSearch(query);
-  };
-
   const runSearch = useCallback(
     async (query?: string, options?: SearchOptions) => {
       const effectiveMode = options?.modeOverride ?? assignMode;
@@ -193,6 +185,14 @@ export function useSearch() {
     ],
   );
 
+  const handleSearch = async (formData: FormData) => {
+    const query = (formData.get("search") as string | null) ?? "";
+    setSearchPhrase(query);
+    setHasSearched(true);
+
+    await runSearch(query);
+  };
+
   const runAdvancedSearchRequest = useCallback(
     async (request: AdvancedSearchRequest) => {
       const results = await advancedSearchAction(request);
@@ -215,42 +215,36 @@ export function useSearch() {
         case "employee":
           request = {
             entityType,
-            query: searchPhrase,
             filters: employeeAdvancedSearch.filters,
           };
           break;
         case "office":
           request = {
             entityType,
-            query: searchPhrase,
             filters: officeAdvancedSearch.filters,
           };
           break;
         case "workspace":
           request = {
             entityType,
-            query: searchPhrase,
             filters: workspaceAdvancedSearch.filters,
           };
           break;
         case "workstation":
           request = {
             entityType,
-            query: searchPhrase,
             filters: workstationAdvancedSearch.filters,
           };
           break;
         case "mobileDevice":
           request = {
             entityType,
-            query: searchPhrase,
             filters: mobileDeviceAdvancedSearch.filters,
           };
           break;
         case "mobilePlan":
           request = {
             entityType,
-            query: searchPhrase,
             filters: mobilePlanAdvancedSearch.filters,
           };
           break;
@@ -258,6 +252,7 @@ export function useSearch() {
 
       await runAdvancedSearchRequest(request);
       setSelectedFilterTags(new Set<string>());
+      setSearchPhrase("");
       setHasSearched(true);
       setLastExecutedSearch({ kind: "advanced", request });
     },
@@ -268,7 +263,6 @@ export function useSearch() {
       mobilePlanAdvancedSearch.filters,
       officeAdvancedSearch.filters,
       runAdvancedSearchRequest,
-      searchPhrase,
       workstationAdvancedSearch.filters,
       workspaceAdvancedSearch.filters,
     ],

@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { OfficeAdvancedSearchRequest } from "@/types";
+import { parseKeywordSearchQuery } from "@/db/data-access/searchFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -8,23 +9,34 @@ function getTextFilterValue(value?: string) {
 export function buildOfficeKeywordSearchFilter(
   query: string,
 ): Prisma.OfficeWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+  const descriptiveFilters: Prisma.OfficeWhereInput[] = isDigitsOnly
+    ? []
+    : [
+        { office_name: { contains: value, mode: "insensitive" } },
+        {
+          office_type: {
+            name: { contains: value, mode: "insensitive" },
+          },
+        },
+        {
+          client_service_type: {
+            name: { contains: value, mode: "insensitive" },
+          },
+        },
+        { address: { contains: value, mode: "insensitive" } },
+        { city: { contains: value, mode: "insensitive" } },
+        { postal_code: { contains: value, mode: "insensitive" } },
+      ];
+
   return {
     OR: [
-      { office_number: { contains: query, mode: "insensitive" } },
-      { office_name: { contains: query, mode: "insensitive" } },
-      {
-        office_type: {
-          name: { contains: query, mode: "insensitive" },
-        },
-      },
-      {
-        client_service_type: {
-          name: { contains: query, mode: "insensitive" },
-        },
-      },
-      { address: { contains: query, mode: "insensitive" } },
-      { city: { contains: query, mode: "insensitive" } },
-      { postal_code: { contains: query, mode: "insensitive" } },
+      { office_number: { equals: value, mode: "insensitive" } },
+      ...descriptiveFilters,
     ],
   };
 }
@@ -50,7 +62,7 @@ export function buildOfficeAdvancedSearchFilter(
   const officeName = getTextFilterValue(filters.officeName);
   if (officeName) {
     conditions.push({
-      office_name: { equals: officeName, mode: "insensitive" },
+      office_name: { contains: officeName, mode: "insensitive" },
     });
   }
 
@@ -64,12 +76,12 @@ export function buildOfficeAdvancedSearchFilter(
 
   const address = getTextFilterValue(filters.address);
   if (address) {
-    conditions.push({ address: { equals: address, mode: "insensitive" } });
+    conditions.push({ address: { contains: address, mode: "insensitive" } });
   }
 
   const city = getTextFilterValue(filters.city);
   if (city) {
-    conditions.push({ city: { equals: city, mode: "insensitive" } });
+    conditions.push({ city: { contains: city, mode: "insensitive" } });
   }
 
   const postalCode = getTextFilterValue(filters.postalCode);

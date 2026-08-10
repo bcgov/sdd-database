@@ -9,7 +9,7 @@ import {
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import TuneIcon from "@mui/icons-material/Tune";
 import { FilterTags } from "@/components/Search/FilterTags";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import type { EmployeeAdvancedSearchState } from "@/hooks/search/useEmployeeAdvancedSearchState";
 import type { OfficeAdvancedSearchState } from "@/hooks/search/useOfficeAdvancedSearchState";
 import type { WorkspaceAdvancedSearchState } from "@/hooks/search/useWorkspaceAdvancedSearchState";
@@ -50,6 +50,11 @@ export function SearchControls({
   runAdvancedSearch,
 }: SearchControlsProps) {
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void handleSearch(new FormData(event.currentTarget));
+  };
 
   const getAssignModeCallout = () => {
     switch (assignMode) {
@@ -106,7 +111,7 @@ export function SearchControls({
       )}
 
       <Form
-        action={handleSearch}
+        onSubmit={handleSubmit}
         style={{
           alignItems: "end",
           display: "flex",
@@ -147,7 +152,6 @@ export function SearchControls({
         <AdvancedSearchModal
           isOpen={isAdvancedSearchOpen}
           setIsOpen={setIsAdvancedSearchOpen}
-          searchPhrase={searchPhrase}
           employeeAdvancedSearch={employeeAdvancedSearch}
           officeAdvancedSearch={officeAdvancedSearch}
           workspaceAdvancedSearch={workspaceAdvancedSearch}

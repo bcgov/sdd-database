@@ -18,16 +18,19 @@ interface MobileDeviceAdvancedSearchFieldsProps {
 }
 
 const mobileDeviceStatusOptions = [
-  { id: "unassigned", label: "Unassigned" },
-  { id: "assigned", label: "Assigned" },
+  { id: "unassigned", label: "Redeploy (available for assignment)" },
+  { id: "assigned", label: "Assigned to an employee" },
   { id: "adr", label: "Disposed" },
   { id: "gilr", label: "Lost / Stolen" },
 ];
 
 const assignmentOptions = [
-  { id: "any", label: "Any assignment state" },
-  { id: "assigned", label: "Assigned" },
-  { id: "unassigned", label: "Unassigned" },
+  { id: "any", label: "Any employee assignment" },
+  { id: "assigned", label: "Assigned to an employee" },
+  {
+    id: "unassigned",
+    label: "No employee assigned (any device status)",
+  },
 ];
 
 const mobilePlanOptions = [
@@ -100,7 +103,7 @@ export function MobileDeviceAdvancedSearchFields({
             }
           />
           <Select
-            label="Status"
+            label="Device Status"
             items={mobileDeviceStatusOptions}
             value={filters.status ?? null}
             onChange={(value) => {

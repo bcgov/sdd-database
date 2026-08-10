@@ -2,13 +2,14 @@ export const dynamic = "force-dynamic";
 
 import {prisma} from "@/db/client";
 import {createXlsxResponse} from "../../xlsx";
+import {buildWorkstationRedeployFilter} from "@/db/data-access/redeployFilters";
 
 export async function POST(req: Request) {
     const body = await req.json();
     const officeCode = body?.officeCode?.toString()?.trim();
 
     const whereClause = {
-        employee_id: null,
+        ...buildWorkstationRedeployFilter(),
         ...(officeCode ? { office_number: officeCode } : {}),
     };
 

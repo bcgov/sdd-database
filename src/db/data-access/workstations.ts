@@ -7,10 +7,12 @@ import {
 } from "@/types";
 import { workstationSearchResultArgs } from "@/db/data-access/searchResultArgs";
 import {
+  buildAssignableWorkstationKeywordSearchFilter,
   buildWorkstationAdvancedSearchFilter,
   buildWorkstationKeywordSearchFilter,
 } from "@/db/data-access/workstationSearchFilters";
 import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
+import { buildWorkstationRedeployFilter } from "@/db/data-access/redeployFilters";
 
 export async function getWorkstationsByAssetTags(assetTags: string[]) {
   if (assetTags.length === 0) return [];
@@ -67,22 +69,12 @@ export async function getAssignableWorkstationsByFilter(
   query?: string,
 ): Promise<WorkstationSearchResult[]> {
   const searchFilter: Prisma.WorkstationWhereInput = query
-    ? {
-        OR: [
-          { asset_tag: { contains: query, mode: "insensitive" } },
-          {
-            workstation_model: {
-              name: { contains: query, mode: "insensitive" },
-            },
-          },
-          { office_number: { contains: query } },
-        ],
-      }
+    ? buildAssignableWorkstationKeywordSearchFilter(query)
     : {};
 
   return prisma.workstation.findMany({
     where: {
-      employee_id: null,
+      ...buildWorkstationRedeployFilter(),
       ...searchFilter,
     },
     ...workstationSearchResultArgs,

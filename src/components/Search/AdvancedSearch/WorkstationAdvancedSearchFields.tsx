@@ -15,9 +15,9 @@ interface WorkstationAdvancedSearchFieldsProps {
 }
 
 const assignmentOptions = [
-  { id: "any", label: "Any assignment state" },
-  { id: "assigned", label: "Assigned" },
-  { id: "unassigned", label: "Unassigned" },
+  { id: "any", label: "Any employee assignment" },
+  { id: "assigned", label: "Assigned to an employee" },
+  { id: "unassigned", label: "Redeploy (no employee assigned)" },
 ];
 
 export function WorkstationAdvancedSearchFields({
@@ -74,7 +74,7 @@ export function WorkstationAdvancedSearchFields({
         </Heading>
         <div style={advancedSearchSectionGridStyle}>
           <Select
-            label="Assignment State"
+            label="Employee Assignment"
             items={assignmentOptions}
             value={
               filters.isAssigned === undefined

@@ -1,4 +1,4 @@
-import {utils, write} from "xlsx";
+import ExcelJS from "exceljs";
 
 type SheetRow = Array<string | number | boolean | null>;
 type SheetDefinition = {
@@ -6,20 +6,24 @@ type SheetDefinition = {
     rows: Array<SheetRow>;
 };
 
-function buildWorkbookBuffer(sheets: Array<SheetDefinition>) {
-    const workbook = utils.book_new();
+async function buildWorkbookBuffer(sheets: Array<SheetDefinition>) {
+    const workbook = new ExcelJS.Workbook();
 
     sheets.forEach(({name, rows}) => {
-        const worksheet = utils.aoa_to_sheet(rows.map((row) => row.map((value) => (value === null || value === undefined ? "" : value))));
-        utils.book_append_sheet(workbook, worksheet, name);
+        const worksheet = workbook.addWorksheet(name);
+        worksheet.addRows(
+            rows.map((row) =>
+                row.map((value) => (value === null || value === undefined ? "" : value))
+            )
+        );
     });
 
-    return write(workbook, {bookType: "xlsx", type: "buffer"});
+    return workbook.xlsx.writeBuffer();
 }
 
 export async function createXlsxResponse(rows: Array<SheetRow>, filename: string, sheetName = "Report") {
-    const buffer = buildWorkbookBuffer([{name: sheetName, rows}]);
-    const bytes = new Uint8Array(buffer as ArrayBuffer);
+    const buffer = await buildWorkbookBuffer([{name: sheetName, rows}]);
+    const bytes = new Uint8Array(buffer);
 
     return new Response(bytes, {
         status: 200,
@@ -31,8 +35,8 @@ export async function createXlsxResponse(rows: Array<SheetRow>, filename: string
 }
 
 export async function createMultiSheetXlsxResponse(sheets: Array<SheetDefinition>, filename: string) {
-    const buffer = buildWorkbookBuffer(sheets);
-    const bytes = new Uint8Array(buffer as ArrayBuffer);
+    const buffer = await buildWorkbookBuffer(sheets);
+    const bytes = new Uint8Array(buffer);
 
     return new Response(bytes, {
         status: 200,

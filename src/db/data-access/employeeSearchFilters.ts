@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { EmployeeAdvancedSearchRequest } from "@/types";
 import { hasEmployeeAdvancedSearchCriteria } from "@/domain/advancedSearch";
+import { parseKeywordSearchQuery } from "@/db/data-access/searchFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -9,36 +10,51 @@ function getTextFilterValue(value?: string) {
 export function buildEmployeeKeywordSearchFilter(
   query: string,
 ): Prisma.EmployeeWhereInput {
-  return {
-    OR: [
-      { office_number: { contains: query } },
-      { idir: { contains: query, mode: "insensitive" } },
-      { first_name: { contains: query, mode: "insensitive" } },
-      { alternate_name: { contains: query, mode: "insensitive" } },
-      { last_name: { contains: query, mode: "insensitive" } },
-      { employee_id: { contains: query, mode: "insensitive" } },
-      {
-        program_area: {
-          branch: { name: { contains: query, mode: "insensitive" } },
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+  const descriptiveFilters: Prisma.EmployeeWhereInput[] = isDigitsOnly
+    ? []
+    : [
+        { first_name: { contains: value, mode: "insensitive" } },
+        { alternate_name: { contains: value, mode: "insensitive" } },
+        { last_name: { contains: value, mode: "insensitive" } },
+        {
+          program_area: {
+            branch: { name: { contains: value, mode: "insensitive" } },
+          },
         },
-      },
-      { program_area: { name: { contains: query, mode: "insensitive" } } },
-      { job_title: { name: { contains: query, mode: "insensitive" } } },
-      { notes: { contains: query, mode: "insensitive" } },
-      {
-        workspace_assignment_type: {
-          name: { contains: query, mode: "insensitive" },
+        {
+          program_area: {
+            name: { contains: value, mode: "insensitive" },
+          },
         },
-      },
-      {
-        ohs_accommodations: {
-          some: {
-            ohs_accommodation_type: {
-              name: { contains: query, mode: "insensitive" },
+        { job_title: { name: { contains: value, mode: "insensitive" } } },
+        { notes: { contains: value, mode: "insensitive" } },
+        {
+          workspace_assignment_type: {
+            name: { contains: value, mode: "insensitive" },
+          },
+        },
+        {
+          ohs_accommodations: {
+            some: {
+              ohs_accommodation_type: {
+                name: { contains: value, mode: "insensitive" },
+              },
             },
           },
         },
-      },
+      ];
+
+  return {
+    OR: [
+      { office_number: { equals: value, mode: "insensitive" } },
+      { idir: { equals: value, mode: "insensitive" } },
+      { employee_id: { equals: value, mode: "insensitive" } },
+      ...descriptiveFilters,
     ],
   };
 }
@@ -57,21 +73,21 @@ export function buildEmployeeAdvancedSearchFilter(
   const firstName = getTextFilterValue(filters.firstName);
   if (firstName) {
     conditions.push({
-      first_name: { equals: firstName, mode: "insensitive" },
+      first_name: { contains: firstName, mode: "insensitive" },
     });
   }
 
   const alternateName = getTextFilterValue(filters.alternateName);
   if (alternateName) {
     conditions.push({
-      alternate_name: { equals: alternateName, mode: "insensitive" },
+      alternate_name: { contains: alternateName, mode: "insensitive" },
     });
   }
 
   const lastName = getTextFilterValue(filters.lastName);
   if (lastName) {
     conditions.push({
-      last_name: { equals: lastName, mode: "insensitive" },
+      last_name: { contains: lastName, mode: "insensitive" },
     });
   }
 
@@ -96,7 +112,7 @@ export function buildEmployeeAdvancedSearchFilter(
 
   const notes = getTextFilterValue(filters.notes);
   if (notes) {
-    conditions.push({ notes: { equals: notes, mode: "insensitive" } });
+    conditions.push({ notes: { contains: notes, mode: "insensitive" } });
   }
 
   if (filters.branchId !== undefined) {

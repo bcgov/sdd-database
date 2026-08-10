@@ -1,8 +1,12 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { parseDate } from "@internationalized/date";
 import type { MobileDeviceAdvancedSearchRequest } from "@/types";
-import { buildAssignedEmployeeSearchFilter } from "@/db/data-access/searchFilters";
+import {
+  buildAssignedEmployeeSearchFilter,
+  parseKeywordSearchQuery,
+} from "@/db/data-access/searchFilters";
 import { normalizeMobilePlanPhoneNumber } from "@/domain/mobilePlans";
+import { buildMobileDeviceRedeployFilter } from "@/db/data-access/redeployFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -30,23 +34,64 @@ function getOrderDateForPaymentEndDate(value?: string) {
 export function buildMobileDeviceKeywordSearchFilter(
   query: string,
 ): Prisma.MobileDeviceWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+
   return {
     OR: [
-      { imei: { contains: query } },
-      { adr: { contains: query } },
-      { gilr: { contains: query, mode: "insensitive" } },
-      {
-        mobile_device_model: {
-          name: { contains: query, mode: "insensitive" },
-        },
-      },
-      { office_number: { contains: query } },
+      { imei: { equals: value, mode: "insensitive" } },
+      { adr: { equals: value, mode: "insensitive" } },
+      { gilr: { equals: value, mode: "insensitive" } },
+      { office_number: { equals: value, mode: "insensitive" } },
       {
         mobile_plan: {
-          phone_number: { equals: normalizeMobilePlanPhoneNumber(query) },
+          phone_number: { equals: normalizeMobilePlanPhoneNumber(value) },
         },
       },
-      buildAssignedEmployeeSearchFilter(query),
+      buildAssignedEmployeeSearchFilter(searchQuery),
+      ...(!isDigitsOnly
+        ? [
+            {
+              mobile_device_model: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+          ]
+        : []),
+    ],
+  };
+}
+
+export function buildAssignableMobileDeviceKeywordSearchFilter(
+  query: string,
+): Prisma.MobileDeviceWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+
+  return {
+    OR: [
+      { imei: { equals: value, mode: "insensitive" } },
+      { office_number: { equals: value, mode: "insensitive" } },
+      {
+        mobile_plan: {
+          phone_number: { equals: normalizeMobilePlanPhoneNumber(value) },
+        },
+      },
+      ...(!isDigitsOnly
+        ? [
+            {
+              mobile_device_model: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -89,7 +134,7 @@ export function buildMobileDeviceAdvancedSearchFilter(
 
   const notes = getTextFilterValue(filters.notes);
   if (notes) {
-    conditions.push({ notes: { equals: notes, mode: "insensitive" } });
+    conditions.push({ notes: { contains: notes, mode: "insensitive" } });
   }
 
   if (filters.modelId !== undefined) {
@@ -105,7 +150,7 @@ export function buildMobileDeviceAdvancedSearchFilter(
 
   switch (filters.status) {
     case "unassigned":
-      conditions.push({ adr: null, gilr: null, employee_id: null });
+      conditions.push(buildMobileDeviceRedeployFilter());
       break;
     case "assigned":
       conditions.push({
@@ -123,6 +168,9 @@ export function buildMobileDeviceAdvancedSearchFilter(
   }
 
   if (filters.isAssigned !== undefined) {
+    // Unlike the Redeploy device status, this intentionally checks only the
+    // employee relation and can therefore include Disposed or Lost / Stolen
+    // devices.
     conditions.push({
       employee_id: filters.isAssigned ? { not: null } : null,
     });

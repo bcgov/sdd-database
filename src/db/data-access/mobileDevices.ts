@@ -11,10 +11,12 @@ import {
   MobilePlanAssignmentError,
 } from "@/domain/mobilePlans";
 import {
+  buildAssignableMobileDeviceKeywordSearchFilter,
   buildMobileDeviceAdvancedSearchFilter,
   buildMobileDeviceKeywordSearchFilter,
 } from "@/db/data-access/mobileDeviceSearchFilters";
 import { hasAdvancedSearchCriteria } from "@/domain/advancedSearch";
+import { buildMobileDeviceRedeployFilter } from "@/db/data-access/redeployFilters";
 
 type DbClient = Prisma.TransactionClient;
 
@@ -69,24 +71,12 @@ export async function getAssignableMobileDevicesByFilter(
   query?: string,
 ): Promise<MobileDeviceSearchResult[]> {
   const searchFilter: Prisma.MobileDeviceWhereInput = query
-    ? {
-        OR: [
-          { imei: { contains: query } },
-          {
-            mobile_device_model: {
-              name: { contains: query, mode: "insensitive" },
-            },
-          },
-          { office_number: { contains: query } },
-        ],
-      }
+    ? buildAssignableMobileDeviceKeywordSearchFilter(query)
     : {};
 
   return prisma.mobileDevice.findMany({
     where: {
-      adr: null,
-      gilr: null,
-      employee_id: null,
+      ...buildMobileDeviceRedeployFilter(),
       ...searchFilter,
     },
     ...mobileDeviceSearchResultArgs,

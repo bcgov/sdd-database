@@ -1,6 +1,10 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { WorkstationAdvancedSearchRequest } from "@/types";
-import { buildAssignedEmployeeSearchFilter } from "@/db/data-access/searchFilters";
+import {
+  buildAssignedEmployeeSearchFilter,
+  parseKeywordSearchQuery,
+} from "@/db/data-access/searchFilters";
+import { buildWorkstationRedeployFilter } from "@/db/data-access/redeployFilters";
 
 function getTextFilterValue(value?: string) {
   return value?.trim() || undefined;
@@ -9,17 +13,54 @@ function getTextFilterValue(value?: string) {
 export function buildWorkstationKeywordSearchFilter(
   query: string,
 ): Prisma.WorkstationWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+  const descriptiveFilters: Prisma.WorkstationWhereInput[] = isDigitsOnly
+    ? []
+    : [
+        {
+          workstation_model: {
+            name: { contains: value, mode: "insensitive" },
+          },
+        },
+        { notes: { contains: value, mode: "insensitive" } },
+      ];
+
   return {
     OR: [
-      { asset_tag: { contains: query, mode: "insensitive" } },
-      {
-        workstation_model: {
-          name: { contains: query, mode: "insensitive" },
-        },
-      },
-      { office_number: { contains: query } },
-      { notes: { contains: query, mode: "insensitive" } },
-      buildAssignedEmployeeSearchFilter(query),
+      { asset_tag: { equals: value, mode: "insensitive" } },
+      { office_number: { equals: value, mode: "insensitive" } },
+      buildAssignedEmployeeSearchFilter(searchQuery),
+      ...descriptiveFilters,
+    ],
+  };
+}
+
+export function buildAssignableWorkstationKeywordSearchFilter(
+  query: string,
+): Prisma.WorkstationWhereInput {
+  const searchQuery = parseKeywordSearchQuery(query);
+
+  if (!searchQuery) return {};
+
+  const { value, isDigitsOnly } = searchQuery;
+
+  return {
+    OR: [
+      { asset_tag: { equals: value, mode: "insensitive" } },
+      { office_number: { equals: value, mode: "insensitive" } },
+      ...(!isDigitsOnly
+        ? [
+            {
+              workstation_model: {
+                name: { contains: value, mode: "insensitive" as const },
+              },
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -55,13 +96,15 @@ export function buildWorkstationAdvancedSearchFilter(
 
   const notes = getTextFilterValue(filters.notes);
   if (notes) {
-    conditions.push({ notes: { equals: notes, mode: "insensitive" } });
+    conditions.push({ notes: { contains: notes, mode: "insensitive" } });
   }
 
   if (filters.isAssigned !== undefined) {
-    conditions.push({
-      employee_id: filters.isAssigned ? { not: null } : null,
-    });
+    conditions.push(
+      filters.isAssigned
+        ? { employee_id: { not: null } }
+        : buildWorkstationRedeployFilter(),
+    );
   }
 
   const assignedEmployeeIdir = getTextFilterValue(filters.assignedEmployeeIdir);
